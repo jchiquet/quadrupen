@@ -1,0 +1,46 @@
+NEWS/Changelog
+
+0.3-0	(2013-11-xx)
+    Major:
+    +	added structured ridge regression (regression penalized by structered l2 norm)
+    +   added corresponding functionalies for cross-validation and stability path
+    Minor:
+    +   removed the not very useful 'reverse' argument for plotting    
+    +   added demo for lasso, ridge and use of the criteria function    
+
+0.2-4	(2013-11-01)
+    +   added a 'lasso' function, simple wrapper to the elastic-net 'function'
+    +   added computation of degrees of freedom (for elastic net and bounded regression)
+    +   added a method to compute penalized criteria (BIC/AIC) of a quadrupen fit, with plot
+
+0.2-3	(2013-08-26)
+    +   added back the 'normalize' parameter
+    +   standardization is performed within the C++ code
+    +   use of sparse conversion from Matrix to Armadillo
+    +   corrected bug with the 'intercept' and 'residuals' components of the quadrupen class
+    +   added more tests in the inst directory
+    +   correction in the documentation
+    +   added r.squared to the quadrupen class
+
+0.2-2	(2013-04-08)
+    +   minor fix to comply with recent ggplot2 updates.
+
+0.2-1	(2013-02-27)
+    +   minor fix to pass CRAN check on Windows operating systems.
+
+0.2-0	(2013-02-26)
+    Major:
+    +	added bounded regression (regression penalized by infinity norm + structered l2 norm)
+    +   added corresponding functionalies for cross-validation and stability path
+    Minor:
+    +   corrected wrong annotations of the stability path (PFER)
+    +   handled normalization internally ('normalize' is no longer a parameter)
+    +   more simple internal handling of penscales and correction of the rescaling of the intercept
+    +   better use of multicore features
+    +   handled runtime error exception in RcppArmadillo when the system is singular (end of the solution path)
+        A consequence is quadrupen is less likely to crash due to user's "bad" parametrization
+    +   simplification of the C++ code, bugs corrected, probably new ones added :-'(
+    +   added 'examples' and 'tests' directories
+
+0.1-0	(2012-10-09)
+    +	first build: structured elastic-net with (weighted) quadratic loss, cross-validation and stability selection methods.

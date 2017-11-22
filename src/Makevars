@@ -1,0 +1,8 @@
+SOURCES=$(wildcard utils/*.cpp optimization/*.cpp tmp_cpp/*.cpp)
+
+OBJECTS = ridge.o elastic_net.o bounded_reg.o group_lasso_main.o $(SOURCES:.cpp=.o)
+
+PKG_CPPFLAGS=-I.
+
+## Use the R_HOME indirection to support installations of multiple R version
+PKG_LIBS = `$(R_HOME)/bin/Rscript -e "Rcpp:::LdFlags()"` $(LAPACK_LIBS) $(BLAS_LIBS) $(FLIBS)
