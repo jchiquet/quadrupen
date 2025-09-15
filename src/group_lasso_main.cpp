@@ -30,10 +30,6 @@ SEXP group_lasso(SEXP BETA0    ,
 		 SEXP VERBOSE  ,
 		 SEXP SPARSE   ) {
 
-  // disable messages being printed to the err2 stream
-  std::ostream nullstream(0);
-  set_stream_err2(nullstream);
-
   // ==============================================================
   // INSTANTIATION OF THE REQUIRED OBJECTS
 

@@ -89,7 +89,7 @@ void standardize(any_mat &x, vec &y, bool &intercept, bool &normalize, vec &pens
 
   if (any(penscale != 1)) {
     for (int i=0; i<n; i++) {
-       x.row(i) /= penscale ;
+       x.row(i) /= trans(penscale) ;
     }
     xbar /= penscale;
   }

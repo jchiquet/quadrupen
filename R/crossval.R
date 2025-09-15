@@ -1,102 +1,102 @@
-##' Cross-validation function for quadrupen fitting methods.
-##'
-##' Function that computes K-fold cross-validated error of a
-##' \code{quadrupen} fit, possibly on a grid of
-##' \code{lambda1,lambda2}.
-##'
-##' @param penalty a string for the fitting procedure used for
-##' cross-validation. Either \code{"lasso"}, \code{"elastic.net"},
-##' \code{"bounded.reg"}, at the moment. Default is
-##' \code{elastic.net}.
-##'
-##' @param x matrix of features, possibly sparsely encoded
-##' (experimental). Do NOT include intercept.
-##'
-##' @param y response vector.
-##'
-##' @param K integer indicating the number of folds. Default is 10.
-##'
-##' @param folds list of \code{K} vectors that describes the folds to
-##' use for the cross-validation. By default, the folds are randomly
-##' sampled with the specified K. The same folds are used for each
-##' values of \code{lambda2}.
-##'
-##' @param lambda2 tunes the \eqn{\ell_2}{l2}-penalty (ridge-like) of
-##' the fit. If none is provided, a vector of values is generated and
-##' a CV is performed on a grid of \code{lambda2} and \code{lambda1},
-##' using the same folds for each \code{lambda2}). Ignored when
-##' \code{penalty} equals \code{"lasso"}. CV is only performed on
-##' \code{lambda2} when the \code{ridge} penalty is used.
-##'
-##' @param verbose logical; indicates if the progression (the current
-##' lambda2) should be displayed. Default is \code{TRUE}.
-##'
-##' @param mc.cores the number of cores to use. The default uses all
-##' the cores available.
-##'
-##' @param ... additional parameters to overwrite the defaults of the
-##' fitting procedure identified by the \code{'penalty'} argument. See
-##' the corresponding documentation (\code{\link{lasso}},
-##' \code{\link{elastic.net}} or \code{\link{bounded.reg}}).
-##'
-##' @note If the user runs the fitting method with option
-##' \code{'bulletproof'} set to \code{FALSE}, the algorithm may stop
-##' at an early stage of the path. Early stops are handled internally,
-##' in order to provide results on the same grid of penalty tuned by
-##' \eqn{\lambda_1}{lambda1}.  This is done by means of \code{NA}
-##' values, so as mean and standard error are consistently
-##' evaluated. If, while cross-validating, the procedure experiences
-##' too much early stoppings, a warning is sent to the user, in which
-##' case you should reconsider the grid of \code{lambda1} used for the
-##' cross-validation.  If \code{bulletproof} is \code{TRUE} (the
-##' default), there is nothing to worry about, except a possible slow
-##' down when any switching to the proximal algorithm is required.
-##'
-##' @return An object of class "cvpen" for which a \code{plot} method
-##' is available.
-##'
-##' @seealso \code{\linkS4class{quadrupen}}, \code{\link{plot.cvpen}}
-##' and \code{\linkS4class{cvpen}}.
-##'
-##' @examples \dontrun{
-##' ## Simulating multivariate Gaussian with blockwise correlation
-##' ## and piecewise constant vector of parameters
-##' beta <- rep(c(0,1,0,-1,0), c(25,10,25,10,25))
-##' cor  <- 0.75
-##' Soo  <- toeplitz(cor^(0:(25-1))) ## Toeplitz correlation for irrelevant variable
-##' Sww  <- matrix(cor,10,10) ## bloc correlation between active variables
-##' Sigma <- bdiag(Soo,Sww,Soo,Sww,Soo) + 0.1
-##' diag(Sigma) <- 1
-##' n <- 100
-##' x <- as.matrix(matrix(rnorm(95*n),n,95) %*% chol(Sigma))
-##' y <- 10 + x %*% beta + rnorm(n,0,10)
-##'
-##' ## Use fewer lambda1 values by overwritting the default parameters
-##' ## and cross-validate over the sequences lambda1 and lambda2
-##' cv.grid <- crossval(x,y, lambda2=10^seq(2,-2,len=50), nlambda1=50)
-##' ## Rerun simple cross-validation with the appropriate lambda2
-##' cv.10K <- crossval(x,y, lambda2=slot(cv.double, "lambda2.min"))
-##' ## Try leave one out also
-##' cv.loo <- crossval(x,y, K=n, lambda2=slot(cv.double, "lambda2.min"))
-##'
-##' plot(cv.grid)
-##' plot(cv.10K)
-##' plot(cv.loo)
-##'
-##' ## Performance for selection purpose
-##' beta.min.10K <- slot(cv.10K, "beta.min")
-##' beta.min.loo <- slot(cv.loo, "beta.min")
-##'
-##' cat("\nFalse positives with the minimal 10-CV choice: ", sum(sign(beta) != sign(beta.min.10K)))
-##' cat("\nFalse positives with the minimal LOO-CV choice: ", sum(sign(beta) != sign(beta.min.loo)))
-##' }
-##'
-##' @keywords models, regression
-##' @name crossval
-##' @aliases crossval
-##' @rdname crossval
-##'
-##' @export
+#' Cross-validation function for quadrupen fitting methods.
+#'
+#' Function that computes K-fold cross-validated error of a
+#' \code{quadrupen} fit, possibly on a grid of
+#' \code{lambda1,lambda2}.
+#'
+#' @param penalty a string for the fitting procedure used for
+#' cross-validation. Either \code{"lasso"}, \code{"elastic.net"},
+#' \code{"bounded.reg"}, at the moment. Default is
+#' \code{elastic.net}.
+#'
+#' @param x matrix of features, possibly sparsely encoded
+#' (experimental). Do NOT include intercept.
+#'
+#' @param y response vector.
+#'
+#' @param K integer indicating the number of folds. Default is 10.
+#'
+#' @param folds list of \code{K} vectors that describes the folds to
+#' use for the cross-validation. By default, the folds are randomly
+#' sampled with the specified K. The same folds are used for each
+#' values of \code{lambda2}.
+#'
+#' @param lambda2 tunes the \eqn{\ell_2}{l2}-penalty (ridge-like) of
+#' the fit. If none is provided, a vector of values is generated and
+#' a CV is performed on a grid of \code{lambda2} and \code{lambda1},
+#' using the same folds for each \code{lambda2}). Ignored when
+#' \code{penalty} equals \code{"lasso"}. CV is only performed on
+#' \code{lambda2} when the \code{ridge} penalty is used.
+#'
+#' @param verbose logical; indicates if the progression (the current
+#' lambda2) should be displayed. Default is \code{TRUE}.
+#'
+#' @param mc.cores the number of cores to use. The default uses all
+#' the cores available.
+#'
+#' @param ... additional parameters to overwrite the defaults of the
+#' fitting procedure identified by the \code{'penalty'} argument. See
+#' the corresponding documentation (\code{\link{lasso}},
+#' \code{\link{elastic.net}} or \code{\link{bounded.reg}}).
+#'
+#' @note If the user runs the fitting method with option
+#' \code{'bulletproof'} set to \code{FALSE}, the algorithm may stop
+#' at an early stage of the path. Early stops are handled internally,
+#' in order to provide results on the same grid of penalty tuned by
+#' \eqn{\lambda_1}{lambda1}.  This is done by means of \code{NA}
+#' values, so as mean and standard error are consistently
+#' evaluated. If, while cross-validating, the procedure experiences
+#' too much early stoppings, a warning is sent to the user, in which
+#' case you should reconsider the grid of \code{lambda1} used for the
+#' cross-validation.  If \code{bulletproof} is \code{TRUE} (the
+#' default), there is nothing to worry about, except a possible slow
+#' down when any switching to the proximal algorithm is required.
+#'
+#' @return An object of class "cvpen" for which a \code{plot} method
+#' is available.
+#'
+#' @seealso \code{\linkS4class{quadrupen}}, \code{\link{plot.cvpen}}
+#' and \code{\linkS4class{cvpen}}.
+#'
+#' @examples \dontrun{
+#' ## Simulating multivariate Gaussian with blockwise correlation
+#' ## and piecewise constant vector of parameters
+#' beta <- rep(c(0,1,0,-1,0), c(25,10,25,10,25))
+#' cor  <- 0.75
+#' Soo  <- toeplitz(cor^(0:(25-1))) ## Toeplitz correlation for irrelevant variable
+#' Sww  <- matrix(cor,10,10) ## bloc correlation between active variables
+#' Sigma <- bdiag(Soo,Sww,Soo,Sww,Soo) + 0.1
+#' diag(Sigma) <- 1
+#' n <- 100
+#' x <- as.matrix(matrix(rnorm(95*n),n,95) %*% chol(Sigma))
+#' y <- 10 + x %*% beta + rnorm(n,0,10)
+#'
+#' ## Use fewer lambda1 values by overwritting the default parameters
+#' ## and cross-validate over the sequences lambda1 and lambda2
+#' cv.grid <- crossval(x,y, lambda2=10^seq(2,-2,len=50), nlambda1=50)
+#' ## Rerun simple cross-validation with the appropriate lambda2
+#' cv.10K <- crossval(x,y, lambda2=slot(cv.double, "lambda2.min"))
+#' ## Try leave one out also
+#' cv.loo <- crossval(x,y, K=n, lambda2=slot(cv.double, "lambda2.min"))
+#'
+#' plot(cv.grid)
+#' plot(cv.10K)
+#' plot(cv.loo)
+#'
+#' ## Performance for selection purpose
+#' beta.min.10K <- slot(cv.10K, "beta.min")
+#' beta.min.loo <- slot(cv.loo, "beta.min")
+#'
+#' cat("\nFalse positives with the minimal 10-CV choice: ", sum(sign(beta) != sign(beta.min.10K)))
+#' cat("\nFalse positives with the minimal LOO-CV choice: ", sum(sign(beta) != sign(beta.min.loo)))
+#' }
+#'
+#' @keywords models, regression
+#' @name crossval
+#' @aliases crossval
+#' @rdname crossval
+#'
+#' @export
 crossval <- function(x,
                      y,
                      penalty  = c("elastic.net", "lasso", "bounded.reg", "ridge"),

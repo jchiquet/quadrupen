@@ -13,13 +13,13 @@
 #define ZERO 2e-16 // practical zero
 
 // Include utils and optimization routines
-#include "utils/utils.h"
-#include "optimization/quadratic.h"
-#include "optimization/first_order.h"
-#include "tmp_cpp/data_reg.hpp"
-#include "tmp_cpp/path.hpp"
-#include "tmp_cpp/active_set.hpp"
-#include "tmp_cpp/penalties.hpp"
+#include "utils.h"
+#include "quadratic.h"
+#include "first_order.h"
+#include "data_reg.hpp"
+#include "path.hpp"
+#include "active_set.hpp"
+#include "penalties.hpp"
 
 #endif
 

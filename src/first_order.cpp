@@ -14,7 +14,7 @@ int fista_lasso(vec  &x0   ,
 
   colvec xk = x0  ; // output vector
   colvec  s = x0  ;
-  int iter = 0, j = 0      ; // current iterate
+  int iter = 0, j = 0   ; // current iterate
   double delta = 2*eps  ; // change in beta
   int max_iter  = 10000 ; // max. number of iteration
   double L  = L0        ; // Lipschitz's constant
@@ -36,7 +36,7 @@ int fista_lasso(vec  &x0   ,
       // apply proximal operator of the Lasso
       xk = s - df/L ;
       for (j=0; j<x0.n_elem; j++) {
-	xk(j) = fmax(0,1-(pen/L)/fabs(xk(j))) * xk(j);
+        xk(j) = fmax(0,1-(pen/L)/fabs(xk(j))) * xk(j);
       }
 
       fk = as_scalar(.5 * strans(xk) * xtx * xk - strans(xty) * xk) ;
@@ -44,7 +44,7 @@ int fista_lasso(vec  &x0   ,
       l_den = as_scalar(pow(norm(xk-s,2),2));
 
       if ((L * l_den >= l_num) || (sqrt(l_den) < eps)) {
-	found = true;
+	      found = true;
       } else {
 	L = fmax(2*L, l_num/l_den);
       }
@@ -68,7 +68,7 @@ int fista_lasso(vec  &x0   ,
     R_CheckUserInterrupt();
   }
 
-  null = sort(find(abs(xk) + (abs(df) - pen) < ZERO),1) ;
+  null = sort(find(abs(xk) + (abs(df) - pen) < ZERO), "descend") ;
 
   return(iter);
 }
@@ -247,13 +247,13 @@ vec proximal_inf(vec v,
   if ( as_scalar(sum(abs(v) / lambda)) >= 1) {
 
     // Reordonnons les valeurs absolues
-    u = sort(abs(v),1);
+    u = sort(abs(v), "descend");
 
     // valeurs des coordonnées projetees si non nulles (problème dual)
     proj = (cumsum(u) - lambda)/linspace<vec>(1,p,p);
 
     // selection des coordonnees non nulles (problème dual)
-    uvec maxs = sort(find(u-proj>ZERO),1) ;
+    uvec maxs = sort(find(u-proj>ZERO), "descend") ;
     double thresh = proj[maxs[0]];
 
     // solution du programme primal
@@ -306,7 +306,7 @@ int pathwise_enet(vec&  x0,
     R_CheckUserInterrupt();
   }
 
-  null = sort(find(abs(xk) + (abs(-xty + xtxw) - pen) < ZERO),1) ;
+  null = sort(find(abs(xk) + (abs(-xty + xtxw) - pen) < ZERO), "descend") ;
   return(iter);
 }
 

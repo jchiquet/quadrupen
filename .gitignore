@@ -28,7 +28,32 @@ vignettes/*.pdf
 /*_cache/
 /cache/
 
+# temp files in inst
+inst/**/*.html
+inst/**/*_files/
+inst/**/*_cache/
+
 # Temporary files created by R markdown
 *.utf8.md
 *.knit.md
 .Rproj.user
+
+# dyn librairies
+src/*.o
+src/*.so
+src/*.dll
+
+# Plot in testthat
+tests/testthat/Rplots.pdf
+
+# Raw data files
+data-raw/*.RData
+
+# Mac bullsh.
+.DS_Store
+
+README.html
+
+pkgdown
+
+tests/testthat/_snaps/

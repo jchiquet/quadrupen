@@ -29,10 +29,6 @@ SEXP ridge_cpp(SEXP X        , // matrix of features
 	       SEXP WEIGHTS  ,
 	       SEXP VERBOSE  ) {
 
-  // disable messages being printed to the err2 stream
-  std::ostream nullstream(0);
-  set_stream_err2(nullstream);
-
   // ==============================================================
   // INSTANTIATE THE RIDGE PATH
   RIDGE ridge(X, Y, C, WEIGHTS, VERBOSE);

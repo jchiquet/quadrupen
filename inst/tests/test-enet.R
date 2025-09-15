@@ -26,7 +26,7 @@ test_that("enet_quad2elasticnet", {
   x <- as.matrix(x)
 
   ## Run the tests...
-  with.intercept <-get.enet(x,y,intercept=TRUE,naive=TRUE)
+  with.intercept <- get.enet(x,y,intercept=TRUE,naive=TRUE)
   expect_that(with.intercept$quad,
               is_equivalent_to(with.intercept$enet))
 

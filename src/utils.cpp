@@ -106,7 +106,8 @@ void choldowndate(mat &R, int j) {
 
   vec x = zeros<vec>(2,1);
   mat G = zeros<mat>(2,2);
-
+  mat H = zeros<mat>(2,2);
+  
   R.shed_col(j);
   int p = R.n_cols;
   double r;
@@ -115,8 +116,9 @@ void choldowndate(mat &R, int j) {
 
     if (x[1] != 0) {
       r = norm(x,2);
-      G <<  x(0) << x(1) << endr
-	<< -x(1) << x(0) << endr;
+//       G <<  x(0) << x(1) << endr
+// 	<< -x(1) << x(0) << endr;
+      G = { {x(0), x(1)}, {-x(1), x(0)}};
       G = G / r;
       x(0) = r; x(1) = 0;
     } else {

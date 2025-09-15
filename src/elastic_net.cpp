@@ -30,10 +30,6 @@ SEXP elastic_net(SEXP BETA0    ,
 		 SEXP USECHOL  ,
 		 SEXP MONITOR  ) {
 
-  // disable messages being printed to the err2 stream
-  std::ostream nullstream(0);
-  set_stream_err2(nullstream);
-
   // Reading input variables
   bool intercept  = as<bool>   (INTERCEPT) ; // boolean for intercept mode
   bool normalize  = as<bool>   (NORMALIZE) ; // boolean for standardizing the predictor
@@ -173,7 +169,8 @@ SEXP elastic_net(SEXP BETA0    ,
     // gradient for active variables
     grd_norm.elem(A) = abs(grd.elem(A) + lambda1[m] * sign(betaA)) ;
     // variable associated with the highest optimality violation
-    max_grd[m] = grd_norm.max(var_in) ;
+    var_in = grd_norm.index_max() ;
+    max_grd[m] = grd_norm(var_in) ;
     if (max_grd[m] < 0) {max_grd[m] = 0;}
 
     while ((max_grd[m] > eps) && (it_active[m] < max_iter)) {
@@ -248,7 +245,8 @@ SEXP elastic_net(SEXP BETA0    ,
       // dual norm of gradient for active variables
       grd_norm.elem(A) = abs(grd.elem(A) + lambda1[m] * sign(betaA)) ;
       // variable associated with the highest optimality violation
-      max_grd[m]  = grd_norm.max(var_in) ;
+      var_in  = grd_norm.index_max() ;
+      max_grd[m]  = grd_norm(var_in) ;
       if (max_grd[m] < 0) {max_grd[m] = 0;}
 
       if (monitor > 0) {

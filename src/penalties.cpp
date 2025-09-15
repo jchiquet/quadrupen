@@ -98,13 +98,13 @@ vec PENALTY::proximal_LINF(vec x, double lambda) {
   if ( as_scalar(sum(abs(x) / lambda)) >= 1) {
     
     // Reordering absolute values
-    u = sort(abs(x),1);
+    u = sort(abs(x), "descend");
 
     // values of the projected coordinate if non zero (dual problem)
     proj = (cumsum(u) - lambda)/linspace<vec>(1,p,p);
 
     // selecting nonnull entries (dual)
-    uvec maxs = sort(find(u-proj>ZERO),1) ;
+    uvec maxs = sort(find(u-proj>ZERO), "descend") ;
     double thresh = proj[maxs[0]];
 
     // solving primal problem
@@ -205,13 +205,13 @@ vec PENALTY::proximal_L1LINF(vec x, double lambda) {
     // proximal l-inf
     if ( as_scalar(sum(abs(v) / lambda)) >= 1) {
       // Reordering absolute values
-      u = sort(abs(v),1);
+      u = sort(abs(v), "descend");
       
       // values of the projected coordinate if non zero (dual problem)
       proj = (cumsum(u) - lambda)/linspace<vec>(1,p,p);
       
       // selecting nonnull entries (dual)
-      uvec maxs = sort(find(u-proj>ZERO),1) ;
+      uvec maxs = sort(find(u-proj>ZERO), "descend") ;
       double thresh = proj[maxs[0]];
       
       // solving primal problem
