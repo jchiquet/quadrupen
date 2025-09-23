@@ -35,13 +35,11 @@ END_RCPP
 
 RcppExport SEXP bounded_reg(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 RcppExport SEXP elastic_net(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
-RcppExport SEXP group_lasso(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 
 static const R_CallMethodDef CallEntries[] = {
     {"_quadrupen_ridge_cpp", (DL_FUNC) &_quadrupen_ridge_cpp, 11},
     {"bounded_reg", (DL_FUNC) &bounded_reg, 20},
     {"elastic_net", (DL_FUNC) &elastic_net, 22},
-    {"group_lasso", (DL_FUNC) &group_lasso, 22},
     {NULL, NULL, 0}
 };
 

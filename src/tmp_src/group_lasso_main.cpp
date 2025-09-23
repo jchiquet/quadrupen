@@ -40,7 +40,7 @@ SEXP group_lasso(SEXP BETA0    ,
   PENALTY lasso, bounded, grpLasso1(PK), grpLasso2(PK), coopLasso(PK) ;
   grpLasso1.setPenalty("l1l2") ;
 
- // path instantiation and generation of the grid of lambda values
+ // path instanciation and generation of the grid of lambda values
   PATH path(MAXFEAT) ;
   path.grid_penLevels(LAMBDA1, NLAMBDA1, MINRATIO, grpLasso1.dual_norm(data.XTY()));
 

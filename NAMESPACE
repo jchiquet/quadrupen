@@ -3,7 +3,6 @@
 export(bounded.reg)
 export(crossval)
 export(elastic.net)
-export(group.lasso)
 export(lasso)
 export(ridge)
 export(stability)

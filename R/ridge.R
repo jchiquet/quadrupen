@@ -16,7 +16,7 @@
 #' \code{nlambda2} entries.
 #'
 #' @param struct matrix structuring the coefficients, possibly
-#' sparsely encoded. Must be at least positive semidefinite (this is
+#' sparsely encoded. Must be at least positive semi-definite (this is
 #' checked internally if the \code{checkarg} argument is
 #' \code{TRUE}). If \code{NULL} (the default), the identity matrix is
 #' used. See details below.

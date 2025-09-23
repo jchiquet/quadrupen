@@ -1,6 +1,7 @@
 /*
- * Author: Julien CHIQUET
- *         Statistique et Génome
+ * Author:  Julien CHIQUET
+ *          UMR MIA Paris-Saclay
+ *          julien.chiquet@inrae.fr
  */
 #ifndef _quadrupen_RIDGE_H
 #define _quadrupen_RIDGE_H
@@ -43,22 +44,22 @@ class RIDGE {
   const arma::vec & get_mu() const { return mu; }
 
  private:
-  arma::mat x       ; // matrix of predictors
-  arma::vec y       ; // vector of reponses
-  arma::mat c       ; // Cholesky decomposition of the structuring matrix
-  arma::mat w       ; // vector of obervation weights
-  int verbose       ; // integer for verbose mode
+  arma::mat x        ; // matrix of predictors
+  arma::vec y        ; // vector of reponses
+  arma::mat c        ; // Cholesky decomposition of the structuring matrix
+  arma::mat w        ; // vector of obervation weights
+  int verbose        ; // integer for verbose mode
 
-  arma::rowvec xty   ; // reponses to predictors vector
+  arma::rowvec xty   ; // responses to predictors vector
   arma::rowvec xbar  ; // mean of the predictors
   arma::rowvec normx ; // norm of the predictors
   double normy       ; // norm of the response
   double ybar        ; // mean of the response
 
-  arma::vec lambda  ; // vector of ridge tuning parameters
-  arma::mat beta    ; // matrix of coefficients
-  arma::vec df      ; // degrees of freedom along the path
-  arma::vec mu      ; // vector of intercept term
+  arma::vec lambda   ; // vector of ridge tuning parameters
+  arma::mat beta     ; // matrix of coefficients
+  arma::vec df       ; // degrees of freedom along the path
+  arma::vec mu       ; // vector of intercept term
 
 };
 
