@@ -197,7 +197,7 @@ elastic.net <- function(x,
   if (checkargs) {
     if (is.data.frame(x))
       x <- as.matrix(x)
-    if(!inherits(x, c("matrix", "dgCMatrix")))
+    if (!inherits(x, c("matrix", "dgCMatrix")))
       stop("x has to be of class 'matrix' or 'dgCMatrix'.")
     if(any(is.na(x)))
       stop("NA value in x not allowed.")

@@ -180,7 +180,7 @@ crossval <- function(x,
 
     ## Apply the fitting procedure with these best lambda2 parameter
     args$lambda2 <- lambda2.min
-    args$checkargs <- FALSE ## enforcing checkargs to FALSE to save some time
+    args$checkargs <- FALSE ## enforcing checkargs to FALSE to save some time
     best.fit <- do.call(fit.func, c(list(x=x,y=y),args))
 
     ind.max <- nrow(best.fit@coefficients)
@@ -204,7 +204,7 @@ crossval <- function(x,
 
       ## Apply the fitting procedure with these best lambda2 parameter
       args$lambda2 <- lambda2.min
-      args$checkargs <- FALSE ## enforcing checkargs to FALSE to save some time
+      args$checkargs <- FALSE ## enforcing checkargs to FALSE to save some time
       best.fit <- do.call(fit.func, c(list(x=x,y=y),args))
 
       ind.max <- nrow(best.fit@coefficients)
@@ -226,7 +226,7 @@ crossval <- function(x,
 
       ## Apply the fitting procedure with these best lambda2 parameter
       args$lambda2 <- lambda2.min
-      args$checkargs <- FALSE ## enforcing checkargs to FALSE to save some time
+      args$checkargs <- FALSE ## enforcing checkargs to FALSE to save some time
       best.fit <- do.call(fit.func, c(list(x=x,y=y),args))
 
       ind.max <- nrow(best.fit@coefficients)
