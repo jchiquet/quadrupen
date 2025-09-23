@@ -12,13 +12,13 @@ using namespace arma;
 
 #define ZERO 2e-16 // practical zero
 
-inline vec  get_lambda1(SEXP LAMBDA1, SEXP N_LAMBDA, SEXP MIN_RATIO, double lmax) {
+inline vec  get_lambda1(SEXP LAMBDA1, uword N_LAMBDA, double MIN_RATIO, double lmax) {
   vec lambda1 ;
   if (LAMBDA1 != R_NilValue) {
     lambda1  = as<vec>(LAMBDA1)  ;
   } else {
-    uword n_lambda = as<uword>(N_LAMBDA) ;
-    double min_ratio = as<double>(MIN_RATIO);
+    uword n_lambda(N_LAMBDA) ;
+    double min_ratio(MIN_RATIO);
     lambda1 = exp10(linspace(log10(lmax), log10(min_ratio*lmax), n_lambda)) ;
   }
   return(lambda1);

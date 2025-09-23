@@ -3,49 +3,54 @@
  *         Statistique et Génome
  */
 
-#include "bounded_reg.h"
+#include "RcppArmadillo.h"
+
+// [[Rcpp::depends(RcppArmadillo)]]
+
+#include "quadrupen_headers.hpp"
 
 using namespace Rcpp;
 using namespace arma;
 
-SEXP bounded_reg(SEXP X        ,
-		 SEXP Y        ,
+// [[Rcpp::export]]
+Rcpp::List bounded_reg_cpp(SEXP X        ,
+     const arma::vec& Y        ,
 		 SEXP STRUCT   ,
 		 SEXP LAMBDA1  ,
-		 SEXP N_LAMBDA ,
-		 SEXP MIN_RATIO,
-		 SEXP PENSCALE ,
-		 SEXP LAMBDA2  ,
-		 SEXP INTERCEPT,
-		 SEXP NORMALIZE,
-		 SEXP WEIGHTS  ,
-		 SEXP NAIVE    ,
-		 SEXP EPS      ,
-		 SEXP MAXITER  ,
-		 SEXP MAXFEAT  ,
-		 SEXP FUN      ,
-		 SEXP VERBOSE  ,
-		 SEXP SPARSE   ,
-		 SEXP BULLETPROOF) {
+		 const arma::uword N_LAMBDA ,
+		 const double MIN_RATIO,
+		 const arma::vec& PENSCALE ,
+		 double LAMBDA2  ,
+		 bool INTERCEPT,
+		 bool NORMALIZE,
+		 const arma::vec& WEIGHTS  ,
+		 bool NAIVE    ,
+		 double EPS      ,
+		 const arma::uword& MAXITER  ,
+		 const arma::uword& MAXFEAT  ,
+		 const arma::uword& FUN      ,
+		 int VERBOSE  ,
+		 bool SPARSE   ,
+		 bool BULLETPROOF) {
 
   // Reading input variables
-  bool intercept  = as<bool>   (INTERCEPT)   ; // boolean for intercept mode
-  bool normalize  = as<bool>   (NORMALIZE)   ; // boolean for standardizing the predictor
-  double lambda2  = as<double> (LAMBDA2)     ; // penalty levels
-  vec    weights  = as<vec>    (WEIGHTS)     ; // observation weights (not use at the moment)
-  vec    penscale = as<vec>    (PENSCALE)    ; // penalty weights
-  bool   naive    = as<bool>   (NAIVE)       ; // naive elastic-net or not
-  vec    y        = as<vec>    (Y)           ; // reponse vector
-  double eps      = as<double> (EPS)         ; // precision required
-  uword  fun      = as<int>    (FUN)         ; // solver (0=quadra, 1=pathwise, 2=fista)
-  int    verbose  = as<int>    (VERBOSE)     ; // int for verbose mode (0/1/2)
-  bool   sparse   = as<bool>   (SPARSE)      ; // boolean for sparse mode
-  bool   bullet   = as<bool>   (BULLETPROOF) ; // int for verbose mode (0/1/2)
-  uword  max_iter = as<int>    (MAXITER)     ; // max # of iterates of the active set
-  uword  max_feat = as<int>    (MAXFEAT)     ; // max # of variables activated
+  bool intercept(INTERCEPT)   ; // boolean for intercept mode
+  bool normalize(NORMALIZE)   ; // boolean for standardizing the predictor
+  double lambda2(LAMBDA2)     ; // penalty levels
+  vec    weights(WEIGHTS)     ; // observation weights (not use at the moment)
+  vec    penscale(PENSCALE)    ; // penalty weights
+  bool   naive(NAIVE)       ; // naive elastic-net or not
+  vec    y(Y)           ; // reponse vector
+  double eps(EPS)         ; // precision required
+  uword  fun(FUN)         ; // solver (0=quadra, 1=pathwise, 2=fista)
+  int    verbose(VERBOSE)     ; // int for verbose mode (0/1/2)
+  bool   sparse(SPARSE)      ; // boolean for sparse mode
+  bool   bullet(BULLETPROOF) ; // int for verbose mode (0/1/2)
+  uword  max_iter(MAXITER)     ; // max # of iterates of the active set
+  uword  max_feat(MAXFEAT)     ; // max # of variables activated
 
 
-  vec    xty   ; // reponses to predictors vector
+  vec    xty   ; // responses to predictors vector
   vec    xbar  ; // mean of the predictors
   vec    meanx ; // mean of the predictors (rescaled)
   vec    normx ; // norm of the predictors

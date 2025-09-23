@@ -258,7 +258,7 @@ bounded.reg <- function(x,
   ## ======================================================
   ## STARTING C++ CALL TO BOUNDED REGRESSION
   if (ctrl$timer) {cpp.start <- proc.time()}
-  out <- .Call("bounded_reg",
+  out <- bounded_reg_cpp(
                x,
                y,
                struct,
@@ -277,8 +277,28 @@ bounded.reg <- function(x,
                ifelse(ctrl$method=="fista",1,0),
                ctrl$verbose,
                inherits(x, "sparseMatrix"),
-               ctrl$bulletproof,
-               package = "quadrupen")
+               ctrl$bulletproof)
+  # out <- .Call("bounded_reg",
+  #              x,
+  #              y,
+  #              struct,
+  #              lambda1      ,
+  #              nlambda1     ,
+  #              min.ratio    ,
+  #              penscale     ,
+  #              lambda2      ,
+  #              intercept    ,
+  #              normalize    ,
+  #              rep(1,n)     ,
+  #              naive        ,
+  #              ctrl$thresh  ,
+  #              ctrl$max.iter,
+  #              max.feat     ,
+  #              ifelse(ctrl$method=="fista",1,0),
+  #              ctrl$verbose,
+  #              inherits(x, "sparseMatrix"),
+  #              ctrl$bulletproof,
+  #              package = "quadrupen")
   coefficients <- Matrix(out$coefficients)
   active.set   <- sparseMatrix(i = out$iB+1,
                                j = out$jB+1,
