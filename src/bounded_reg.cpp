@@ -94,7 +94,7 @@ Rcpp::List bounded_reg_cpp(SEXP X        ,
   // Initializing "first level" variables (outside of the lambda1 loop)
   colvec beta     = zeros<vec>(p)          ; // vector of current parameters
   uvec all(p);
-  for (int i=0;i<p;i++){all(i) = i;}
+  for (uword i=0;i<p;i++){all(i) = i;}
   uvec   B           = all                 ; // guys reaching the boundary
   uvec   I = setdiff(all,B)                ; // guys living in between the supremum
   mat    coef                              ; // matrice of solution path
@@ -119,7 +119,7 @@ Rcpp::List bounded_reg_cpp(SEXP X        ,
   //
   // START THE LOOP OVER LAMBDA
   timer.tic();
-  for (int m=0; m<n_lambda; m++) {
+  for (uword m=0; m<n_lambda; m++) {
     if (verbose == 2) {Rprintf("\n lambda1 = %f",lambda1(m)) ;}
 
     // _____________________________________________________________
@@ -192,7 +192,7 @@ Rcpp::List bounded_reg_cpp(SEXP X        ,
       // dual norm of gradient for unactive variable
       max_grd[m] = as_scalar(sum(abs(grd)) - lambda1[m]) ;
       if (max_grd[m] < 0) {
-	max_grd[m] = 0;
+	      max_grd[m] = 0;
       }
 
       // Moving to the next iterate
@@ -200,7 +200,7 @@ Rcpp::List bounded_reg_cpp(SEXP X        ,
 
       // Cutting the path here if fail to converge or
       if (!success_optim) {
-	break;
+	      break;
       }
 
       R_CheckUserInterrupt();
@@ -234,14 +234,14 @@ Rcpp::List bounded_reg_cpp(SEXP X        ,
       break;
     } else {
       if (any(penscale != 1)) {
-	coef = join_rows(coef,beta/(normx % penscale));
+	      coef = join_rows(coef,beta/(normx % penscale));
       } else {
-	coef = join_rows(coef,beta/normx);
+	      coef = join_rows(coef,beta/normx);
       }
       iB = join_cols(iB, m*ones(B.n_elem,1) );
       jB = join_cols(jB, conv_to<mat>::from(B) );
       if (intercept == 1) {
-	mu[m] = dot(beta, xbar) ;
+	       mu[m] = dot(beta, xbar) ;
       }
     }
 

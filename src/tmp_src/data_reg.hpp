@@ -30,7 +30,7 @@ private:
   vec    preweights ; // predictor weights
   mat    x          ; // matrix of predictors
   mat    xt         ; // transpose matrix of predictor once and keep it to save time
-  vec    xty        ; // reponses to predictors vector
+  vec    xty        ; // responses to predictors vector
   vec    y          ; // vector of response
 
 public:

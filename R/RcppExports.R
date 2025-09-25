@@ -5,8 +5,8 @@ bounded_reg_cpp <- function(X, Y, STRUCT, LAMBDA1, N_LAMBDA, MIN_RATIO, PENSCALE
     .Call(`_quadrupen_bounded_reg_cpp`, X, Y, STRUCT, LAMBDA1, N_LAMBDA, MIN_RATIO, PENSCALE, LAMBDA2, INTERCEPT, NORMALIZE, WEIGHTS, NAIVE, EPS, MAXITER, MAXFEAT, FUN, VERBOSE, SPARSE, BULLETPROOF)
 }
 
-elastic_net_cpp <- function(BETA0, X, Y, STRUCT, LAMBDA1, N_LAMBDA, MIN_RATIO, PENSCALE, LAMBDA2, INTERCEPT, NORMALIZE, WEIGHTS, NAIVE, EPS, MAXITER, MAXFEAT, FUN, VERBOSE, SPARSE, USECHOL, MONITOR) {
-    .Call(`_quadrupen_elastic_net_cpp`, BETA0, X, Y, STRUCT, LAMBDA1, N_LAMBDA, MIN_RATIO, PENSCALE, LAMBDA2, INTERCEPT, NORMALIZE, WEIGHTS, NAIVE, EPS, MAXITER, MAXFEAT, FUN, VERBOSE, SPARSE, USECHOL, MONITOR)
+elastic_net_cpp <- function(BETA0, X, y, STRUCT, LAMBDA1, n_lambda, min_ratio, penscale, lambda2, intercept, normalize, weights, naive, eps, max_iter, max_feat, fun, verbose, sparse, usechol, monitor) {
+    .Call(`_quadrupen_elastic_net_cpp`, BETA0, X, y, STRUCT, LAMBDA1, n_lambda, min_ratio, penscale, lambda2, intercept, normalize, weights, naive, eps, max_iter, max_feat, fun, verbose, sparse, usechol, monitor)
 }
 
 ridge_cpp <- function(X, Y, C, LAMBDA, NLAMBDA, LAMBDAMIN, LAMBDAMAX, INTERCEPT, NORMALIZE, WEIGHTS, VERBOSE) {

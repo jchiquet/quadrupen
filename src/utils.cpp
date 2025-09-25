@@ -18,7 +18,7 @@ vec grp_norm(vec x, uvec pk, int norm, int rep)  {
   switch (norm) {
     // -1 is the convention for the sup norm
   case -1 :
-    for (int k=0; k<pk.n_elem; k++) {
+    for (uword k=0; k<pk.n_elem; k++) {
       current_norm = as_scalar(max(abs(x.subvec(ind, ind + pk(k) - 1))));
       if (rep > 0) {
 	res.subvec(ind, ind + pk(k) - 1) = current_norm*ones(pk(k));
@@ -29,7 +29,7 @@ vec grp_norm(vec x, uvec pk, int norm, int rep)  {
     }
     break;
   case 1 :
-    for (int k=0; k<pk.n_elem; k++) {
+    for (uword k=0; k<pk.n_elem; k++) {
       current_norm = as_scalar(sum(abs(x.subvec(ind, ind + pk(k) - 1))));
       if (rep > 0) {
 	res.subvec(ind, ind + pk(k) - 1) = current_norm*ones(pk(k));
@@ -40,7 +40,7 @@ vec grp_norm(vec x, uvec pk, int norm, int rep)  {
     }
     break;
   case 2:
-    for (int k=0; k<pk.n_elem; k++) {
+    for (uword k=0; k<pk.n_elem; k++) {
       current_norm = as_scalar(sqrt(sum(pow(x.subvec(ind, ind + pk(k) - 1),2))));
       if (rep > 0) {
 	res.subvec(ind, ind + pk(k) - 1) = current_norm*ones(pk(k));
@@ -51,7 +51,7 @@ vec grp_norm(vec x, uvec pk, int norm, int rep)  {
     }
     break;
   default:
-    for (int k=0; k<pk.n_elem; k++) {
+    for (uword k=0; k<pk.n_elem; k++) {
       current_norm = as_scalar(sqrt(sum(pow(x.subvec(ind, ind + pk(k) - 1),2))));
       if (rep > 0) {
 	res.subvec(ind, ind + pk(k) - 1) = current_norm*ones(pk(k));
@@ -74,8 +74,8 @@ vec grp_sign(vec x, uvec pk)  {
 
   vec norm_grp = grp_norm(x, pk, -1, 0) ;
 
-  for (int k=0; k<pk.n_elem; k++) {
-    for (int j=ind;j<(ind+pk.at(k));j++) {
+  for (uword k=0; k<pk.n_elem; k++) {
+    for (uword j=ind;j<(ind+pk.at(k));j++) {
       if ((fabs(x(j)) - norm_grp(k)) < eps) {
 	if (x(j) > eps) {
 	  signs(j) = 1;
@@ -132,7 +132,7 @@ void choldowndate(mat &R, int j) {
   R.shed_row(p);
 }
 
-double get_df_enet(double &lambda2, mat &R, mat &xAtxA, sp_mat &S, uvec &A, uword &fun) {
+double get_df_enet(const double &lambda2, mat &R, mat &xAtxA, sp_mat &S, uvec &A, const uword &fun) {
 
   mat SAA(A.n_elem,A.n_elem) ;
   double df ;
@@ -148,10 +148,10 @@ double get_df_enet(double &lambda2, mat &R, mat &xAtxA, sp_mat &S, uvec &A, uwor
     // have to do this due to sparse encoding
     // either wait for Armadillo's guy to develop non contiguous
     // subview for sparse matrice or iterate over the n_zeros only...
-    for (int i=0;i<A.n_elem;i++){
-      for (int j=i;j<A.n_elem;j++){
-	SAA(i,j) = S.at(A(i),A(j));
-	SAA(j,i) = SAA(i,j);
+    for (uword i=0;i<A.n_elem;i++){
+      for (uword j=i;j<A.n_elem;j++){
+	      SAA(i,j) = S.at(A(i),A(j));
+	      SAA(j,i) = SAA(i,j);
       }
     }
     df = A.n_elem - sum(mat(SAA * B).diag()); // trace does not work, don't know why
@@ -162,7 +162,7 @@ double get_df_enet(double &lambda2, mat &R, mat &xAtxA, sp_mat &S, uvec &A, uwor
   return(df);
 }
 
-double get_df_breg(double &lambda2, mat &xtx, sp_mat &S, uvec &A) {
+double get_df_breg(const double &lambda2, mat &xtx, sp_mat &S, uvec &A) {
 
   double df ;
   mat C     ;
@@ -173,10 +173,10 @@ double get_df_breg(double &lambda2, mat &xtx, sp_mat &S, uvec &A) {
     // have to do this due to sparse encoding
     // either wait for Armadillo's guy to develop non contiguous
     // subview for sparse matrice or iterate over the n_zeros only...
-    for (int i=0;i<A.n_elem;i++){
-      for (int j=i;j<A.n_elem;j++){
-	SAA(i,j) = S.at(A(i),A(j));
-	SAA(j,i) = SAA(i,j);
+    for (uword i=0;i<A.n_elem;i++){
+      for (uword j=i;j<A.n_elem;j++){
+	      SAA(i,j) = S.at(A(i),A(j));
+	      SAA(j,i) = SAA(i,j);
       }
     }
     df = A.n_elem - sum(mat(SAA * C).diag()); // trace does not work, don't know why
@@ -187,7 +187,7 @@ double get_df_breg(double &lambda2, mat &xtx, sp_mat &S, uvec &A) {
   return(df);
 }
 
-void add_var_enet(uword &n, int &nbr_in, uword &var_in, vec &betaA, uvec &A, mat &x, mat &xt, mat &xtxA, mat &xAtxA, mat &xtxw, mat &R, double &lambda2, vec &xbar, sp_mat &spS, bool &usechol, uword &fun) {
+void add_var_enet(uword &n, uword &nbr_in, uword &var_in, vec &betaA, uvec &A, mat &x, mat &xt, mat &xtxA, mat &xAtxA, mat &xtxw, mat &R, const double &lambda2, vec &xbar, sp_mat &spS, const bool &usechol, const uword &fun) {
 
   vec  new_col   ; // column currently added to xtxA
 
@@ -209,7 +209,7 @@ void add_var_enet(uword &n, int &nbr_in, uword &var_in, vec &betaA, uvec &A, mat
   xtxA  = join_rows(xtxA, new_col) ;
   xAtxA = join_rows(xAtxA, trans(xtxA.row(var_in))) ;
 
-  if (fun == 0 & usechol == 1) {
+  if ((fun == 0) & (usechol == 1)) {
     cholupdate(R, xAtxA) ;
   }
 
@@ -219,7 +219,7 @@ void add_var_enet(uword &n, int &nbr_in, uword &var_in, vec &betaA, uvec &A, mat
   }
 }
 
-void add_var_enet(uword &n, int &nbr_in, uword &var_in, vec &betaA, uvec &A, sp_mat &x, sp_mat &xt, mat &xtxA, mat &xAtxA, mat &xtxw, mat &R, double &lambda2, vec &xbar, sp_mat &spS, bool &usechol, uword &fun) {
+void add_var_enet(uword &n, uword &nbr_in, uword &var_in, vec &betaA, uvec &A, sp_mat &x, sp_mat &xt, mat &xtxA, mat &xAtxA, mat &xtxw, mat &R, const double &lambda2, vec &xbar, sp_mat &spS, const bool &usechol, const uword &fun) {
 
   vec  new_col   ; // column currently added to xtxA
 
@@ -241,7 +241,7 @@ void add_var_enet(uword &n, int &nbr_in, uword &var_in, vec &betaA, uvec &A, sp_
   xtxA  = join_rows(xtxA, new_col) ;
   xAtxA = join_rows(xAtxA, trans(xtxA.row(var_in))) ;
 
-  if (fun == 0 & usechol == 1) {
+  if ((fun == 0) & (usechol == 1)) {
     cholupdate(R, xAtxA) ;
   }
 
@@ -251,9 +251,9 @@ void add_var_enet(uword &n, int &nbr_in, uword &var_in, vec &betaA, uvec &A, sp_
   }
 }
 
-void remove_var_enet(int &nbr_in, uvec &are_in, vec &betaA, uvec &A, mat &xtxA, mat &xAtxA, mat &xtxw, mat &R, uvec &null, bool &usechol, uword &fun) {
+void remove_var_enet(uword &nbr_in, uvec &are_in, vec &betaA, uvec &A, mat &xtxA, mat &xAtxA, mat &xtxw, mat &R, uvec &null, const bool &usechol, const uword &fun) {
 
-  for (int j=0; j<null.n_elem; j++) {
+  for (uword j=0; j<null.n_elem; j++) {
     are_in[A(null[j])]  = 0 ;
     A.shed_row(null[j])     ;
     betaA.shed_row(null[j]) ;
@@ -263,7 +263,7 @@ void remove_var_enet(int &nbr_in, uvec &are_in, vec &betaA, uvec &A, mat &xtxA, 
     xtxA.shed_col(null[j])  ;
     xAtxA.shed_col(null[j]) ;
     xAtxA.shed_row(null[j]) ;
-    if (fun == 0 & usechol == 1) {
+    if ((fun == 0) & (usechol == 1)) {
       choldowndate(R, null[j]) ;
     }
     nbr_in--;
@@ -276,10 +276,10 @@ void bound_to_optimal(vec &betaA,
 		      vec &xty,
 		      vec &grd,
 		      double &lambda1,
-		      double &lambda2,
+		      const double &lambda2,
 		      double &normy,
 		      uvec &A,
-		      int &monitor,
+		      const uword &monitor,
 		      vec &J_hat,
 		      vec &D_hat) {
 
@@ -330,7 +330,7 @@ vec cg(mat A, vec b, vec x, double tol) {
   double alpha ;
   mat Ap ;
 
-  while (sqrt(rs_new) > tol & i < 1e3) {
+  while ((sqrt(rs_new) > tol) & (i < 1e3)) {
     Ap = A * p;
     alpha = rs_old/dot(p,Ap) ;
     x += alpha * p ;
@@ -361,7 +361,7 @@ vec pcg(mat A, mat P, vec b, vec x, double tol) {
   double alpha ;
   mat Ap ;
 
-  while (sqrt(rs_new) > tol & i < 1e3) {
+  while ((sqrt(rs_new) > tol) & (i < 1e3)) {
     Ap = A * p;
     alpha = rs_old/dot(p,Ap) ;
     x += alpha * p ;

@@ -12,22 +12,20 @@ using namespace arma;
 
 #define ZERO 2e-16 // practical zero
 
-inline vec  get_lambda1(SEXP LAMBDA1, uword N_LAMBDA, double MIN_RATIO, double lmax) {
+inline vec get_lambda1(SEXP LAMBDA1, uword n_lambda, double min_ratio, double lmax) {
   vec lambda1 ;
   if (LAMBDA1 != R_NilValue) {
     lambda1  = as<vec>(LAMBDA1)  ;
   } else {
-    uword n_lambda(N_LAMBDA) ;
-    double min_ratio(MIN_RATIO);
     lambda1 = exp10(linspace(log10(lmax), log10(min_ratio*lmax), n_lambda)) ;
   }
   return(lambda1);
 }
 
-inline sp_mat get_struct(SEXP STRUCT, double lambda2, vec penscale) {
+inline sp_mat get_struct(SEXP STRUCT, const double lambda2, vec penscale) {
   uword p = penscale.n_elem;
   sp_mat S;
-  if (STRUCT == R_NilValue | lambda2 == 0) {
+  if ( (STRUCT == R_NilValue) | (lambda2 == 0) ) {
     S = speye(p,p);
   } else {
     S = as<sp_mat> (STRUCT) ;
@@ -43,8 +41,8 @@ inline sp_mat get_struct(SEXP STRUCT, double lambda2, vec penscale) {
 vec grp_norm(vec x, uvec pk, int norm, int rep) ;
 vec grp_sign(vec x, uvec pk) ;
 
-double get_df_enet(double &lambda2, mat &R, mat &xAtxA, sp_mat &S, uvec &A, uword &fun) ;
-double get_df_breg(double &lambda2, mat &xtx, sp_mat &S, uvec &A) ;
+double get_df_enet(const double &lambda2, mat &R, mat &xAtxA, sp_mat &S, uvec &A, const uword &fun) ;
+double get_df_breg(const double &lambda2, mat &xtx, sp_mat &S, uvec &A) ;
 
 vec  cg(mat A, vec b, vec x, double tol) ;
 vec pcg(mat A, mat P, vec b, vec x, double tol) ;
@@ -53,16 +51,16 @@ void cholupdate(mat &R, mat& XtX) ;
 
 void choldowndate(mat &R, int j) ;
 
-void bound_to_optimal(vec &betaA, mat &xAtxA, vec &xty, vec &grd, double &lambda1, double &lambda2, double &normy, uvec &A, int &monitor, vec &J_hat, vec &D_hat) ;
+void bound_to_optimal(vec &betaA, mat &xAtxA, vec &xty, vec &grd, double &lambda1, const double &lambda2, double &normy, uvec &A, const uword &monitor, vec &J_hat, vec &D_hat) ;
 
-void add_var_enet(uword &n, int &nbr_in, uword &var_in, vec &betaA, uvec &A, mat &x, mat &xt, mat &xtxA, mat &xAtxA, mat &xtxw, mat &R, double &lambda2, vec &xbar, sp_mat &spS, bool &usechol, uword &fun) ;
+void add_var_enet(uword &n, uword &nbr_in, uword &var_in, vec &betaA, uvec &A, mat &x, mat &xt, mat &xtxA, mat &xAtxA, mat &xtxw, mat &R, const double &lambda2, vec &xbar, sp_mat &spS, const bool &usechol, const uword &fun) ;
 
-void add_var_enet(uword &n, int &nbr_in, uword &var_in, vec &betaA, uvec &A, sp_mat &x, sp_mat &xt, mat &xtxA, mat &xAtxA, mat &xtxw, mat &R, double &lambda2, vec &xbar, sp_mat &spS, bool &usechol, uword &fun) ;
+void add_var_enet(uword &n, uword &nbr_in, uword &var_in, vec &betaA, uvec &A, sp_mat &x, sp_mat &xt, mat &xtxA, mat &xAtxA, mat &xtxw, mat &R, const double &lambda2, vec &xbar, sp_mat &spS, const bool &usechol, const uword &fun) ;
 
-void remove_var_enet(int &nbr_in, uvec &are_in, vec &betaA, uvec &A, mat &xtxAS, mat &xAtxA, mat &xtxw, mat &R,  uvec &null, bool &usechol, uword &fun) ;
+void remove_var_enet(uword &nbr_in, uvec &are_in, vec &betaA, uvec &A, mat &xtxAS, mat &xAtxA, mat &xtxw, mat &R, uvec &null, const bool &usechol, const uword &fun) ;
 
 template <typename any_mat>
-void standardize(any_mat &x, vec &y, bool &intercept, bool &normalize, vec &penscale,
+void standardize(any_mat &x, const vec &y, const bool &intercept, const bool &normalize, const vec &penscale,
 		 vec &xty, vec &normx, double &normy, vec &xbar, double &ybar) {
   
   uword n = x.n_rows;
@@ -78,7 +76,7 @@ void standardize(any_mat &x, vec &y, bool &intercept, bool &normalize, vec &pens
 
   if (normalize == 1) {
     normx = sqrt(trans(sum(square(x),0)) - n * square(xbar));
-    for (int i=0; i<p; i++) {
+    for (uword i=0; i<p; i++) {
       x.col(i) /= normx(i);
     }
     xbar /= normx ;
@@ -88,7 +86,7 @@ void standardize(any_mat &x, vec &y, bool &intercept, bool &normalize, vec &pens
   normy = sqrt(sum(square(y))) ;
 
   if (any(penscale != 1)) {
-    for (int i=0; i<n; i++) {
+    for (uword i=0; i<n; i++) {
        x.row(i) /= trans(penscale) ;
     }
     xbar /= penscale;
@@ -96,7 +94,7 @@ void standardize(any_mat &x, vec &y, bool &intercept, bool &normalize, vec &pens
 
   if (intercept == 1) {
     xty = trans(trans(y-ybar) * x) ;
-    for (int i=0;i<p;i++) {
+    for (uword i=0; i<p; i++) {
        xty(i) -=  sum(y-ybar) * xbar(i);
     }
   } else {

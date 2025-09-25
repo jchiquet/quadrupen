@@ -1,6 +1,5 @@
 /*
  * Author: Julien CHIQUET
- *         Statistique et Génome
  */
 #ifndef _quadrupen_ACTIVE_SET_H
 #define _quadrupen_ACTIVE_SET_H

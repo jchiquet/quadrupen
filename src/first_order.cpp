@@ -14,7 +14,7 @@ int fista_lasso(vec  &x0   ,
 
   colvec xk = x0  ; // output vector
   colvec  s = x0  ;
-  int iter = 0, j = 0   ; // current iterate
+  int iter = 0  ; // current iterate
   double delta = 2*eps  ; // change in beta
   int max_iter  = 10000 ; // max. number of iteration
   double L  = L0        ; // Lipschitz's constant
@@ -35,7 +35,7 @@ int fista_lasso(vec  &x0   ,
     while(!found) {
       // apply proximal operator of the Lasso
       xk = s - df/L ;
-      for (j=0; j<x0.n_elem; j++) {
+      for (uword j=0; j<x0.n_elem; j++) {
         xk(j) = fmax(0,1-(pen/L)/fabs(xk(j))) * xk(j);
       }
 
@@ -109,9 +109,9 @@ int fista_breg(vec    &x0,
       l_den = as_scalar(pow(norm(xk-s,2),2));
 
       if ((L0 * l_den >= l_num) || (sqrt(l_den) < eps)) {
-	found = true;
+	      found = true;
       } else {
-	L0 = fmax(2*L0, l_num/l_den);
+	      L0 = fmax(2*L0, l_num/l_den);
       }
 
       R_CheckUserInterrupt();
@@ -147,7 +147,7 @@ int fista_grp(vec   &x0,
 
   colvec xk = x0  ; // output vector
   colvec  s = x0  ;
-  int iter = 0, j = 0      ; // current iterate
+  int iter = 0          ; // current iterate
   double delta = 2*eps  ; // change in beta
   int max_iter  = 10000 ; // max. number of iteration
   double L  = L0        ; // Lipschitz's constant
@@ -167,20 +167,20 @@ int fista_grp(vec   &x0,
     // Line search over L
     while(!found) {
       // apply proximal operator of the group-Lasso
-      if (grpnorm == -1) { // -1 is our code for "inf" norm
-	xk = proximal_grpinf(s - df/L, pk, pen, L);
+      if (grpnorm == 2) {
+        xk = proximal_grp2(s - df/L, pk, pen, L);
       } else {
-	xk = proximal_grp2(s - df/L, pk, pen, L);
+        xk = proximal_grpinf(s - df/L, pk, pen, L);
       }
 
       fk = as_scalar(.5 * strans(xk) * xtx * xk - strans(xty) * xk) ;
       l_num = as_scalar(2 * (fk - f0 - dot(df, xk-s) ));
       l_den = as_scalar(pow(norm(xk-s,2),2));
 
-      if (L * l_den >= l_num  | sqrt(l_den) < eps) {
-	found = true;
+      if ( (L * l_den >= l_num)  | (sqrt(l_den) < eps)) {
+	      found = true;
       } else {
-	L = fmax(2*L, l_num/l_den);
+	      L = fmax(2*L, l_num/l_den);
       }
 
       R_CheckUserInterrupt();
@@ -210,11 +210,11 @@ vec proximal_grp2(vec u,
 		  vec  lambda,
 		  double L) {
 
-  int j,k,ind = 0 ;
+  uword ind = 0 ;
 
   vec grp_norm2 = grp_norm(u, pk, 2, 1);
-  for (k=0; k<pk.n_elem; k++) {
-    for (j=ind; j<(ind+pk.at(k)); j++) {
+  for (uword k=0; k<pk.n_elem; k++) {
+    for (uword j=ind; j<(ind+pk.at(k)); j++) {
       u(j) = fmax(0,1-(lambda(j)/L)/grp_norm2(j)) * u(j);
     }
     ind += pk.at(k);
@@ -228,8 +228,8 @@ vec proximal_grpinf(vec u,
 		    vec lambda,
 		    double L) {
 
-  int ind = 0 ;
-  for (int k=0; k<pk.n_elem; k++) {
+  uword ind = 0 ;
+  for (uword k=0; k<pk.n_elem; k++) {
     u.subvec(ind,ind+pk.at(k)-1) = proximal_inf(u.subvec(ind,ind+pk.at(k)-1),lambda.subvec(ind,ind+pk.at(k)-1)/L);
     ind += pk.at(k);
   }
@@ -240,7 +240,7 @@ vec proximal_grpinf(vec u,
 vec proximal_inf(vec v,
 		 vec lambda) {
 
-  int p = v.n_elem;
+  uword p = v.n_elem;
   vec u, proj;
   vec out = zeros<vec>(p);
 
@@ -258,13 +258,13 @@ vec proximal_inf(vec v,
 
     // solution du programme primal
     // On garde les valeurs les plus petites, et on seuille le reste à une valeur commune +- thresh
-    for (int k=0; k < p;k++) {
+    for (uword k=0; k < p;k++) {
       if (fabs(v(k)) > ZERO) {
-	if (v(k) > 0) {
-	  out(k) = fmin(fabs(v(k)),thresh);
-	} else {
-	  out(k) = -fmin(fabs(v(k)),thresh);
-	}
+	      if (v(k) > 0) {
+	      out(k) = fmin(fabs(v(k)),thresh);
+	      } else {
+	        out(k) = -fmin(fabs(v(k)),thresh);
+	      }
       }
     }
   }
@@ -277,11 +277,11 @@ int pathwise_enet(vec&  x0,
 		  vec& xtxw,
 		  double& pen,
 		  uvec &null,
-		  double& gam   ,
-		  double eps    ) {
+		  const double& gam   ,
+		  const double eps    ) {
 
   colvec xk = x0 ; // output vector
-  int j, iter  = 0     ; // current iterate
+  int iter  = 0     ; // current iterate
   int max_iter = 10000 ; // max. number of iteration
   double delta = 2*eps ; // change in beta
   double u, d          ; // temporary scalar
@@ -289,7 +289,7 @@ int pathwise_enet(vec&  x0,
   while ((delta > eps/x0.n_elem ) && (iter < max_iter)) {
 
     delta = 0;
-    for (j=0; j<x0.n_elem; j++) {
+    for (uword j=0; j<x0.n_elem; j++) {
       // Soft thresholding operator
       u = x0(j) * (1+gam) + xty(j) - xtxw(j) ;
       xk(j)  = fmax(1-pen/fabs(u),0) * u/(1+gam) ;
