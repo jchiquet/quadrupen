@@ -14,13 +14,13 @@ using namespace arma;
 
 // [[Rcpp::export]]
 Rcpp::List elastic_net_cpp(
-     SEXP BETA0                 ,
-		 SEXP X                     ,
+     SEXP BETA0                 , //
+		 SEXP X                     , // regressor matrix
 		 const arma::vec y          , // response vector
-		 SEXP STRUCT                ,
-		 SEXP LAMBDA1               ,
-		 double n_lambda            ,
-		 const double min_ratio             ,
+		 const arma::sp_mat Struct  , // Structuring matrix
+		 SEXP LAMBDA1               , // 
+		 double n_lambda            , //
+		 const double min_ratio     , //
 		 const arma::vec penscale   , // penalty weights
 		 const double lambda2       , // the smooth (ridge) penalty
 		 const bool intercept       , // boolean for intercept mode
@@ -47,7 +47,6 @@ Rcpp::List elastic_net_cpp(
   uword n      ; // sample size
   uword p      ; // problem size
 
-  // Managing the data matrix in both cases of sparse or dense coding
   mat x        ;
   mat xt       ;
   sp_mat sp_x  ;
@@ -69,7 +68,8 @@ Rcpp::List elastic_net_cpp(
   meanx = xbar % penscale % normx;
 
   // STRUCTURATING MATRIX
-  sp_mat S = get_struct(STRUCT, lambda2, penscale) ; // sparsely encoded structuring matrix
+  sp_mat diag_S = spdiags(sqrt(lambda2)*pow(penscale,-1/2), ivec({0}), p, p) ;
+  sp_mat S = diag_S * Struct * diag_S  ; // sparsely encoded structuring matrix
   mat SAA ; // densely encoded active counterpart
 
   // VECTOR OF TUNING PARAMETER FOR THE L1-PENALTY
@@ -85,12 +85,11 @@ Rcpp::List elastic_net_cpp(
   vec  xtxw                              ; // t(x_A) * x_A * beta(A)
   vec  grd       = -xty                  ; // smooth part of the gradient
   vec  mu        = zeros<vec>(n_lambda)  ; // the intercept term
-
   vec  max_grd   = zeros<vec>(n_lambda)  ; // a vector with the successively reach duality gap
   vec  converge  = zeros<vec>(n_lambda)  ; // a vector indicating if convergence occured (0/1/2)
   uvec it_active = zeros<uvec>(n_lambda) ; // # of loop in the active set for each lambda1
   uvec it_optim                          ; // # of loop in the optimization process for each loop of the active se
-  double L0            = 1.0 + lambda2   ; // Lipschitz constant for proximal methods
+  double L0      = 1.0 + lambda2         ; // Lipschitz constant for proximal methods
   vec  timing      (n_lambda)            ; // succesive timing in
   vec  df          (n_lambda)            ; // degrees of freedom
   wall_clock timer                       ; // clock

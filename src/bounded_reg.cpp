@@ -15,8 +15,8 @@ using namespace arma;
 // [[Rcpp::export]]
 Rcpp::List bounded_reg_cpp(SEXP X        ,
      const arma::vec& Y        ,
-		 SEXP STRUCT   ,
-		 SEXP LAMBDA1  ,
+     const arma::sp_mat Struct  , // Structuring matrix
+     SEXP LAMBDA1  ,
 		 const arma::uword N_LAMBDA ,
 		 const double MIN_RATIO,
 		 const arma::vec& PENSCALE ,
@@ -48,7 +48,6 @@ Rcpp::List bounded_reg_cpp(SEXP X        ,
   bool   bullet(BULLETPROOF) ; // int for verbose mode (0/1/2)
   uword  max_iter(MAXITER)     ; // max # of iterates of the active set
   uword  max_feat(MAXFEAT)     ; // max # of variables activated
-
 
   vec    xty   ; // responses to predictors vector
   vec    xbar  ; // mean of the predictors
@@ -84,7 +83,8 @@ Rcpp::List bounded_reg_cpp(SEXP X        ,
   meanx = xbar % penscale % normx;
 
   // STRUCTURATING MATRIX
-  sp_mat S = get_struct(STRUCT, lambda2, penscale) ; // sparsely encoded structuring matrix
+  sp_mat diag_S = spdiags(sqrt(lambda2)*pow(penscale,-1/2), ivec({0}), p, p) ;
+  sp_mat S = diag_S * Struct * diag_S  ; // sparsely encoded structuring matrix
   xtx += S ; // S is scaled by lambda2
 
   // VECTOR OF TUNING PARAMETER FOR THE L1-PENALTY

@@ -10,7 +10,7 @@ elastic.net(
   lambda1 = NULL,
   lambda2 = 0.01,
   penscale = rep(1, p),
-  struct = NULL,
+  struct = Diagonal(p, 1),
   intercept = TRUE,
   normalize = TRUE,
   naive = FALSE,

@@ -178,7 +178,7 @@ elastic.net <- function(x,
                         lambda1   = NULL,
                         lambda2   = 0.01,
                         penscale  = rep(1,p),
-                        struct    = NULL,
+                        struct    = Diagonal(p, 1),
                         intercept = TRUE,
                         normalize = TRUE,
                         naive     = FALSE,
@@ -223,14 +223,12 @@ elastic.net <- function(x,
     }
     if(min.ratio < 0)
         stop("min.ratio must be non negative.")
-    if (!is.null(struct)) {
-      if (ncol(struct) != p | ncol(struct) != p)
-          stop("struct must be a (square) positive semidefinite matrix.")
-      if (any(eigen(struct,only.values=TRUE)$values<0))
-          stop("struct must be a (square) positive semidefinite matrix.")
-      if (!inherits(struct, "dgCMatrix"))
-          struct <- as(struct, "dgCMatrix")
-    }
+    if (ncol(struct) != p | ncol(struct) != p)
+        stop("struct must be a (square) positive semidefinite matrix.")
+    if (any(eigen(struct,only.values=TRUE)$values<0))
+        stop("struct must be a (square) positive semidefinite matrix.")
+    if (!inherits(struct, "dgCMatrix"))
+        struct <- as(struct, "dgCMatrix")
     if (!is.null(beta0)) {
       beta0 <- as.numeric(beta0)
       if (length(beta0) != p)
@@ -291,13 +289,13 @@ elastic.net <- function(x,
                ctrl$usechol,
                ctrl$monitor)
   
-  coefficients <- sparseMatrix(i = out$iA+1,
-                               j = out$jA+1,
+  coefficients <- sparseMatrix(i = out$iA + 1,
+                               j = out$jA + 1,
                                x = c(out$nzeros),
-                               dims=c(length(out$lambda1),p))
-  active.set   <- sparseMatrix(i = out$iA+1,
-                               j = out$jA+1,
-                               dims=c(length(out$lambda1),p))
+                               dims = c(length(out$lambda1),p))
+  active.set   <- sparseMatrix(i = out$iA + 1,
+                               j = out$jA + 1,
+                               dims = c(length(out$lambda1),p))
   ## END OF CALL
   if (ctrl$timer) {
     internal.timer <- (proc.time() - cpp.start)[3]

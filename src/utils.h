@@ -5,8 +5,6 @@
 #ifndef _quadrupen_UTILS_H
 #define _quadrupen_UTILS_H
 
-#define ARMA_WARN_LEVEL 1
-
 #include <RcppArmadillo.h>
 
 using namespace Rcpp;
@@ -22,22 +20,6 @@ inline vec get_lambda1(SEXP LAMBDA1, uword n_lambda, double min_ratio, double lm
     lambda1 = exp10(linspace(log10(lmax), log10(min_ratio*lmax), n_lambda)) ;
   }
   return(lambda1);
-}
-
-inline sp_mat get_struct(SEXP STRUCT, const double lambda2, vec penscale) {
-  uword p = penscale.n_elem;
-  sp_mat S;
-  if ( (STRUCT == R_NilValue) | (lambda2 == 0) ) {
-    S = speye(p,p);
-  } else {
-    S = as<sp_mat> (STRUCT) ;
-  }
-  if (lambda2 > 0) {
-    // renormalize the l2 structuring matrix according to the l1
-    // penscale values, so as it does not interfere with the l2 penalty.
-    S = diagmat(sqrt(lambda2)*pow(penscale,-1/2)) * S * diagmat(sqrt(lambda2)*pow(penscale,-1/2)) ;
-  }
-  return(S) ;
 }
 
 vec grp_norm(vec x, uvec pk, int norm, int rep) ;
