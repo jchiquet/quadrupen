@@ -228,7 +228,7 @@ elastic.net <- function(x,
           stop("struct must be a (square) positive semidefinite matrix.")
       if (any(eigen(struct,only.values=TRUE)$values<0))
           stop("struct must be a (square) positive semidefinite matrix.")
-      if(!inherits(struct, "dgCMatrix"))
+      if (!inherits(struct, "dgCMatrix"))
           struct <- as(struct, "dgCMatrix")
     }
     if (!is.null(beta0)) {
@@ -238,7 +238,7 @@ elastic.net <- function(x,
     }
     if (length(max.feat)>1)
         stop("max.feat must be an integer.")
-    if(is.numeric(max.feat) & !is.integer(max.feat))
+    if (is.numeric(max.feat) & !is.integer(max.feat))
         max.feat <- as.integer(max.feat)
   }
 
@@ -291,32 +291,6 @@ elastic.net <- function(x,
                ctrl$usechol,
                ctrl$monitor)
   
-  # out <- .Call("elastic_net",
-  #              beta0        ,
-  #              x            ,
-  #              y            ,
-  #              struct       ,
-  #              lambda1      ,
-  #              nlambda1     ,
-  #              min.ratio    ,
-  #              penscale     ,
-  #              lambda2      ,
-  #              intercept    ,
-  #              normalize    ,
-  #              rep(1,n)     ,
-  #              naive        ,
-  #              ctrl$thresh  ,
-  #              ctrl$max.iter,
-  #              max.feat     ,
-  #              switch(ctrl$method,
-  #                     quadra   = 0,
-  #                     pathwise = 1,
-  #                     fista    = 2, 0),
-  #              ctrl$verbose,
-  #              inherits(x, "sparseMatrix"),
-  #              ctrl$usechol,
-  #              ctrl$monitor,
-  #              package = "quadrupen")
   coefficients <- sparseMatrix(i = out$iA+1,
                                j = out$jA+1,
                                x = c(out$nzeros),

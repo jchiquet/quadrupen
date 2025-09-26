@@ -278,27 +278,7 @@ bounded.reg <- function(x,
                ctrl$verbose,
                inherits(x, "sparseMatrix"),
                ctrl$bulletproof)
-  # out <- .Call("bounded_reg",
-  #              x,
-  #              y,
-  #              struct,
-  #              lambda1      ,
-  #              nlambda1     ,
-  #              min.ratio    ,
-  #              penscale     ,
-  #              lambda2      ,
-  #              intercept    ,
-  #              normalize    ,
-  #              rep(1,n)     ,
-  #              naive        ,
-  #              ctrl$thresh  ,
-  #              ctrl$max.iter,
-  #              max.feat     ,
-  #              ifelse(ctrl$method=="fista",1,0),
-  #              ctrl$verbose,
-  #              inherits(x, "sparseMatrix"),
-  #              ctrl$bulletproof,
-  #              package = "quadrupen")
+
   coefficients <- Matrix(out$coefficients)
   active.set   <- sparseMatrix(i = out$iB+1,
                                j = out$jB+1,
@@ -336,14 +316,15 @@ bounded.reg <- function(x,
 
   ## FITTED VALUES AND RESIDUALS...
   if (intercept) {
-    fitted <- sweep(tcrossprod(x,coefficients),2L,-mu,check.margin=FALSE)
+    fitted <- sweep(tcrossprod(x,coefficients),2L,-mu,check.margin = FALSE)
     df <- df + 1
   } else {
     mu <- 0
     fitted <- tcrossprod(x,coefficients)
   }
-  residuals <- apply(fitted,2,function(y.hat) y-y.hat)
-  r.squared <- 1-colSums(residuals^2)/ifelse(intercept,sum((y-mean(y))^2),sum(y^2))
+  residuals <- apply(fitted, 2, function(y.hat) y - y.hat)
+  r.squared <- 1 - colSums(residuals^2) / 
+    ifelse(intercept, sum((y - mean(y))^2), sum(y^2))
 
   return(new("quadrupen",
              coefficients = coefficients   ,

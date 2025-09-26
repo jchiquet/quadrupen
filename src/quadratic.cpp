@@ -1,6 +1,5 @@
 /*
  * Author: Julien CHIQUET
- *         Statistique et Génome
  */
 #include "quadratic.h"
 
@@ -71,6 +70,7 @@ int quadra_enet(vec &x0,
       x0 = x1 ;
     }
   }
+  
   return(iter);
 }
 
@@ -103,7 +103,7 @@ int quadra_breg(vec    &beta,
   I = setdiff(all,B);
   toB = B;
 
-  while (toB.n_elem > 0 & iter < maxit) {
+  while ((toB.n_elem > 0) & (iter < maxit)) {
 
     iter++;
     //

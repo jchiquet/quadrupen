@@ -6,6 +6,8 @@
 #ifndef _quadrupen_QUADRATIC_H
 #define _quadrupen_QUADRATIC_H
 
+#define ARMA_WARN_LEVEL 1
+
 #include <RcppArmadillo.h>
 #include "utils.h"
 

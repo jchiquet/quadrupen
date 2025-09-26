@@ -21,9 +21,9 @@ vec grp_norm(vec x, uvec pk, int norm, int rep)  {
     for (uword k=0; k<pk.n_elem; k++) {
       current_norm = as_scalar(max(abs(x.subvec(ind, ind + pk(k) - 1))));
       if (rep > 0) {
-	res.subvec(ind, ind + pk(k) - 1) = current_norm*ones(pk(k));
+	      res.subvec(ind, ind + pk(k) - 1) = current_norm*ones(pk(k));
       } else {
-	res(k) = current_norm;
+	      res(k) = current_norm;
       }
       ind += pk(k);
     }
@@ -32,9 +32,9 @@ vec grp_norm(vec x, uvec pk, int norm, int rep)  {
     for (uword k=0; k<pk.n_elem; k++) {
       current_norm = as_scalar(sum(abs(x.subvec(ind, ind + pk(k) - 1))));
       if (rep > 0) {
-	res.subvec(ind, ind + pk(k) - 1) = current_norm*ones(pk(k));
+	      res.subvec(ind, ind + pk(k) - 1) = current_norm*ones(pk(k));
       } else {
-	res(k) = current_norm;
+	      res(k) = current_norm;
       }
       ind += pk(k);
     }
@@ -43,9 +43,9 @@ vec grp_norm(vec x, uvec pk, int norm, int rep)  {
     for (uword k=0; k<pk.n_elem; k++) {
       current_norm = as_scalar(sqrt(sum(pow(x.subvec(ind, ind + pk(k) - 1),2))));
       if (rep > 0) {
-	res.subvec(ind, ind + pk(k) - 1) = current_norm*ones(pk(k));
+	      res.subvec(ind, ind + pk(k) - 1) = current_norm*ones(pk(k));
       } else {
-	res(k) = current_norm;
+	      res(k) = current_norm;
       }
       ind += pk(k);
     }
@@ -54,9 +54,9 @@ vec grp_norm(vec x, uvec pk, int norm, int rep)  {
     for (uword k=0; k<pk.n_elem; k++) {
       current_norm = as_scalar(sqrt(sum(pow(x.subvec(ind, ind + pk(k) - 1),2))));
       if (rep > 0) {
-	res.subvec(ind, ind + pk(k) - 1) = current_norm*ones(pk(k));
+	      res.subvec(ind, ind + pk(k) - 1) = current_norm*ones(pk(k));
       } else {
-	res(k) = current_norm;
+	      res(k) = current_norm;
       }
       ind += pk(k);
     }
@@ -118,7 +118,7 @@ void choldowndate(mat &R, int j) {
       r = norm(x,2);
 //       G <<  x(0) << x(1) << endr
 // 	<< -x(1) << x(0) << endr;
-      G = { {x(0), x(1)}, {-x(1), x(0)}};
+      G = {{x(0), x(1)}, {-x(1), x(0)}};
       G = G / r;
       x(0) = r; x(1) = 0;
     } else {
@@ -137,7 +137,7 @@ double get_df_enet(const double &lambda2, mat &R, mat &xAtxA, sp_mat &S, uvec &A
   mat SAA(A.n_elem,A.n_elem) ;
   double df ;
   mat B ;
-
+  
   if (lambda2 > 0) {
     if (fun == 0) {
       B = solve(trimatu(R), eye(R.n_cols, R.n_cols));

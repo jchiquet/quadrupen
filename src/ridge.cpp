@@ -76,7 +76,7 @@ void RIDGE::LetsRoll() {
   beta.resize(lambda.n_elem, x.n_cols);
   df.resize(lambda.n_elem, 1);
 
-  for (int i; i<lambda.n_elem; i++) {
+  for (uword i; i<lambda.n_elem; i++) {
     // computing the structured ridge estimate
     beta.row(i) = trans(cinvV * diagmat(eta/(square(eta) + lambda(i))) * Uty) / normx;
     // computing the estimated degrees of freedom
@@ -91,7 +91,6 @@ void RIDGE::standardize(const bool INTERCEPT, const bool NORMALIZE) {
 
   bool intercept  = (INTERCEPT) ; // boolean for intercept mode
   bool normalize  = (NORMALIZE) ; // boolean for standardizing the predictor
-  uword n = x.n_rows;
   uword p = x.n_cols;
 
   if (intercept == 1) {

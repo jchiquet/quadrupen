@@ -142,7 +142,7 @@ plot(bounded.reg(x,y, lambda2=5, intercept=FALSE), label=label)
 
 ### Regularization with prior knowledge
 
-Now let use define the graph associated with the groups of the regressor and compute the Graph Laplacian. We add a small value on the diagonal ton ensure strict positive definiteness (in he futre, this matrix should preferentially be defined with a graph).
+Now let use define the graph associated with the groups of the regressor and compute the Graph Laplacian. We add a small value on the diagonal ton ensure strict positive definiteness (in he future, this matrix should preferentially be defined with a graph).
 
 ```{r prior}
 A <- bdiag(lapply(group, function(s) matrix(1,s,s))) ; diag(A) <- 0

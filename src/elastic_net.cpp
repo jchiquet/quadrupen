@@ -14,27 +14,27 @@ using namespace arma;
 
 // [[Rcpp::export]]
 Rcpp::List elastic_net_cpp(
-     SEXP BETA0                   ,
-		 SEXP X                       ,
-		 const arma::vec y           , // response vector
-		 SEXP STRUCT                  ,
-		 SEXP LAMBDA1                 ,
-		 double n_lambda              ,
+     SEXP BETA0                 ,
+		 SEXP X                     ,
+		 const arma::vec y          , // response vector
+		 SEXP STRUCT                ,
+		 SEXP LAMBDA1               ,
+		 double n_lambda            ,
 		 const double min_ratio             ,
 		 const arma::vec penscale   , // penalty weights
-		 const double lambda2               , // the smooth (ridge) penalty
-		 const bool intercept             , // boolean for intercept mode
-		 const bool normalize             , // boolean for standardizing the predictor
-		 const arma::vec weights     , // observation weights (not use at the moment)
-		 const bool naive                   , // naive elastic-net or not
-		 const double eps                   , // precision required
-		 const arma::uword max_iter   , // max # of iterates of the active set
-		 const arma::uword max_feat   , // max # of variables activated
-		 const arma::uword fun        , // solver (0=quadra, 1=pathwise, 2=fista)
-		 const arma::uword verbose    , // int for verbose mode (0/1/2)
-		 const bool sparse                  , // boolean for sparse mode
-		 const bool usechol                 , // use Cholesky decomposition or not
-		 const arma::uword monitor      // convergence monitoring (1 == Grandvalet's bound ;-) 2 == Fenchel duality gap)
+		 const double lambda2       , // the smooth (ridge) penalty
+		 const bool intercept       , // boolean for intercept mode
+		 const bool normalize       , // boolean for standardizing the predictor
+		 const arma::vec weights    , // observation weights (not use at the moment)
+		 const bool naive           , // naive elastic-net or not
+		 const double eps           , // precision required
+		 const arma::uword max_iter , // max # of iterates of the active set
+		 const arma::uword max_feat , // max # of variables activated
+		 const arma::uword fun      , // solver (0=quadra, 1=pathwise, 2=fista)
+		 const arma::uword verbose  , // int for verbose mode (0/1/2)
+		 const bool sparse          , // boolean for sparse mode
+		 const bool usechol         , // use Cholesky decomposition or not
+		 const arma::uword monitor    // convergence monitoring (1 == Grandvalet's bound ;-) 2 == Fenchel duality gap)
 		 ) {
 
   vec    xty   ; // responses to predictors vector
@@ -148,7 +148,10 @@ Rcpp::List elastic_net_cpp(
   // START THE LOOP OVER LAMBDA
   timer.tic();
   for (int m=0; m<n_lambda; m++) {
-    if (verbose == 2) {Rprintf("\n lambda1 = %f",lambda1(m)) ;}
+    if (verbose == 2) {
+      Rprintf("\n lambda1 = %f",lambda1(m)) ;
+      Rprintf("\n nb active variables = %i",nbr_in) ;
+    }
     // _____________________________________________________________
     //
     // START THE ACTIVE SET ALGORITHM
@@ -161,6 +164,7 @@ Rcpp::List elastic_net_cpp(
     grd_norm.elem(A) = abs(grd.elem(A) + lambda1[m] * sign(betaA)) ;
     // variable associated with the highest optimality violation
     var_in = grd_norm.index_max() ;
+
     max_grd[m] = grd_norm(var_in) ;
     if (max_grd[m] < 0) {max_grd[m] = 0;}
 
@@ -172,17 +176,16 @@ Rcpp::List elastic_net_cpp(
 
       // Check if the variable is already in the active set
       if (are_in[var_in] == 0) {
-	if (sparse == 1) {
-	  add_var_enet(n, nbr_in, var_in, betaA, A, sp_x, sp_xt, xtxA, xAtxA, xtxw, R, lambda2, xbar, S, usechol, fun) ;
-	} else {
-	  add_var_enet(n, nbr_in, var_in, betaA, A, x, xt, xtxA, xAtxA, xtxw, R, lambda2, xbar, S, usechol, fun) ;
-	}
-
-	if (verbose == 2) {Rprintf("newly added variable %i\n",var_in);}
-	are_in[var_in] = 1;
-	nbr_in++;
+	      if (sparse == 1) {
+	        add_var_enet(n, nbr_in, var_in, betaA, A, sp_x, sp_xt, xtxA, xAtxA, xtxw, R, lambda2, xbar, S, usechol, fun) ;
+	      } else {
+	        add_var_enet(n, nbr_in, var_in, betaA, A, x, xt, xtxA, xAtxA, xtxw, R, lambda2, xbar, S, usechol, fun) ;
+	      }
+	      if (verbose == 2) {Rprintf("newly added variable %i\n",var_in);}
+	      are_in[var_in] = 1;
+	      nbr_in++;
       } else {
-	if (verbose == 2) {Rprintf("already in %i\n",var_in);}
+	      if (verbose == 2) {Rprintf("already in %i\n",var_in);}
       }
 
       // _____________________________________________________________
@@ -193,21 +196,21 @@ Rcpp::List elastic_net_cpp(
 
       it_optim.reshape(nbr_opt + 1,1) ;
       switch (fun) {
-      case 1 :
-	      it_optim[nbr_opt] = pathwise_enet(betaA, xAtxA, xty.elem(A), xtxw, lambda1[m], null, lambda2, eps2);
-	      break;
-      case 2 :
-	      it_optim[nbr_opt] = fista_lasso(betaA, xAtxA, xty.elem(A), lambda1[m], null, L0, eps2);
-	      break;
-      default:
-	      try {
-	        it_optim[nbr_opt] = quadra_enet(betaA, R, xAtxA, xty.elem(A), sign(grd.elem(A)), lambda1[m], null, usechol, eps);
-	      } catch (std::runtime_error &error) {
-	        if (verbose > 0) {
-	        Rprintf("\nWarning: singular system at this stage of the solution path, cutting here.\n");
+        case 1 :
+	        it_optim[nbr_opt] = pathwise_enet(betaA, xAtxA, xty.elem(A), xtxw, lambda1[m], null, lambda2, eps2);
+	        break;
+        case 2 :
+	        it_optim[nbr_opt] = fista_lasso(betaA, xAtxA, xty.elem(A), lambda1[m], null, L0, eps2);
+	        break;
+        default:
+	        try {
+	          it_optim[nbr_opt] = quadra_enet(betaA, R, xAtxA, xty.elem(A), sign(grd.elem(A)), lambda1[m], null, usechol, eps);
+	        } catch (std::runtime_error &error) {
+	          if (verbose > 0) {
+	          Rprintf("\nWarning: singular system at this stage of the solution path, cutting here.\n");
+	          }
+	          success_optim = false ;
 	      }
-	  success_optim = false ;
-	}
       }
       // update the smooth part of the gradient
       grd = -xty + xtxA * betaA;
@@ -254,13 +257,13 @@ Rcpp::List elastic_net_cpp(
       R_CheckUserInterrupt();
     }
 
-    // degress of freedom
+    // degrees of freedom
     df[m] = get_df_enet(lambda2, R, xAtxA, S, A, fun);
 
     // the reference parameter (obtained once optimum is met)
     if (monitor > 0) {
       if (it_active[m] > 0) {
-	J_star = join_cols(J_star, ones(it_active[m],1) * J_hat[nbr_opt-1]) ;
+	      J_star = join_cols(J_star, ones(it_active[m],1) * J_hat[nbr_opt-1]) ;
       }
     }
 
@@ -289,14 +292,14 @@ Rcpp::List elastic_net_cpp(
       break;
     } else {
       if (any(penscale != 1)) {
-	nonzeros = join_cols(nonzeros, betaA/(normx.elem(A) % penscale.elem(A)));
+	      nonzeros = join_cols(nonzeros, betaA/(normx.elem(A) % penscale.elem(A)));
       } else {
-	nonzeros = join_cols(nonzeros, betaA/(normx.elem(A)));
+	      nonzeros = join_cols(nonzeros, betaA/(normx.elem(A)));
       }
       iA = join_cols(iA, m*ones(betaA.n_elem,1) );
       jA = join_cols(jA, conv_to<mat>::from(A) ) ;
       if (intercept == 1) {
-	mu[m] = dot(betaA, xbar.elem(A)) ;
+	      mu[m] = dot(betaA, xbar.elem(A)) ;
       }
     }
   }
