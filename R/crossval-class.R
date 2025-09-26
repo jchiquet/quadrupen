@@ -47,8 +47,7 @@
 #'
 #' @rdname cvpen-class
 #'
-#' @exportClass cvpen
-#'
+#' @export
 setClassUnion("lambda", c("NULL","numeric"))
 setClass("cvpen",
    representation = representation(

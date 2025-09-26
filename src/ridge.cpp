@@ -1,6 +1,7 @@
 /*
  * Author: Julien CHIQUET
- *         Statistique et Génome
+ *         Statistique et Génome*
+ *         MIA PAris-Saclay
  */
 
 #include "ridge.h"
@@ -8,26 +9,32 @@
 using namespace Rcpp;
 using namespace arma;
 
-RIDGE::RIDGE(SEXP X, SEXP Y, SEXP C, SEXP WEIGHTS, SEXP VERBOSE) :
-  x        (as<mat>         (X)     ) , // predictors
-  y        (as<vec>         (Y)     ) , // responses
-  c        (trimatu(as<mat> (C)     )), // cholesky of L
-  w        (as<vec>         (WEIGHTS)), // observation weights
-  verbose  (as<int>         (VERBOSE))  // verbose mode (unused)
+RIDGE::RIDGE(const arma::mat X, 
+             const arma::vec Y,
+             const arma::mat C, 
+             const arma::vec WEIGHTS,
+             const arma::uword VERBOSE) :
+  x        (X), // predictors
+  y        (Y), // responses
+  c        (trimatu(C)), // Cholesky of L
+  w        (WEIGHTS), // observation weights
+  verbose  (VERBOSE)  // verbose mode (unused)
 {}
 
 
-SEXP ridge_cpp(SEXP X        , // matrix of features
-	       SEXP Y        , // vector of response
-	       SEXP C        , // Cholesky decompostion of the structuring matrix
-	       SEXP LAMBDA   ,
-	       SEXP NLAMBDA  ,
-	       SEXP LAMBDAMIN,
-	       SEXP LAMBDAMAX,
-	       SEXP INTERCEPT,
-	       SEXP NORMALIZE,
-	       SEXP WEIGHTS  ,
-	       SEXP VERBOSE  ) {
+// [[Rcpp::export]]
+Rcpp::List ridge_cpp(
+    const arma::mat& X  , // matrix of features
+	  const arma::vec& Y        , // vector of response
+	  const arma::mat& C        , // Cholesky decompostion of the structuring matrix
+	  SEXP LAMBDA,
+	  const arma::uword& NLAMBDA  ,
+	  const double& LAMBDAMIN,
+	  const double& LAMBDAMAX,
+	  const bool& INTERCEPT,
+	  const bool& NORMALIZE,
+	  const arma::vec& WEIGHTS  ,
+	  const arma::uword& VERBOSE  ) {
 
   // ==============================================================
   // INSTANTIATE THE RIDGE PATH
@@ -44,7 +51,7 @@ SEXP ridge_cpp(SEXP X        , // matrix of features
   // ==============================================================
   // COMPUTE THE PATH OF SOLUTIONS
   ridge.LetsRoll();
-
+  
   return List::create(Named("coefficients") = ridge.get_coef()  ,
 		      Named("mu")           = ridge.get_mu()    ,
 		      Named("normx")        = ridge.get_normx() ,
@@ -69,7 +76,7 @@ void RIDGE::LetsRoll() {
   beta.resize(lambda.n_elem, x.n_cols);
   df.resize(lambda.n_elem, 1);
 
-  for (int i; i<lambda.n_elem; i++) {
+  for (uword i; i<lambda.n_elem; i++) {
     // computing the structured ridge estimate
     beta.row(i) = trans(cinvV * diagmat(eta/(square(eta) + lambda(i))) * Uty) / normx;
     // computing the estimated degrees of freedom
@@ -77,50 +84,48 @@ void RIDGE::LetsRoll() {
   }
 
   // estimating the intercept term
-  mu = ybar - beta * xbar;
+  mu = ybar - beta * xbar.t() ;
 }
 
-void RIDGE::standardize(SEXP INTERCEPT, SEXP NORMALIZE) {
+void RIDGE::standardize(const bool INTERCEPT, const bool NORMALIZE) {
 
-  bool intercept  = as<bool>   (INTERCEPT) ; // boolean for intercept mode
-  bool normalize  = as<bool>   (NORMALIZE) ; // boolean for standardizing the predictor
-  uword n = x.n_rows;
+  bool intercept  = (INTERCEPT) ; // boolean for intercept mode
+  bool normalize  = (NORMALIZE) ; // boolean for standardizing the predictor
   uword p = x.n_cols;
 
   if (intercept == 1) {
-    xbar = trans(rowvec(mean(x, 0)));
+    xbar = mean(x, 0);
     ybar = mean(y) ;
-    for (int i=0; i<p; i++) {
-      x.col(i) -= xbar(i);
-    }
+    x.each_row() -= xbar ;
   } else {
-    xbar = zeros(p) ;
+    xbar = zeros<rowvec>(p) ;
     ybar = 0;
   }
 
   if (normalize == 1) {
-    normx = sqrt(trans(sum(square(x),0)));
-    for (int i=0; i<p; i++) {
-      x.col(i) /= normx(i);
-    }
+    normx = sqrt(sum(square(x),0));
+    x.each_row() /= normx ;
   } else {
-    normx = ones(p);
+    normx = ones<rowvec>(p);
   }
   normy = sqrt(sum(square(y))) ;
 
   if (intercept == 1) {
-    xty = trans(trans(y-ybar) * x) ;
+    xty = trans(y-ybar) * x ;
   } else {
-    xty = trans(y.t()*x) ;
+    xty = y.t()*x ;
   }
 }
 
-void RIDGE::get_lambda(SEXP LAMBDA, SEXP NLAMBDA, SEXP LAMBDAMIN, SEXP LAMBDAMAX) {
+void RIDGE::get_lambda(SEXP LAMBDA, 
+                       const arma::uword NLAMBDA,
+                       const double LAMBDAMIN,
+                       const double LAMBDAMAX) {
 
   if (LAMBDA != R_NilValue) {
     lambda  = as<vec>(LAMBDA)  ;
   } else {
-    lambda = exp10(linspace(log10(as<double>(LAMBDAMIN)), log10(as<double>(LAMBDAMAX)), as<uword>(NLAMBDA))) ;
+    lambda = exp10(linspace(log10(LAMBDAMIN), log10(LAMBDAMAX), NLAMBDA)) ;
   }
 
 }

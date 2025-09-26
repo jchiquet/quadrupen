@@ -1,6 +1,7 @@
 /*
- * Author: Julien CHIQUET
- *         Statistique et Génome
+ * Author:  Julien CHIQUET
+ *          UMR MIA Paris-Saclay
+ *          julien.chiquet@inrae.fr
  */
 #ifndef _quadrupen_RIDGE_H
 #define _quadrupen_RIDGE_H
@@ -18,52 +19,47 @@
 using namespace Rcpp;
 using namespace arma;
 
-RcppExport SEXP ridge_cpp(SEXP X        , // matrix of features
-			  SEXP Y        , // vector of response
-			  SEXP C        , // Cholesky decompostion of the structuring matrix
-			  SEXP LAMBDA   ,
-			  SEXP NLAMBDA  ,
-			  SEXP LAMBDAMIN,
-			  SEXP LAMBDAMAX,
-			  SEXP INTERCEPT,
-			  SEXP NORMALIZE,
-			  SEXP WEIGHTS  ,
-			  SEXP VERBOSE  ) ;
-
 class RIDGE {
  public:
-  RIDGE(SEXP X, SEXP Y, SEXP C, SEXP WEIGHTS, SEXP VERBOSE);
+  RIDGE(const arma::mat X,
+        const arma::vec Y,
+        const arma::mat C,
+        const arma::vec WEIGHTS,
+        const uword VERBOSE);
 
-  void standardize(SEXP INTERCEPT, SEXP NORMALIZE);
+  void standardize(const bool INTERCEPT, const bool NORMALIZE);
 
-  void get_lambda(SEXP LAMBDA, SEXP NLAMBDA, SEXP LAMBDAMIN, SEXP LAMBDAMAX);
+  void get_lambda(SEXP LAMBDA, 
+                  const arma::uword NLAMBDA,
+                  const double LAMBDAMIN,
+                  const double LAMBDAMAX);
 
   void LetsRoll();
 
-  // various function to acces private members
+  // various function to access private members
   const arma::mat & get_coef() const { return beta; }
   const arma::vec & get_lambda() const { return lambda; }
   const arma::vec & get_df() const { return df; }
-  const arma::vec & get_normx() const { return normx; }
+  const arma::rowvec & get_normx() const { return normx; }
   const arma::vec & get_mu() const { return mu; }
 
  private:
-  arma::mat x       ; // matrix of predictors
-  arma::vec y       ; // vector of reponses
-  arma::mat c       ; // Cholesky decomposition of the structuring matrix
-  arma::mat w       ; // vector of obervation weights
-  int verbose       ; // integer for verbose mode
+  arma::mat x        ; // matrix of predictors
+  arma::vec y        ; // vector of reponses
+  arma::mat c        ; // Cholesky decomposition of the structuring matrix
+  arma::mat w        ; // vector of obervation weights
+  int verbose        ; // integer for verbose mode
 
-  arma::vec xty     ; // reponses to predictors vector
-  arma::vec xbar    ; // mean of the predictors
-  arma::vec normx   ; // norm of the predictors
-  double normy      ; // norm of the response
-  double ybar       ; // mean of the response
+  arma::rowvec xty   ; // responses to predictors vector
+  arma::rowvec xbar  ; // mean of the predictors
+  arma::rowvec normx ; // norm of the predictors
+  double normy       ; // norm of the response
+  double ybar        ; // mean of the response
 
-  arma::vec lambda  ; // vector of ridge tuning parameters
-  arma::mat beta    ; // matrix of coefficients
-  arma::vec df      ; // degrees of freedom along the path
-  arma::vec mu      ; // vector of intercept term
+  arma::vec lambda   ; // vector of ridge tuning parameters
+  arma::mat beta     ; // matrix of coefficients
+  arma::vec df       ; // degrees of freedom along the path
+  arma::vec mu       ; // vector of intercept term
 
 };
 

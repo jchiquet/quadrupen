@@ -3,60 +3,50 @@
  *         Statistique et Génome
  */
 
-#include "elastic_net.h"
+#include "RcppArmadillo.h"
+
+// [[Rcpp::depends(RcppArmadillo)]]
+
+#include "quadrupen_headers.hpp"
 
 using namespace Rcpp;
 using namespace arma;
 
-SEXP elastic_net(SEXP BETA0    ,
-		 SEXP X        ,
-		 SEXP Y        ,
-		 SEXP STRUCT   ,
-		 SEXP LAMBDA1  ,
-		 SEXP N_LAMBDA ,
-		 SEXP MIN_RATIO,
-		 SEXP PENSCALE ,
-		 SEXP LAMBDA2  ,
-		 SEXP INTERCEPT,
-		 SEXP NORMALIZE,
-		 SEXP WEIGHTS  ,
-		 SEXP NAIVE    ,
-		 SEXP EPS      ,
-		 SEXP MAXITER  ,
-		 SEXP MAXFEAT  ,
-		 SEXP FUN      ,
-		 SEXP VERBOSE  ,
-		 SEXP SPARSE   ,
-		 SEXP USECHOL  ,
-		 SEXP MONITOR  ) {
+// [[Rcpp::export]]
+Rcpp::List elastic_net_cpp(
+     SEXP BETA0                 , //
+		 SEXP X                     , // regressor matrix
+		 const arma::vec y          , // response vector
+		 const arma::sp_mat Struct  , // Structuring matrix
+		 SEXP LAMBDA1               , // 
+		 double n_lambda            , //
+		 const double min_ratio     , //
+		 const arma::vec penscale   , // penalty weights
+		 const double lambda2       , // the smooth (ridge) penalty
+		 const bool intercept       , // boolean for intercept mode
+		 const bool normalize       , // boolean for standardizing the predictor
+		 const arma::vec weights    , // observation weights (not use at the moment)
+		 const bool naive           , // naive elastic-net or not
+		 const double eps           , // precision required
+		 const arma::uword max_iter , // max # of iterates of the active set
+		 const arma::uword max_feat , // max # of variables activated
+		 const arma::uword fun      , // solver (0=quadra, 1=pathwise, 2=fista)
+		 const arma::uword verbose  , // int for verbose mode (0/1/2)
+		 const bool sparse          , // boolean for sparse mode
+		 const bool usechol         , // use Cholesky decomposition or not
+		 const arma::uword monitor    // convergence monitoring (1 == Grandvalet's bound ;-) 2 == Fenchel duality gap)
+		 ) {
 
-  // Reading input variables
-  bool intercept  = as<bool>   (INTERCEPT) ; // boolean for intercept mode
-  bool normalize  = as<bool>   (NORMALIZE) ; // boolean for standardizing the predictor
-  double lambda2  = as<double> (LAMBDA2)   ; // the smooth (ridge) penality
-  vec    weights  = as<vec>    (WEIGHTS)   ; // observation weights (not use at the moment)
-  vec    penscale = as<vec>    (PENSCALE)  ; // penalty weights
-  bool   naive    = as<bool>   (NAIVE)     ; // naive elastic-net or not
-  bool   usechol  = as<bool>   (USECHOL)   ; // use cholesky decomposition or not
-  vec    y        = as<vec>    (Y)         ; // reponse vector
-  double eps      = as<double> (EPS)       ; // precision required
-  uword  fun      = as<int>    (FUN)       ; // solver (0=quadra, 1=pathwise, 2=fista)
-  int    verbose  = as<int>    (VERBOSE)   ; // int for verbose mode (0/1/2)
-  bool   sparse   = as<bool>   (SPARSE)    ; // boolean for sparse mode
-  int    monitor  = as<int>    (MONITOR)   ; // convergence monitoring (1 == Grandvalet's bound ;-) 2 == Fenchel duality gap)
-  uword  max_iter = as<int>    (MAXITER)   ; // max # of iterates of the active set
-  uword  max_feat = as<int>    (MAXFEAT)   ; // max # of variables activated
-
-  vec    xty   ; // reponses to predictors vector
+  vec    xty   ; // responses to predictors vector
   vec    xbar  ; // mean of the predictors
   vec    meanx ; // mean of the predictors (rescaled)
   vec    normx ; // norm of the predictors
   double normy ; // norm of the response
   double ybar  ; // mean of the response
+  const double eps2 = pow(eps, 2) ;
   uword n      ; // sample size
   uword p      ; // problem size
 
-  // Managing the data matrix in both cases of sparse or dense coding
   mat x        ;
   mat xt       ;
   sp_mat sp_x  ;
@@ -78,12 +68,13 @@ SEXP elastic_net(SEXP BETA0    ,
   meanx = xbar % penscale % normx;
 
   // STRUCTURATING MATRIX
-  sp_mat S = get_struct(STRUCT, lambda2, penscale) ; // sparsely encoded structuring matrix
+  sp_mat diag_S = spdiags(sqrt(lambda2)*pow(penscale,-1/2), ivec({0}), p, p) ;
+  sp_mat S = diag_S * Struct * diag_S  ; // sparsely encoded structuring matrix
   mat SAA ; // densely encoded active counterpart
 
   // VECTOR OF TUNING PARAMETER FOR THE L1-PENALTY
-  vec lambda1 = get_lambda1(LAMBDA1, N_LAMBDA, MIN_RATIO, max(abs(xty)));
-  uword n_lambda = lambda1.n_elem  ; // # of penalty levels
+  vec lambda1 = get_lambda1(LAMBDA1, n_lambda, min_ratio, max(abs(xty)));
+  n_lambda = lambda1.n_elem  ; // # of penalty levels
 
   // Initializing "first level" variables (outside of the lambda1 loop)
   mat  R                                 ; // Cholesky decomposition of XAtXA
@@ -94,20 +85,19 @@ SEXP elastic_net(SEXP BETA0    ,
   vec  xtxw                              ; // t(x_A) * x_A * beta(A)
   vec  grd       = -xty                  ; // smooth part of the gradient
   vec  mu        = zeros<vec>(n_lambda)  ; // the intercept term
-
   vec  max_grd   = zeros<vec>(n_lambda)  ; // a vector with the successively reach duality gap
   vec  converge  = zeros<vec>(n_lambda)  ; // a vector indicating if convergence occured (0/1/2)
   uvec it_active = zeros<uvec>(n_lambda) ; // # of loop in the active set for each lambda1
   uvec it_optim                          ; // # of loop in the optimization process for each loop of the active se
-  double L0            = 1.0 + lambda2   ; // Lipschitz constant for proximal methods
+  double L0      = 1.0 + lambda2         ; // Lipschitz constant for proximal methods
   vec  timing      (n_lambda)            ; // succesive timing in
   vec  df          (n_lambda)            ; // degrees of freedom
   wall_clock timer                       ; // clock
 
   // Initializing "second level" variables (within the active set - for a fixed value of lamdba)
   uword var_in                           ; // currently added variable
-  int   nbr_in   = 0                     ; // # of currently added variables
-  int   nbr_opt  = 0                     ; // # of current calls to the optimization routine
+  uword nbr_in   = 0                     ; // # of currently added variables
+  uword nbr_opt  = 0                     ; // # of current calls to the optimization routine
   uvec  are_in   = zeros<uvec>(p)        ; // a vector to check if a variable is already in the active set
   List  out_optim                        ; // the list of output of the optimization function
   bool  success_optim = true             ; // was the internal system resolution successful?
@@ -130,9 +120,9 @@ SEXP elastic_net(SEXP BETA0    ,
       xtxA = mat(xt * x.cols(A)) ;
     }
     if (lambda2 > 0) {
-      for (int i=0; i<A.n_elem;i++) {
-	xtxA.col(i) = xtxA.col(i) + S.col(A(i));
-	are_in(A(i)) = 1;
+      for (uword i=0; i<A.n_elem;i++) {
+	      xtxA.col(i) = xtxA.col(i) + S.col(A(i));
+	      are_in(A(i)) = 1;
       }
     }
     grd += xtxA * betaA    ;
@@ -157,7 +147,10 @@ SEXP elastic_net(SEXP BETA0    ,
   // START THE LOOP OVER LAMBDA
   timer.tic();
   for (int m=0; m<n_lambda; m++) {
-    if (verbose == 2) {Rprintf("\n lambda1 = %f",lambda1(m)) ;}
+    if (verbose == 2) {
+      Rprintf("\n lambda1 = %f",lambda1(m)) ;
+      Rprintf("\n nb active variables = %i",nbr_in) ;
+    }
     // _____________________________________________________________
     //
     // START THE ACTIVE SET ALGORITHM
@@ -170,6 +163,7 @@ SEXP elastic_net(SEXP BETA0    ,
     grd_norm.elem(A) = abs(grd.elem(A) + lambda1[m] * sign(betaA)) ;
     // variable associated with the highest optimality violation
     var_in = grd_norm.index_max() ;
+
     max_grd[m] = grd_norm(var_in) ;
     if (max_grd[m] < 0) {max_grd[m] = 0;}
 
@@ -181,17 +175,16 @@ SEXP elastic_net(SEXP BETA0    ,
 
       // Check if the variable is already in the active set
       if (are_in[var_in] == 0) {
-	if (sparse == 1) {
-	  add_var_enet(n, nbr_in, var_in, betaA, A, sp_x, sp_xt, xtxA, xAtxA, xtxw, R, lambda2, xbar, S, usechol, fun) ;
-	} else {
-	  add_var_enet(n, nbr_in, var_in, betaA, A, x, xt, xtxA, xAtxA, xtxw, R, lambda2, xbar, S, usechol, fun) ;
-	}
-
-	if (verbose == 2) {Rprintf("newly added variable %i\n",var_in);}
-	are_in[var_in] = 1;
-	nbr_in++;
+	      if (sparse == 1) {
+	        add_var_enet(n, nbr_in, var_in, betaA, A, sp_x, sp_xt, xtxA, xAtxA, xtxw, R, lambda2, xbar, S, usechol, fun) ;
+	      } else {
+	        add_var_enet(n, nbr_in, var_in, betaA, A, x, xt, xtxA, xAtxA, xtxw, R, lambda2, xbar, S, usechol, fun) ;
+	      }
+	      if (verbose == 2) {Rprintf("newly added variable %i\n",var_in);}
+	      are_in[var_in] = 1;
+	      nbr_in++;
       } else {
-	if (verbose == 2) {Rprintf("already in %i\n",var_in);}
+	      if (verbose == 2) {Rprintf("already in %i\n",var_in);}
       }
 
       // _____________________________________________________________
@@ -202,21 +195,21 @@ SEXP elastic_net(SEXP BETA0    ,
 
       it_optim.reshape(nbr_opt + 1,1) ;
       switch (fun) {
-      case 1 :
-	it_optim[nbr_opt] = pathwise_enet(betaA, xAtxA, xty.elem(A), xtxw, lambda1[m], null, lambda2, pow(eps,2));
-	break;
-      case 2 :
-	it_optim[nbr_opt] = fista_lasso(betaA, xAtxA, xty.elem(A), lambda1[m], null, L0, pow(eps,2));
-	break;
-      default:
-	try {
-	  it_optim[nbr_opt] = quadra_enet(betaA, R, xAtxA, xty.elem(A), sign(grd.elem(A)), lambda1[m], null, usechol, eps);
-	} catch (std::runtime_error &error) {
-	  if (verbose > 0) {
-	    Rprintf("\nWarning: singular system at this stage of the solution path, cutting here.\n");
-	  }
-	  success_optim = false ;
-	}
+        case 1 :
+	        it_optim[nbr_opt] = pathwise_enet(betaA, xAtxA, xty.elem(A), xtxw, lambda1[m], null, lambda2, eps2);
+	        break;
+        case 2 :
+	        it_optim[nbr_opt] = fista_lasso(betaA, xAtxA, xty.elem(A), lambda1[m], null, L0, eps2);
+	        break;
+        default:
+	        try {
+	          it_optim[nbr_opt] = quadra_enet(betaA, R, xAtxA, xty.elem(A), sign(grd.elem(A)), lambda1[m], null, usechol, eps);
+	        } catch (std::runtime_error &error) {
+	          if (verbose > 0) {
+	          Rprintf("\nWarning: singular system at this stage of the solution path, cutting here.\n");
+	          }
+	          success_optim = false ;
+	      }
       }
       // update the smooth part of the gradient
       grd = -xty + xtxA * betaA;
@@ -229,10 +222,10 @@ SEXP elastic_net(SEXP BETA0    ,
       //
       // removing variables zeroed during optimization
       if (!null.is_empty()) {
-	if (verbose == 2) {
-	  for (int j=0; j<null.n_elem; j++) {Rprintf("removing variable %i\n",null[j]);}
-	}
-	remove_var_enet(nbr_in,are_in,betaA,A,xtxA,xAtxA,xtxw,R,null,usechol,fun) ;
+	      if (verbose == 2) {
+	        for (uword j=0; j<null.n_elem; j++) {Rprintf("removing variable %i\n",null[j]);}
+	      }
+	      remove_var_enet(nbr_in,are_in,betaA,A,xtxA,xAtxA,xtxw,R,null,usechol,fun) ;
       }
 
       // _____________________________________________________________
@@ -250,11 +243,11 @@ SEXP elastic_net(SEXP BETA0    ,
       if (max_grd[m] < 0) {max_grd[m] = 0;}
 
       if (monitor > 0) {
-	// _____________________________________________________________
-	//
-	// (OPTIONAL) FOLLOWING CONVERGENCE BY COMPLETE MONITORING
-	// _____________________________________________________________
-	bound_to_optimal(betaA, xAtxA, xty, grd, lambda1[m], lambda2, normy, A, monitor, J_hat, D_hat) ;
+	      // _____________________________________________________________
+	      //
+	      // (OPTIONAL) FOLLOWING CONVERGENCE BY COMPLETE MONITORING
+	      // _____________________________________________________________
+	      bound_to_optimal(betaA, xAtxA, xty, grd, lambda1[m], lambda2, normy, A, monitor, J_hat, D_hat) ;
       }
 
       // Moving to the next iterate
@@ -263,13 +256,13 @@ SEXP elastic_net(SEXP BETA0    ,
       R_CheckUserInterrupt();
     }
 
-    // degress of freedom
+    // degrees of freedom
     df[m] = get_df_enet(lambda2, R, xAtxA, S, A, fun);
 
     // the reference parameter (obtained once optimum is met)
     if (monitor > 0) {
       if (it_active[m] > 0) {
-	J_star = join_cols(J_star, ones(it_active[m],1) * J_hat[nbr_opt-1]) ;
+	      J_star = join_cols(J_star, ones(it_active[m],1) * J_hat[nbr_opt-1]) ;
       }
     }
 
@@ -298,14 +291,14 @@ SEXP elastic_net(SEXP BETA0    ,
       break;
     } else {
       if (any(penscale != 1)) {
-	nonzeros = join_cols(nonzeros, betaA/(normx.elem(A) % penscale.elem(A)));
+	      nonzeros = join_cols(nonzeros, betaA/(normx.elem(A) % penscale.elem(A)));
       } else {
-	nonzeros = join_cols(nonzeros, betaA/(normx.elem(A)));
+	      nonzeros = join_cols(nonzeros, betaA/(normx.elem(A)));
       }
       iA = join_cols(iA, m*ones(betaA.n_elem,1) );
       jA = join_cols(jA, conv_to<mat>::from(A) ) ;
       if (intercept == 1) {
-	mu[m] = dot(betaA, xbar.elem(A)) ;
+	      mu[m] = dot(betaA, xbar.elem(A)) ;
       }
     }
   }

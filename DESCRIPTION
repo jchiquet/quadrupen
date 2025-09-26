@@ -3,13 +3,18 @@ Type: Package
 Title: Sparsity by Worst-Case Quadratic Penalties
 Version: 0.3-0
 Date: 2013-xx-xx
-Author: Julien Chiquet
-Maintainer: Julien Chiquet <julien.chiquet@genopole.cnrs.fr>
+Authors@R: person("Julien", "Chiquet", , "julien.chiquet@inrae.fr", role = c("aut", "cre"),
+           comment = c(ORCID = "0000-0002-3629-3429"))
 Description: This package fits classical sparse regression models with
     efficient active set algorithms by solving quadratic problems. Also
     provides a few methods for model selection purpose (cross-validation,
     stability selection).
+URL: https://github.com/jchiquet/quadrupen
+BugReports: https://github.com/jchiquet/quadrupen/issues
 License: GPL (>=2)
+Encoding: UTF-8
+Language: en-US
+LazyData: true
 Depends:
     R (>= 3.0.2), 
     Rcpp,	
@@ -23,7 +28,9 @@ Imports:
     parallel
 Suggests:
     testthat
-LinkingTo: Rcpp, RcppArmadillo (>= 0.2.34)
+LinkingTo: 
+    Rcpp,
+    RcppArmadillo
 Collate:
     'init.R'
     'quadrupen-package.R'
@@ -38,4 +45,6 @@ Collate:
     'lasso.R'
     'ridge.R'
     'group_lasso.R'
+    'RcppExports.R'
 Packaged: 2013-03-25 19:41:00 UTC; jchiquet
+RoxygenNote: 7.3.2

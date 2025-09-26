@@ -3,49 +3,53 @@
  *         Statistique et Génome
  */
 
-#include "bounded_reg.h"
+#include "RcppArmadillo.h"
+
+// [[Rcpp::depends(RcppArmadillo)]]
+
+#include "quadrupen_headers.hpp"
 
 using namespace Rcpp;
 using namespace arma;
 
-SEXP bounded_reg(SEXP X        ,
-		 SEXP Y        ,
-		 SEXP STRUCT   ,
-		 SEXP LAMBDA1  ,
-		 SEXP N_LAMBDA ,
-		 SEXP MIN_RATIO,
-		 SEXP PENSCALE ,
-		 SEXP LAMBDA2  ,
-		 SEXP INTERCEPT,
-		 SEXP NORMALIZE,
-		 SEXP WEIGHTS  ,
-		 SEXP NAIVE    ,
-		 SEXP EPS      ,
-		 SEXP MAXITER  ,
-		 SEXP MAXFEAT  ,
-		 SEXP FUN      ,
-		 SEXP VERBOSE  ,
-		 SEXP SPARSE   ,
-		 SEXP BULLETPROOF) {
+// [[Rcpp::export]]
+Rcpp::List bounded_reg_cpp(SEXP X        ,
+     const arma::vec& Y        ,
+     const arma::sp_mat Struct  , // Structuring matrix
+     SEXP LAMBDA1  ,
+		 const arma::uword N_LAMBDA ,
+		 const double MIN_RATIO,
+		 const arma::vec& PENSCALE ,
+		 double LAMBDA2  ,
+		 bool INTERCEPT,
+		 bool NORMALIZE,
+		 const arma::vec& WEIGHTS  ,
+		 bool NAIVE    ,
+		 double EPS      ,
+		 const arma::uword& MAXITER  ,
+		 const arma::uword& MAXFEAT  ,
+		 const arma::uword& FUN      ,
+		 int VERBOSE  ,
+		 bool SPARSE   ,
+		 bool BULLETPROOF) {
 
   // Reading input variables
-  bool intercept  = as<bool>   (INTERCEPT)   ; // boolean for intercept mode
-  bool normalize  = as<bool>   (NORMALIZE)   ; // boolean for standardizing the predictor
-  double lambda2  = as<double> (LAMBDA2)     ; // penalty levels
-  vec    weights  = as<vec>    (WEIGHTS)     ; // observation weights (not use at the moment)
-  vec    penscale = as<vec>    (PENSCALE)    ; // penalty weights
-  bool   naive    = as<bool>   (NAIVE)       ; // naive elastic-net or not
-  vec    y        = as<vec>    (Y)           ; // reponse vector
-  double eps      = as<double> (EPS)         ; // precision required
-  uword  fun      = as<int>    (FUN)         ; // solver (0=quadra, 1=pathwise, 2=fista)
-  int    verbose  = as<int>    (VERBOSE)     ; // int for verbose mode (0/1/2)
-  bool   sparse   = as<bool>   (SPARSE)      ; // boolean for sparse mode
-  bool   bullet   = as<bool>   (BULLETPROOF) ; // int for verbose mode (0/1/2)
-  uword  max_iter = as<int>    (MAXITER)     ; // max # of iterates of the active set
-  uword  max_feat = as<int>    (MAXFEAT)     ; // max # of variables activated
+  bool intercept(INTERCEPT)   ; // boolean for intercept mode
+  bool normalize(NORMALIZE)   ; // boolean for standardizing the predictor
+  double lambda2(LAMBDA2)     ; // penalty levels
+  vec    weights(WEIGHTS)     ; // observation weights (not use at the moment)
+  vec    penscale(PENSCALE)    ; // penalty weights
+  bool   naive(NAIVE)       ; // naive elastic-net or not
+  vec    y(Y)           ; // reponse vector
+  double eps(EPS)         ; // precision required
+  uword  fun(FUN)         ; // solver (0=quadra, 1=pathwise, 2=fista)
+  int    verbose(VERBOSE)     ; // int for verbose mode (0/1/2)
+  bool   sparse(SPARSE)      ; // boolean for sparse mode
+  bool   bullet(BULLETPROOF) ; // int for verbose mode (0/1/2)
+  uword  max_iter(MAXITER)     ; // max # of iterates of the active set
+  uword  max_feat(MAXFEAT)     ; // max # of variables activated
 
-
-  vec    xty   ; // reponses to predictors vector
+  vec    xty   ; // responses to predictors vector
   vec    xbar  ; // mean of the predictors
   vec    meanx ; // mean of the predictors (rescaled)
   vec    normx ; // norm of the predictors
@@ -79,7 +83,8 @@ SEXP bounded_reg(SEXP X        ,
   meanx = xbar % penscale % normx;
 
   // STRUCTURATING MATRIX
-  sp_mat S = get_struct(STRUCT, lambda2, penscale) ; // sparsely encoded structuring matrix
+  sp_mat diag_S = spdiags(sqrt(lambda2)*pow(penscale,-1/2), ivec({0}), p, p) ;
+  sp_mat S = diag_S * Struct * diag_S  ; // sparsely encoded structuring matrix
   xtx += S ; // S is scaled by lambda2
 
   // VECTOR OF TUNING PARAMETER FOR THE L1-PENALTY
@@ -89,7 +94,7 @@ SEXP bounded_reg(SEXP X        ,
   // Initializing "first level" variables (outside of the lambda1 loop)
   colvec beta     = zeros<vec>(p)          ; // vector of current parameters
   uvec all(p);
-  for (int i=0;i<p;i++){all(i) = i;}
+  for (uword i=0;i<p;i++){all(i) = i;}
   uvec   B           = all                 ; // guys reaching the boundary
   uvec   I = setdiff(all,B)                ; // guys living in between the supremum
   mat    coef                              ; // matrice of solution path
@@ -114,7 +119,7 @@ SEXP bounded_reg(SEXP X        ,
   //
   // START THE LOOP OVER LAMBDA
   timer.tic();
-  for (int m=0; m<n_lambda; m++) {
+  for (uword m=0; m<n_lambda; m++) {
     if (verbose == 2) {Rprintf("\n lambda1 = %f",lambda1(m)) ;}
 
     // _____________________________________________________________
@@ -187,7 +192,7 @@ SEXP bounded_reg(SEXP X        ,
       // dual norm of gradient for unactive variable
       max_grd[m] = as_scalar(sum(abs(grd)) - lambda1[m]) ;
       if (max_grd[m] < 0) {
-	max_grd[m] = 0;
+	      max_grd[m] = 0;
       }
 
       // Moving to the next iterate
@@ -195,7 +200,7 @@ SEXP bounded_reg(SEXP X        ,
 
       // Cutting the path here if fail to converge or
       if (!success_optim) {
-	break;
+	      break;
       }
 
       R_CheckUserInterrupt();
@@ -229,14 +234,14 @@ SEXP bounded_reg(SEXP X        ,
       break;
     } else {
       if (any(penscale != 1)) {
-	coef = join_rows(coef,beta/(normx % penscale));
+	      coef = join_rows(coef,beta/(normx % penscale));
       } else {
-	coef = join_rows(coef,beta/normx);
+	      coef = join_rows(coef,beta/normx);
       }
       iB = join_cols(iB, m*ones(B.n_elem,1) );
       jB = join_cols(jB, conv_to<mat>::from(B) );
       if (intercept == 1) {
-	mu[m] = dot(beta, xbar) ;
+	       mu[m] = dot(beta, xbar) ;
       }
     }
 
