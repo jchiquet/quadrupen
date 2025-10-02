@@ -17,7 +17,9 @@ Language: en-US
 LazyData: true
 Depends:
     R (>= 3.0.2), 
-    Rcpp,	
+    Rcpp,
+    R6,
+    RcppArmadillo,
     ggplot2,
     Matrix
 Imports:
@@ -35,6 +37,7 @@ Collate:
     'init.R'
     'quadrupen-package.R'
     'quadrupen-class.R'
+    'quadrupen-R6Class.R'
     'crossval-class.R'
     'crossval.R'
     'stability-class.R'
