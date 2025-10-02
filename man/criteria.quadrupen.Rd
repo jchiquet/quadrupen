@@ -12,7 +12,7 @@ criteria(object, penalty=setNames(c(2, log(p)), c("AIC","BIC")), sigma=NULL,
            log.scale=TRUE, xvar = "lambda", plot=TRUE)
 
 plot.quadrupen(x, y, xvar = "lambda",
-        main = private$penalty," path", sep=""),
+        main = self$penalty," path", sep=""),
         log.scale = TRUE, standardize=TRUE, reverse=FALSE,
         labels = NULL, plot = TRUE, ...)
 
@@ -202,15 +202,6 @@ See also \code{\link{plot.quadrupen}}.
 
 \code{\linkS4class{quadrupen}}.
 }
-\section{Active bindings}{
-\if{html}{\out{<div class="r6-active-bindings">}}
-\describe{
-\item{\code{major_penalty}}{vector of "leading" penalties (either l1 or l2)}
-
-\item{\code{major_penalty}}{vector of "minor" penalties (either l1 or l2)}
-}
-\if{html}{\out{</div>}}
-}
 \section{Methods}{
 \subsection{Public methods}{
 \itemize{
@@ -231,65 +222,25 @@ See also \code{\link{plot.quadrupen}}.
 \if{html}{\out{<div class="r">}}\preformatted{QuadrupenFit$new(
   x,
   y,
-  coefficients,
-  active.set,
+  struct,
+  beta0,
   intercept,
-  mu,
-  normx,
-  fitted,
-  residuals,
-  df,
-  r.squared,
+  normalize,
   penscale,
-  penalty,
-  naive,
   lambda1,
-  lambda2,
-  monitoring,
-  control
+  lambda2
 )}\if{html}{\out{</div>}}
 }
 
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{coefficients}}{Matrix (class \code{"dgCMatrix"}) of
-coefficients with respect to the original input. The number of
-rows corresponds the length of \code{lambda1}.}
-
 \item{\code{intercept}}{logical; indicates if an intercept has
 been included to the model.}
-
-\item{\code{mu}}{A vector (class \code{"numeric"})
-containing the successive values of the (unpenalized) intercept.
-Equals to zero if \code{intercept} has been set to \code{FALSE}.}
-
-\item{\code{normx}}{Vector (class \code{"numeric"}) containing the
-square root of the sum of squares of each column of the design
-matrix.}
-
-\item{\code{fitted}}{Matrix of fitted values, each column
-corresponding to a value of \code{lambda1}.}
-
-\item{\code{residuals}}{Matrix of residuals, each column
-corresponding to a value of \code{lambda1}.}
-
-\item{\code{df}}{Estimated degree of freedoms for the successive
-\code{lambda1}.  Only available for 'elastic.net' using tCholesky
-factorization.}
-
-\item{\code{r.squared}}{Vector (class \code{"numeric"}) given the
-coefficient of determination as a function of lambda1.}
 
 \item{\code{penscale}}{Vector \code{"numeric"} with real positive
 values that have been used to weight the penalty tuned by
 \eqn{\lambda_1}{lambda1}.}
-
-\item{\code{penalty}}{Object of class \code{"character"}
-indicating the method used (\code{"elastic-net"} or \code{"bounded
-regression"}).}
-
-\item{\code{naive}}{logical; was the \code{naive} mode on?}
 
 \item{\code{lambda1}}{Vector (class \code{"numeric"}) of penalty
 levels (either \eqn{\ell_1}{l1} or \eqn{\ell_\infty}{l-infinity})
@@ -297,13 +248,6 @@ for which the model has eventually been fitted.}
 
 \item{\code{lambda2}}{Scalar (class \code{"numeric"}) for the
 amount of \eqn{\ell_2}{l2} (ridge-like) penalty.}
-
-\item{\code{monitoring}}{List (class \code{"list"}) which
-contains various indicators dealing with the optimization
-process.}
-
-\item{\code{control}}{Object of class \code{"list"} with low
-level options used for optimization.}
 }
 \if{html}{\out{</div>}}
 }
@@ -346,7 +290,7 @@ Produce a plot of the solution path of a \code{quadrupen} fit.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{QuadrupenFit$plot(
   xvar = "lambda",
-  main = paste(private$penalty, " path", sep = ""),
+  main = paste(self$penalty, " path", sep = ""),
   log.scale = TRUE,
   standardize = TRUE,
   labels = NULL,

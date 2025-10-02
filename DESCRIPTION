@@ -38,6 +38,8 @@ Collate:
     'quadrupen-package.R'
     'quadrupen-class.R'
     'quadrupen-R6Class.R'
+    'DataModel-R6Class.R'
+    'ElasticNetFit-R6Class.R'
     'crossval-class.R'
     'crossval.R'
     'stability-class.R'

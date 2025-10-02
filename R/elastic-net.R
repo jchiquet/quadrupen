@@ -360,9 +360,6 @@ elastic.net <- function(x,
 
 }
 
-
-
-
 #' @export
 elastic.net2 <- function(x,
                          y,
@@ -374,62 +371,34 @@ elastic.net2 <- function(x,
                          normalize = TRUE,
                          naive     = FALSE,
                          nlambda1  = ifelse(is.null(lambda1),100,length(lambda1)),
-                         min.ratio = ifelse(n<=p,1e-2,1e-4),
-                         max.feat  = ifelse(lambda2<1e-2,min(n,p),min(4*n,p)),
+                         min.ratio = ifelse(n <= p, 1e-2, 1e-4),
+                         max.feat  = ifelse(lambda2 < 1e-2, min(n,p), min(4*n,p)),
                          beta0     = NULL,
-                         control   = list(),
-                         checkargs = TRUE) {
-  
-  p <- ncol(x) # problem size
-  n <- nrow(x) # sample size
-  
+                         control   = list()) {
+
+  myData <- GaussianModel$new(covariates = x, outcome = y, cov_struct = struct,
+                              intercept = intercept, standardize = normalize,
+                              cov_weights = penscale)
+
   ## ===================================================
   ## CHECKS TO (PARTIALLY) AVOID CRASHES OF THE C++ CODE
-  if (checkargs) {
-    if (is.data.frame(x))
-      x <- as.matrix(x)
-    if (!inherits(x, c("matrix", "dgCMatrix")))
-      stop("x has to be of class 'matrix' or 'dgCMatrix'.")
-    if(any(is.na(x)))
-      stop("NA value in x not allowed.")
-    if(!is.numeric(y))
-      stop("y has to be of type 'numeric'")
-    if(n != length(y))
-      stop("x and y have not correct dimensions")
-    if(length(penscale) != p)
-      stop("penscale must have ncol(x) entries")
-    if (any(penscale <= 0))
-      stop("weights in penscale must be positive")
-    if(!inherits(lambda2, "numeric") | length(lambda2) > 1)
-      stop("lambda2 must be a scalar.")
-    if(lambda2 < 0)
-      stop("lambda2 must be a non negative scalar.")
-    if (!is.null(lambda1)) {
-      if(any(lambda1 <= 0))
-        stop("entries inlambda1 must all be postive.")
-      if(is.unsorted(rev(lambda1)))
-        stop("lambda1 values must be sorted in decreasing order.")
-      if (length(lambda1)>1 & !is.null(beta0))
-        warning("providing beta0 for a serie of l1 penalties mught be inefficient.")
-    }
-    if(min.ratio < 0)
-      stop("min.ratio must be non negative.")
-    if (ncol(struct) != p | ncol(struct) != p)
-      stop("struct must be a (square) positive semidefinite matrix.")
-    if (any(eigen(struct,only.values=TRUE)$values<0))
-      stop("struct must be a (square) positive semidefinite matrix.")
-    if (!inherits(struct, "dgCMatrix"))
-      struct <- as(struct, "dgCMatrix")
-    if (!is.null(beta0)) {
-      beta0 <- as.numeric(beta0)
-      if (length(beta0) != p)
-        stop("beta0 must be a vector with p entries.")
-    }
-    if (length(max.feat)>1)
-      stop("max.feat must be an integer.")
-    if (is.numeric(max.feat) & !is.integer(max.feat))
-      max.feat <- as.integer(max.feat)
+  if (is.null(lambda1)) {
+    lambda1 <- myData$getL1PenaltyRange(nlambda1, min.ratio)
+  } else {
+    stopifnot("entries inlambda1 must all be postive." =
+                (all(lambda1 > 0)))
+    stopifnot("lambda1 values must be sorted in decreasing order." =
+              !is.unsorted(rev(lambda1)))
   }
+  stopifnot("lambda2 must be a scalar." = (length(lambda2) == 1 & inherits(lambda2, "numeric")))
+  stopifnot("lambda2 must be a non negative scalar." =  (lambda2 >= 0))
+  if (!is.null(beta0)) {
+    stopifnot("beta0 must be a vector with ncol(x) entries." = 
+                (length(beta0) == p & is.numeric(beta0)))
+  }
+  stopifnot(length(max.feat) == 1, "max.feat must be an integer.")
+  if (is.numeric(max.feat) & !is.integer(max.feat))
+    max.feat <- as.integer(max.feat)
 
   ## ============================================
   ## RECOVERING LOW LEVEL OPTIONS
@@ -441,7 +410,8 @@ elastic.net2 <- function(x,
   }
   ctrl <- list(verbose      = 1, # default control options
                timer        =  FALSE,
-               max.iter     = max(500,p),
+               max.iter     = max(500,ncol(x)),
+               max.feat     = max.feat,
                method       = "quadra",
                threshold    = ifelse(quadra, 1e-7, 1e-2),
                monitor      = 0,
@@ -449,104 +419,14 @@ elastic.net2 <- function(x,
                usechol      = TRUE)
   ctrl[names(control)] <- control # overwritten by user specifications
   if (ctrl$timer) {r.start <- proc.time()}
-  
-  ## ======================================================
-  ## STARTING C++ CALL TO ENET_LS
-  if (ctrl$timer) {cpp.start <- proc.time()}
-  out <- elastic_net_cpp(
-    beta0        ,
-    x            ,
-    y            ,
-    struct       ,
-    lambda1      ,
-    nlambda1     ,
-    min.ratio    ,
-    penscale     ,
-    lambda2      ,
-    intercept    ,
-    normalize    ,
-    rep(1,n)     ,
-    naive        ,
-    ctrl$thresh  ,
-    ctrl$max.iter,
-    max.feat     ,
-    switch(ctrl$method,
-           quadra   = 0,
-           pathwise = 1,
-           fista    = 2, 0),
-    ctrl$verbose,
-    inherits(x, "sparseMatrix"),
-    ctrl$usechol,
-    ctrl$monitor)
-  
-  coefficients <- sparseMatrix(i = out$iA + 1,
-                               j = out$jA + 1,
-                               x = c(out$nzeros),
-                               dims = c(length(out$lambda1),p))
-  active.set   <- sparseMatrix(i = out$iA + 1,
-                               j = out$jA + 1,
-                               dims = c(length(out$lambda1),p))
-  ## END OF CALL
-  if (ctrl$timer) {
-    internal.timer <- (proc.time() - cpp.start)[3]
-    external.timer <- (proc.time() - r.start)[3]
-  } else {
-    internal.timer <- NULL
-    external.timer <- NULL
-  }
-  
-  ## ======================================================
-  ## BUILDING THE QUADRUPEN OBJECT
-  out$converge[out$converge == 0] <- "converged"
-  out$converge[out$converge == 1] <- "max # of iterate reached"
-  out$converge[out$converge == 2] <- "max # of feature reached"
-  out$converge[out$converge == 3] <- "system has become singular"
-  monitoring  <- list(it.active      = c(out$it.active ),
-                      it.optim       = c(out$it.optim  ),
-                      max.grad       = c(out$max.grd   ),
-                      status         = c(out$converge  ),
-                      pensteps.timer = c(out$timing    ),
-                      external.timer = external.timer   ,
-                      internal.timer = internal.timer   ,
-                      dist.to.opt    = c(out$delta.hat ),
-                      dist.to.str    = c(out$delta.star))
-  dimnames(coefficients)[[1]] <- round(c(out$lambda1),3)
-  if (is.null(colnames(x))) {
-    dimnames(coefficients)[[2]] <- 1:p
-  } else {
-    dimnames(coefficients)[[2]] <- colnames(x)
-  }
-  mu <- drop(out$mu)
-  df <- drop(out$df)
-  
-  ## FITTED VALUES AND RESIDUALS...
-  if (intercept) {
-    fitted <- sweep(tcrossprod(x,coefficients),2L,-mu,check.margin=FALSE)
-    df <- df + 1
-  } else {
-    mu <- 0
-    fitted <- tcrossprod(x,coefficients)
-  }
-  residuals <- apply(fitted,2,function(y.hat) y-y.hat)
-  r.squared <- 1 - colSums(residuals^2)/ifelse(intercept,sum((y-mean(y))^2),sum(y^2))
 
-  res <- QuadrupenFit$new(
-            x, y, 
-            coefficients = coefficients   ,
-             active.set   = active.set     ,
-             intercept    = intercept      ,
-             mu           = mu             ,
-             normx        = drop(out$normx),
-             fitted       = fitted         ,
-             residuals    = residuals      ,
-             df           = df             ,
-             r.squared    = r.squared      ,
-             penscale     = penscale       ,
-             penalty      = "elastic.net"  ,
-             naive        = naive          ,
-             lambda1      = c(out$lambda1) ,
-             lambda2      = lambda2        ,
-             monitoring   = monitoring     ,
-             control      = ctrl)
-  res
+  Model <- ElasticNet$new(
+    data    = myData , 
+    beta0   = beta0  ,
+    naive   = naive  ,
+    lambda1 = lambda1,
+    lambda2 = lambda2)
+  
+  Model$fit(ctrl)
+  Model
 }

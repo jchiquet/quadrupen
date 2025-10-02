@@ -132,7 +132,7 @@ void choldowndate(mat &R, int j) {
   R.shed_row(p);
 }
 
-double get_df_enet(const double &lambda2, mat &R, mat &xAtxA, sp_mat &S, uvec &A, const uword &fun) {
+double get_df_enet(const double &lambda2, mat &R, mat &xAtxA, const sp_mat &S, uvec &A, const uword &fun) {
 
   mat SAA(A.n_elem,A.n_elem) ;
   double df ;
@@ -185,70 +185,6 @@ double get_df_breg(const double &lambda2, mat &xtx, sp_mat &S, uvec &A) {
   }
 
   return(df);
-}
-
-void add_var_enet(uword &n, uword &nbr_in, uword &var_in, vec &betaA, uvec &A, mat &x, mat &xt, mat &xtxA, mat &xAtxA, mat &xtxw, mat &R, const double &lambda2, vec &xbar, sp_mat &spS, const bool &usechol, const uword &fun) {
-
-  vec  new_col   ; // column currently added to xtxA
-
-  A.resize(nbr_in+1)     ; // update the active set
-  A[nbr_in] = var_in     ;
-  betaA.resize(nbr_in+1) ; // update the vector of active parameters
-  betaA[nbr_in]  = 0.0   ;
-
-  new_col = xt * x.col(var_in);
-  if (lambda2 > 0) {
-    // Adding the column corresponding to the structurating matrix
-    new_col += spS.col(var_in);
-  }
-
-  // UPDATE THE xtxA AND xAtxA MATRICES
-  if (nbr_in > 0) {
-    xAtxA = join_cols(xAtxA, xtxA.row(var_in)) ;
-  }
-  xtxA  = join_rows(xtxA, new_col) ;
-  xAtxA = join_rows(xAtxA, trans(xtxA.row(var_in))) ;
-
-  if ((fun == 0) & (usechol == 1)) {
-    cholupdate(R, xAtxA) ;
-  }
-
-  if (fun == 1) {
-    xtxw.resize(nbr_in+1) ;
-    xtxw(nbr_in) = dot(xAtxA.col(nbr_in),betaA);
-  }
-}
-
-void add_var_enet(uword &n, uword &nbr_in, uword &var_in, vec &betaA, uvec &A, sp_mat &x, sp_mat &xt, mat &xtxA, mat &xAtxA, mat &xtxw, mat &R, const double &lambda2, vec &xbar, sp_mat &spS, const bool &usechol, const uword &fun) {
-
-  vec  new_col   ; // column currently added to xtxA
-
-  A.resize(nbr_in+1)     ; // update the active set
-  A[nbr_in] = var_in     ;
-  betaA.resize(nbr_in+1) ; // update the vector of active parameters
-  betaA[nbr_in]  = 0.0   ;
-
-  new_col = xt * x.col(var_in) - n * xbar * as_scalar(xbar[var_in]);
-  if (lambda2 > 0) {
-    // Adding the column corresponding to the structurating matrix
-    new_col += spS.col(var_in);
-  }
-
-  // UPDATE THE xtxA AND xAtxA MATRICES
-  if (nbr_in > 0) {
-    xAtxA = join_cols(xAtxA, xtxA.row(var_in)) ;
-  }
-  xtxA  = join_rows(xtxA, new_col) ;
-  xAtxA = join_rows(xAtxA, trans(xtxA.row(var_in))) ;
-
-  if ((fun == 0) & (usechol == 1)) {
-    cholupdate(R, xAtxA) ;
-  }
-
-  if (fun == 1) {
-    xtxw.resize(nbr_in+1) ;
-    xtxw(nbr_in) = dot(xAtxA.col(nbr_in),betaA);
-  }
 }
 
 void remove_var_enet(uword &nbr_in, uvec &are_in, vec &betaA, uvec &A, mat &xtxA, mat &xAtxA, mat &xtxw, mat &R, uvec &null, const bool &usechol, const uword &fun) {

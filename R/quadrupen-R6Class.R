@@ -83,21 +83,14 @@ QuadrupenFit <- R6Class(
   ## PRIVATE MEMBERS
   ## ____________________________________________________
   private = list(
-    x           = Matrix()   ,
-    y           = numeric()  ,
-    beta        = Matrix()   ,
-    activeSet   = Matrix()   ,
-    intercept   = logical()  ,
-    mu          = numeric()  ,
-    normx       = numeric()  ,
-    df          = numeric()  ,
-    r.squared   = numeric()  ,
-    penscale    = numeric()  ,
-    penalty     = character(),
-    naive       = NA         ,
-    lambda1     = numeric()  ,
-    lambda2     = numeric()  ,
-    control     = list()     ,
+    data        = NA,
+    beta        = Matrix()  ,
+    mu          = numeric() ,
+    activeSet   = Matrix()  ,
+    df          = numeric() ,
+    lambda1     = numeric() ,
+    lambda2     = numeric() ,
+    control     = list()    ,
     monitoring  = list()
   ),
   ## ____________________________________________________
@@ -105,40 +98,44 @@ QuadrupenFit <- R6Class(
   ## ACTIVE BINDINGS MEMBERS
   ## ____________________________________________________
   active = list(
-    ncoef = function(value) {ncol(private$beta)},
-    nsample = function(value) {length(private$y)},
-    #' @field major_penalty vector of "leading" penalties (either l1 or l2)
-    major_penalty = function(value) {
-      switch(private$penalty,
-             "ridge" = data.frame(lambda2=private$lambda2),
-             data.frame(lambda1=private$lambda1))
-    },
-    #' @field major_penalty vector of "minor" penalties (either l1 or l2)
-    minor_penalty = function(value) {
-      switch(private$penalty,
-             "ridge" = setNames(private$lambda1, "lambda1"),
-             setNames(private$lambda2, "lambda2"))
-    },
+    ncoef = function(value) {private$data$d},
+    nsample = function(value) {private$data$n},
+    has_intercept = function(value) {private$data$has_intercept},
+    is_standardized = function(value) {private$data$is_standardized},
     fitted = function(value) {
-      if (private$intercept) {
-        res <- sweep(tcrossprod(private$x, private$beta),2L,-private$mu,check.margin=FALSE)
+      if (self$has_intercept) {
+### TODO - normalize x back        
+        res <- sweep(tcrossprod(private$data$X, private$beta),2L,-private$mu,check.margin=FALSE)
       } else {
         private$mu <- 0
-        res <- tcrossprod(private$x, private$beta)
+        res <- tcrossprod(private$data$X, private$beta)
       }
       res
     },
-    residuals = function(value) {apply(self$fitted, 2, function(y_hat) private$y - y_hat)},
+    coefficients = function(value) {private$beta},
+    residuals = function(value) {apply(self$fitted, 2, function(y_hat) private$data$y - y_hat)},
     deviance = function(value) {colSums(self$residuals^2)},
-    degree_freedom = function(value) {
-      ifelse(private$intercept, private$df + 1, private$df)
-      },
+    degrees_freedom = function(value) {
+      private$df + ifelse(private$intercept, 1L, 0L)
+    },
+### TODO - only valid for Gaussian models
     r_squared = function(value) {
-      RSS <- ifelse(private$intercept, sum((private$y - mean(private$y))^2),sum(private$y^2))
-      1 - colSums(self$residuals^2) / RSS
-      }
+      1 - colSums(self$residuals^2) / private$data$rss
+    }
   ),
   
+#' #' @field major_penalty vector of "leading" penalties (either l1 or l2)
+#' major_penalty = function(value) {
+#'   switch(self$penalty,
+#'          "ridge" = data.frame(lambda2=private$lambda2),
+#'          data.frame(lambda1=private$lambda1))
+#' },
+#' #' @field major_penalty vector of "minor" penalties (either l1 or l2)
+#' minor_penalty = function(value) {
+#'   switch(self$penalty,
+#'          "ridge" = setNames(private$lambda1, "lambda1"),
+#'          setNames(private$lambda2, "lambda2"))
+#' },
 
   ## ____________________________________________________
   ## 
@@ -146,62 +143,29 @@ QuadrupenFit <- R6Class(
   ## ____________________________________________________
   public  = list(
     initialize = function(
-    x, y,
-    coefficients,
-    active.set  ,
-    intercept   ,
-    mu          ,
-    normx       ,
-    fitted      ,
-    residuals   ,
-    df          ,
-    r.squared   ,
-    penscale    ,
-    penalty     ,
-    naive       ,
+    data, 
+    beta0       ,
     lambda1     ,
-    lambda2     ,
-    monitoring  ,
-    control     ) {
-      private$x          <- x
-      private$y          <- y
-      private$beta       <- coefficients
-      private$activeSet  <- active.set
-      private$intercept  <- intercept
-      private$mu         <- mu
-      private$normx      <- normx
-      private$df         <- df
-      private$r.squared  <- r.squared
-      private$penscale   <- penscale
-      private$penalty    <- penalty
-      private$naive      <- naive
-      private$lambda1    <- lambda1
-      private$lambda2    <- lambda2
-      private$monitoring <- monitoring
-      private$control    <- control
+    lambda2) {
+    private$data  <- data
+    private$beta       <- beta0
+    private$lambda1    <- lambda1
+    private$lambda2    <- lambda2
+    D <- Diagonal(x = sqrt(lambda2) / sqrt(penscale))
+    private$struct     <- D %*% struct %*% D
     },
     show = function() {
-      if (!is.null(private$naive)) {
-        if (private$naive) {
-          cat("Linear regression with", private$penalty, "penalizer, no rescaling of the coefficients (naive).\n")
-        } else {
-          cat("Linear regression with", private$penalty, "penalizer, coefficients rescaled by (1+lambda2).\n")
-        }
-      } else {
-        cat("Linear regression with", private$penalty, "penalizer.\n")
-      }
+      cat("Linear regression with", self$penalty, "penalizer.\n")
       if (private$intercept) {
         cat("- number of coefficients:", self$ncoef,"+ intercept\n")
       } else {
         cat("- number of coefficients:", self$ncoef,"(no intercept)\n")
       }
-      
       cat("- penalty parameter ",names(self$major_penalty), ": ",
           length(self$major_penalty), " points from ",
           format(max(self$major_penalty), digits = 3)," to ",
           format(min(self$major_penalty), digits = 3),"\n", sep="")
       cat("- penalty parameter ",names(self$minor_penalty),": ", self$minor_penalty, "\n", sep="")
-      
       invisible(self)
     },
     #' @description User friendly print method
@@ -219,7 +183,7 @@ QuadrupenFit <- R6Class(
     #' Produce a plot of the solution path of a \code{quadrupen} fit.
     #'
     #' @usage plot.quadrupen(x, y, xvar = "lambda",
-    #'         main = private$penalty," path", sep=""),
+    #'         main = self$penalty," path", sep=""),
     #'         log.scale = TRUE, standardize=TRUE, reverse=FALSE,
     #'         labels = NULL, plot = TRUE, ...)
     #' @param x output of a fitting procedure of the \pkg{quadrupen}
@@ -275,7 +239,7 @@ QuadrupenFit <- R6Class(
     #' @import ggplot2 scales grid methods
     #' @export
     plot = function(xvar = "lambda",
-                    main = paste(private$penalty," path", sep=""),
+                    main = paste(self$penalty," path", sep=""),
                     log.scale = TRUE, standardize=TRUE, labels = NULL, plot = TRUE, ...) {
       
       lambda <- as.numeric(unlist(self$major_penalty))
@@ -291,7 +255,7 @@ QuadrupenFit <- R6Class(
       beta  <- as.matrix(private$beta[, nzeros, drop = FALSE])
       rownames(beta) <- NULL ## avoid warning message in ggplot2
       
-      if (standardize) beta  <- scale(beta, FALSE, 1/private$normx[nzeros])
+      if (standardize) beta <- scale(beta, FALSE, 1/private$normx[nzeros])
 
       if (xvar == "fraction") {
         xv <-  apply(abs(beta),1,sum)/max(apply(abs(beta),1,sum))
@@ -315,10 +279,11 @@ QuadrupenFit <- R6Class(
       colnames(data.coef) <- c("xvar","var","coef", "variables")
       d <- ggplot(data.coef,aes(x=xvar,y=coefficients, colour=variables, group=var)) +
         geom_line(aes(x=xvar,y=coef)) +  geom_hline(yintercept=0, alpha=0.5, linetype="dotted") +
-        ylab(ifelse(standardize, "standardized coefficients","coefficients")) + ggtitle(main)
+        ylab(ifelse(standardize, "standardized coefficients","coefficients")) + ggtitle(main) +
+        theme_bw()
       
       if (xvar=="lambda") {
-        d <- d + xlab(switch(private$penalty, "ridge" = ifelse(log.scale,expression(log[10](lambda[2])),expression(lambda[2])),
+        d <- d + xlab(switch(self$penalty, "ridge" = ifelse(log.scale,expression(log[10](lambda[2])),expression(lambda[2])),
                              ifelse(log.scale,expression(log[10](lambda[1])),expression(lambda[1]))))
         if (log.scale)
           d <- d + scale_x_log10() + annotation_logticks(sides="b")
@@ -327,7 +292,7 @@ QuadrupenFit <- R6Class(
       }
       
       if (is.null(labels)) {
-        d <- d + theme(legend.position="none")
+        d <- d + theme(legend.position="none") 
       } else {
         if (length(labels[nzeros]) != length(nzeros)) {
           d <- d + theme(legend.position="none")
@@ -438,17 +403,17 @@ QuadrupenFit <- R6Class(
       p <- self$ncoef
       
       ## Compute generalized cross-validation
-      GCV <- self$deviance/(n*(1 + self$degree_freedom/n))^2
+      GCV <- self$deviance/(n*(1 + self$degrees_freedom/n))^2
       
       ## compute the penalized criteria
       if (is.null(sigma)) {
-        crit <- sapply(penalty, function(pen) log(self$deviance) + pen * self$degree_freedom/n)
+        crit <- sapply(penalty, function(pen) log(self$deviance) + pen * self$degrees_freedom/n)
       } else {
-        crit <- sapply(penalty, function(pen) self$deviance/n + pen * self$degree_freedom/n * sigma^2)
+        crit <- sapply(penalty, function(pen) self$deviance/n + pen * self$degrees_freedom/n * sigma^2)
       }
       
       ## put together all relevant information about those criteria
-      criterion <- data.frame(crit, GCV=GCV, df=self$degree_freedom, lambda=lambda, fraction = apply(abs(betas),1,sum)/max(apply(abs(betas),1,sum)), row.names=1:nrow(crit))
+      criterion <- data.frame(crit, GCV=GCV, df=self$degrees_freedom, lambda=lambda, fraction = apply(abs(betas),1,sum)/max(apply(abs(betas),1,sum)), row.names=1:nrow(crit))
       
       ## recover the associated vectors of parameters
       beta.min  <- t(betas[apply(crit, 2, which.min), ])
@@ -471,12 +436,12 @@ QuadrupenFit <- R6Class(
         xlab <- switch(xvar,
                        "fraction" = expression(paste("|",beta[lambda[1]],"|",{}[1]/max[lambda[1]],"|",beta[lambda[1]],"|",{}[1],sep="")),
                        "df" = "Estimated degrees of freedom",
-                       switch(private$penalty, "ridge" = ifelse(log.scale,expression(log[10](lambda[2])),expression(lambda[2])),
+                       switch(self$penalty, "ridge" = ifelse(log.scale,expression(log[10](lambda[2])),expression(lambda[2])),
                               ifelse(log.scale,expression(log[10](lambda[1])),expression(lambda[1])) ) )
         
         d <- ggplot(data.plot, aes(x=xvar, y=value, colour=criterion, group=criterion)) +
           geom_line(aes(x=xvar,y=value)) + geom_point(aes(x=xvar,y=value)) +
-          labs(x=xlab, y="criterion's value",  title=paste("Information Criteria for a", private$penalty,"fit"))
+          labs(x=xlab, y="criterion's value",  title=paste("Information Criteria for a", self$penalty,"fit"))
         
         if (log.scale & (xvar=="lambda")) {
           d <- d + scale_x_log10()
