@@ -488,9 +488,6 @@ deviance.QuadrupenFit <- function(object, ...) {
 }
 
 
-
-
-
 #' #' @field major_penalty vector of "leading" penalties (either l1 or l2)
 #' major_penalty = function(value) {
 #'   switch(self$penalty,

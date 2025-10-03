@@ -20,6 +20,7 @@ ElasticNet <- R6::R6Class(
       },
     show = function() {
       super$show()
+      self$data$scaleStruct(lambda2)
       if (private$naive) {
         cat("No rescaling of the coefficients (naive Elastic-net).\n")
       } else {
@@ -33,34 +34,22 @@ ElasticNet <- R6::R6Class(
                     (length(beta0) == self$ncoef & is.numeric(beta0)))
       }
       
-      D <- Diagonal(x = sqrt(private$lambda2) / sqrt(private$data$wx))
       
       ## ======================================================
       ## STARTING C++ CALL TO ENET_LS
       if (control$timer) {cpp.start <- proc.time()}      
-      
+
+      control$method <- switch(control$method,
+             quadra   = 0  ,
+             pathwise = 1  ,
+             fista    = 2, 0)
+
       out <- elastic_net2_cpp(
-        beta0                     ,
-        private$data$X            ,
-        private$data$y            ,
-        D %*% private$data$S %*% D,
-        private$lambda1           ,
-        private$data$wx           , 
-        private$lambda2           ,
-        self$has_intercept        ,
-        private$data$xty, private$data$mean_X, private$data$norm_X, private$data$norm_y, 
-        private$data$wy      ,
-        control$threshold    ,
-        control$max.iter     ,
-        control$max.feat     ,
-        switch(control$method,
-               quadra   = 0  ,
-               pathwise = 1  ,
-               fista    = 2, 0),
-        control$verbose      ,
-        private$data$sparse_encoding,
-        control$usechol,
-        control$monitor)
+        beta0          ,
+        private$data   ,        
+        private$lambda1,
+        private$lambda2,
+        control)
       ## END OF CALL
 
       if (control$timer) {

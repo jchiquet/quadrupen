@@ -76,6 +76,9 @@ DataModel <- R6::R6Class(
       if (!inherits(private$data$X, "sparseMatrix")) self$X <- as.matrix(self$X)
       ##
       ## ===================================================
+    },
+    scaleStruct = function(lambda) {
+      private$S <- dimScale(private$S, sqrt(lambda) / sqrt(private$wx))
     }
   ), 
   active = list(

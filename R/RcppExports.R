@@ -9,8 +9,8 @@ elastic_net_cpp <- function(BETA0, X, y, Struct, LAMBDA1, n_lambda, min_ratio, p
     .Call(`_quadrupen_elastic_net_cpp`, BETA0, X, y, Struct, LAMBDA1, n_lambda, min_ratio, penscale, lambda2, intercept, normalize, weights, naive, eps, max_iter, max_feat, fun, verbose, sparse, usechol, monitor)
 }
 
-elastic_net2_cpp <- function(BETA0, X, y, S, lambda1, penscale, lambda2, intercept, xty, xbar, normx, normy, weights, eps, max_iter, max_feat, fun, verbose, sparse, usechol, monitor) {
-    .Call(`_quadrupen_elastic_net2_cpp`, BETA0, X, y, S, lambda1, penscale, lambda2, intercept, xty, xbar, normx, normy, weights, eps, max_iter, max_feat, fun, verbose, sparse, usechol, monitor)
+elastic_net2_cpp <- function(BETA0, dataModel, lambda1, lambda2, control) {
+    .Call(`_quadrupen_elastic_net2_cpp`, BETA0, dataModel, lambda1, lambda2, control)
 }
 
 ridge_cpp <- function(X, Y, C, LAMBDA, NLAMBDA, LAMBDAMIN, LAMBDAMAX, INTERCEPT, NORMALIZE, WEIGHTS, VERBOSE) {

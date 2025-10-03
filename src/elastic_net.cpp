@@ -338,28 +338,32 @@ Rcpp::List elastic_net_cpp(
 // [[Rcpp::export]]
 Rcpp::List elastic_net2_cpp(
     SEXP BETA0                 , //
-    SEXP X                     , // regressor matrix
-    const arma::vec y          , // response vector
-    const arma::sp_mat& S      , // Structuring matrix
-    arma::vec lambda1          , // vector of tuning parameterfor the L1-penalty
-    const arma::vec penscale   , // penalty weights
+    const Environment &dataModel     , //
+    arma::vec lambda1          , // vector of tuning parameter for the L1-penalty
     const double lambda2       , // the smooth (ridge) penalty
-    const bool intercept       , // boolean for intercept mode
-    arma::vec xty           , // responses to predictors vector
-    arma::vec xbar          , // mean of the predictors
-    arma::vec normx         , // norm of the predictors
-    double normy         , // norm of the response
-    const arma::vec weights    , // observation weights (not use at the moment)
-    const double eps           , // precision required
-    const arma::uword max_iter , // max # of iterates of the active set
-    const arma::uword max_feat , // max # of variables activated
-    const arma::uword fun      , // solver (0=quadra, 1=pathwise, 2=fista)
-    const arma::uword verbose  , // int for verbose mode (0/1/2)
-    const bool sparse          , // boolean for sparse mode
-    const bool usechol         , // use Cholesky decomposition or not
-    const arma::uword monitor    // convergence monitoring (1 == Grandvalet's bound ;-) 2 == Fenchel duality gap)
+    const List control          
 ) {
-  
+
+             SEXP X = dataModel["X"] ; // regressor matrix
+  const arma::vec y = dataModel["y"] ; // response vector
+  const arma::sp_mat& S  = dataModel["S"] ; // Structuring matrix
+  const arma::vec penscale = dataModel["wx"] ;  // penalty weights
+  const bool intercept = dataModel["has_intercept"] ; // boolean for intercept mode
+  arma::vec xty  = dataModel["xty"] ; // responses to predictors vector
+  arma::vec xbar  = dataModel["mean_X"] ; // mean of the predictors
+  arma::vec normx  = dataModel["norm_X"] ; // norm of the predictors
+  double normy  = dataModel["norm_y"] ;  // norm of the response
+  const arma::vec weights = dataModel["wy"] ;     // observation weights (not use at the moment)
+  const bool sparse = dataModel["sparse_encoding"] ; // boolean for sparse mode
+
+  const double eps  = control["threshold"] ; // precision required
+  const arma::uword max_iter = control["max.iter"] ; // max # of iterates of the active set
+  const arma::uword max_feat = control["max.feat"] ; // max # of variables activated
+  const arma::uword fun      = control["method"] ; // solver (0=quadra, 1=pathwise, 2=fista)
+  const arma::uword verbose  = control["verbose"] ; // int for verbose mode (0/1/2)
+  const bool usechol= control["usechol"] ; // use Cholesky decomposition or not
+  const arma::uword monitor = control["monitor"] ; // convergence monitoring (1 == Grandvalet's bound ;-) 2 == Fenchel duality gap)
+
   const double eps2 = pow(eps, 2) ;
   uword n      ; // sample size
   uword p      ; // problem size
