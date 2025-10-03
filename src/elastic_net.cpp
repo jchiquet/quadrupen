@@ -283,11 +283,7 @@ Rcpp::List elastic_net_cpp(
       df          =    df.subvec(0,m)        ;
       break;
     } else {
-      if (any(penscale != 1)) {
-	      nonzeros = join_cols(nonzeros, betaA/(normx.elem(A) % penscale.elem(A)));
-      } else {
-	      nonzeros = join_cols(nonzeros, betaA/(normx.elem(A)));
-      }
+      nonzeros = join_cols(nonzeros, betaA/(normx.elem(A) % penscale.elem(A)));
       iA = join_cols(iA, m*ones(betaA.n_elem,1) );
       jA = join_cols(jA, conv_to<mat>::from(A) ) ;
       if (intercept == 1) {
@@ -584,11 +580,7 @@ Rcpp::List elastic_net2_cpp(
       df          =    df.subvec(0,m)        ;
       break;
     } else {
-      if (any(penscale != 1)) {
-        nonzeros = join_cols(nonzeros, betaA/(normx.elem(A) % penscale.elem(A)));
-      } else {
-        nonzeros = join_cols(nonzeros, betaA/(normx.elem(A)));
-      }
+      nonzeros = join_cols(nonzeros, betaA/(normx.elem(A) % penscale.elem(A)));
       iA = join_cols(iA, m*ones(betaA.n_elem,1) );
       jA = join_cols(jA, conv_to<mat>::from(A) ) ;
       if (intercept == 1) mu[m] = dot(betaA, xbar.elem(A)) ;

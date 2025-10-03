@@ -65,7 +65,7 @@ ElasticNet <- R6::R6Class(
       private$monitoring$internal.timer <- timer
       private$monitoring$convergence <- 
         sapply(private$monitoring$convergence, status_to_message)
-
+      private$control <- control
     }
   )
 )

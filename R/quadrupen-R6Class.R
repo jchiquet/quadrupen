@@ -102,6 +102,8 @@ QuadrupenFit <- R6Class(
     nsample = function(value) {private$data$n},
     has_intercept = function(value) {private$data$has_intercept},
     is_standardized = function(value) {private$data$is_standardized},
+    optim_monitoring = function(value) {private$monitoring},
+    optim_config = function(value) {private$control},
     fitted = function(value) {
       Xs <- Matrix::colScale(private$data$X, private$data$norm_X)
       if (self$has_intercept) {
