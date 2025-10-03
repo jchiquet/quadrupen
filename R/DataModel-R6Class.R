@@ -30,7 +30,7 @@ DataModel <- R6::R6Class(
         stopifnot("x and y have not correct dimensions" = 
                   (nrow(covariates) == length(outcome)))
         stopifnot("struct must be a (square) positive semidefinite matrix." = 
-                    all(dim(cov_struct) == p))
+                    all(dim(cov_struct) == ncol(covariates)))
         stopifnot("struct must be a (square) positive semidefinite matrix." = 
                     all(eigen(cov_struct, only.values = TRUE)$values >= 0))
         if (!inherits(cov_struct, "sparseMatrix")) 
@@ -78,7 +78,7 @@ DataModel <- R6::R6Class(
       ## ===================================================
     },
     scaleStruct = function(lambda) {
-      private$S <- dimScale(private$S, sqrt(lambda) / sqrt(private$wx))
+      private$S <- dimScale(private$S, sqrt(lambda/private$wx))
     }
   ), 
   active = list(
@@ -145,9 +145,7 @@ GaussianModel <- R6::R6Class(
   ),
   active = list(
     name = function() "Gaussian response (Linear Regression)",
-    rss  = function(value) {
-      ifelse(private$centered, sum((private$y - mean(private$y))^2), sum(private$y^2))
-    }
+    rss  = function(value) {sum((self$y - self$mean_y)^2)}
   )
 )
 

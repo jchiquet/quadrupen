@@ -100,6 +100,7 @@ QuadrupenFit <- R6Class(
   active = list(
     ncoef = function(value) {private$data$d},
     nsample = function(value) {private$data$n},
+    dataModel = function(value) {private$data},
     has_intercept = function(value) {private$data$has_intercept},
     is_standardized = function(value) {private$data$is_standardized},
     optim_monitoring = function(value) {private$monitoring},
