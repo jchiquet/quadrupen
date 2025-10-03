@@ -116,8 +116,6 @@ void choldowndate(mat &R, int j) {
 
     if (x[1] != 0) {
       r = norm(x,2);
-//       G <<  x(0) << x(1) << endr
-// 	<< -x(1) << x(0) << endr;
       G = {{x(0), x(1)}, {-x(1), x(0)}};
       G = G / r;
       x(0) = r; x(1) = 0;
@@ -209,11 +207,11 @@ void remove_var_enet(uword &nbr_in, uvec &are_in, vec &betaA, uvec &A, mat &xtxA
 
 void bound_to_optimal(vec &betaA,
 		      mat &xAtxA,
-		      vec &xty,
+		      const vec &xty,
 		      vec &grd,
 		      double &lambda1,
 		      const double &lambda2,
-		      double &normy,
+		      const double &normy,
 		      uvec &A,
 		      const uword &monitor,
 		      vec &J_hat,

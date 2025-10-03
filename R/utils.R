@@ -128,5 +128,14 @@ ctrl_default <- function(d)
       usechol     = TRUE
   )
 
-
+status_to_message <- function(status) {
+  message <- switch(as.character(status),
+                    "0"  = "converged",
+                    "1"  = "max # of iterate reached",
+                    "2"  = "max # of feature reached",
+                    "3"  = "system has become singular",
+                    "Return status not recognized"
+  )
+  message
+}
 

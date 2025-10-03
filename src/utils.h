@@ -35,10 +35,10 @@ void cholupdate(mat &R, mat& XtX) ;
 
 void choldowndate(mat &R, int j) ;
 
-void bound_to_optimal(vec &betaA, mat &xAtxA, vec &xty, vec &grd, double &lambda1, const double &lambda2, double &normy, uvec &A, const uword &monitor, vec &J_hat, vec &D_hat) ;
+void bound_to_optimal(vec &betaA, mat &xAtxA, const vec &xty, vec &grd, double &lambda1, const double &lambda2, const double &normy, uvec &A, const uword &monitor, vec &J_hat, vec &D_hat) ;
 
 template <typename any_mat>
-void add_var_enet(uword &n, uword &nbr_in, uword &var_in, vec &betaA, uvec &A, any_mat &x, any_mat &xt, mat &xtxA, mat &xAtxA, mat &xtxw, mat &R, const double &lambda2, vec &xbar, const sp_mat &spS, const bool &usechol, const uword &fun) {
+void add_var_enet(const uword &n, uword &nbr_in, uword &var_in, vec &betaA, uvec &A, any_mat &x, any_mat &xt, mat &xtxA, mat &xAtxA, mat &xtxw, mat &R, const double &lambda2, const vec &xbar, const sp_mat &spS, const bool &usechol, const uword &fun) {
   
   vec  new_col   ; // column currently added to xtxA
   

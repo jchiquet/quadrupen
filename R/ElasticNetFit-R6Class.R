@@ -33,63 +33,39 @@ ElasticNet <- R6::R6Class(
         stopifnot("beta0 must be a vector with ncol(x) entries." = 
                     (length(beta0) == self$ncoef & is.numeric(beta0)))
       }
-      
-      
+
       ## ======================================================
-      ## STARTING C++ CALL TO ENET_LS
-      if (control$timer) {cpp.start <- proc.time()}      
-
-      control$method <- switch(control$method,
-             quadra   = 0  ,
-             pathwise = 1  ,
-             fista    = 2, 0)
-
-      out <- elastic_net2_cpp(
-        beta0          ,
-        private$data   ,        
-        private$lambda1,
-        private$lambda2,
-        control)
+      ## C++ CALL TO ENET_LS
+      ## 
+      if (control$timer) {cpp.start <- proc.time()}
+      out <- 
+        elastic_net2_cpp(
+          beta0, 
+          private$data, 
+          private$lambda1,
+          private$lambda2,
+          control
+        )
+      timer <- ifelse(control$timer, (proc.time() - cpp.start)[3], NA) 
       ## END OF CALL
-
-      if (control$timer) {
-        internal.timer <- (proc.time() - cpp.start)[3]
-      } else {
-        internal.timer <- NULL
-      }
-
-      if (!private$naive) {
-         out$nzeros <- out$nzeros * (1 + private$lambda2)
-         private$mu = private$data$mean_y - (1 + private$lambda2) * drop(out$mu)
-       } else {
-         private$mu = private$data$mean_y - drop(out$mu);
-      }
+      ## ======================================================
 
       private$df      <- drop(out$df)
       private$activeSet <- sparseMatrix(i = out$iA + 1,
                                         j = out$jA + 1,
                                         dims = c(length(private$lambda1),self$ncoef))
+      private$mu   <- drop(out$mu)
       private$beta <- sparseMatrix(i = out$iA + 1,
                                    j = out$jA + 1,
                                    x = c(out$nzeros),
                                    dims = c(length(out$lambda1),self$ncoef),
                                    dimnames = list(round(c(private$lambda1),3),
                                                    colnames(private$data$X)))
+      private$monitoring <- out$monitoring
+      private$monitoring$internal.timer <- timer
+      private$monitoring$convergence <- 
+        sapply(private$monitoring$convergence, status_to_message)
 
-      out$converge[out$converge == 0] <- "converged"
-      out$converge[out$converge == 1] <- "max # of iterate reached"
-      out$converge[out$converge == 2] <- "max # of feature reached"
-      out$converge[out$converge == 3] <- "system has become singular"
-      private$monitoring <- 
-        list(it.active      = c(out$it.active ),
-             it.optim       = c(out$it.optim  ),
-             max.grad       = c(out$max.grd   ),
-             status         = c(out$converge  ),
-             pensteps.timer = c(out$timing    ),
-             internal.timer = internal.timer   ,
-             dist.to.opt    = c(out$delta.hat ),
-             dist.to.str    = c(out$delta.star))
-    
     }
   )
 )

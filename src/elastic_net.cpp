@@ -43,8 +43,8 @@ Rcpp::List elastic_net_cpp(
   double normy ; // norm of the response
   double ybar  ; // mean of the response
   const double eps2 = pow(eps, 2) ;
-  uword n      ; // sample size
-  uword p      ; // problem size
+  const uword n(y.n_elem)      ; // sample size
+  const uword p(Struct.n_cols)      ; // problem size
 
   mat x        ;
   mat xt       ;
@@ -54,14 +54,10 @@ Rcpp::List elastic_net_cpp(
     sp_x = as<sp_mat>(X) ;
     standardize(sp_x, y, intercept, normalize, penscale, xty, normx, normy, xbar, ybar) ;
     sp_xt = sp_x.t() ;
-    n = sp_x.n_rows ;
-    p = sp_x.n_cols ;
   } else {
     x = as<mat>(X) ;
     standardize(x, y, intercept, normalize, penscale, xty, normx, normy, xbar, ybar) ;
     xt = x.t();
-    n = x.n_rows ;
-    p = x.n_cols ;
   }
 
   // STRUCTURATING MATRIX
@@ -337,51 +333,49 @@ Rcpp::List elastic_net_cpp(
 // V2
 // [[Rcpp::export]]
 Rcpp::List elastic_net2_cpp(
-    SEXP BETA0                 , //
-    const Environment &dataModel     , //
-    arma::vec lambda1          , // vector of tuning parameter for the L1-penalty
-    const double lambda2       , // the smooth (ridge) penalty
-    const List control          
+    SEXP BETA0                   , // initial vector of coefficients
+    const Environment &dataModel , // data structure
+       arma::vec lambda1         , // vector of L1 penalties
+    const double lambda2         , // scalar for the amount L2 penalty
+    const List control             // config of the optimisation 
 ) {
 
-             SEXP X = dataModel["X"] ; // regressor matrix
-  const arma::vec y = dataModel["y"] ; // response vector
-  const arma::sp_mat& S  = dataModel["S"] ; // Structuring matrix
-  const arma::vec penscale = dataModel["wx"] ;  // penalty weights
-  const bool intercept = dataModel["has_intercept"] ; // boolean for intercept mode
-  arma::vec xty  = dataModel["xty"] ; // responses to predictors vector
-  arma::vec xbar  = dataModel["mean_X"] ; // mean of the predictors
-  arma::vec normx  = dataModel["norm_X"] ; // norm of the predictors
-  double normy  = dataModel["norm_y"] ;  // norm of the response
-  const arma::vec weights = dataModel["wy"] ;     // observation weights (not use at the moment)
-  const bool sparse = dataModel["sparse_encoding"] ; // boolean for sparse mode
-
-  const double eps  = control["threshold"] ; // precision required
-  const arma::uword max_iter = control["max.iter"] ; // max # of iterates of the active set
-  const arma::uword max_feat = control["max.feat"] ; // max # of variables activated
-  const arma::uword fun      = control["method"] ; // solver (0=quadra, 1=pathwise, 2=fista)
-  const arma::uword verbose  = control["verbose"] ; // int for verbose mode (0/1/2)
-  const bool usechol= control["usechol"] ; // use Cholesky decomposition or not
-  const arma::uword monitor = control["monitor"] ; // convergence monitoring (1 == Grandvalet's bound ;-) 2 == Fenchel duality gap)
+  const uword n             = dataModel["n"]  ; // sample size
+  const uword p             = dataModel["d"]  ; // problem size
+  const SEXP &X             = dataModel["X"]  ; // design matrix
+  const arma::vec &y        = dataModel["y"]  ; // response vector
+  const arma::sp_mat& S     = dataModel["S"]  ; // Structuring matrix
+  const arma::vec &penscale = dataModel["wx"] ;  // penalty weights
+  const bool &intercept     = dataModel["has_intercept"] ; // boolean for intercept mode
+  const arma::vec &xty      = dataModel["xty"]    ; // responses to predictors vector
+  const arma::vec xbar      = dataModel["mean_X"] ; // mean of the predictors
+  const arma::vec &normx    = dataModel["norm_X"] ; // norm of the predictors
+  const double ybar         = dataModel["mean_y"] ; // mean of the predictors
+  const double normy        = dataModel["norm_y"] ; // norm of the response
+  const arma::vec& weights  = dataModel["wy"]     ; // observation weights (not use at the moment)
+  const bool sparse         = dataModel["sparse_encoding"] ; // boolean for sparse mode
+  
+  const double eps           = control["threshold"] ; // precision required
+  const arma::uword max_iter = control["max.iter"]  ; // max # of iterates of the active set
+  const arma::uword max_feat = control["max.feat"]  ; // max # of variables activated
+  const arma::uword fun      = control["method"]    ; // solver (0=quadra, 1=pathwise, 2=fista)
+  const arma::uword verbose  = control["verbose"]   ; // int for verbose mode (0/1/2)
+  const bool usechol         = control["usechol"]   ; // use Cholesky decomposition or not
+  const bool naive           = control["naive"]     ; // use Cholesky decomposition or not
+  const arma::uword monitor  = control["monitor"]   ; // convergence monitoring (1 == Grandvalet's bound ;-) 2 == Fenchel duality gap)
 
   const double eps2 = pow(eps, 2) ;
-  uword n      ; // sample size
-  uword p      ; // problem size
   
   mat x        ;
   mat xt       ;
   sp_mat sp_x  ;
   sp_mat sp_xt ;
-  if (sparse == 1) { // Check how x is encoded for reading
+  if (sparse) { // Check how x is encoded for reading
     sp_x = as<sp_mat>(X) ;
     sp_xt = sp_x.t() ;
-    n = sp_x.n_rows ;
-    p = sp_x.n_cols ;
   } else {
     x = as<mat>(X) ;
     xt = x.t();
-    n = x.n_rows ;
-    p = x.n_cols ;
   }
 
   // Initializing "first level" variables (outside of the lambda1 loop)
@@ -403,7 +397,7 @@ Rcpp::List elastic_net2_cpp(
   vec  df          (n_lambda)            ; // degrees of freedom
   wall_clock timer                       ; // clock
   
-  // Initializing "second level" variables (within the active set - for a fixed value of lamdba)
+  // Initializing "second level" variables (within the active set - for a fixed value of lambda1)
   uword var_in                           ; // currently added variable
   uword nbr_in   = 0                     ; // # of currently added variables
   uword nbr_opt  = 0                     ; // # of current calls to the optimization routine
@@ -422,7 +416,7 @@ Rcpp::List elastic_net2_cpp(
     beta0 = as<vec>(BETA0) ;
     A = find(beta0 != 0) ;
     betaA = beta0.elem(A) ;
-    if (sparse == 1) {
+    if (sparse) {
       // WRONG - DO IT THE RIGHT WAY
       xtxA = mat(sp_xt * sp_x.col(0)) ;
     } else {
@@ -446,16 +440,13 @@ Rcpp::List elastic_net2_cpp(
   }
   
   // Additional variable for convergence monitoring
-  vec D_hat    ;
-  vec D_star   ;
-  vec J_hat    ;
-  mat J_star   ;
+  vec D_hat, D_star, J_hat ; mat J_star ;
   
   // _____________________________________________________________
   //
   // START THE LOOP OVER LAMBDA
   timer.tic();
-  for (int m=0; m<n_lambda; m++) {
+  for (uword m=0; m<n_lambda; m++) {
     if (verbose == 2) {
       Rprintf("\n lambda1 = %f", lambda1(m)) ;
       Rprintf("\n nb active variables = %i",nbr_in) ;
@@ -466,11 +457,11 @@ Rcpp::List elastic_net2_cpp(
     // _____________________________________________________________
     //
     
-    // dual norm of gradient for unactive variable
+    // dual norm of gradient for inactive variables
     grd_norm = abs(grd) - lambda1[m] ;
     // gradient for active variables
     grd_norm.elem(A) = abs(grd.elem(A) + lambda1[m] * sign(betaA)) ;
-    // variable associated with the highest optimality violation
+    // variable associated with the highest violation of optimality conditions 
     var_in = grd_norm.index_max() ;
     
     max_grd[m] = grd_norm(var_in) ;
@@ -484,7 +475,7 @@ Rcpp::List elastic_net2_cpp(
       
       // Check if the variable is already in the active set
       if (are_in[var_in] == 0) {
-        if (sparse == 1) {
+        if (sparse) {
           add_var_enet(n, nbr_in, var_in, betaA, A, sp_x, sp_xt, xtxA, xAtxA, xtxw, R, lambda2, xbar, S, usechol, fun) ;
         } else {
           add_var_enet(n, nbr_in, var_in, betaA, A, x, xt, xtxA, xAtxA, xtxw, R, lambda2, xbar, S, usechol, fun) ;
@@ -579,16 +570,10 @@ Rcpp::List elastic_net2_cpp(
     timing[m] = timer.toc() ;
     
     // Checking convergence status
-    if (it_active[m] >= max_iter) {
-      converge[m] = 1;
-    }
-    if (nbr_in > max_feat) {
-      converge[m] = 2 ;
-    }
-    if (!success_optim) {
-      converge[m] = 3;
-    }
-    
+    if (it_active[m] >= max_iter) converge[m] = 1 ;
+    if (nbr_in > max_feat)        converge[m] = 2 ;
+    if (!success_optim)           converge[m] = 3 ;
+
     // Stop now if relevant
     if (converge[m] == 2 || converge[m] == 3) {
       lambda1     =    lambda1.subvec(0,m-1) ;
@@ -606,31 +591,36 @@ Rcpp::List elastic_net2_cpp(
       }
       iA = join_cols(iA, m*ones(betaA.n_elem,1) );
       jA = join_cols(jA, conv_to<mat>::from(A) ) ;
-      if (intercept == 1) {
-        mu[m] = dot(betaA, xbar.elem(A)) ;
-      }
+      if (intercept == 1) mu[m] = dot(betaA, xbar.elem(A)) ;
     }
+  }
+  if (!naive) {
+    nonzeros *= 1+lambda2;
+    mu = ybar - (1+lambda2) * mu;
+  } else {
+    mu = ybar - mu;
   }
   
   // Updating monitored quantities
-  if (monitor > 0) {
-    D_star = J_hat - J_star;
-  }
+  if (monitor > 0) D_star = J_hat - J_star;
   
-  return List::create(Named("nzeros")     = nonzeros ,
-                      Named("iA")         = iA       ,
-                      Named("jA")         = jA       ,
-                      Named("mu")         = mu       ,
-                      Named("normx")      = normx    ,
-                      Named("lambda1")    = lambda1  ,
-                      Named("df")         = df       ,
-                      Named("nbr.in")     = nbr_in   ,
-                      Named("it.active")  = it_active,
-                      Named("it.optim")   = it_optim ,
-                      Named("max.grd")    = max_grd  ,
-                      Named("timing")     = timing   ,
-                      Named("delta.hat")  = D_hat    ,
-                      Named("delta.star") = D_star   ,
-                      Named("converge")   = converge );
+  return List::create(
+    Named("nzeros")     = nonzeros ,
+    Named("iA")         = iA       ,
+    Named("jA")         = jA       ,
+    Named("mu")         = mu       ,
+    Named("lambda1")    = lambda1  ,
+    Named("df")         = df       ,
+    Named("monitoring") = 
+      List::create(
+        Named("it.active")      = it_active,
+        Named("it.optim")       = it_optim ,
+        Named("max.grd")        = max_grd  ,
+        Named("converge")       = converge ,
+        Named("pensteps.timer") = timing, 
+        Named("delta.hat")      = D_hat    ,
+        Named("delta.star")     = D_star   
+      )
+  );
   
 }
