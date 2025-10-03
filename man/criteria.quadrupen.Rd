@@ -219,29 +219,12 @@ See also \code{\link{plot.quadrupen}}.
 \if{latex}{\out{\hypertarget{method-QuadrupenFit-new}{}}}
 \subsection{Method \code{new()}}{
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{QuadrupenFit$new(
-  x,
-  y,
-  struct,
-  beta0,
-  intercept,
-  normalize,
-  penscale,
-  lambda1,
-  lambda2
-)}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{QuadrupenFit$new(data, lambda1, lambda2)}\if{html}{\out{</div>}}
 }
 
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{intercept}}{logical; indicates if an intercept has
-been included to the model.}
-
-\item{\code{penscale}}{Vector \code{"numeric"} with real positive
-values that have been used to weight the penalty tuned by
-\eqn{\lambda_1}{lambda1}.}
-
 \item{\code{lambda1}}{Vector (class \code{"numeric"}) of penalty
 levels (either \eqn{\ell_1}{l1} or \eqn{\ell_\infty}{l-infinity})
 for which the model has eventually been fitted.}

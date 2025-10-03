@@ -116,3 +116,17 @@ standardize <- function(x,y,intercept,normalize,penscale,zero=.Machine$double.ep
 
   return(list(xbar=xbar, ybar=ybar, normx=normx, normy=normy, xty=xty, x=x))
 }
+
+ctrl_default <- function(d)
+  list(verbose    = 1, # default control options
+      timer       =  FALSE,
+      max.iter    = max(500, d),
+      method      = "quadra",
+      threshold   = 1e-7,
+      monitor     = 0,
+      bulletproof = TRUE,
+      usechol     = TRUE
+  )
+
+
+

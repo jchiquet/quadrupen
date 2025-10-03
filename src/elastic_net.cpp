@@ -381,9 +381,8 @@ Rcpp::List elastic_net2_cpp(
     p = x.n_cols ;
   }
 
-  uword n_lambda = lambda1.n_elem  ; // # of penalty levels
-  
   // Initializing "first level" variables (outside of the lambda1 loop)
+  uword n_lambda = lambda1.n_elem        ; // # of penalty levels
   mat  R                                 ; // Cholesky decomposition of XAtXA
   uvec A                                 ; // set of currently activated variables
   vec  betaA                             ; // vector of currently activated parameters
@@ -393,11 +392,11 @@ Rcpp::List elastic_net2_cpp(
   vec  grd       = -xty                  ; // smooth part of the gradient
   vec  mu        = zeros<vec>(n_lambda)  ; // the intercept term
   vec  max_grd   = zeros<vec>(n_lambda)  ; // a vector with the successively reach duality gap
-  vec  converge  = zeros<vec>(n_lambda)  ; // a vector indicating if convergence occured (0/1/2)
+  vec  converge  = zeros<vec>(n_lambda)  ; // a vector indicating if convergence occurred (0/1/2)
   uvec it_active = zeros<uvec>(n_lambda) ; // # of loop in the active set for each lambda1
   uvec it_optim                          ; // # of loop in the optimization process for each loop of the active se
   double L0      = 1.0 + lambda2         ; // Lipschitz constant for proximal methods
-  vec  timing      (n_lambda)            ; // succesive timing in
+  vec  timing      (n_lambda)            ; // successive timing in
   vec  df          (n_lambda)            ; // degrees of freedom
   wall_clock timer                       ; // clock
   

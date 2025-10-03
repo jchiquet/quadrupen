@@ -2,6 +2,7 @@
 
 export(ElasticNet)
 export(GaussianModel)
+export(QuadrupenFit)
 export(bounded.reg)
 export(crossval)
 export(deviance.QuadrupenFit)

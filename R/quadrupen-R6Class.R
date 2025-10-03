@@ -123,40 +123,33 @@ QuadrupenFit <- R6Class(
       1 - colSums(self$residuals^2) / private$data$rss
     }
   ),
-  
-#' #' @field major_penalty vector of "leading" penalties (either l1 or l2)
-#' major_penalty = function(value) {
-#'   switch(self$penalty,
-#'          "ridge" = data.frame(lambda2=private$lambda2),
-#'          data.frame(lambda1=private$lambda1))
-#' },
-#' #' @field major_penalty vector of "minor" penalties (either l1 or l2)
-#' minor_penalty = function(value) {
-#'   switch(self$penalty,
-#'          "ridge" = setNames(private$lambda1, "lambda1"),
-#'          setNames(private$lambda2, "lambda2"))
-#' },
 
   ## ____________________________________________________
   ## 
   ## PUBLIC MEMBERS
   ## ____________________________________________________
   public  = list(
-    initialize = function(
-    data, 
-    beta0       ,
-    lambda1     ,
-    lambda2) {
-    private$data  <- data
-    private$beta       <- beta0
-    private$lambda1    <- lambda1
-    private$lambda2    <- lambda2
-    D <- Diagonal(x = sqrt(lambda2) / sqrt(penscale))
-    private$struct     <- D %*% struct %*% D
+    initialize = function(data, lambda1, lambda2) {
+
+      ## ===================================================
+      ## CHECKS TO AVOID CRASHES OF THE C++ CODE
+      stopifnot("The data object must be an instance of DataModel"
+                = inherits(data, "DataModel"))
+      stopifnot("entries inlambda1 must all be postive." =
+                  (all(lambda1 > 0)))
+      stopifnot("lambda1 values must be sorted in decreasing order." =
+                  !is.unsorted(rev(lambda1)))
+      stopifnot("lambda2 must be a scalar." = 
+                  (length(lambda2) == 1 & inherits(lambda2, "numeric")))
+      stopifnot("lambda2 must be a non negative scalar." =  
+                  (lambda2 >= 0))
+      private$data     <- data
+      private$lambda1  <- lambda1
+      private$lambda2  <- lambda2
     },
     show = function() {
       cat("Linear regression with", self$penalty, "penalizer.\n")
-      if (private$intercept) {
+      if (self$has_intercept) {
         cat("- number of coefficients:", self$ncoef,"+ intercept\n")
       } else {
         cat("- number of coefficients:", self$ncoef,"(no intercept)\n")
@@ -255,7 +248,7 @@ QuadrupenFit <- R6Class(
       beta  <- as.matrix(private$beta[, nzeros, drop = FALSE])
       rownames(beta) <- NULL ## avoid warning message in ggplot2
       
-      if (standardize) beta <- scale(beta, FALSE, 1/private$normx[nzeros])
+      if (standardize) beta <- scale(beta, FALSE, 1/private$data$norm_X[nzeros])
 
       if (xvar == "fraction") {
         xv <-  apply(abs(beta),1,sum)/max(apply(abs(beta),1,sum))
@@ -283,8 +276,11 @@ QuadrupenFit <- R6Class(
         theme_bw()
       
       if (xvar=="lambda") {
-        d <- d + xlab(switch(self$penalty, "ridge" = ifelse(log.scale,expression(log[10](lambda[2])),expression(lambda[2])),
-                             ifelse(log.scale,expression(log[10](lambda[1])),expression(lambda[1]))))
+        d <- d + xlab(switch(
+          self$penalty,
+          "ridge" = ifelse(log.scale,expression(log[10](lambda[2])),expression(lambda[2])),
+                    ifelse(log.scale,expression(log[10](lambda[1])),expression(lambda[1]))
+          ))
         if (log.scale)
           d <- d + scale_x_log10() + annotation_logticks(sides="b")
       } else {
@@ -434,10 +430,11 @@ QuadrupenFit <- R6Class(
         colnames(data.plot)[1] <- "xvar"
         
         xlab <- switch(xvar,
-                       "fraction" = expression(paste("|",beta[lambda[1]],"|",{}[1]/max[lambda[1]],"|",beta[lambda[1]],"|",{}[1],sep="")),
-                       "df" = "Estimated degrees of freedom",
-                       switch(self$penalty, "ridge" = ifelse(log.scale,expression(log[10](lambda[2])),expression(lambda[2])),
-                              ifelse(log.scale,expression(log[10](lambda[1])),expression(lambda[1])) ) )
+            "fraction" = expression(paste("|",beta[lambda[1]],"|",{}[1]/max[lambda[1]],"|",beta[lambda[1]],"|",{}[1],sep="")),
+            "df" = "Estimated degrees of freedom",
+              switch(self$penalty, 
+                     "ridge" = ifelse(log.scale,expression(log[10](lambda[2])),expression(lambda[2])),
+                               ifelse(log.scale,expression(log[10](lambda[1])),expression(lambda[1])) ) )
         
         d <- ggplot(data.plot, aes(x=xvar, y=value, colour=criterion, group=criterion)) +
           geom_line(aes(x=xvar,y=value)) + geom_point(aes(x=xvar,y=value)) +
@@ -489,3 +486,19 @@ deviance.QuadrupenFit <- function(object, ...) {
   object$deviance
 }
 
+
+
+
+
+#' #' @field major_penalty vector of "leading" penalties (either l1 or l2)
+#' major_penalty = function(value) {
+#'   switch(self$penalty,
+#'          "ridge" = data.frame(lambda2=private$lambda2),
+#'          data.frame(lambda1=private$lambda1))
+#' },
+#' #' @field major_penalty vector of "minor" penalties (either l1 or l2)
+#' minor_penalty = function(value) {
+#'   switch(self$penalty,
+#'          "ridge" = setNames(private$lambda1, "lambda1"),
+#'          setNames(private$lambda2, "lambda2"))
+#' },

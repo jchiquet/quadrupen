@@ -365,68 +365,49 @@ elastic.net2 <- function(x,
                          y,
                          lambda1   = NULL,
                          lambda2   = 0.01,
-                         penscale  = rep(1,p),
-                         struct    = Diagonal(p, 1),
+                         penscale  = rep(1,ncol(x)),
+                         struct    = Diagonal(ncol(x), 1),
                          intercept = TRUE,
                          normalize = TRUE,
                          naive     = FALSE,
                          nlambda1  = ifelse(is.null(lambda1),100,length(lambda1)),
-                         min.ratio = ifelse(n <= p, 1e-2, 1e-4),
-                         max.feat  = ifelse(lambda2 < 1e-2, min(n,p), min(4*n,p)),
+                         min.ratio = ifelse(nrow(x) <= ncol(x), 1e-2, 1e-4),
+                         max.feat  = ifelse(lambda2 < 1e-2, min(nrow(x),ncol(x)), min(4*nrow(x),ncol(x))),
                          beta0     = NULL,
                          control   = list()) {
 
-  myData <- GaussianModel$new(covariates = x, outcome = y, cov_struct = struct,
-                              intercept = intercept, standardize = normalize,
-                              cov_weights = penscale)
-
-  ## ===================================================
-  ## CHECKS TO (PARTIALLY) AVOID CRASHES OF THE C++ CODE
-  if (is.null(lambda1)) {
-    lambda1 <- myData$getL1PenaltyRange(nlambda1, min.ratio)
-  } else {
-    stopifnot("entries inlambda1 must all be postive." =
-                (all(lambda1 > 0)))
-    stopifnot("lambda1 values must be sorted in decreasing order." =
-              !is.unsorted(rev(lambda1)))
-  }
-  stopifnot("lambda2 must be a scalar." = (length(lambda2) == 1 & inherits(lambda2, "numeric")))
-  stopifnot("lambda2 must be a non negative scalar." =  (lambda2 >= 0))
-  if (!is.null(beta0)) {
-    stopifnot("beta0 must be a vector with ncol(x) entries." = 
-                (length(beta0) == p & is.numeric(beta0)))
-  }
-  stopifnot(length(max.feat) == 1, "max.feat must be an integer.")
-  if (is.numeric(max.feat) & !is.integer(max.feat))
-    max.feat <- as.integer(max.feat)
+  ## ============================================
+  ## INSTANTIATE THE DATA MODEL
+  myData <- GaussianModel$new(
+    covariates  = x,
+    outcome     = y,
+    cov_struct  = struct,
+    intercept   = intercept,
+    standardize = normalize,
+    cov_weights = penscale
+  )
+  if (is.null(lambda1)) lambda1 <- myData$getL1PenaltyRange(nlambda1, min.ratio)
 
   ## ============================================
-  ## RECOVERING LOW LEVEL OPTIONS
-  quadra <- TRUE
-  if (!is.null(control$method)) {
-    if (control$method != "quadra") {
-      quadra <- FALSE
-    }
-  }
-  ctrl <- list(verbose      = 1, # default control options
-               timer        =  FALSE,
-               max.iter     = max(500,ncol(x)),
-               max.feat     = max.feat,
-               method       = "quadra",
-               threshold    = ifelse(quadra, 1e-7, 1e-2),
-               monitor      = 0,
-               bulletproof  = TRUE,
-               usechol      = TRUE)
-  ctrl[names(control)] <- control # overwritten by user specifications
-  if (ctrl$timer) {r.start <- proc.time()}
-
-  Model <- ElasticNet$new(
+  ## INSTANTIATE THE PENALTY MODEL
+  myModel <- ElasticNet$new(
     data    = myData , 
-    beta0   = beta0  ,
     naive   = naive  ,
     lambda1 = lambda1,
     lambda2 = lambda2)
   
-  Model$fit(ctrl)
-  Model
+  ## ============================================
+  ## RECOVER LOW LEVEL OPTIONS
+  ctrl <- ctrl_default(ncol(x))
+  ctrl$max.feat <- max.feat
+  if (!is.null(control$method)) if (control$method != "quadra") ctrl$threshold <- 1e-2
+  ctrl[names(control)] <- control # default overwritten by user specifications
+
+  ## ============================================
+  ## FIT THE MODEL WITH ACTIVE SET ALGORITHM
+  myModel$fit(beta0, ctrl)
+  
+  ## ============================================
+  ## DONE, SEND BACK THE RESULTING MODEL
+  myModel
 }
