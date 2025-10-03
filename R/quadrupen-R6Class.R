@@ -103,20 +103,21 @@ QuadrupenFit <- R6Class(
     has_intercept = function(value) {private$data$has_intercept},
     is_standardized = function(value) {private$data$is_standardized},
     fitted = function(value) {
+      Xs <- Matrix::colScale(private$data$X, private$data$norm_X)
       if (self$has_intercept) {
-### TODO - normalize x back        
-        res <- sweep(tcrossprod(private$data$X, private$beta),2L,-private$mu,check.margin=FALSE)
+        res <- sweep(tcrossprod(Xs, private$beta),2L,-private$mu,check.margin=FALSE)
       } else {
         private$mu <- 0
-        res <- tcrossprod(private$data$X, private$beta)
+        res <- tcrossprod(Xs, private$beta)
       }
       res
     },
     coefficients = function(value) {private$beta},
+    intercept = function(value) {private$mu},
     residuals = function(value) {apply(self$fitted, 2, function(y_hat) private$data$y - y_hat)},
     deviance = function(value) {colSums(self$residuals^2)},
     degrees_freedom = function(value) {
-      private$df + ifelse(private$intercept, 1L, 0L)
+      private$df + ifelse(self$has_intercept, 1L, 0L)
     },
 ### TODO - only valid for Gaussian models
     r_squared = function(value) {

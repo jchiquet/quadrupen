@@ -59,7 +59,6 @@ Rcpp::List elastic_net_cpp(
   } else {
     x = as<mat>(X) ;
     standardize(x, y, intercept, normalize, penscale, xty, normx, normy, xbar, ybar) ;
-    // x  = x - sqrt(weights) * trans(xbar) ;
     xt = x.t();
     n = x.n_rows ;
     p = x.n_cols ;

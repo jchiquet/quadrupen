@@ -68,9 +68,9 @@ ElasticNet <- R6::R6Class(
       } else {
         internal.timer <- NULL
       }
-      
+
       if (!private$naive) {
-         out$nonzeros <- out$nonzeros * (1 + private$lambda2)
+         out$nzeros <- out$nzeros * (1 + private$lambda2)
          private$mu = private$data$mean_y - (1 + private$lambda2) * drop(out$mu)
        } else {
          private$mu = private$data$mean_y - drop(out$mu);
