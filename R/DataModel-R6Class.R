@@ -78,7 +78,7 @@ DataModel <- R6::R6Class(
       ## ===================================================
     },
     scaleStruct = function(lambda) {
-      private$S <- dimScale(private$S, sqrt(lambda/private$wx))
+      self$S <- dimScale(self$S, sqrt(lambda/self$wx))
     }
   ), 
   active = list(

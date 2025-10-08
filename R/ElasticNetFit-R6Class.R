@@ -17,10 +17,10 @@ ElasticNet <- R6::R6Class(
     initialize =  function(data, naive, lambda1, lambda2) {
         super$initialize(data, lambda1, lambda2)
         private$naive <- naive
+        private$data$scaleStruct(lambda2)
       },
     show = function() {
       super$show()
-      self$data$scaleStruct(lambda2)
       if (private$naive) {
         cat("No rescaling of the coefficients (naive Elastic-net).\n")
       } else {
@@ -33,7 +33,6 @@ ElasticNet <- R6::R6Class(
         stopifnot("beta0 must be a vector with ncol(x) entries." = 
                     (length(beta0) == self$ncoef & is.numeric(beta0)))
       }
-
       ## ======================================================
       ## C++ CALL TO ENET_LS
       ## 
