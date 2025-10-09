@@ -9,16 +9,16 @@ bounded.reg(
   y,
   lambda1 = NULL,
   lambda2 = 0.01,
-  penscale = rep(1, p),
-  struct = NULL,
+  penscale = rep(1, ncol(x)),
+  struct = Diagonal(ncol(x), 1),
   intercept = TRUE,
   normalize = TRUE,
   naive = FALSE,
   nlambda1 = ifelse(is.null(lambda1), 100, length(lambda1)),
-  min.ratio = ifelse(n <= p, 0.01, 0.001),
-  max.feat = ifelse(lambda2 < 0.01, min(n, p), min(4 * n, p)),
-  control = list(),
-  checkargs = TRUE
+  min.ratio = ifelse(nrow(x) <= ncol(x), 0.01, 1e-04),
+  max.feat = ifelse(lambda2 < 0.01, min(nrow(x), ncol(x)), min(4 * nrow(x), ncol(x))),
+  beta0 = NULL,
+  control = list()
 )
 }
 \arguments{
@@ -114,11 +114,6 @@ this threshold. Default is \code{1e-7} for \code{"quadra"} and
 \item{\code{bulletproof}: }{logical; indicates if the bulletproof
 mode should be used while running the \code{"quadra"}
 method. Default is \code{TRUE}. See details below.}}}
-
-\item{checkargs}{logical; should arguments be checked to
-(hopefully) avoid internal crashes? Default is
-\code{TRUE}. Automatically set to \code{FALSE} when calls are made
-from cross-validation or stability selection procedures.}
 }
 \value{
 an object with class \code{quadrupen}, see the
@@ -191,7 +186,6 @@ labels[beta != 0] <- "relevant"
 plot(bounded.reg(x,y,lambda2=0) , label=labels) ## a mess
 plot(bounded.reg(x,y,lambda2=10), label=labels) ## good guys are at the boundaries
 plot(bounded.reg(x,y,lambda2=10,struct=solve(Sigma)), label=labels) ## even better
-
 
 }
 \seealso{

@@ -104,11 +104,6 @@
 #' Fenchel duality gap is computed along the algorithm.}
 #' }
 #'
-#' @param checkargs logical; should arguments be checked to
-#' (hopefully) avoid internal crashes? Default is
-#' \code{TRUE}. Automatically set to \code{FALSE} when calls are made
-#' from cross-validation or stability selection procedures.
-#'
 #' @return an object with class \code{quadrupen}, see the
 #' documentation page \code{\linkS4class{quadrupen}} for details.
 #'
@@ -148,21 +143,13 @@
 #' x <- as.matrix(matrix(rnorm(95*n),n,95) %*% chol(Sigma))
 #' y <- 10 + x %*% beta + rnorm(n,0,10)
 #'
-#' ## Structured Elastic.net
-#' p <- ncol(x)
-#' C <- bandSparse(p,k=0:1,diagonals=list(rep(1,p),rep(-1,p-1)))
-#' L <- t(C) %*% C
-#'
-#' ## This gives a great advantage to the elastic-net
-#' ## for support recovery
-#' beta.lasso <- slot(crossval(x,y, "lasso", mc.cores=2) , "beta.min")
-#' beta.enet  <- slot(crossval(x,y, "elastic.net", lambda2=10, mc.cores=2), "beta.min")
-#' beta.struc <- slot(crossval(x,y, "elastic.net", lambda2=10, mc.cores=2, struct=L), "beta.min")
-#'
-#' cat("\nFalse positives for the Lasso:", sum(sign(beta) != sign(beta.lasso)))
-#' cat("\nFalse positives for the Elastic-net:", sum(sign(beta) != sign(beta.enet)))
-#' cat("\nFalse positives for the Structured Elastic-net:", sum(sign(beta) != sign(beta.struc)))
-#' cat("\nDONE.\n")
+#' ## Structured Elastic.net without/with an additional l2 regularization term
+#' ## and with structuring prior
+#' labels <- rep("irrelevant", length(beta))
+#' labels[beta != 0] <- "relevant"
+#' plot(lasso(x,y), label=labels) ## a mess
+#' plot(elastic.net(x,y,lambda2=10), label=labels) ## good guys are selected first
+#' plot(elastic.net(x,y,lambda2=10,struct=solve(Sigma)), label=labels) ## even better
 #'
 #' labels <- rep("irrelevant", length(beta))
 #' labels[beta != 0] <- "relevant"
@@ -225,8 +212,6 @@ elastic.net <- function(x,
   ## DONE, SEND BACK THE RESULTING MODEL
   myModel
 }
-
-
 
 elastic.net.old <- function(x,
                             y,
@@ -318,7 +303,7 @@ elastic.net.old <- function(x,
   ## ======================================================
   ## STARTING C++ CALL TO ENET_LS
   if (ctrl$timer) {cpp.start <- proc.time()}
-  out <- elastic_net_cpp(
+  out <- elastic_net_old_cpp(
     beta0        ,
     x            ,
     y            ,

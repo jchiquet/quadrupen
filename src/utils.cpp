@@ -160,7 +160,7 @@ double get_df_enet(const double &lambda2, mat &R, mat &xAtxA, const sp_mat &S, u
   return(df);
 }
 
-double get_df_breg(const double &lambda2, mat &xtx, sp_mat &S, uvec &A) {
+double get_df_breg(const double &lambda2, mat &xtx, const sp_mat &S, uvec &A) {
 
   double df ;
   mat C     ;
@@ -170,7 +170,7 @@ double get_df_breg(const double &lambda2, mat &xtx, sp_mat &S, uvec &A) {
     C = inv_sympd(xtx.submat(A,A));
     // have to do this due to sparse encoding
     // either wait for Armadillo's guy to develop non contiguous
-    // subview for sparse matrice or iterate over the n_zeros only...
+    // subview for sparse matrices or iterate over the n_zeros only...
     for (uword i=0;i<A.n_elem;i++){
       for (uword j=i;j<A.n_elem;j++){
 	      SAA(i,j) = S.at(A(i),A(j));

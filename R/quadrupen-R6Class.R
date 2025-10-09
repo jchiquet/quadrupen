@@ -234,7 +234,6 @@ QuadrupenFit <- R6Class(
     #'
     #' @importFrom graphics plot
     #' @import ggplot2 scales grid methods
-    #' @export
     plot = function(xvar = "lambda",
                     main = paste(self$penalty," path", sep=""),
                     log.scale = TRUE, standardize=TRUE, labels = NULL, plot = TRUE, ...) {
@@ -392,7 +391,6 @@ QuadrupenFit <- R6Class(
     #' }
     #'
     #' @import ggplot2 reshape2 scales grid methods
-    #' @exportMethod criteria
     criteria = function(penalty=setNames(c(2, log(self$ncoef)), c("AIC","BIC")), sigma=NULL,
                          log.scale=TRUE, xvar = "lambda", plot=TRUE) {
       

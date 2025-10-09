@@ -13,7 +13,7 @@ using namespace Rcpp;
 using namespace arma;
 
 // [[Rcpp::export]]
-Rcpp::List elastic_net_cpp(
+Rcpp::List elastic_net_old_cpp(
      SEXP BETA0                 , //
 		 SEXP X                     , // regressor matrix
 		 const arma::vec y          , // response vector
@@ -328,7 +328,7 @@ Rcpp::List elastic_net_cpp(
 // 
 // V2
 // [[Rcpp::export]]
-Rcpp::List elastic_net2_cpp(
+Rcpp::List elastic_net_cpp(
     SEXP BETA0                   , // initial vector of coefficients
     const Environment &dataModel , // data structure
        arma::vec lambda1         , // vector of L1 penalties

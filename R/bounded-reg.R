@@ -101,11 +101,6 @@
 #' mode should be used while running the \code{"quadra"}
 #' method. Default is \code{TRUE}. See details below.}}
 #'
-#' @param checkargs logical; should arguments be checked to
-#' (hopefully) avoid internal crashes? Default is
-#' \code{TRUE}. Automatically set to \code{FALSE} when calls are made
-#' from cross-validation or stability selection procedures.
-#'
 #' @return an object with class \code{quadrupen}, see the
 #' documentation page \code{\linkS4class{quadrupen}} for details.
 #'
@@ -173,26 +168,78 @@
 #' plot(bounded.reg(x,y,lambda2=10), label=labels) ## good guys are at the boundaries
 #' plot(bounded.reg(x,y,lambda2=10,struct=solve(Sigma)), label=labels) ## even better
 #'
-#'
 #' @export
 bounded.reg <- function(x,
                         y,
                         lambda1   = NULL,
                         lambda2   = 0.01,
-                        penscale  = rep(1,p),
-                        struct    = NULL,
+                        penscale  = rep(1,ncol(x)),
+                        struct    = Diagonal(ncol(x), 1),
                         intercept = TRUE,
                         normalize = TRUE,
                         naive     = FALSE,
                         nlambda1  = ifelse(is.null(lambda1),100,length(lambda1)),
-                        min.ratio = ifelse(n<=p,1e-2,1e-3),
-                        max.feat  = ifelse(lambda2<1e-2,min(n,p),min(4*n,p)),
-                        control   = list(),
-                        checkargs = TRUE) {
+                        min.ratio = ifelse(nrow(x) <= ncol(x), 1e-2, 1e-4),
+                        max.feat  = ifelse(lambda2 < 1e-2, min(nrow(x),ncol(x)), min(4*nrow(x),ncol(x))),
+                        beta0     = NULL,
+                        control   = list()) {
+  
+  ## ============================================
+  ## INSTANTIATE THE DATA MODEL
+  myData <- GaussianModel$new(
+    covariates  = x,
+    outcome     = y,
+    cov_struct  = struct,
+    intercept   = intercept,
+    standardize = normalize,
+    cov_weights = penscale
+  )
+  if (is.null(lambda1)) lambda1 <- myData$getLInfPenaltyRange(nlambda1, min.ratio)
 
+  ## ============================================
+  ## INSTANTIATE THE PENALTY MODEL
+  myModel <- BoundedReg$new(
+    data    = myData , 
+    naive   = naive  ,
+    lambda1 = lambda1,
+    lambda2 = lambda2)
+
+  ## ============================================
+  ## RECOVER LOW LEVEL OPTIONS
+  ctrl <- ctrl_default(ncol(x))
+  ctrl$max.feat <- max.feat
+  if (!is.null(control$method)) if (control$method != "quadra") ctrl$threshold <- 1e-2
+  ctrl[names(control)] <- control # default overwritten by user specifications
+  ctrl$method <- switch(ctrl$method, quadra = 0, pathwise = 1, fista = 2, 0)
+  ctrl$naive  <- naive
+
+  ## ============================================
+  ## FIT THE MODEL WITH ACTIVE SET ALGORITHM
+  myModel$fit(ctrl)
+  
+  ## ============================================
+  ## DONE, SEND BACK THE RESULTING MODEL
+  myModel
+}
+
+bounded.reg.old <- function(x,
+                            y,
+                            lambda1   = NULL,
+                            lambda2   = 0.01,
+                            penscale  = rep(1,p),
+                            struct    = Diagonal(p, 1),
+                            intercept = TRUE,
+                            normalize = TRUE,
+                            naive     = FALSE,
+                            nlambda1  = ifelse(is.null(lambda1),100,length(lambda1)),
+                            min.ratio = ifelse(n<=p,1e-2,1e-3),
+                            max.feat  = ifelse(lambda2<1e-2,min(n,p),min(4*n,p)),
+                            control   = list(),
+                            checkargs = TRUE) {
+  
   p <- ncol(x) # problem size
   n <- nrow(x) # sample size
-
+  
   ## ===================================================
   ## CHECKS TO (PARTIALLY) AVOID CRASHES OF THE C++ CODE
   if (checkargs) {
@@ -235,7 +282,7 @@ bounded.reg <- function(x,
     if(is.numeric(max.feat) & !is.integer(max.feat))
       max.feat <- as.integer(max.feat)
   }
-
+  
   ## ============================================
   ## RECOVERING LOW LEVEL OPTIONS
   quadra <- TRUE
@@ -254,31 +301,32 @@ bounded.reg <- function(x,
                usechol      = TRUE)
   ctrl[names(control)] <- control # overwritten by user specifications
   if (ctrl$timer) {r.start <- proc.time()}
-
+  
   ## ======================================================
   ## STARTING C++ CALL TO BOUNDED REGRESSION
   if (ctrl$timer) {cpp.start <- proc.time()}
-  out <- bounded_reg_cpp(
-               x,
-               y,
-               struct,
-               lambda1      ,
-               nlambda1     ,
-               min.ratio    ,
-               penscale     ,
-               lambda2      ,
-               intercept    ,
-               normalize    ,
-               rep(1,n)     ,
-               naive        ,
-               ctrl$thresh  ,
-               ctrl$max.iter,
-               max.feat     ,
-               ifelse(ctrl$method=="fista",1,0),
-               ctrl$verbose,
-               inherits(x, "sparseMatrix"),
-               ctrl$bulletproof)
-
+  
+  out <- bounded_reg_old_cpp(
+    x,
+    y,
+    struct,
+    lambda1      ,
+    nlambda1     ,
+    min.ratio    ,
+    penscale     ,
+    lambda2      ,
+    intercept    ,
+    normalize    ,
+    rep(1,n)     ,
+    naive        ,
+    ctrl$thresh  ,
+    ctrl$max.iter,
+    max.feat     ,
+    ifelse(ctrl$method=="fista",1,0),
+    ctrl$verbose,
+    inherits(x, "sparseMatrix"),
+    ctrl$bulletproof)
+  
   coefficients <- Matrix(out$coefficients)
   active.set   <- sparseMatrix(i = out$iB+1,
                                j = out$jB+1,
@@ -291,7 +339,7 @@ bounded.reg <- function(x,
     internal.timer <- NULL
     external.timer <- NULL
   }
-
+  
   ## ======================================================
   ## BUILDING THE QUADRUPEN OBJECT
   out$converge[out$converge == 0] <- "converged"
@@ -313,7 +361,7 @@ bounded.reg <- function(x,
   }
   mu <- drop(out$mu)
   df <- drop(out$df)
-
+  
   ## FITTED VALUES AND RESIDUALS...
   if (intercept) {
     fitted <- sweep(tcrossprod(x,coefficients),2L,-mu,check.margin = FALSE)
@@ -325,7 +373,7 @@ bounded.reg <- function(x,
   residuals <- apply(fitted, 2, function(y.hat) y - y.hat)
   r.squared <- 1 - colSums(residuals^2) / 
     ifelse(intercept, sum((y - mean(y))^2), sum(y^2))
-
+  
   return(new("quadrupen",
              coefficients = coefficients   ,
              active.set   = active.set     ,

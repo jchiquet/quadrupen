@@ -125,39 +125,31 @@
 #' x <- as.matrix(matrix(rnorm(95*n),n,95) %*% chol(Sigma))
 #' y <- 10 + x %*% beta + rnorm(n,0,10)
 #'
-#' beta.lasso <- slot(crossval(x,y, penalty="lasso", mc.cores=2) , "beta.min")
-#'
-#' cat("\nFalse positives for the Lasso:", sum(sign(beta) != sign(beta.lasso)))
-#' cat("\nDONE.\n")
-#'
 #' labels <- rep("irrelevant", length(beta))
 #' labels[beta != 0] <- "relevant"
 #' ## The solution path of the LASSO
 #' plot(lasso(x,y), label=labels)
 #'
-#'
 #' @export
 lasso <- function(x,
                   y,
                   lambda1   = NULL,
-                  penscale  = rep(1,p),
+                  penscale  = rep(1,ncol(x)),
+                  struct    = Diagonal(ncol(x), 1),
                   intercept = TRUE,
                   normalize = TRUE,
                   nlambda1  = ifelse(is.null(lambda1),100,length(lambda1)),
-                  min.ratio = ifelse(n<=p,1e-2,1e-4),
-                  max.feat  = min(n,p),
+                  min.ratio = ifelse(nrow(x) <= ncol(x), 1e-2, 1e-4),
+                  max.feat  = min(nrow(x),ncol(x)),
                   beta0     = NULL,
-                  control   = list(),
-                  checkargs = TRUE) {
-
-  n <- nrow(x)
-  p <- ncol(x)
+                  control   = list()) {
+  
   out <- elastic.net(x,
                      y,
                      lambda1   = lambda1,
                      lambda2   = 0,
                      penscale  = penscale,
-                     struct    = NULL,
+                     struct    = struct,
                      intercept = intercept,
                      normalize = normalize,
                      naive     = TRUE,
@@ -165,10 +157,9 @@ lasso <- function(x,
                      min.ratio = min.ratio,
                      max.feat  = max.feat,
                      beta0     = beta0,
-                     control   = control,
-                     checkargs = checkargs)
-  out@penalty <- "lasso"
-  return(out)
+                     control   = control)
+  # out@penalty <- "lasso"
+  out
 
 }
 

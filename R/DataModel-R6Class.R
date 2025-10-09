@@ -135,6 +135,12 @@ GaussianModel <- R6::R6Class(
       lmax <- max(abs(self$xty))
       lambda <- 10^seq(from=log10(lmax), to=log10(lmax*min_ratio), len=length)  
       lambda
+    },
+    getLInfPenaltyRange = function(length, min_ratio) {
+      stopifnot("min.ratio must be non negative." = min_ratio > 0)
+      lmax <- sum(abs(self$xty))
+      lambda <- 10^seq(from=log10(lmax), to=log10(lmax*min_ratio), len=length)  
+      lambda
     }
     # loss = function(theta) {
     #   y_hat <- self$X %*% theta

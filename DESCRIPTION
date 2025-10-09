@@ -39,6 +39,7 @@ Collate:
     'quadrupen-class.R'
     'quadrupen-R6Class.R'
     'DataModel-R6Class.R'
+    'BoundedRegFit-R6Class.R'
     'ElasticNetFit-R6Class.R'
     'crossval-class.R'
     'crossval.R'

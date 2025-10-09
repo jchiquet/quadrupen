@@ -26,7 +26,7 @@ vec grp_norm(vec x, uvec pk, int norm, int rep) ;
 vec grp_sign(vec x, uvec pk) ;
 
 double get_df_enet(const double &lambda2, mat &R, mat &xAtxA, const sp_mat &S, uvec &A, const uword &fun) ;
-double get_df_breg(const double &lambda2, mat &xtx, sp_mat &S, uvec &A) ;
+double get_df_breg(const double &lambda2, mat &xtx, const sp_mat &S, uvec &A) ;
 
 vec  cg(mat A, vec b, vec x, double tol) ;
 vec pcg(mat A, mat P, vec b, vec x, double tol) ;

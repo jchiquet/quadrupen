@@ -1,10 +1,10 @@
 #' @export
 #' 
-ElasticNet <- R6::R6Class(
-  classname = "ElasticNet",
+BoundedReg <- R6::R6Class(
+  classname = "BoundedReg",
   inherit = QuadrupenFit,
   active  = list(
-    penalty = function(value) "elastic.net",
+    penalty = function(value) "bounded.reg",
     #' @field major_penalty vector of "leading" penalties (either l1 or l2)
     major_penalty = function(value) data.frame(lambda1 = private$lambda1),
     #' @field major_penalty vector of "minor" penalties (either l1 or l2)
@@ -27,19 +27,14 @@ ElasticNet <- R6::R6Class(
         cat("Coefficients rescaled by (1+lambda2).\n")
       }
     },
-    fit = function(beta0 = NULL, control) {
+    fit = function(control) {
       
-      if (!is.null(beta0)) {
-        stopifnot("beta0 must be a vector with ncol(x) entries." = 
-                    (length(beta0) == self$ncoef & is.numeric(beta0)))
-      }
       ## ======================================================
-      ## C++ CALL TO ENET_LS
+      ## C++ CALL TO BREG_LS
       ## 
       if (control$timer) {cpp.start <- proc.time()}
       out <- 
-        elastic_net_cpp(
-          beta0, 
+        bounded_reg_cpp(
           private$data, 
           private$lambda1,
           private$lambda2,
@@ -48,18 +43,14 @@ ElasticNet <- R6::R6Class(
       timer <- ifelse(control$timer, (proc.time() - cpp.start)[3], NA) 
       ## END OF CALL
       ## ======================================================
-      
+
       private$df      <- drop(out$df)
-      private$activeSet <- sparseMatrix(i = out$iA + 1,
-                                        j = out$jA + 1,
+      private$activeSet <- sparseMatrix(i = out$iB + 1,
+                                        j = out$jB + 1,
                                         dims = c(length(private$lambda1),self$ncoef))
       private$mu   <- drop(out$mu)
-      private$beta <- sparseMatrix(i = out$iA + 1,
-                                   j = out$jA + 1,
-                                   x = c(out$nzeros),
-                                   dims = c(length(out$lambda1),self$ncoef),
-                                   dimnames = list(round(c(private$lambda1),3),
-                                                   colnames(private$data$X)))
+      private$beta <- Matrix(out$coef)
+      
       private$monitoring <- out$monitoring
       private$monitoring$internal.timer <- timer
       private$monitoring$convergence <- 

@@ -11,9 +11,9 @@ Rcpp::Rostream<true>&  Rcpp::Rcout = Rcpp::Rcpp_cout_get();
 Rcpp::Rostream<false>& Rcpp::Rcerr = Rcpp::Rcpp_cerr_get();
 #endif
 
-// bounded_reg_cpp
-Rcpp::List bounded_reg_cpp(SEXP X, const arma::vec& Y, const arma::sp_mat Struct, SEXP LAMBDA1, const arma::uword N_LAMBDA, const double MIN_RATIO, const arma::vec& PENSCALE, double LAMBDA2, bool INTERCEPT, bool NORMALIZE, const arma::vec& WEIGHTS, bool NAIVE, double EPS, const arma::uword& MAXITER, const arma::uword& MAXFEAT, const arma::uword& FUN, int VERBOSE, bool SPARSE, bool BULLETPROOF);
-RcppExport SEXP _quadrupen_bounded_reg_cpp(SEXP XSEXP, SEXP YSEXP, SEXP StructSEXP, SEXP LAMBDA1SEXP, SEXP N_LAMBDASEXP, SEXP MIN_RATIOSEXP, SEXP PENSCALESEXP, SEXP LAMBDA2SEXP, SEXP INTERCEPTSEXP, SEXP NORMALIZESEXP, SEXP WEIGHTSSEXP, SEXP NAIVESEXP, SEXP EPSSEXP, SEXP MAXITERSEXP, SEXP MAXFEATSEXP, SEXP FUNSEXP, SEXP VERBOSESEXP, SEXP SPARSESEXP, SEXP BULLETPROOFSEXP) {
+// bounded_reg_old_cpp
+Rcpp::List bounded_reg_old_cpp(SEXP X, const arma::vec& Y, const arma::sp_mat Struct, SEXP LAMBDA1, const arma::uword N_LAMBDA, const double MIN_RATIO, const arma::vec& PENSCALE, double LAMBDA2, bool INTERCEPT, bool NORMALIZE, const arma::vec& WEIGHTS, bool NAIVE, double EPS, const arma::uword& MAXITER, const arma::uword& MAXFEAT, const arma::uword& FUN, int VERBOSE, bool SPARSE, bool BULLETPROOF);
+RcppExport SEXP _quadrupen_bounded_reg_old_cpp(SEXP XSEXP, SEXP YSEXP, SEXP StructSEXP, SEXP LAMBDA1SEXP, SEXP N_LAMBDASEXP, SEXP MIN_RATIOSEXP, SEXP PENSCALESEXP, SEXP LAMBDA2SEXP, SEXP INTERCEPTSEXP, SEXP NORMALIZESEXP, SEXP WEIGHTSSEXP, SEXP NAIVESEXP, SEXP EPSSEXP, SEXP MAXITERSEXP, SEXP MAXFEATSEXP, SEXP FUNSEXP, SEXP VERBOSESEXP, SEXP SPARSESEXP, SEXP BULLETPROOFSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -36,13 +36,27 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< int >::type VERBOSE(VERBOSESEXP);
     Rcpp::traits::input_parameter< bool >::type SPARSE(SPARSESEXP);
     Rcpp::traits::input_parameter< bool >::type BULLETPROOF(BULLETPROOFSEXP);
-    rcpp_result_gen = Rcpp::wrap(bounded_reg_cpp(X, Y, Struct, LAMBDA1, N_LAMBDA, MIN_RATIO, PENSCALE, LAMBDA2, INTERCEPT, NORMALIZE, WEIGHTS, NAIVE, EPS, MAXITER, MAXFEAT, FUN, VERBOSE, SPARSE, BULLETPROOF));
+    rcpp_result_gen = Rcpp::wrap(bounded_reg_old_cpp(X, Y, Struct, LAMBDA1, N_LAMBDA, MIN_RATIO, PENSCALE, LAMBDA2, INTERCEPT, NORMALIZE, WEIGHTS, NAIVE, EPS, MAXITER, MAXFEAT, FUN, VERBOSE, SPARSE, BULLETPROOF));
     return rcpp_result_gen;
 END_RCPP
 }
-// elastic_net_cpp
-Rcpp::List elastic_net_cpp(SEXP BETA0, SEXP X, const arma::vec y, const arma::sp_mat Struct, SEXP LAMBDA1, double n_lambda, const double min_ratio, const arma::vec penscale, const double lambda2, const bool intercept, const bool normalize, const arma::vec weights, const bool naive, const double eps, const arma::uword max_iter, const arma::uword max_feat, const arma::uword fun, const arma::uword verbose, const bool sparse, const bool usechol, const arma::uword monitor);
-RcppExport SEXP _quadrupen_elastic_net_cpp(SEXP BETA0SEXP, SEXP XSEXP, SEXP ySEXP, SEXP StructSEXP, SEXP LAMBDA1SEXP, SEXP n_lambdaSEXP, SEXP min_ratioSEXP, SEXP penscaleSEXP, SEXP lambda2SEXP, SEXP interceptSEXP, SEXP normalizeSEXP, SEXP weightsSEXP, SEXP naiveSEXP, SEXP epsSEXP, SEXP max_iterSEXP, SEXP max_featSEXP, SEXP funSEXP, SEXP verboseSEXP, SEXP sparseSEXP, SEXP usecholSEXP, SEXP monitorSEXP) {
+// bounded_reg_cpp
+Rcpp::List bounded_reg_cpp(const Environment& dataModel, arma::vec lambda1, const double lambda2, const List control);
+RcppExport SEXP _quadrupen_bounded_reg_cpp(SEXP dataModelSEXP, SEXP lambda1SEXP, SEXP lambda2SEXP, SEXP controlSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const Environment& >::type dataModel(dataModelSEXP);
+    Rcpp::traits::input_parameter< arma::vec >::type lambda1(lambda1SEXP);
+    Rcpp::traits::input_parameter< const double >::type lambda2(lambda2SEXP);
+    Rcpp::traits::input_parameter< const List >::type control(controlSEXP);
+    rcpp_result_gen = Rcpp::wrap(bounded_reg_cpp(dataModel, lambda1, lambda2, control));
+    return rcpp_result_gen;
+END_RCPP
+}
+// elastic_net_old_cpp
+Rcpp::List elastic_net_old_cpp(SEXP BETA0, SEXP X, const arma::vec y, const arma::sp_mat Struct, SEXP LAMBDA1, double n_lambda, const double min_ratio, const arma::vec penscale, const double lambda2, const bool intercept, const bool normalize, const arma::vec weights, const bool naive, const double eps, const arma::uword max_iter, const arma::uword max_feat, const arma::uword fun, const arma::uword verbose, const bool sparse, const bool usechol, const arma::uword monitor);
+RcppExport SEXP _quadrupen_elastic_net_old_cpp(SEXP BETA0SEXP, SEXP XSEXP, SEXP ySEXP, SEXP StructSEXP, SEXP LAMBDA1SEXP, SEXP n_lambdaSEXP, SEXP min_ratioSEXP, SEXP penscaleSEXP, SEXP lambda2SEXP, SEXP interceptSEXP, SEXP normalizeSEXP, SEXP weightsSEXP, SEXP naiveSEXP, SEXP epsSEXP, SEXP max_iterSEXP, SEXP max_featSEXP, SEXP funSEXP, SEXP verboseSEXP, SEXP sparseSEXP, SEXP usecholSEXP, SEXP monitorSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -67,13 +81,13 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< const bool >::type sparse(sparseSEXP);
     Rcpp::traits::input_parameter< const bool >::type usechol(usecholSEXP);
     Rcpp::traits::input_parameter< const arma::uword >::type monitor(monitorSEXP);
-    rcpp_result_gen = Rcpp::wrap(elastic_net_cpp(BETA0, X, y, Struct, LAMBDA1, n_lambda, min_ratio, penscale, lambda2, intercept, normalize, weights, naive, eps, max_iter, max_feat, fun, verbose, sparse, usechol, monitor));
+    rcpp_result_gen = Rcpp::wrap(elastic_net_old_cpp(BETA0, X, y, Struct, LAMBDA1, n_lambda, min_ratio, penscale, lambda2, intercept, normalize, weights, naive, eps, max_iter, max_feat, fun, verbose, sparse, usechol, monitor));
     return rcpp_result_gen;
 END_RCPP
 }
-// elastic_net2_cpp
-Rcpp::List elastic_net2_cpp(SEXP BETA0, const Environment& dataModel, arma::vec lambda1, const double lambda2, const List control);
-RcppExport SEXP _quadrupen_elastic_net2_cpp(SEXP BETA0SEXP, SEXP dataModelSEXP, SEXP lambda1SEXP, SEXP lambda2SEXP, SEXP controlSEXP) {
+// elastic_net_cpp
+Rcpp::List elastic_net_cpp(SEXP BETA0, const Environment& dataModel, arma::vec lambda1, const double lambda2, const List control);
+RcppExport SEXP _quadrupen_elastic_net_cpp(SEXP BETA0SEXP, SEXP dataModelSEXP, SEXP lambda1SEXP, SEXP lambda2SEXP, SEXP controlSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -82,7 +96,7 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< arma::vec >::type lambda1(lambda1SEXP);
     Rcpp::traits::input_parameter< const double >::type lambda2(lambda2SEXP);
     Rcpp::traits::input_parameter< const List >::type control(controlSEXP);
-    rcpp_result_gen = Rcpp::wrap(elastic_net2_cpp(BETA0, dataModel, lambda1, lambda2, control));
+    rcpp_result_gen = Rcpp::wrap(elastic_net_cpp(BETA0, dataModel, lambda1, lambda2, control));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -109,9 +123,10 @@ END_RCPP
 }
 
 static const R_CallMethodDef CallEntries[] = {
-    {"_quadrupen_bounded_reg_cpp", (DL_FUNC) &_quadrupen_bounded_reg_cpp, 19},
-    {"_quadrupen_elastic_net_cpp", (DL_FUNC) &_quadrupen_elastic_net_cpp, 21},
-    {"_quadrupen_elastic_net2_cpp", (DL_FUNC) &_quadrupen_elastic_net2_cpp, 5},
+    {"_quadrupen_bounded_reg_old_cpp", (DL_FUNC) &_quadrupen_bounded_reg_old_cpp, 19},
+    {"_quadrupen_bounded_reg_cpp", (DL_FUNC) &_quadrupen_bounded_reg_cpp, 4},
+    {"_quadrupen_elastic_net_old_cpp", (DL_FUNC) &_quadrupen_elastic_net_old_cpp, 21},
+    {"_quadrupen_elastic_net_cpp", (DL_FUNC) &_quadrupen_elastic_net_cpp, 5},
     {"_quadrupen_ridge_cpp", (DL_FUNC) &_quadrupen_ridge_cpp, 11},
     {NULL, NULL, 0}
 };
