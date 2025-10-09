@@ -1,4 +1,4 @@
-#include "active_set.hpp"
+#include "active_set.h"
 
 using namespace Rcpp;
 using namespace arma;

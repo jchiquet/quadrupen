@@ -5,7 +5,7 @@
 #define _quadrupen_ACTIVE_SET_H
 
 #include <RcppArmadillo.h>
-#include "data_reg.hpp"
+#include "data_reg.h"
 
 using namespace Rcpp;
 using namespace arma;

@@ -1,4 +1,4 @@
-#include "data_reg.hpp"
+#include "data_reg.h"
 
 using namespace Rcpp;
 using namespace arma;

@@ -1,4 +1,4 @@
-#include "path.hpp"
+#include "path.h"
 
 using namespace Rcpp;
 using namespace arma;

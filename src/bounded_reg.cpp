@@ -7,7 +7,7 @@
 
 // [[Rcpp::depends(RcppArmadillo)]]
 
-#include "quadrupen_headers.hpp"
+#include "quadrupen_headers.h"
 
 using namespace Rcpp;
 using namespace arma;
@@ -292,7 +292,6 @@ Rcpp::List bounded_reg_cpp(
   const arma::vec xbar      = dataModel["mean_X"] ; // mean of the predictors
   const arma::vec &normx    = dataModel["norm_X"] ; // norm of the predictors
   const double ybar         = dataModel["mean_y"] ; // mean of the predictors
-  const double normy        = dataModel["norm_y"] ; // norm of the response
   const arma::vec& weights  = dataModel["wy"]     ; // observation weights (not use at the moment)
   const bool sparse         = dataModel["sparse_encoding"] ; // boolean for sparse mode
 
@@ -301,14 +300,10 @@ Rcpp::List bounded_reg_cpp(
   const arma::uword max_feat = control["max.feat"]  ; // max # of variables activated
   arma::uword fun      = control["method"]    ; // solver (0=quadra, 1=pathwise, 2=fista)
   const arma::uword verbose  = control["verbose"]   ; // int for verbose mode (0/1/2)
-  const bool usechol         = control["usechol"]   ; // use Cholesky decomposition or not
   const bool naive           = control["naive"]     ; // use Cholesky decomposition or not
   const bool bullet          = control["bulletproof"];// use Cholesky decomposition or not
-  const arma::uword monitor  = control["monitor"]   ; // convergence monitoring (1 == Grandvalet's bound ;-) 2 == Fenchel duality gap)
 
   // Managing the data matrix in both cases of sparse or dense coding
-  const double eps2 = pow(eps, 2) ;
-  
   mat x        ;
   mat xt       ;
   mat xtx      ;

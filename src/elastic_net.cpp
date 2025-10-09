@@ -7,7 +7,7 @@
 
 // [[Rcpp::depends(RcppArmadillo)]]
 
-#include "quadrupen_headers.hpp"
+#include "quadrupen_headers.h"
 
 using namespace Rcpp;
 using namespace arma;

@@ -1,5 +1,5 @@
 /***
- * @file interface.hpp
+ * @file interface.h
  *
  */
 #ifndef __QUADRUPEN_HEADERS_HPP
@@ -16,10 +16,10 @@
 #include "utils.h"
 #include "quadratic.h"
 #include "first_order.h"
-// #include "data_reg.hpp"
-// #include "path.hpp"
-// #include "active_set.hpp"
-// #include "penalties.hpp"
+// #include "data_reg.h"
+// #include "path.h"
+// #include "active_set.h"
+// #include "penalties.h"
 
 #endif
 

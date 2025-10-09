@@ -3,7 +3,7 @@
  *         Statistique et Génome
  */
 
-#include "penalties.hpp"
+#include "penalties.h"
 
 using namespace Rcpp;
 using namespace arma;

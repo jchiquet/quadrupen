@@ -1,7 +1,6 @@
 /*
  * Author: Julien CHIQUET
- *         Statistique et Génome*
- *         MIA PAris-Saclay
+ *         MIA Paris-Saclay
  */
 
 #include "ridge.h"
@@ -63,7 +62,7 @@ Rcpp::List ridge_cpp(
 void RIDGE::LetsRoll() {
 
   arma::mat cinv = inv(trimatu(c)) ; // inverting the Cholesky decomp. of the structuring matrix
-
+  
   // SVD DECOMPOSITION OF ( X * C^-1)
   arma::vec eta ; // eigen value of X cinv
   arma::mat U   ; // left singular vectors of X
@@ -72,27 +71,27 @@ void RIDGE::LetsRoll() {
   
   arma::mat cinvV = cinv * V ;
   arma::mat Uty = trans(U) * y ;
-
+  
   beta.resize(lambda.n_elem, x.n_cols);
   df.resize(lambda.n_elem, 1);
-
+  
   for (uword i; i<lambda.n_elem; i++) {
     // computing the structured ridge estimate
     beta.row(i) = trans(cinvV * diagmat(eta/(square(eta) + lambda(i))) * Uty) / normx;
     // computing the estimated degrees of freedom
     df(i) = sum(square(eta)/(square(eta) + lambda(i)));
   }
-
+  
   // estimating the intercept term
   mu = ybar - beta * xbar.t() ;
 }
 
 void RIDGE::standardize(const bool INTERCEPT, const bool NORMALIZE) {
-
+  
   bool intercept  = (INTERCEPT) ; // boolean for intercept mode
   bool normalize  = (NORMALIZE) ; // boolean for standardizing the predictor
   uword p = x.n_cols;
-
+  
   if (intercept == 1) {
     xbar = mean(x, 0);
     ybar = mean(y) ;
@@ -101,7 +100,7 @@ void RIDGE::standardize(const bool INTERCEPT, const bool NORMALIZE) {
     xbar = zeros<rowvec>(p) ;
     ybar = 0;
   }
-
+  
   if (normalize == 1) {
     normx = sqrt(sum(square(x),0));
     x.each_row() /= normx ;
@@ -109,7 +108,7 @@ void RIDGE::standardize(const bool INTERCEPT, const bool NORMALIZE) {
     normx = ones<rowvec>(p);
   }
   normy = sqrt(sum(square(y))) ;
-
+  
   if (intercept == 1) {
     xty = trans(y-ybar) * x ;
   } else {
@@ -121,7 +120,7 @@ void RIDGE::get_lambda(SEXP LAMBDA,
                        const arma::uword NLAMBDA,
                        const double LAMBDAMIN,
                        const double LAMBDAMAX) {
-
+  
   if (LAMBDA != R_NilValue) {
     lambda  = as<vec>(LAMBDA)  ;
   } else {

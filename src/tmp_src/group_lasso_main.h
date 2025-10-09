@@ -13,7 +13,7 @@
 #define ARMA_HAVE_GETTIMEOFDAY
 #endif
 
-#include "quadrupen_headers.hpp"
+#include "quadrupen_headers.h"
 
 using namespace Rcpp;
 using namespace arma;

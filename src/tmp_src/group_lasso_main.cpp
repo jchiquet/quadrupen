@@ -3,7 +3,7 @@
  *         Statistique et Génome
  */
 
-#include "group_lasso_main.hpp"
+#include "group_lasso_main.h"
 
 using namespace Rcpp;
 using namespace arma;
