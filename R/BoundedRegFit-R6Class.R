@@ -3,16 +3,8 @@
 BoundedReg <- R6::R6Class(
   classname = "BoundedReg",
   inherit = QuadrupenFit,
-  active  = list(
-    penalty = function(value) "bounded.reg",
-    #' @field major_penalty vector of "leading" penalties (either l1 or l2)
-    major_penalty = function(value) data.frame(lambda1 = private$lambda1),
-    #' @field major_penalty vector of "minor" penalties (either l1 or l2)
-    minor_penalty = function(value) setNames(private$lambda2, "lambda2")
-  ),
-  private = list(
-    naive = NA
-  ),
+  active  = list(penalty = function(value) "bounded.reg"),
+  private = list(naive = NA),
   public  = list(
     initialize =  function(data, naive, lambda1, lambda2) {
       super$initialize(data, lambda1, lambda2)
@@ -22,7 +14,7 @@ BoundedReg <- R6::R6Class(
     show = function() {
       super$show()
       if (private$naive) {
-        cat("No rescaling of the coefficients (naive Elastic-net).\n")
+        cat("No rescaling of the coefficients (naive bounded regression).\n")
       } else {
         cat("Coefficients rescaled by (1+lambda2).\n")
       }

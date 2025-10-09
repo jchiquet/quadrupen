@@ -103,6 +103,10 @@ QuadrupenFit <- R6Class(
     dataModel = function(value) {private$data},
     has_intercept = function(value) {private$data$has_intercept},
     is_standardized = function(value) {private$data$is_standardized},
+    #' @field major_penalty vector of "leading" penalties (either l1, linf or l2)
+    major_penalty = function(value) data.frame(lambda1 = private$lambda1),
+    #' @field minor_penalty vector of "minor" penalties (either l1 or l2)
+    minor_penalty = function(value) setNames(private$lambda2, "lambda2"),
     optim_monitoring = function(value) {private$monitoring},
     optim_config = function(value) {private$control},
     fitted = function(value) {
@@ -392,7 +396,7 @@ QuadrupenFit <- R6Class(
     #' }
     #'
     #' @import ggplot2 reshape2 scales grid methods
-    #' @export
+    #' @exportMethod criteria
     criteria = function(penalty=setNames(c(2, log(self$ncoef)), c("AIC","BIC")), sigma=NULL,
                          log.scale=TRUE, xvar = "lambda", plot=TRUE) {
       
@@ -489,17 +493,3 @@ deviance.QuadrupenFit <- function(object, ...) {
   stopifnot(isQuadrupenFit(object))
   object$deviance
 }
-
-
-#' #' @field major_penalty vector of "leading" penalties (either l1 or l2)
-#' major_penalty = function(value) {
-#'   switch(self$penalty,
-#'          "ridge" = data.frame(lambda2=private$lambda2),
-#'          data.frame(lambda1=private$lambda1))
-#' },
-#' #' @field major_penalty vector of "minor" penalties (either l1 or l2)
-#' minor_penalty = function(value) {
-#'   switch(self$penalty,
-#'          "ridge" = setNames(private$lambda1, "lambda1"),
-#'          setNames(private$lambda2, "lambda2"))
-#' },

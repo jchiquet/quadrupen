@@ -59,6 +59,59 @@ Rcpp::List ridge_cpp(
 
 }
 
+// [[Rcpp::export]]
+Rcpp::List ridge2_cpp(
+    const Environment &dataModel , // data structure
+    arma::vec lambda             , // vector of L2 penalties
+    const arma::uword& VERBOSE  ) {
+
+  const arma::mat &X        = dataModel["X"]      ; // design matrix
+  const arma::vec &y        = dataModel["y"]      ; // response vector
+  const arma::mat& C        = dataModel["C"]      ; // Cholesky decompostion of the structuring matrix
+  const arma::vec &penscale = dataModel["wx"]     ;  // penalty weights
+  const arma::rowvec xbar      = dataModel["mean_X"] ; // mean of the predictors
+  const arma::rowvec &normx    = dataModel["norm_X"] ; // norm of the predictors
+  const double ybar         = dataModel["mean_y"] ; // mean of the predictors
+  const arma::vec& weights  = dataModel["wy"]     ; // observation weights (not use at the moment)
+
+  // ==============================================================
+  // INSTANTIATE THE RIDGE PATH
+  arma::mat beta     ; // matrix of coefficients
+  arma::vec df       ; // degrees of freedom along the path
+  arma::vec mu       ; // vector of intercept term
+  
+  // ==============================================================
+  // COMPUTE THE PATH OF SOLUTIONS
+  arma::mat cinv = inv(trimatu(C)) ; // inverting the Cholesky decomp. of the structuring matrix
+  
+  // SVD DECOMPOSITION OF ( X * C^-1)
+  arma::vec eta ; // eigen value of X cinv
+  arma::mat U   ; // left singular vectors of X
+  arma::mat V   ; // right singular vectors of X
+  svd_econ(U, eta, V, (X.each_row() - xbar)*cinv) ;
+  uword n = y.n_elem ;
+  arma::mat cinvV = cinv * V ;
+  arma::mat Uty = trans(U) * y ;
+  
+  beta.resize(lambda.n_elem, X.n_cols);
+  df.resize(lambda.n_elem, 1);
+  
+  for (uword i; i<lambda.n_elem; i++) {
+    // computing the structured ridge estimate
+    beta.row(i) = trans(cinvV * diagmat(eta/(square(eta) + lambda(i))) * Uty) / normx;
+    // computing the estimated degrees of freedom
+    df(i) = sum(square(eta)/(square(eta) + lambda(i)));
+  }
+  
+  // estimating the intercept term
+  mu = ybar - beta * xbar.t() ;
+  
+  return List::create(Named("coefficients") = beta,
+                      Named("mu")           = mu,
+                      Named("df")           = df);
+  
+}
+
 void RIDGE::LetsRoll() {
 
   arma::mat cinv = inv(trimatu(c)) ; // inverting the Cholesky decomp. of the structuring matrix

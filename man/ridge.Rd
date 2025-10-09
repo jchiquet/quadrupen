@@ -7,15 +7,14 @@
 ridge(
   x,
   y,
-  lambda2 = NULL,
-  struct = NULL,
+  lambda = NULL,
+  struct = Diagonal(ncol(x), 1),
   intercept = TRUE,
   normalize = TRUE,
-  nlambda2 = 100,
-  lambda.min = ifelse(n <= p, 0.01, 1e-04),
+  nlambda = 100,
+  lambda.min = ifelse(nrow(x) <= ncol(x), 0.01, 1e-04),
   lambda.max = 100,
-  control = list(),
-  checkargs = TRUE
+  control = list()
 )
 }
 \arguments{
@@ -24,10 +23,6 @@ normalized os \code{TRUE}, coefficients will then be rescaled to
 the original scale.}
 
 \item{y}{response vector.}
-
-\item{lambda2}{sequence of decreasing \eqn{\ell_2}{l2}-penalty
-levels. If \code{NULL} (the default), a vector is generated with
-\code{nlambda2} entries.}
 
 \item{struct}{matrix structuring the coefficients, possibly
 sparsely encoded. Must be at least positive semi-definite (this is
@@ -41,10 +36,6 @@ included in the model. Default is \code{TRUE}.}
 \item{normalize}{logical; indicates if variables should be
 normalized to have unit L2 norm before fitting.  Default is
 \code{TRUE}.}
-
-\item{nlambda2}{integer that indicates the number of values to put
-in the \code{lambda2} vector.  Ignored if \code{lambda2} is
-provided.}
 
 \item{lambda.min}{the minimal amount of penalty used to generated
 the vector \code{lambda2}. Ignored if \code{lambda2} is provided.}
@@ -68,10 +59,13 @@ algorithm. Default is \code{FALSE}.}
 
 }}
 
-\item{checkargs}{logical; should arguments be checked to
-(hopefully) avoid internal crashes? Default is
-\code{TRUE}. Automatically set to \code{FALSE} when calls are made
-from cross-validation or stability selection procedures.}
+\item{lambda2}{sequence of decreasing \eqn{\ell_2}{l2}-penalty
+levels. If \code{NULL} (the default), a vector is generated with
+\code{nlambda2} entries.}
+
+\item{nlambda2}{integer that indicates the number of values to put
+in the \code{lambda2} vector.  Ignored if \code{lambda2} is
+provided.}
 }
 \value{
 an object with class \code{quadrupen}, see the
@@ -109,8 +103,10 @@ n <- 50
 x <- as.matrix(matrix(rnorm(95*n),n,95) \%*\% chol(Sigma))
 y <- 10 + x \%*\% beta + rnorm(n,0,10)
 
-
-beta.lasso <- slot(crossval(x,y, penalty="lasso", mc.cores=2) , "beta.min")
+labels <- rep("irrelevant", length(beta))
+labels[beta != 0] <- "relevant"
+plot(ridge(x,y) , label=labels) ## a mess
+plot(ridge(x,y, struct=solve(Sigma)), label=labels) ## even better
 
 cat("\nFalse positives for the Lasso:", sum(sign(beta) != sign(beta.lasso)))
 cat("\nDONE.\n")

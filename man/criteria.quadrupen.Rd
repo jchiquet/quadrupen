@@ -202,6 +202,15 @@ See also \code{\link{plot.quadrupen}}.
 
 \code{\linkS4class{quadrupen}}.
 }
+\section{Active bindings}{
+\if{html}{\out{<div class="r6-active-bindings">}}
+\describe{
+\item{\code{major_penalty}}{vector of "leading" penalties (either l1, linf or l2)}
+
+\item{\code{minor_penalty}}{vector of "minor" penalties (either l1 or l2)}
+}
+\if{html}{\out{</div>}}
+}
 \section{Methods}{
 \subsection{Public methods}{
 \itemize{

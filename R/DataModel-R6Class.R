@@ -9,6 +9,7 @@ DataModel <- R6::R6Class(
     ## model-related fields
     X = Matrix(),
     y = numeric(),
+    C = matrix(),
     S = Matrix(),
     wx = numeric(),
     wy = numeric(),
@@ -79,6 +80,9 @@ DataModel <- R6::R6Class(
     },
     scaleStruct = function(lambda) {
       self$S <- dimScale(self$S, sqrt(lambda/self$wx))
+    },
+    CholStruct = function() {
+      self$C <- as.matrix(chol(self$S))
     }
   ), 
   active = list(
@@ -140,6 +144,11 @@ GaussianModel <- R6::R6Class(
       stopifnot("min.ratio must be non negative." = min_ratio > 0)
       lmax <- sum(abs(self$xty))
       lambda <- 10^seq(from=log10(lmax), to=log10(lmax*min_ratio), len=length)  
+      lambda
+    },
+    getL2PenaltyRange = function(length, lmin, lmax) {
+      stopifnot("lambda.min must be non negative." = lmin > 0)
+      lambda <- 10^seq(from=log10(lmax), to=log10(lmin), len=length)  
       lambda
     }
     # loss = function(theta) {

@@ -54,11 +54,6 @@
 #'
 #' }
 #'
-#' @param checkargs logical; should arguments be checked to
-#' (hopefully) avoid internal crashes? Default is
-#' \code{TRUE}. Automatically set to \code{FALSE} when calls are made
-#' from cross-validation or stability selection procedures.
-#'
 #' @return an object with class \code{quadrupen}, see the
 #' documentation page \code{\linkS4class{quadrupen}} for details.
 #'
@@ -93,8 +88,10 @@
 #' x <- as.matrix(matrix(rnorm(95*n),n,95) %*% chol(Sigma))
 #' y <- 10 + x %*% beta + rnorm(n,0,10)
 #'
-#'
-#' beta.lasso <- slot(crossval(x,y, penalty="lasso", mc.cores=2) , "beta.min")
+#' labels <- rep("irrelevant", length(beta))
+#' labels[beta != 0] <- "relevant"
+#' plot(ridge(x,y) , label=labels) ## a mess
+#' plot(ridge(x,y, struct=solve(Sigma)), label=labels) ## even better
 #'
 #' cat("\nFalse positives for the Lasso:", sum(sign(beta) != sign(beta.lasso)))
 #' cat("\nDONE.\n")
@@ -103,131 +100,46 @@
 #' @export
 ridge <- function(x,
                   y,
-                  lambda2    = NULL,
-                  struct     = NULL,
+                  lambda     = NULL,
+                  struct     = Diagonal(ncol(x), 1),
                   intercept  = TRUE,
                   normalize  = TRUE,
-                  nlambda2   = 100 ,
-                  lambda.min = ifelse(n<=p,1e-2,1e-4),
+                  nlambda    = 100 ,
+                  lambda.min = ifelse(nrow(x) <= ncol(x), 1e-2, 1e-4),
                   lambda.max = 100,
-                  control    = list(),
-                  checkargs  = TRUE) {
-  
-  p <- ncol(x) # problem size
-  n <- nrow(x) # sample size
-  
-  ## ===================================================
-  ## CHECKS TO (PARTIALLY) AVOID CRASHES OF THE C++ CODE
-  if(!inherits(x, c("matrix")))
-    x <- as.matrix(x)
-  if (checkargs) {
-    if(any(is.na(x)))
-      stop("NA value in x not allowed.")
-    if(!is.numeric(y))
-      stop("y has to be of type 'numeric'")
-    if(n != length(y))
-      stop("x and y have not correct dimensions")
-    if (!is.null(lambda2)) {
-      if(any(lambda2 <= 0) | lambda.min <=0)
-        stop("entries in lambda2 must all be postive.")
-    }
-    if (!is.null(struct)) {
-      if (ncol(struct) != p | ncol(struct) != p)
-        stop("struct must be a (square) positive semidefinite matrix.")
-      if (any(eigen(struct,only.values=TRUE)$values<0))
-        stop("struct must be a (square) positive semidefinite matrix.")
-      if(!inherits(struct, c("dgCMatrix", "matrix")))
-        struct <- as(struct, "dgCMatrix")
-    }
-  }
+                  control    = list()) {
+
+  ## ============================================
+  ## INSTANTIATE THE DATA MODEL
+  myData <- GaussianModel$new(
+    covariates  = x,
+    outcome     = y,
+    cov_struct  = struct,
+    intercept   = intercept,
+    standardize = normalize,
+    cov_weights = rep(1, ncol(x))
+  )
+  if (is.null(lambda)) 
+    lambda <- myData$getL2PenaltyRange(nlambda, lambda.min, lambda.max)
+
+  ## ============================================
+  ## INSTANTIATE THE PENALTY MODEL
+  myModel <- Ridge$new(data = myData, lambda = lambda)
   
   ## ============================================
-  ## RECOVERING LOW LEVEL OPTIONS
-  quadra <- TRUE
-  if (!is.null(control$method)) {
-    if (control$method != "quadra") {
-      quadra <- FALSE
-    }
-  }
+  ## RECOVER LOW LEVEL OPTIONS
   ctrl <- list(verbose      = 1, # default control options
                timer        =  FALSE)
   ctrl[names(control)] <- control # overwritten by user specifications
   if (ctrl$timer) {r.start <- proc.time()}
+
+  ## ============================================
+  ## FIT THE MODEL WITH ACTIVE SET ALGORITHM
+  myModel$fit(ctrl)
   
-  ## Cholesky decomposition of the (possibly sparsely encoded) structuring matrix
-  if (is.null(struct)) {
-    C <- diag(rep(1,p))
-  } else {
-    C <- as.matrix(chol(struct))
-  }
-  
-  ## ======================================================
-  ## STARTING C++ CALL TO ENET_LS
-  if (ctrl$timer) {cpp.start <- proc.time()}
-  out <- ridge_cpp(
-    x            ,
-    y            ,
-    C            ,
-    lambda2      ,
-    nlambda2     ,
-    lambda.min   ,
-    lambda.max   ,
-    intercept    ,
-    normalize    ,
-    rep(1,n)     ,
-    ctrl$verbose)
-  coefficients <- Matrix(out$coefficients)
-  ## END OF CALL
-  if (ctrl$timer) {
-    internal.timer <- (proc.time() - cpp.start)[3]
-    external.timer <- (proc.time() - r.start)[3]
-  } else {
-    internal.timer <- NULL
-    external.timer <- NULL
-  }
-  
-  ## ======================================================
-  ## BUILDING THE QUADRUPEN OBJECT
-  monitoring  <- list(external.timer = external.timer   ,
-                      internal.timer = internal.timer   )
-  dimnames(coefficients)[[1]] <- round(c(out$lambda2),3)
-  if (is.null(colnames(x))) {
-    dimnames(coefficients)[[2]] <- 1:p
-  } else {
-    dimnames(coefficients)[[2]] <- colnames(x)
-  }
-  mu <- drop(out$mu)
-  df <- drop(out$df)
-  
-  ## FITTED VALUES AND RESIDUALS...
-  if (intercept) {
-    fitted <- sweep(tcrossprod(x,coefficients),2L,-mu,check.margin=FALSE)
-    df <- df + 1
-  } else {
-    mu <- 0
-    fitted <- tcrossprod(x,coefficients)
-  }
-  residuals <- apply(fitted,2,function(y.hat) y - y.hat)
-  r.squared <- 1 - colSums(residuals^2)/ifelse(intercept,sum((y - mean(y))^2),sum(y^2))
-  
-  return(new("quadrupen",
-             coefficients = coefficients   ,
-             active.set   = Matrix(1,nrow=p,ncol=p),
-             intercept    = intercept      ,
-             mu           = mu             ,
-             normx        = drop(out$normx),
-             fitted       = fitted         ,
-             residuals    = residuals      ,
-             df           = df             ,
-             r.squared    = r.squared      ,
-             penscale     = rep(1,p)       ,
-             penalty      = "ridge"        ,
-             naive        = NULL           ,
-             lambda1      = 0              ,
-             lambda2      = c(out$lambda2) ,
-             monitoring   = monitoring     ,
-             control      = ctrl))
-  
+  ## ============================================
+  ## DONE, SEND BACK THE RESULTING MODEL
+  myModel
 }
 
 ridge.old <- function(x,

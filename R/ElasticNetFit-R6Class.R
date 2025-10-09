@@ -3,16 +3,8 @@
 ElasticNet <- R6::R6Class(
   classname = "ElasticNet",
   inherit = QuadrupenFit,
-  active  = list(
-    penalty = function(value) "elastic.net",
-    #' @field major_penalty vector of "leading" penalties (either l1 or l2)
-    major_penalty = function(value) data.frame(lambda1 = private$lambda1),
-    #' @field major_penalty vector of "minor" penalties (either l1 or l2)
-    minor_penalty = function(value) setNames(private$lambda2, "lambda2")
-  ),
-  private = list(
-    naive = NA
-  ),
+  active  = list(penalty = function(value) "elastic.net"),
+  private = list(naive = NA),
   public  = list(
     initialize =  function(data, naive, lambda1, lambda2) {
       super$initialize(data, lambda1, lambda2)
