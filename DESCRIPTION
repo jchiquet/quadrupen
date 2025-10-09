@@ -52,4 +52,4 @@ Collate:
     'group_lasso.R'
     'RcppExports.R'
 Packaged: 2013-03-25 19:41:00 UTC; jchiquet
-RoxygenNote: 7.3.2
+RoxygenNote: 7.3.3

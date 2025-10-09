@@ -10,8 +10,9 @@ test_that("lasso_quad2lars", {
       lambda1 <-  lasso.larsen$lambda ## usde the lars lambda grid
       lasso.quadru <- lasso(x,y, intercept=intercept, normalize=normalize,
                                   lambda1=lambda1, control=list(method="quadra"))
-      quad <- list(coef   = as.matrix(lasso.quadru@coefficients),
-                   normx  = lasso.quadru@normx,
+
+      quad <- list(coef   = as.matrix(lasso.quadru$coefficients),
+                   normx  = lasso.quadru$dataModel$norm_X,
                    rss    = deviance(lasso.quadru))
 
       lars <- list(coef   = lasso.larsen$beta[-iols, ],

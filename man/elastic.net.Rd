@@ -9,17 +9,16 @@ elastic.net(
   y,
   lambda1 = NULL,
   lambda2 = 0.01,
-  penscale = rep(1, p),
-  struct = Diagonal(p, 1),
+  penscale = rep(1, ncol(x)),
+  struct = Diagonal(ncol(x), 1),
   intercept = TRUE,
   normalize = TRUE,
   naive = FALSE,
   nlambda1 = ifelse(is.null(lambda1), 100, length(lambda1)),
-  min.ratio = ifelse(n <= p, 0.01, 1e-04),
-  max.feat = ifelse(lambda2 < 0.01, min(n, p), min(4 * n, p)),
+  min.ratio = ifelse(nrow(x) <= ncol(x), 0.01, 1e-04),
+  max.feat = ifelse(lambda2 < 0.01, min(nrow(x), ncol(x)), min(4 * nrow(x), ncol(x))),
   beta0 = NULL,
-  control = list(),
-  checkargs = TRUE
+  control = list()
 )
 }
 \arguments{
