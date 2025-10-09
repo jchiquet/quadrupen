@@ -309,8 +309,8 @@ setMethod("plot", "quadrupen", definition =
        }
      }
      colnames(data.coef) <- c("xvar","var","coef", "variables")
-     d <- ggplot(data.coef,aes(x=xvar,y=coefficients, colour=variables, group=var)) +
-       geom_line(aes(x=xvar,y=coef)) +  geom_hline(yintercept=0, alpha=0.5, linetype="dotted") +
+     d <- ggplot(data.coef,aes(x=.data$xvar,y=.data$coefficients, colour=.data$variables, group=.data$var)) +
+       geom_line(aes(x=.data$xvar,y=.data$coef)) +  geom_hline(yintercept=0, alpha=0.5, linetype="dotted") +
          ylab(ifelse(standardize, "standardized coefficients","coefficients")) + ggtitle(main)
 
      if (xvar=="lambda") {
