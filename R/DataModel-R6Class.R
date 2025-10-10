@@ -30,12 +30,16 @@ DataModel <- R6::R6Class(
         stopifnot("y has to be of type 'numeric'" = is.numeric(outcome))
         stopifnot("x and y have not correct dimensions" = 
                   (nrow(covariates) == length(outcome)))
-        stopifnot("struct must be a (square) positive semidefinite matrix." = 
-                    all(dim(cov_struct) == ncol(covariates)))
-        stopifnot("struct must be a (square) positive semidefinite matrix." = 
-                    all(eigen(cov_struct, only.values = TRUE)$values >= 0))
+        if (!is.null(cov_struct)) {
+          stopifnot("struct must be a (square) positive semidefinite matrix." = 
+                      all(dim(cov_struct) == ncol(covariates)))
+          stopifnot("struct must be a (square) positive semidefinite matrix." = 
+                      all(eigen(cov_struct, only.values = TRUE)$values >= 0))
+        } else {
+          cov_struct <- Diagonal(ncol(covariates), 1)
+        }
         if (!inherits(cov_struct, "sparseMatrix")) 
-          cov_struct <- as(cov_struct, "dgCMatrix")
+          cov_struct <- as(cov_struct, "CsparseMatrix")
         stopifnot("penscale must have ncol(x) entries" = 
                   (length(cov_weights) == ncol(covariates)))
         stopifnot("covariates weights must be positive" = all(cov_weights > 0))

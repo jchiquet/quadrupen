@@ -165,7 +165,7 @@ setMethod("plot", "cvpen", definition =
       
       d <- d + ggtitle(main) +
         geom_vline(data=lambda, aes(xintercept=.data$xval,colour=.data$lambda.choice),
-                   linetype="dashed",  alpha=0.5, show_guide=TRUE)
+                   linetype="dashed",  alpha=0.5, show.legend = TRUE)
     }
     ## DO THE PLOT
     if (plot) {print(d)}

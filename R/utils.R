@@ -18,7 +18,7 @@ default.args <- function(penalty,n,p,user) {
            lambda1   = NULL,
            lambda2   = 0.01,
            penscale  = rep(1,p),
-           struct    = NULL,
+           struct    = Diagonal(ncol(x), 1),
            intercept = TRUE,
            normalize = TRUE,
            naive     = FALSE,
@@ -26,8 +26,7 @@ default.args <- function(penalty,n,p,user) {
            min.ratio = ifelse(n<p,0.01,5e-3),
            max.feat  = min(4*n,p),
            beta0     = NULL,
-           control   = list(),
-           checkargs = TRUE),
+           control   = list()),
 
          "lasso"     = list(
            lambda1   = NULL,
@@ -38,35 +37,45 @@ default.args <- function(penalty,n,p,user) {
            min.ratio = ifelse(n<p,0.01,5e-3),
            max.feat  = min(n,p),
            beta0     = NULL,
-           control   = list(),
-           checkargs = TRUE),
-         
+           control   = list()),
+
          "ridge" = list(
            lambda2    = NULL,
-           struct     = NULL,
+           struct     = Diagonal(ncol(x), 1),
+           penscale   = rep(1,p),
            intercept  = TRUE,
            normalize  = TRUE,
-           nlambda2   = 100 ,
+           nlambda    = 100 ,
            lambda.min = ifelse(n<=p,0.01,1e-4),
            lambda.max = 100 ,
-           control    = list(),
-           checkargs  = TRUE),
+           control    = list()),
 
          "bounded.reg" = list(
            lambda1   = NULL,
            lambda2   = 0.01,
            penscale  = rep(1,p),
-           struct    = NULL,
+           struct    = Diagonal(ncol(x), 1),
            intercept = TRUE,
            normalize = TRUE,
            naive     = FALSE,
            nlambda1  = ifelse(is.null(user$lambda1),100,length(user$lambda1)),
            min.ratio = ifelse(n<p,0.01,5e-3),
            max.feat  = min(4*n,p),
-           control   = list(),
-           checkargs = TRUE)
+           control   = list())
          )
 }
+
+ctrl_default <- function(d)
+  list(verbose    = 1, # default control options
+       timer       =  FALSE,
+       max.iter    = max(500, d),
+       method      = "quadra",
+       threshold   = 1e-7,
+       monitor     = 0,
+       bulletproof = TRUE,
+       usechol     = TRUE
+  )
+
 
 ## ====================================================================
 ## STANDARDIZE THE PREDICTOR (NEEDED FOR CROSS-VALIDATION PURPOSES)
@@ -116,17 +125,6 @@ standardize <- function(x,y,intercept,normalize,penscale,zero=.Machine$double.ep
 
   return(list(xbar=xbar, ybar=ybar, normx=normx, normy=normy, xty=xty, x=x))
 }
-
-ctrl_default <- function(d)
-  list(verbose    = 1, # default control options
-      timer       =  FALSE,
-      max.iter    = max(500, d),
-      method      = "quadra",
-      threshold   = 1e-7,
-      monitor     = 0,
-      bulletproof = TRUE,
-      usechol     = TRUE
-  )
 
 status_to_message <- function(status) {
   message <- switch(as.character(status),

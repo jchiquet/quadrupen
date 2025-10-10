@@ -104,7 +104,7 @@ crossval <- function(x,
                      folds    = split(sample(1:nrow(x)), rep(1:K, length=nrow(x))),
                      lambda2  = switch(penalty, "ridge" = 10^seq(-2,2,len=100), 10^seq(-2,0,len=20) ),
                      verbose  = TRUE,
-                     mc.cores = detectCores(),
+                     mc.cores = 1,
                      ...) {
 
   ## =============================================================
@@ -119,25 +119,34 @@ crossval <- function(x,
                      "lasso"       = lasso      ,
                      "bounded.reg" = bounded.reg,
                      "ridge"       = ridge)
-  get.lambda1 <- switch(penalty,
-                        "elastic.net" = get.lambda1.l1,
-                        "lasso"       = get.lambda1.l1,
-                        "bounded.reg" = get.lambda1.li,
-                        "ridge"       = NULL)
-
+  
   if (penalty == "lasso") {lambda2 <- NULL}
-
 
   user <- list(...)
   defs <- default.args(penalty,nrow(x)-max(sapply(folds,length)),ncol(x),user)
   args <- modifyList(defs, user)
-  ## Compute a grid of lambda1 (the same for each fold)
-  if (is.null(args$lambda1) & penalty != "ridge") {
-    input <- standardize(x,y,args$intercept,args$normalize,args$penscale)
-    args$lambda1 <- get.lambda1(input$xty,args$nlambda1,args$min.ratio)
-    rm(input)
+  
+  ## ============================================
+  ## INSTANTIATE THE DATA MODEL
+  myData <- GaussianModel$new(
+    covariates  = x,
+    outcome     = y,
+    cov_struct  = args$struct,
+    intercept   = args$intercept,
+    standardize = args$normalize,
+    cov_weights = args$penscale
+  )
+  
+## Compute a grid of lambda1 (the same for each fold)
+  if (is.null(args$lambda1)) {
+    args$lambda1 <- switch(
+      penalty,
+      "elastic.net" = myData$getL1PenaltyRange(args$nlambda1, args$min.ratio),
+      "lasso"       = myData$getL1PenaltyRange(args$nlambda1, args$min.ratio),
+      "bounded.reg" = myData$getLInfPenaltyRange(args$nlambda1, args$min.ratio),
+      "ridge"       = NULL)
   }
-
+  
   if (penalty=="ridge") {
     major.lambda <- lambda2
   } else {
@@ -180,10 +189,10 @@ crossval <- function(x,
 
     ## Apply the fitting procedure with these best lambda2 parameter
     args$lambda2 <- lambda2.min
-    args$checkargs <- FALSE ## enforcing checkargs to FALSE to save some time
+    
     best.fit <- do.call(fit.func, c(list(x=x,y=y),args))
 
-    ind.max <- nrow(best.fit@coefficients)
+    ind.max <- nrow(best.fit$coefficients)
     ind.min <- min(match(lambda1.min, major.lambda),ind.max)
     ind.1se <- min(match(lambda1.1se, major.lambda),ind.max)
 
@@ -194,7 +203,7 @@ crossval <- function(x,
         cat("\nCROSS-VALIDATION FOR ",penalty," REGULARIZER \n\n")
         cat(length(folds),"-fold CV on the lambda2 grid.\n", sep="")
       }
-      cv <- simple.cv(folds, x, y, fit.func, args, lambda2, mc.cores)
+      cv <- simple.cv(folds, x, y, fit.func, args, sort(lambda2, decreasing = TRUE), mc.cores)
 
       ## Recovering the best lambda1 and lambda2
       lambda1.min <- 0
@@ -204,10 +213,9 @@ crossval <- function(x,
 
       ## Apply the fitting procedure with these best lambda2 parameter
       args$lambda2 <- lambda2.min
-      args$checkargs <- FALSE ## enforcing checkargs to FALSE to save some time
       best.fit <- do.call(fit.func, c(list(x=x,y=y),args))
 
-      ind.max <- nrow(best.fit@coefficients)
+      ind.max <- nrow(best.fit$coefficients)
       ind.min <- min(match(lambda2.min, major.lambda),ind.max)
       ind.1se <- min(match(lambda2.1se, major.lambda),ind.max)
 
@@ -226,10 +234,9 @@ crossval <- function(x,
 
       ## Apply the fitting procedure with these best lambda2 parameter
       args$lambda2 <- lambda2.min
-      args$checkargs <- FALSE ## enforcing checkargs to FALSE to save some time
       best.fit <- do.call(fit.func, c(list(x=x,y=y),args))
 
-      ind.max <- nrow(best.fit@coefficients)
+      ind.max <- nrow(best.fit$coefficients)
       ind.min <- min(match(lambda1.min, major.lambda),ind.max)
       ind.1se <- min(match(lambda1.1se, major.lambda),ind.max)
 
@@ -238,8 +245,8 @@ crossval <- function(x,
   }
 
   ## Finally recover the CV choice (minimum and 1-se rule)
-  beta.min <- best.fit@coefficients[ind.min,]
-  beta.1se <- best.fit@coefficients[ind.1se,]
+  beta.min <- best.fit$coefficients[ind.min,]
+  beta.1se <- best.fit$coefficients[ind.1se,]
 
   return(new("cvpen",
              lambda1     = args$lambda1,
@@ -262,7 +269,6 @@ simple.cv <- function(folds, x, y, fit.func, args, lambda2, mc.cores) {
   ## overwrite irrelevant arguments
   args$control$verbose <- 0
   args$lambda2         <- lambda2
-  args$checkargs       <- FALSE
   if (!is.null(args$max.feat))
     args$max.feat        <- ncol(x)
 

@@ -100,8 +100,9 @@
 #' @export
 ridge <- function(x,
                   y,
-                  lambda     = NULL,
-                  struct     = Diagonal(ncol(x), 1),
+                  lambda2    = NULL,
+                  struct     = NULL,
+                  penscale   = rep(1,ncol(x)),
                   intercept  = TRUE,
                   normalize  = TRUE,
                   nlambda    = 100 ,
@@ -117,14 +118,14 @@ ridge <- function(x,
     cov_struct  = struct,
     intercept   = intercept,
     standardize = normalize,
-    cov_weights = rep(1, ncol(x))
+    cov_weights = penscale
   )
-  if (is.null(lambda)) 
-    lambda <- myData$getL2PenaltyRange(nlambda, lambda.min, lambda.max)
+  if (is.null(lambda2)) 
+    lambda2 <- myData$getL2PenaltyRange(nlambda, lambda.min, lambda.max)
 
   ## ============================================
   ## INSTANTIATE THE PENALTY MODEL
-  myModel <- Ridge$new(data = myData, lambda = lambda)
+  myModel <- Ridge$new(data = myData, lambda = lambda2)
   
   ## ============================================
   ## RECOVER LOW LEVEL OPTIONS

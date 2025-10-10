@@ -181,7 +181,6 @@ bounded.reg <- function(x,
                         nlambda1  = ifelse(is.null(lambda1),100,length(lambda1)),
                         min.ratio = ifelse(nrow(x) <= ncol(x), 1e-2, 1e-4),
                         max.feat  = ifelse(lambda2 < 1e-2, min(nrow(x),ncol(x)), min(4*nrow(x),ncol(x))),
-                        beta0     = NULL,
                         control   = list()) {
   
   ## ============================================
