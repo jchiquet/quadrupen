@@ -41,7 +41,8 @@ BoundedReg <- R6::R6Class(
                                         j = out$jB + 1,
                                         dims = c(length(private$lambda1),self$ncoef))
       private$mu   <- drop(out$mu)
-      private$beta <- Matrix(out$coef)
+      private$beta <- Matrix(out$coef, 
+            dimnames = list(round(c(private$lambda1),3), colnames(private$data$X)))
       
       private$monitoring <- out$monitoring
       private$monitoring$internal.timer <- timer

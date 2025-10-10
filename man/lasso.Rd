@@ -9,7 +9,6 @@ lasso(
   y,
   lambda1 = NULL,
   penscale = rep(1, ncol(x)),
-  struct = Diagonal(ncol(x), 1),
   intercept = TRUE,
   normalize = TRUE,
   nlambda1 = ifelse(is.null(lambda1), 100, length(lambda1)),

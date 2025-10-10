@@ -102,7 +102,7 @@ crossval <- function(x,
                      penalty  = c("elastic.net", "lasso", "bounded.reg", "ridge"),
                      K        = 10,
                      folds    = split(sample(1:nrow(x)), rep(1:K, length=nrow(x))),
-                     lambda2  = switch(penalty, "ridge" = 10^seq(-2,2,len=100), 10^seq(-2,0,len=20) ),
+                     lambda2  = switch(penalty, "ridge" = 10^seq(2,-2,len=100), 10^seq(0,-2,len=20) ),
                      verbose  = TRUE,
                      mc.cores = 1,
                      ...) {
@@ -116,12 +116,10 @@ crossval <- function(x,
   penalty <- match.arg(penalty)
   fit.func <- switch(penalty,
                      "elastic.net" = elastic.net,
-                     "lasso"       = lasso      ,
+                     "lasso"       = elastic.net,
                      "bounded.reg" = bounded.reg,
                      "ridge"       = ridge)
   
-  if (penalty == "lasso") {lambda2 <- NULL}
-
   user <- list(...)
   defs <- default.args(penalty,nrow(x)-max(sapply(folds,length)),ncol(x),user)
   args <- modifyList(defs, user)
@@ -147,11 +145,8 @@ crossval <- function(x,
       "ridge"       = NULL)
   }
   
-  if (penalty=="ridge") {
-    major.lambda <- lambda2
-  } else {
-    major.lambda <- args$lambda1
-  }
+  if (penalty == "lasso") {lambda2 <- NULL}
+  if (penalty == "ridge") {lambda1 <- 0}
 
   ## =============================================================
   if (length(lambda2) > 1 & penalty != "ridge") {
@@ -161,40 +156,17 @@ crossval <- function(x,
       cat(length(folds),"-fold CV on the lambda1 grid for each lambda2\n", sep="")
     }
     cv <- sapply(1:length(lambda2), function(i) {
-      if(verbose){
-        cat(round(lambda2[i],3),"\t")
-        if (i %% 5 == 0) {cat("\n")}
-      }
+      if(verbose) { cat(round(lambda2[i],3),"\t"); if (i %% 5 == 0) {cat("\n")} }
       simple.cv(folds, x, y, fit.func, args, lambda2[i], mc.cores)
     }, simplify=FALSE)
     if(verbose){cat("\n")}
 
-    ## Recovering the best lambda1 and lambda2
-    lambda1.cv <- sapply(1:length(lambda2), function(j) {
-      cv.min <- min(cv[[j]]$mean)
-      lambda1.min   <- max(major.lambda[cv[[j]]$mean <= cv.min], na.rm=TRUE)
-      lambda1.1se   <- max(major.lambda[cv[[j]]$mean <(cv[[j]]$mean+cv[[j]]$serr+1e-5)[match(lambda1.min,major.lambda)]], na.rm=TRUE)
-      return(c(cv.min, lambda1.min, lambda1.1se))
-    })
-    ind.lb2.min <- which.min(lambda1.cv[1,])
-    lambda2.min <- lambda2[ind.lb2.min]
-    lambda2.1se <- NULL
-    lambda1.min <- lambda1.cv[2, ind.lb2.min]
-    lambda1.1se <- lambda1.cv[3, ind.lb2.min]
-
     ## formatting cv.error for ggplot
-    cv <- data.frame(do.call(rbind,cv),
-                     lambda1=rep(major.lambda, length(lambda2)),
-                     lambda2=rep(lambda2,rep(length(major.lambda),length(cv))))
-
-    ## Apply the fitting procedure with these best lambda2 parameter
-    args$lambda2 <- lambda2.min
-    
-    best.fit <- do.call(fit.func, c(list(x=x,y=y),args))
-
-    ind.max <- nrow(best.fit$coefficients)
-    ind.min <- min(match(lambda1.min, major.lambda),ind.max)
-    ind.1se <- min(match(lambda1.1se, major.lambda),ind.max)
+    cv <- data.frame(
+      do.call(rbind,cv),
+      lambda1 = rep(args$lambda1, length(lambda2)),
+      lambda2 = rep(lambda2, rep(length(args$lambda1),length(cv)))
+    )
 
   } else {
     ## SIMPLE CROSS-VALIDATION WORK
@@ -203,62 +175,22 @@ crossval <- function(x,
         cat("\nCROSS-VALIDATION FOR ",penalty," REGULARIZER \n\n")
         cat(length(folds),"-fold CV on the lambda2 grid.\n", sep="")
       }
-      cv <- simple.cv(folds, x, y, fit.func, args, sort(lambda2, decreasing = TRUE), mc.cores)
-
-      ## Recovering the best lambda1 and lambda2
-      lambda1.min <- 0
-      lambda1.1se <- 0
-      lambda2.min <- max(major.lambda[cv$mean <= min(cv$mean)], na.rm=TRUE)
-      lambda2.1se <- max(major.lambda[cv$mean <(cv$mean+cv$serr+1e-5)[match(lambda2.min,major.lambda)]], na.rm=TRUE)
-
-      ## Apply the fitting procedure with these best lambda2 parameter
-      args$lambda2 <- lambda2.min
-      best.fit <- do.call(fit.func, c(list(x=x,y=y),args))
-
-      ind.max <- nrow(best.fit$coefficients)
-      ind.min <- min(match(lambda2.min, major.lambda),ind.max)
-      ind.1se <- min(match(lambda2.1se, major.lambda),ind.max)
-
+      cv <- simple.cv(folds, x, y, fit.func, args, lambda2, mc.cores)
+      cv <- data.frame(cv, lambda1=0, lambda2=lambda2)
+      
     } else {
       if (verbose) {
         cat("\nCROSS-VALIDATION FOR ",penalty," REGULARIZER \n\n")
         cat(length(folds),"-fold CV on the lambda1 grid, lambda2 is fixed.\n", sep="")
       }
       cv <- simple.cv(folds, x, y, fit.func, args, lambda2, mc.cores)
-
-      ## Recovering the best lambda1 and lambda2
-      lambda1.min <- max(major.lambda[cv$mean <= min(cv$mean)], na.rm=TRUE)
-      lambda1.1se <- max(major.lambda[cv$mean <(cv$mean+cv$serr+1e-5)[match(lambda1.min,major.lambda)]], na.rm=TRUE)
-      lambda2.min <- lambda2
-      lambda2.1se <- lambda2
-
-      ## Apply the fitting procedure with these best lambda2 parameter
-      args$lambda2 <- lambda2.min
-      best.fit <- do.call(fit.func, c(list(x=x,y=y),args))
-
-      ind.max <- nrow(best.fit$coefficients)
-      ind.min <- min(match(lambda1.min, major.lambda),ind.max)
-      ind.1se <- min(match(lambda1.1se, major.lambda),ind.max)
-
+      cv <- data.frame(cv, lambda1=args$lambda1, lambda2=ifelse(penalty == "lasso", 0, lambda2))
     }
-    cv <- data.frame(cv, lambda=major.lambda)
   }
 
-  ## Finally recover the CV choice (minimum and 1-se rule)
-  beta.min <- best.fit$coefficients[ind.min,]
-  beta.1se <- best.fit$coefficients[ind.1se,]
-
-  return(new("cvpen",
-             lambda1     = args$lambda1,
-             lambda1.min = lambda1.min,
-             lambda1.1se = lambda1.1se,
-             lambda2     = lambda2,
-             lambda2.min = lambda2.min,
-             lambda2.1se = lambda2.1se,
-             cv.error    = cv,
-             folds       = folds,
-             beta.min    = beta.min,
-             beta.1se    = beta.1se))
+  myCV <- CrossValidation$new(cv_error = cv, folds = folds)
+  myCV$get_best_fit(x, y, fit.func, args)
+  myCV
 }
 
 simple.cv <- function(folds, x, y, fit.func, args, lambda2, mc.cores) {
@@ -292,7 +224,7 @@ simple.cv <- function(folds, x, y, fit.func, args, lambda2, mc.cores) {
     warning("\nThere have been a lot of early stops along the path: I keep on running, but you really should reconsider 'min.ratio' regarding the n<<p setting.")
   }
   mean[is.nan(mean)] <- NA
-  serr <- sqrt((colSums(sweep(err, 2L, mean, check.margin = FALSE)^2,na.rm=TRUE)/(n-1)) /K)
+  serr <- sqrt((colSums(sweep(err, 2L, mean, check.margin = FALSE)^2,na.rm=TRUE)/(n-1))/K)
 
-  return(data.frame(mean=mean, serr=serr))
+  data.frame(mean=mean, serr=serr)
 }

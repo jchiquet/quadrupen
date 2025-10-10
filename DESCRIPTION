@@ -42,6 +42,7 @@ Collate:
     'BoundedRegFit-R6Class.R'
     'ElasticNetFit-R6Class.R'
     'RidgeFit-R6Class.R'
+    'CrossValidation-R6Class.R'
     'crossval-class.R'
     'crossval.R'
     'stability-class.R'

@@ -7,8 +7,9 @@
 ridge(
   x,
   y,
-  lambda = NULL,
-  struct = Diagonal(ncol(x), 1),
+  lambda2 = NULL,
+  struct = NULL,
+  penscale = rep(1, ncol(x)),
   intercept = TRUE,
   normalize = TRUE,
   nlambda = 100,
@@ -23,6 +24,10 @@ normalized os \code{TRUE}, coefficients will then be rescaled to
 the original scale.}
 
 \item{y}{response vector.}
+
+\item{lambda2}{sequence of decreasing \eqn{\ell_2}{l2}-penalty
+levels. If \code{NULL} (the default), a vector is generated with
+\code{nlambda2} entries.}
 
 \item{struct}{matrix structuring the coefficients, possibly
 sparsely encoded. Must be at least positive semi-definite (this is
@@ -58,10 +63,6 @@ selection.}
 algorithm. Default is \code{FALSE}.}
 
 }}
-
-\item{lambda2}{sequence of decreasing \eqn{\ell_2}{l2}-penalty
-levels. If \code{NULL} (the default), a vector is generated with
-\code{nlambda2} entries.}
 
 \item{nlambda2}{integer that indicates the number of values to put
 in the \code{lambda2} vector.  Ignored if \code{lambda2} is

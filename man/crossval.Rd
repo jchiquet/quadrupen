@@ -12,7 +12,7 @@ crossval(
   folds = split(sample(1:nrow(x)), rep(1:K, length = nrow(x))),
   lambda2 = switch(penalty, ridge = 10^seq(-2, 2, len = 100), 10^seq(-2, 0, len = 20)),
   verbose = TRUE,
-  mc.cores = detectCores(),
+  mc.cores = 1,
   ...
 )
 }
