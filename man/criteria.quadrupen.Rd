@@ -162,6 +162,14 @@ plot(elastic.net(x,y, lambda2=10), standardize=FALSE, xvar="fraction")
 plot(bounded.reg(x,y, lambda2=10), xvar="fraction")
 }
 
+Penalized criteria based on estimation of degrees of freedom
+
+Produce a plot or send back the values of some penalized criteria
+accompanied with the vector(s) of parameters selected
+accordingly. The default behavior plots the BIC and the AIC (with
+respective factor \eqn{\log(n)}{log(n)} and \eqn{2}{2}) yet the user can specify any
+penalty.
+
 
 ## ------------------------------------------------
 ## Method `QuadrupenFit$criteria`
@@ -228,7 +236,7 @@ See also \code{\link{plot.quadrupen}}.
 \if{latex}{\out{\hypertarget{method-QuadrupenFit-new}{}}}
 \subsection{Method \code{new()}}{
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{QuadrupenFit$new(data, lambda1, lambda2)}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{QuadrupenFit$new(lambda1, lambda2)}\if{html}{\out{</div>}}
 }
 
 \subsection{Arguments}{
@@ -354,6 +362,14 @@ plot(elastic.net(x,y, lambda2=10), standardize=FALSE, xvar="fraction")
 ## Plot the Bounded regression path (fraction on X-axis)
 plot(bounded.reg(x,y, lambda2=10), xvar="fraction")
 }
+
+Penalized criteria based on estimation of degrees of freedom
+
+Produce a plot or send back the values of some penalized criteria
+accompanied with the vector(s) of parameters selected
+accordingly. The default behavior plots the BIC and the AIC (with
+respective factor \eqn{\log(n)}{log(n)} and \eqn{2}{2}) yet the user can specify any
+penalty.
 
 }
 \if{html}{\out{</div>}}

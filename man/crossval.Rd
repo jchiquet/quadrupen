@@ -10,7 +10,7 @@ crossval(
   penalty = c("elastic.net", "lasso", "bounded.reg", "ridge"),
   K = 10,
   folds = split(sample(1:nrow(x)), rep(1:K, length = nrow(x))),
-  lambda2 = switch(penalty, ridge = 10^seq(-2, 2, len = 100), 10^seq(-2, 0, len = 20)),
+  lambda2 = switch(penalty, ridge = 10^seq(2, -2, len = 100), 10^seq(0, -2, len = 20)),
   verbose = TRUE,
   mc.cores = 1,
   ...
@@ -93,20 +93,17 @@ y <- 10 + x \%*\% beta + rnorm(n,0,10)
 ## and cross-validate over the sequences lambda1 and lambda2
 cv.grid <- crossval(x,y, lambda2=10^seq(2,-2,len=50), nlambda1=50)
 ## Rerun simple cross-validation with the appropriate lambda2
-cv.10K <- crossval(x,y, lambda2=slot(cv.double, "lambda2.min"))
+cv.10K <- crossval(x,y, lambda2=cv.grid$lambda2_min)
 ## Try leave one out also
-cv.loo <- crossval(x,y, K=n, lambda2=slot(cv.double, "lambda2.min"))
+cv.loo <- crossval(x,y, K=n, lambda2=cv.grid$lambda2_min)
 
 plot(cv.grid)
 plot(cv.10K)
 plot(cv.loo)
 
 ## Performance for selection purpose
-beta.min.10K <- slot(cv.10K, "beta.min")
-beta.min.loo <- slot(cv.loo, "beta.min")
-
-cat("\nFalse positives with the minimal 10-CV choice: ", sum(sign(beta) != sign(beta.min.10K)))
-cat("\nFalse positives with the minimal LOO-CV choice: ", sum(sign(beta) != sign(beta.min.loo)))
+cat("\nFalse positives with the minimal 10-CV choice: ", sum(sign(beta) != sign(cv.10K$beta_min )))
+cat("\nFalse positives with the minimal LOO-CV choice: ", sum(sign(beta) != sign(cv.loo$beta_min)))
 }
 
 }

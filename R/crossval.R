@@ -75,20 +75,17 @@
 #' ## and cross-validate over the sequences lambda1 and lambda2
 #' cv.grid <- crossval(x,y, lambda2=10^seq(2,-2,len=50), nlambda1=50)
 #' ## Rerun simple cross-validation with the appropriate lambda2
-#' cv.10K <- crossval(x,y, lambda2=slot(cv.double, "lambda2.min"))
+#' cv.10K <- crossval(x,y, lambda2=cv.grid$lambda2_min)
 #' ## Try leave one out also
-#' cv.loo <- crossval(x,y, K=n, lambda2=slot(cv.double, "lambda2.min"))
+#' cv.loo <- crossval(x,y, K=n, lambda2=cv.grid$lambda2_min)
 #'
 #' plot(cv.grid)
 #' plot(cv.10K)
 #' plot(cv.loo)
 #'
 #' ## Performance for selection purpose
-#' beta.min.10K <- slot(cv.10K, "beta.min")
-#' beta.min.loo <- slot(cv.loo, "beta.min")
-#'
-#' cat("\nFalse positives with the minimal 10-CV choice: ", sum(sign(beta) != sign(beta.min.10K)))
-#' cat("\nFalse positives with the minimal LOO-CV choice: ", sum(sign(beta) != sign(beta.min.loo)))
+#' cat("\nFalse positives with the minimal 10-CV choice: ", sum(sign(beta) != sign(cv.10K$beta_min )))
+#' cat("\nFalse positives with the minimal LOO-CV choice: ", sum(sign(beta) != sign(cv.loo$beta_min)))
 #' }
 #'
 #' @keywords models, regression

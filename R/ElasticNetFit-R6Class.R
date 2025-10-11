@@ -6,10 +6,9 @@ ElasticNet <- R6::R6Class(
   active  = list(penalty = function(value) "elastic.net"),
   private = list(naive = NA),
   public  = list(
-    initialize =  function(data, naive, lambda1, lambda2) {
-      super$initialize(data, lambda1, lambda2)
+    initialize =  function(lambda1, lambda2, naive) {
+      super$initialize(lambda1, lambda2)
       private$naive <- naive
-      private$data$scaleStruct(lambda2)
     },
     show = function() {
       super$show()
@@ -19,12 +18,16 @@ ElasticNet <- R6::R6Class(
         cat("Coefficients rescaled by (1+lambda2).\n")
       }
     },
-    fit = function(beta0 = NULL, control) {
+    fit = function(data, control, beta0 = NULL) {
       
-      if (!is.null(beta0)) {
+      stopifnot("The data object must be an instance of DataModel"
+                = inherits(data, "DataModel"))
+      private$data <- data
+      private$data$scaleStruct(private$lambda2)
+      
+      if (!is.null(beta0))
         stopifnot("beta0 must be a vector with ncol(x) entries." = 
                     (length(beta0) == self$ncoef & is.numeric(beta0)))
-      }
       ## ======================================================
       ## C++ CALL TO ENET_LS
       ## 

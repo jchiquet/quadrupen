@@ -198,10 +198,9 @@ bounded.reg <- function(x,
   ## ============================================
   ## INSTANTIATE THE PENALTY MODEL
   myModel <- BoundedReg$new(
-    data    = myData , 
-    naive   = naive  ,
     lambda1 = lambda1,
-    lambda2 = lambda2)
+    lambda2 = lambda2,
+    naive   = naive)
 
   ## ============================================
   ## RECOVER LOW LEVEL OPTIONS
@@ -214,7 +213,7 @@ bounded.reg <- function(x,
 
   ## ============================================
   ## FIT THE MODEL WITH ACTIVE SET ALGORITHM
-  myModel$fit(ctrl)
+  myModel$fit(myData, ctrl)
   
   ## ============================================
   ## DONE, SEND BACK THE RESULTING MODEL

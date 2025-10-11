@@ -123,26 +123,17 @@ QuadrupenFit <- R6Class(
     intercept = function(value) {private$mu},
     residuals = function(value) {apply(self$fitted, 2, function(y_hat) private$data$y - y_hat)},
     deviance = function(value) {colSums(self$residuals^2)},
-    degrees_freedom = function(value) {
-      private$df + ifelse(self$has_intercept, 1L, 0L)
-    },
-    ### TODO - only valid for Gaussian models
-    r_squared = function(value) {
-      1 - colSums(self$residuals^2) / private$data$rss
-    }
+    degrees_freedom = function(value) {private$df + ifelse(self$has_intercept, 1L, 0L)},
+    r_squared = function(value) {1 - colSums(self$residuals^2) / private$data$rss}
   ),
-
   ## ____________________________________________________
   ## 
   ## PUBLIC MEMBERS
   ## ____________________________________________________
   public  = list(
-    initialize = function(data, lambda1, lambda2) {
+    initialize = function(lambda1, lambda2) {
 
       ## ===================================================
-      ## CHECKS TO AVOID CRASHES OF THE C++ CODE
-      stopifnot("The data object must be an instance of DataModel"
-                = inherits(data, "DataModel"))
       stopifnot("entries inlambda1 must all be postive." =
                   (all(lambda1 > 0)))
       stopifnot("lambda1 values must be sorted in decreasing order." =
@@ -151,7 +142,6 @@ QuadrupenFit <- R6Class(
                   (length(lambda2) == 1 & inherits(lambda2, "numeric")))
       stopifnot("lambda2 must be a non negative scalar." =  
                   (lambda2 >= 0))
-      private$data     <- data
       private$lambda1  <- lambda1
       private$lambda2  <- lambda2
     },
@@ -178,6 +168,13 @@ QuadrupenFit <- R6Class(
         res <- sweep(newx %*% t(private$beta),2L,-private$mu, check.margin=FALSE)
       }
       res
+    },
+    cross_validate = 
+      function(
+          K     = 10,
+          folds = split(sample(1:self$ncoef), rep(1:K, length=self$nsample)),
+          verbose = TRUE) {
+      
     },
     #' Plot method for a quadrupen object
     #'
@@ -236,9 +233,6 @@ QuadrupenFit <- R6Class(
     #' plot(bounded.reg(x,y, lambda2=10), xvar="fraction")
     #' }
     #'
-    #' @importFrom graphics plot
-    #' @import ggplot2 scales grid methods
-    #' @export plot
     plot = function(xvar = "lambda",
                     main = paste(self$penalty," path", sep=""),
                     log.scale = TRUE, standardize=TRUE, labels = NULL, plot = TRUE, ...) {

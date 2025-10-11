@@ -7,17 +7,22 @@ Ridge <- R6::R6Class(
     naive = NA
   ),
   public  = list(
-    initialize =  function(data, lambda) {
-      super$initialize(data, lambda, 0)
+    initialize =  function(lambda) {
+      super$initialize(lambda, 0)
       private$data$CholStruct()
     },
-    fit = function(control) {
+    fit = function(data, control) {
+
+      stopifnot("The data object must be an instance of DataModel"
+                = inherits(data, "DataModel"))
+      private$data <- data
+      private$data$scaleStruct(private$lambda)
       
       ## ======================================================
       ## C++ CALL TO RIDGE_LS
       ## 
       if (control$timer) {cpp.start <- proc.time()}
-      out <- ridge2_cpp(private$data,private$lambda1, control$verbose)
+      out <- ridge2_cpp(private$data, private$lambda1, control$verbose)
       timer <- ifelse(control$timer, (proc.time() - cpp.start)[3], NA) 
       ## END OF CALL
       ## ======================================================

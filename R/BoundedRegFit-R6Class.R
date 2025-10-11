@@ -6,10 +6,9 @@ BoundedReg <- R6::R6Class(
   active  = list(penalty = function(value) "bounded.reg"),
   private = list(naive = NA),
   public  = list(
-    initialize =  function(data, naive, lambda1, lambda2) {
-      super$initialize(data, lambda1, lambda2)
+    initialize =  function(lambda1, lambda2, naive) {
+      super$initialize(lambda1, lambda2)
       private$naive <- naive
-      private$data$scaleStruct(lambda2)
     },
     show = function() {
       super$show()
@@ -19,7 +18,12 @@ BoundedReg <- R6::R6Class(
         cat("Coefficients rescaled by (1+lambda2).\n")
       }
     },
-    fit = function(control) {
+    fit = function(data, control) {
+
+      stopifnot("The data object must be an instance of DataModel"
+                = inherits(data, "DataModel"))
+      private$data <- data
+      private$data$scaleStruct(private$lambda2)
       
       ## ======================================================
       ## C++ CALL TO BREG_LS

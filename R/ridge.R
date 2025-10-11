@@ -125,7 +125,7 @@ ridge <- function(x,
 
   ## ============================================
   ## INSTANTIATE THE PENALTY MODEL
-  myModel <- Ridge$new(data = myData, lambda = lambda2)
+  myModel <- Ridge$new(lambda = lambda2)
   
   ## ============================================
   ## RECOVER LOW LEVEL OPTIONS
@@ -136,7 +136,7 @@ ridge <- function(x,
 
   ## ============================================
   ## FIT THE MODEL WITH ACTIVE SET ALGORITHM
-  myModel$fit(ctrl)
+  myModel$fit(myData, ctrl)
   
   ## ============================================
   ## DONE, SEND BACK THE RESULTING MODEL

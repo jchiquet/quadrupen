@@ -190,10 +190,9 @@ elastic.net <- function(x,
   ## ============================================
   ## INSTANTIATE THE PENALTY MODEL
   myModel <- ElasticNet$new(
-    data    = myData , 
-    naive   = naive  ,
     lambda1 = lambda1,
-    lambda2 = lambda2)
+    lambda2 = lambda2, 
+    naive   = naive  )
   
   ## ============================================
   ## RECOVER LOW LEVEL OPTIONS
@@ -206,7 +205,7 @@ elastic.net <- function(x,
   
   ## ============================================
   ## FIT THE MODEL WITH ACTIVE SET ALGORITHM
-  myModel$fit(beta0, ctrl)
+  myModel$fit(myData, ctrl, beta0)
   
   ## ============================================
   ## DONE, SEND BACK THE RESULTING MODEL
