@@ -174,20 +174,21 @@ elastic.net <- function(x,
                         max.feat  = ifelse(lambda2 < 1e-2, min(nrow(x),ncol(x)), min(4*nrow(x),ncol(x))),
                         beta0     = NULL,
                         control   = list()) {
-
+  
   ## ============================================
   ## INSTANTIATE THE DATA MODEL
   myData <- GaussianModel$new(
     covariates  = x,
     outcome     = y,
     cov_struct  = struct,
-    intercept   = intercept,
-    standardize = normalize,
     cov_weights = penscale
   )
-  if (is.null(lambda1)) lambda1 <- myData$getL1PenaltyRange(nlambda1, min.ratio)
   myData$scaleStruct(lambda2)
-  
+  myData$standardize(intercept, normalize)
+  myData$getSufficientStat()
+  if (is.null(lambda1)) 
+    lambda1 <- myData$getL1PenaltyRange(nlambda1, min.ratio)
+    
   ## ============================================
   ## INSTANTIATE THE PENALTY MODEL
   myModel <- ElasticNet$new(

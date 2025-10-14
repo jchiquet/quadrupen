@@ -15,70 +15,70 @@ DataModel <- R6::R6Class(
     wy = numeric(),
     mean_X = numeric(),
     norm_X = double(),
+    mean_y = numeric(),
+    norm_y = double(),
     initialize = 
       function(covariates, outcome, cov_struct,
-               intercept=TRUE, standardize=TRUE,
                cov_weights = rep(1,ncol(covariates)),
-               obs_weights = rep(1,length(outcome))) {
-
-        ## ===================================================
-        ## CHECKS TO (PARTIALLY) AVOID CRASHES OF THE C++ CODE
-        ## 
-        stopifnot("x has to be of class 'matrix' or 'dgCMatrix'." = 
-                  inherits(covariates, c("matrix", "dgCMatrix")))
-        stopifnot("NA value in x not allowed." = !any(is.na(covariates)))
-        stopifnot("y has to be of type 'numeric'" = is.numeric(outcome))
-        stopifnot("x and y have not correct dimensions" = 
-                  (nrow(covariates) == length(outcome)))
-        if (!is.null(cov_struct)) {
-          stopifnot("struct must be a (square) positive semidefinite matrix." = 
-                      all(dim(cov_struct) == ncol(covariates)))
-          stopifnot("struct must be a (square) positive semidefinite matrix." = 
-                      all(eigen(cov_struct, only.values = TRUE)$values >= 0))
-        } else {
-          cov_struct <- Diagonal(ncol(covariates), 1)
-        }
-        if (!inherits(cov_struct, "sparseMatrix")) 
-          cov_struct <- as(cov_struct, "CsparseMatrix")
-        stopifnot("penscale must have ncol(x) entries" = 
-                  (length(cov_weights) == ncol(covariates)))
-        stopifnot("covariates weights must be positive" = all(cov_weights > 0))
-        stopifnot("observations weights must be positive" = all(obs_weights > 0))
-        ## ===================================================
+               obs_weights = rep(1,length(outcome)), check_args = TRUE) {
         
         ## ===================================================
-        ## GET SUFFICIENT STATISTICS FOR CENTERING AND SCALING
-        ## 
+        ## CHECKS TO (PARTIALLY) AVOID CRASHES OF THE C++ CODE
+        ##
+        if (check_args) {
+          stopifnot("x has to be of class 'matrix' or 'dgCMatrix'." = 
+                      inherits(covariates, c("matrix", "dgCMatrix")))
+          stopifnot("NA value in x not allowed." = !any(is.na(covariates)))
+          stopifnot("y has to be of type 'numeric'" = is.numeric(outcome))
+          stopifnot("x and y have not correct dimensions" = 
+                      (nrow(covariates) == length(outcome)))
+          if (!is.null(cov_struct)) {
+            stopifnot("struct must be a (square) positive semidefinite matrix." = 
+                        all(dim(cov_struct) == ncol(covariates)))
+            stopifnot("struct must be a (square) positive semidefinite matrix." = 
+                        all(eigen(cov_struct, only.values = TRUE)$values >= 0))
+            if (!inherits(cov_struct, "sparseMatrix")) 
+              cov_struct <- as(cov_struct, "CsparseMatrix")
+          }
+          stopifnot("penscale must have ncol(x) entries" = 
+                      (length(cov_weights) == ncol(covariates)))
+          stopifnot("covariates weights must be positive" = all(cov_weights > 0))
+          stopifnot("observations weights must be positive" = all(obs_weights > 0))
+        } 
+        ## ===================================================
+        
         if (is.null(colnames(covariates))) colnames(covariates) <- 1:ncol(covariates)
         self$X  <- covariates
         self$y  <- outcome
         self$S  <- cov_struct
         self$wx <- cov_weights
         self$wy <- obs_weights
-        private$centered <- intercept
-        private$scaled   <- standardize
-
+      },
+      standardize = function(intercept, normalize) {
         ## X and y are normalized but not centered (to keep efficiency with sparse encoding)
         if (intercept) {
           private$names <- c("intercept", colnames(self$X))
           self$mean_X <- colMeans(self$X)
+          self$mean_y <- mean(self$y)
         } else {
           private$names <- colnames(self$X)
           self$mean_X <- rep(0, self$d)
+          self$mean_y <- 0
         }
         
         ## normalizing the data
-        if (standardize) {
+        if (normalize) {
           self$norm_X <-  sqrt(drop(colSums(self$X^2)) - self$n * self$mean_X^2)
           self$X      <- Matrix::colScale(self$X, 1/self$norm_X)
           self$mean_X <- self$mean_X/self$norm_X
       } else {
         self$norm_X <- rep(1, self$d)
+        self$norm_y <- sqrt(sum(self$wy * self$y^2))
       }
 
       self$X      <- Matrix::colScale(self$X, 1/self$wx)
       self$mean_X <- self$mean_X / self$wx
-      if (!inherits(private$data$X, "sparseMatrix")) self$X <- as.matrix(self$X)
+      if (!inherits(self$X, "sparseMatrix")) self$X <- as.matrix(self$X)
       ##
       ## ===================================================
     },
@@ -104,40 +104,11 @@ GaussianModel <- R6::R6Class(
   classname = "GaussianModel",
   inherit = DataModel,
   public = list(
-    mean_y = numeric(),
-    norm_y = double(),
     xty    = double(),
-    initialize = 
-      function(covariates, outcome, cov_struct,
-               intercept=TRUE, standardize=TRUE,
-               cov_weights = rep(1,ncol(covariates)),
-               obs_weights = rep(1,length(outcome))) {
-
-        ## ===================================================
-        ## CALL TO MOTHER CLASS CONSTRUCTOR 
-        ## 
-        super$initialize(covariates, outcome, cov_struct, 
-                         intercept, standardize, cov_weights, obs_weights)
-
-        ## ===================================================
-        ## SUFFICIENT STATISTICS FOR CENTERING AND SCALING
-        ## SPECIFIC TO GAUSSIAN DATA (LINEAR REGRESSION)
-        ## 
-        if (self$has_intercept) {
-          self$mean_y <- mean(self$y)
-        } else {
-          self$mean_y <- 0
-        }
-        self$norm_y <- sqrt(sum(self$wy * self$y^2))
-        
-        if (self$has_intercept) {
-          self$xty <- crossprod(self$X, self$y - self$mean_y) - 
-            sum(self$y - self$mean_y) * self$mean_X
-        } else {
-          self$xty <- crossprod(self$X, self$y)
-        }
-        self$xty <- as.numeric(self$xty)
-      },
+    getSufficientStat = function() {
+      self$xty <- as.numeric(crossprod(self$X, self$y - self$mean_y) - 
+                               sum(self$y - self$mean_y) * self$mean_X)
+    },
     getL1PenaltyRange = function(length, min_ratio) {
       stopifnot("min.ratio must be non negative." = min_ratio > 0)
       lmax <- max(abs(self$xty))

@@ -116,13 +116,13 @@ ridge <- function(x,
     covariates  = x,
     outcome     = y,
     cov_struct  = struct,
-    intercept   = intercept,
-    standardize = normalize,
     cov_weights = penscale
   )
+  myData$CholStruct()
+  myData$standardize(intercept, normalize)
+  myData$getSufficientStat()
   if (is.null(lambda2)) 
     lambda2 <- myData$getL2PenaltyRange(nlambda, lambda.min, lambda.max)
-  myData$CholStruct()
   
   ## ============================================
   ## INSTANTIATE THE PENALTY MODEL

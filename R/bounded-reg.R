@@ -189,20 +189,22 @@ bounded.reg <- function(x,
     covariates  = x,
     outcome     = y,
     cov_struct  = struct,
-    intercept   = intercept,
-    standardize = normalize,
     cov_weights = penscale
   )
-  if (is.null(lambda1)) lambda1 <- myData$getLInfPenaltyRange(nlambda1, min.ratio)
   myData$scaleStruct(lambda2)
-  
+  myData$standardize(intercept, normalize)
+  myData$getSufficientStat()
+  if (is.null(lambda1)) 
+    lambda1 <- myData$getLInfPenaltyRange(nlambda1, min.ratio)
+
   ## ============================================
   ## INSTANTIATE THE PENALTY MODEL
   myModel <- BoundedReg$new(
     data    = myData,
     lambda1 = lambda1,
     lambda2 = lambda2,
-    naive   = naive)
+    naive   = naive
+  )
 
   ## ============================================
   ## RECOVER LOW LEVEL OPTIONS
