@@ -131,9 +131,11 @@ QuadrupenFit <- R6Class(
   ## PUBLIC MEMBERS
   ## ____________________________________________________
   public  = list(
-    initialize = function(lambda1, lambda2) {
+    initialize = function(data, lambda1, lambda2) {
 
       ## ===================================================
+      stopifnot("The data object must be an instance of DataModel"
+                = inherits(data, "DataModel"))
       stopifnot("entries inlambda1 must all be postive." =
                   (all(lambda1 > 0)))
       stopifnot("lambda1 values must be sorted in decreasing order." =
@@ -142,6 +144,7 @@ QuadrupenFit <- R6Class(
                   (length(lambda2) == 1 & inherits(lambda2, "numeric")))
       stopifnot("lambda2 must be a non negative scalar." =  
                   (lambda2 >= 0))
+      private$data <- data
       private$lambda1  <- lambda1
       private$lambda2  <- lambda2
     },

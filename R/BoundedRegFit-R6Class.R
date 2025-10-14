@@ -6,8 +6,8 @@ BoundedReg <- R6::R6Class(
   active  = list(penalty = function(value) "bounded.reg"),
   private = list(naive = NA),
   public  = list(
-    initialize =  function(lambda1, lambda2, naive) {
-      super$initialize(lambda1, lambda2)
+    initialize =  function(data, lambda1, lambda2, naive) {
+      super$initialize(data, lambda1, lambda2)
       private$naive <- naive
     },
     show = function() {
@@ -18,13 +18,8 @@ BoundedReg <- R6::R6Class(
         cat("Coefficients rescaled by (1+lambda2).\n")
       }
     },
-    fit = function(data, control) {
+    fit = function(control) {
 
-      stopifnot("The data object must be an instance of DataModel"
-                = inherits(data, "DataModel"))
-      private$data <- data
-      private$data$scaleStruct(private$lambda2)
-      
       ## ======================================================
       ## C++ CALL TO BREG_LS
       ## 
@@ -41,9 +36,10 @@ BoundedReg <- R6::R6Class(
       ## ======================================================
 
       private$df      <- drop(out$df)
+      private$lambda1 <- out$lambda1
       private$activeSet <- sparseMatrix(i = out$iB + 1,
                                         j = out$jB + 1,
-                                        dims = c(length(private$lambda1),self$ncoef))
+                                        dims = c(length(out$lambda1),self$ncoef))
       private$mu   <- drop(out$mu)
       private$beta <- Matrix(out$coef, 
             dimnames = list(round(c(private$lambda1),3), colnames(private$data$X)))

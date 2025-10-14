@@ -186,10 +186,12 @@ elastic.net <- function(x,
     cov_weights = penscale
   )
   if (is.null(lambda1)) lambda1 <- myData$getL1PenaltyRange(nlambda1, min.ratio)
-
+  myData$scaleStruct(lambda2)
+  
   ## ============================================
   ## INSTANTIATE THE PENALTY MODEL
   myModel <- ElasticNet$new(
+    data    = myData,
     lambda1 = lambda1,
     lambda2 = lambda2, 
     naive   = naive  )
@@ -205,7 +207,7 @@ elastic.net <- function(x,
   
   ## ============================================
   ## FIT THE MODEL WITH ACTIVE SET ALGORITHM
-  myModel$fit(myData, ctrl, beta0)
+  myModel$fit(ctrl, beta0)
   
   ## ============================================
   ## DONE, SEND BACK THE RESULTING MODEL

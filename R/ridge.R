@@ -122,10 +122,11 @@ ridge <- function(x,
   )
   if (is.null(lambda2)) 
     lambda2 <- myData$getL2PenaltyRange(nlambda, lambda.min, lambda.max)
-
+  myData$CholStruct()
+  
   ## ============================================
   ## INSTANTIATE THE PENALTY MODEL
-  myModel <- Ridge$new(lambda = lambda2)
+  myModel <- Ridge$new(myData, lambda2)
   
   ## ============================================
   ## RECOVER LOW LEVEL OPTIONS
@@ -136,7 +137,7 @@ ridge <- function(x,
 
   ## ============================================
   ## FIT THE MODEL WITH ACTIVE SET ALGORITHM
-  myModel$fit(myData, ctrl)
+  myModel$fit(ctrl)
   
   ## ============================================
   ## DONE, SEND BACK THE RESULTING MODEL

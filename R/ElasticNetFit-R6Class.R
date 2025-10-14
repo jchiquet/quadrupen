@@ -6,8 +6,8 @@ ElasticNet <- R6::R6Class(
   active  = list(penalty = function(value) "elastic.net"),
   private = list(naive = NA),
   public  = list(
-    initialize =  function(lambda1, lambda2, naive) {
-      super$initialize(lambda1, lambda2)
+    initialize =  function(data, lambda1, lambda2, naive) {
+      super$initialize(data, lambda1, lambda2)
       private$naive <- naive
     },
     show = function() {
@@ -18,13 +18,8 @@ ElasticNet <- R6::R6Class(
         cat("Coefficients rescaled by (1+lambda2).\n")
       }
     },
-    fit = function(data, control, beta0 = NULL) {
-      
-      stopifnot("The data object must be an instance of DataModel"
-                = inherits(data, "DataModel"))
-      private$data <- data
-      private$data$scaleStruct(private$lambda2)
-      
+    fit = function(control, beta0 = NULL) {
+
       if (!is.null(beta0))
         stopifnot("beta0 must be a vector with ncol(x) entries." = 
                     (length(beta0) == self$ncoef & is.numeric(beta0)))
@@ -45,6 +40,7 @@ ElasticNet <- R6::R6Class(
       ## ======================================================
       
       private$df      <- drop(out$df)
+      private$lambda1 <- out$lambda1
       private$activeSet <- sparseMatrix(i = out$iA + 1,
                                         j = out$jA + 1,
                                         dims = c(length(private$lambda1),self$ncoef))

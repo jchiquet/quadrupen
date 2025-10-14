@@ -7,17 +7,11 @@ Ridge <- R6::R6Class(
     naive = NA
   ),
   public  = list(
-    initialize =  function(lambda) {
-      super$initialize(lambda, 0)
-      private$data$CholStruct()
+    initialize =  function(data, lambda) {
+      super$initialize(data, lambda, 0)
     },
-    fit = function(data, control) {
+    fit = function(control) {
 
-      stopifnot("The data object must be an instance of DataModel"
-                = inherits(data, "DataModel"))
-      private$data <- data
-      private$data$scaleStruct(private$lambda)
-      
       ## ======================================================
       ## C++ CALL TO RIDGE_LS
       ## 

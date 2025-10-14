@@ -194,10 +194,12 @@ bounded.reg <- function(x,
     cov_weights = penscale
   )
   if (is.null(lambda1)) lambda1 <- myData$getLInfPenaltyRange(nlambda1, min.ratio)
-
+  myData$scaleStruct(lambda2)
+  
   ## ============================================
   ## INSTANTIATE THE PENALTY MODEL
   myModel <- BoundedReg$new(
+    data    = myData,
     lambda1 = lambda1,
     lambda2 = lambda2,
     naive   = naive)
@@ -213,7 +215,7 @@ bounded.reg <- function(x,
 
   ## ============================================
   ## FIT THE MODEL WITH ACTIVE SET ALGORITHM
-  myModel$fit(myData, ctrl)
+  myModel$fit(ctrl)
   
   ## ============================================
   ## DONE, SEND BACK THE RESULTING MODEL
