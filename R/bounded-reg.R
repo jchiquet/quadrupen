@@ -194,16 +194,21 @@ bounded.reg <- function(x,
   myData$scaleStruct(lambda2)
   myData$standardize(intercept, normalize)
   myData$getSufficientStat()
-  if (is.null(lambda1)) 
-    lambda1 <- myData$getLInfPenaltyRange(nlambda1, min.ratio)
+  
+  if (is.null(lambda1)) {
+    stopifnot("min.ratio must be non negative." = min.ratio > 0)
+    lmax <- sum(abs(myData$xty))
+    lambda_inf <- 10^seq(from=log10(lmax), to=log10(lmax*min.ratio), len=nlambda1)  
+  }
 
   ## ============================================
   ## INSTANTIATE THE PENALTY MODEL
   myModel <- BoundedReg$new(
-    data    = myData,
-    lambda1 = lambda1,
-    lambda2 = lambda2,
-    naive   = naive
+    data      = myData,
+    intercept = intercept,
+    lambda1   = lambda_inf,
+    lambda2   = lambda2,
+    naive     = naive
   )
 
   ## ============================================

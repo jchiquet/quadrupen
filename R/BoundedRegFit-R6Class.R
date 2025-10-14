@@ -6,8 +6,8 @@ BoundedReg <- R6::R6Class(
   active  = list(penalty = function(value) "bounded.reg"),
   private = list(naive = NA),
   public  = list(
-    initialize =  function(data, lambda1, lambda2, naive) {
-      super$initialize(data, lambda1, lambda2)
+    initialize =  function(data, intercept, lambda1, lambda2, naive) {
+      super$initialize(data, intercept, lambda1, lambda2)
       private$naive <- naive
     },
     show = function() {

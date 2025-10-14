@@ -17,11 +17,11 @@ elastic_net_old_cpp <- function(BETA0, X, y, Struct, LAMBDA1, n_lambda, min_rati
     .Call(`_quadrupen_elastic_net_old_cpp`, BETA0, X, y, Struct, LAMBDA1, n_lambda, min_ratio, penscale, lambda2, intercept, normalize, weights, naive, eps, max_iter, max_feat, fun, verbose, sparse, usechol, monitor)
 }
 
-ridge_cpp <- function(X, Y, C, LAMBDA, NLAMBDA, LAMBDAMIN, LAMBDAMAX, INTERCEPT, NORMALIZE, WEIGHTS, VERBOSE) {
-    .Call(`_quadrupen_ridge_cpp`, X, Y, C, LAMBDA, NLAMBDA, LAMBDAMIN, LAMBDAMAX, INTERCEPT, NORMALIZE, WEIGHTS, VERBOSE)
+ridge_cpp <- function(dataModel, lambda, VERBOSE) {
+    .Call(`_quadrupen_ridge_cpp`, dataModel, lambda, VERBOSE)
 }
 
-ridge2_cpp <- function(dataModel, lambda, VERBOSE) {
-    .Call(`_quadrupen_ridge2_cpp`, dataModel, lambda, VERBOSE)
+ridge_old_cpp <- function(X, Y, C, LAMBDA, NLAMBDA, LAMBDAMIN, LAMBDAMAX, INTERCEPT, NORMALIZE, WEIGHTS, VERBOSE) {
+    .Call(`_quadrupen_ridge_old_cpp`, X, Y, C, LAMBDA, NLAMBDA, LAMBDAMIN, LAMBDAMAX, INTERCEPT, NORMALIZE, WEIGHTS, VERBOSE)
 }
 

@@ -54,30 +54,29 @@ DataModel <- R6::R6Class(
         self$wx <- cov_weights
         self$wy <- obs_weights
       },
-      standardize = function(intercept, normalize) {
-        ## X and y are normalized but not centered (to keep efficiency with sparse encoding)
-        if (intercept) {
-          private$names <- c("intercept", colnames(self$X))
-          self$mean_X <- colMeans(self$X)
-          self$mean_y <- mean(self$y)
-        } else {
-          private$names <- colnames(self$X)
-          self$mean_X <- rep(0, self$d)
-          self$mean_y <- 0
-        }
-        
-        ## normalizing the data
-        if (normalize) {
-          self$norm_X <-  sqrt(drop(colSums(self$X^2)) - self$n * self$mean_X^2)
-          self$X      <- Matrix::colScale(self$X, 1/self$norm_X)
-          self$mean_X <- self$mean_X/self$norm_X
+    standardize = function(intercept, normalize) {
+      ## X and y are not centered to keep efficiency with sparse encoding
+      
+      if (intercept) {
+        private$names <- c("intercept", colnames(self$X))
+        self$mean_X <- colMeans(self$X)
+        self$mean_y <- mean(self$y)
+      } else {
+        private$names <- colnames(self$X)
+        self$mean_X <- rep(0, self$d)
+        self$mean_y <- 0
+      }
+      
+      ## normalizing the data
+      self$norm_y <- sqrt(sum(self$wy * self$y^2))
+      if (normalize) {
+        self$norm_X <-  sqrt(drop(colSums(self$X^2)) - self$n * self$mean_X^2)
       } else {
         self$norm_X <- rep(1, self$d)
-        self$norm_y <- sqrt(sum(self$wy * self$y^2))
       }
 
-      self$X      <- Matrix::colScale(self$X, 1/self$wx)
-      self$mean_X <- self$mean_X / self$wx
+      self$X      <- Matrix::colScale(self$X, 1/(self$norm_X * self$wx))
+      self$mean_X <- self$mean_X / (self$wx * self$norm_X)
       if (!inherits(self$X, "sparseMatrix")) self$X <- as.matrix(self$X)
       ##
       ## ===================================================
@@ -108,23 +107,6 @@ GaussianModel <- R6::R6Class(
     getSufficientStat = function() {
       self$xty <- as.numeric(crossprod(self$X, self$y - self$mean_y) - 
                                sum(self$y - self$mean_y) * self$mean_X)
-    },
-    getL1PenaltyRange = function(length, min_ratio) {
-      stopifnot("min.ratio must be non negative." = min_ratio > 0)
-      lmax <- max(abs(self$xty))
-      lambda <- 10^seq(from=log10(lmax), to=log10(lmax*min_ratio), len=length)  
-      lambda
-    },
-    getLInfPenaltyRange = function(length, min_ratio) {
-      stopifnot("min.ratio must be non negative." = min_ratio > 0)
-      lmax <- sum(abs(self$xty))
-      lambda <- 10^seq(from=log10(lmax), to=log10(lmax*min_ratio), len=length)  
-      lambda
-    },
-    getL2PenaltyRange = function(length, lmin, lmax) {
-      stopifnot("lambda.min must be non negative." = lmin > 0)
-      lambda <- 10^seq(from=log10(lmax), to=log10(lmin), len=length)  
-      lambda
     }
     # loss = function(theta) {
     #   y_hat <- self$X %*% theta

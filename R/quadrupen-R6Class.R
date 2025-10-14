@@ -90,6 +90,7 @@ QuadrupenFit <- R6Class(
     df          = numeric() ,
     lambda1     = numeric() ,
     lambda2     = numeric() ,
+    intercept_  = NA        ,
     control     = list()    ,
     monitoring  = list()
   ),
@@ -101,8 +102,7 @@ QuadrupenFit <- R6Class(
     ncoef = function(value) {private$data$d},
     nsample = function(value) {private$data$n},
     dataModel = function(value) {private$data},
-    has_intercept = function(value) {private$data$has_intercept},
-    is_standardized = function(value) {private$data$is_standardized},
+    has_intercept = function(value) {private$intercept_},
     #' @field major_penalty vector of "leading" penalties (either l1, linf or l2)
     major_penalty = function(value) data.frame(lambda1 = private$lambda1),
     #' @field minor_penalty vector of "minor" penalties (either l1 or l2)
@@ -111,12 +111,7 @@ QuadrupenFit <- R6Class(
     optim_config = function(value) {private$control},
     fitted = function(value) {
       Xs <- Matrix::colScale(private$data$X, private$data$norm_X)
-      if (self$has_intercept) {
-        res <- sweep(tcrossprod(Xs, private$beta),2L,-private$mu,check.margin=FALSE)
-      } else {
-        private$mu <- 0
-        res <- tcrossprod(Xs, private$beta)
-      }
+      res <- sweep(tcrossprod(Xs, private$beta),2L,-private$mu,check.margin=FALSE)
       res
     },
     coefficients = function(value) {private$beta},
@@ -131,9 +126,8 @@ QuadrupenFit <- R6Class(
   ## PUBLIC MEMBERS
   ## ____________________________________________________
   public  = list(
-    initialize = function(data, lambda1, lambda2) {
+    initialize = function(data, intercept, lambda1, lambda2) {
 
-      ## ===================================================
       stopifnot("The data object must be an instance of DataModel"
                 = inherits(data, "DataModel"))
       stopifnot("entries inlambda1 must all be postive." =
@@ -144,9 +138,11 @@ QuadrupenFit <- R6Class(
                   (length(lambda2) == 1 & inherits(lambda2, "numeric")))
       stopifnot("lambda2 must be a non negative scalar." =  
                   (lambda2 >= 0))
-      private$data <- data
-      private$lambda1  <- lambda1
-      private$lambda2  <- lambda2
+      
+      private$data       <- data
+      private$intercept_ <- intercept
+      private$lambda1    <- lambda1
+      private$lambda2    <- lambda2
     },
     show = function() {
       cat("Linear regression with", self$penalty, "penalizer.\n")
@@ -172,6 +168,17 @@ QuadrupenFit <- R6Class(
       }
       res
     },
+    # getLInfPenaltyRange = function(length, min_ratio) {
+    #   stopifnot("min.ratio must be non negative." = min_ratio > 0)
+    #   lmax <- sum(abs(self$xty))
+    #   lambda <- 10^seq(from=log10(lmax), to=log10(lmax*min_ratio), len=length)  
+    #   lambda
+    # },
+    # getL2PenaltyRange = function(length, lmin, lmax) {
+    #   stopifnot("lambda.min must be non negative." = lmin > 0)
+    #   lambda <- 10^seq(from=log10(lmax), to=log10(lmin), len=length)  
+    #   lambda
+    # }
     cross_validate = 
       function(
           K     = 10,

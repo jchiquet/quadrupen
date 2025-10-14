@@ -27,13 +27,12 @@ Rcpp::List elastic_net_cpp(
   const arma::vec &y        = dataModel["y"]  ; // response vector
   const arma::sp_mat& S     = dataModel["S"]  ; // Structuring matrix
   const arma::vec &penscale = dataModel["wx"] ;  // penalty weights
-  const bool &intercept     = dataModel["has_intercept"] ; // boolean for intercept mode
+  const arma::vec& weights  = dataModel["wy"]     ; // observation weights (not use at the moment)
   const arma::vec &xty      = dataModel["xty"]    ; // responses to predictors vector
   const arma::vec xbar      = dataModel["mean_X"] ; // mean of the predictors
   const arma::vec &normx    = dataModel["norm_X"] ; // norm of the predictors
   const double ybar         = dataModel["mean_y"] ; // mean of the predictors
   const double normy        = dataModel["norm_y"] ; // norm of the response
-  const arma::vec& weights  = dataModel["wy"]     ; // observation weights (not use at the moment)
   const bool sparse         = dataModel["sparse_encoding"] ; // boolean for sparse mode
   
   const double eps           = control["threshold"] ; // precision required
@@ -268,7 +267,7 @@ Rcpp::List elastic_net_cpp(
       nonzeros = join_cols(nonzeros, betaA/(normx.elem(A) % penscale.elem(A)));
       iA = join_cols(iA, m*ones(betaA.n_elem,1) );
       jA = join_cols(jA, conv_to<mat>::from(A) ) ;
-      if (intercept) mu[m] = dot(betaA, xbar.elem(A)) ;
+      mu[m] = dot(betaA, xbar.elem(A)) ;
     }
   }
   if (!naive) {

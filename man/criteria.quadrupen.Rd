@@ -226,6 +226,7 @@ See also \code{\link{plot.quadrupen}}.
 \item \href{#method-QuadrupenFit-show}{\code{QuadrupenFit$show()}}
 \item \href{#method-QuadrupenFit-print}{\code{QuadrupenFit$print()}}
 \item \href{#method-QuadrupenFit-predict}{\code{QuadrupenFit$predict()}}
+\item \href{#method-QuadrupenFit-cross_validate}{\code{QuadrupenFit$cross_validate()}}
 \item \href{#method-QuadrupenFit-plot}{\code{QuadrupenFit$plot()}}
 \item \href{#method-QuadrupenFit-criteria}{\code{QuadrupenFit$criteria()}}
 \item \href{#method-QuadrupenFit-clone}{\code{QuadrupenFit$clone()}}
@@ -236,12 +237,15 @@ See also \code{\link{plot.quadrupen}}.
 \if{latex}{\out{\hypertarget{method-QuadrupenFit-new}{}}}
 \subsection{Method \code{new()}}{
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{QuadrupenFit$new(lambda1, lambda2)}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{QuadrupenFit$new(data, intercept, lambda1, lambda2)}\if{html}{\out{</div>}}
 }
 
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
+\item{\code{intercept}}{logical; indicates if an intercept has
+been included to the model.}
+
 \item{\code{lambda1}}{Vector (class \code{"numeric"}) of penalty
 levels (either \eqn{\ell_1}{l1} or \eqn{\ell_\infty}{l-infinity})
 for which the model has eventually been fitted.}
@@ -280,6 +284,19 @@ Produce a plot of the solution path of a \code{quadrupen} fit.
 \subsection{Method \code{predict()}}{
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{QuadrupenFit$predict(newx = NULL, ...)}\if{html}{\out{</div>}}
+}
+
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-QuadrupenFit-cross_validate"></a>}}
+\if{latex}{\out{\hypertarget{method-QuadrupenFit-cross_validate}{}}}
+\subsection{Method \code{cross_validate()}}{
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{QuadrupenFit$cross_validate(
+  K = 10,
+  folds = split(sample(1:self$ncoef), rep(1:K, length = self$nsample)),
+  verbose = TRUE
+)}\if{html}{\out{</div>}}
 }
 
 }

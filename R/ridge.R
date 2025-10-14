@@ -101,12 +101,12 @@
 ridge <- function(x,
                   y,
                   lambda2    = NULL,
-                  struct     = NULL,
+                  struct     = Diagonal(ncol(x),1),
                   penscale   = rep(1,ncol(x)),
                   intercept  = TRUE,
                   normalize  = TRUE,
                   nlambda    = 100 ,
-                  lambda.min = ifelse(nrow(x) <= ncol(x), 1e-2, 1e-4),
+                  min.ratio  = 1e-4,
                   lambda.max = 100,
                   control    = list()) {
 
@@ -121,12 +121,14 @@ ridge <- function(x,
   myData$CholStruct()
   myData$standardize(intercept, normalize)
   myData$getSufficientStat()
-  if (is.null(lambda2)) 
-    lambda2 <- myData$getL2PenaltyRange(nlambda, lambda.min, lambda.max)
-  
+  if (is.null(lambda2)) {
+    stopifnot("min.ratio must be non negative." = min.ratio > 0)
+    lambda_l2 <- 10^seq(from=log10(lambda.max), to=log10(lambda.max*min.ratio), len=nlambda)
+  }
+
   ## ============================================
   ## INSTANTIATE THE PENALTY MODEL
-  myModel <- Ridge$new(myData, lambda2)
+  myModel <- Ridge$new(myData, intercept, lambda_l2)
   
   ## ============================================
   ## RECOVER LOW LEVEL OPTIONS

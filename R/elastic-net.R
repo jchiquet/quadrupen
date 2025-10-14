@@ -161,7 +161,7 @@
 #'
 #' @export
 elastic.net <- function(x,
-                         y,
+                        y,
                         lambda1   = NULL,
                         lambda2   = 0.01,
                         penscale  = rep(1,ncol(x)),
@@ -186,16 +186,23 @@ elastic.net <- function(x,
   myData$scaleStruct(lambda2)
   myData$standardize(intercept, normalize)
   myData$getSufficientStat()
-  if (is.null(lambda1)) 
-    lambda1 <- myData$getL1PenaltyRange(nlambda1, min.ratio)
-    
+
   ## ============================================
   ## INSTANTIATE THE PENALTY MODEL
+  if (is.null(lambda1)) {
+    stopifnot("min.ratio must be non negative." = min.ratio > 0)
+    lmax <- max(abs(myData$xty))
+    lambda1 <- 10^seq(from=log10(lmax), to=log10(lmax*min.ratio), len=nlambda1)  
+  }
+  
+  
   myModel <- ElasticNet$new(
-    data    = myData,
-    lambda1 = lambda1,
-    lambda2 = lambda2, 
-    naive   = naive  )
+    data      = myData,
+    intercept = intercept,
+    lambda1   = lambda1,
+    lambda2   = lambda2, 
+    naive   = naive
+  )
   
   ## ============================================
   ## RECOVER LOW LEVEL OPTIONS

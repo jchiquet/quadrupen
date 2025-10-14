@@ -7,8 +7,8 @@ Ridge <- R6::R6Class(
     naive = NA
   ),
   public  = list(
-    initialize =  function(data, lambda) {
-      super$initialize(data, lambda, 0)
+    initialize =  function(data, intercept, lambda) {
+      super$initialize(data, intercept, lambda, 0)
     },
     fit = function(control) {
 
@@ -16,7 +16,7 @@ Ridge <- R6::R6Class(
       ## C++ CALL TO RIDGE_LS
       ## 
       if (control$timer) {cpp.start <- proc.time()}
-      out <- ridge2_cpp(private$data, private$lambda1, control$verbose)
+      out <- ridge_cpp(private$data, private$lambda1, control$verbose)
       timer <- ifelse(control$timer, (proc.time() - cpp.start)[3], NA) 
       ## END OF CALL
       ## ======================================================

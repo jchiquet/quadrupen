@@ -8,72 +8,23 @@
 using namespace Rcpp;
 using namespace arma;
 
-RIDGE::RIDGE(const arma::mat X, 
-             const arma::vec Y,
-             const arma::mat C, 
-             const arma::vec WEIGHTS,
-             const arma::uword VERBOSE) :
-  x        (X), // predictors
-  y        (Y), // responses
-  c        (trimatu(C)), // Cholesky of L
-  w        (WEIGHTS), // observation weights
-  verbose  (VERBOSE)  // verbose mode (unused)
-{}
 
 
 // [[Rcpp::export]]
 Rcpp::List ridge_cpp(
-    const arma::mat& X  , // matrix of features
-	  const arma::vec& Y        , // vector of response
-	  const arma::mat& C        , // Cholesky decompostion of the structuring matrix
-	  SEXP LAMBDA,
-	  const arma::uword& NLAMBDA  ,
-	  const double& LAMBDAMIN,
-	  const double& LAMBDAMAX,
-	  const bool& INTERCEPT,
-	  const bool& NORMALIZE,
-	  const arma::vec& WEIGHTS  ,
-	  const arma::uword& VERBOSE  ) {
-
-  // ==============================================================
-  // INSTANTIATE THE RIDGE PATH
-  RIDGE ridge(X, Y, C, WEIGHTS, VERBOSE);
-
-  // ==============================================================
-  // DATA NORMALIZATION
-  ridge.standardize(INTERCEPT, NORMALIZE) ;
-
-  // ==============================================================
-  // GET LAMBDA VALUES
-  ridge.get_lambda(LAMBDA, NLAMBDA, LAMBDAMIN, LAMBDAMAX) ;
-
-  // ==============================================================
-  // COMPUTE THE PATH OF SOLUTIONS
-  ridge.LetsRoll();
-  
-  return List::create(Named("coefficients") = ridge.get_coef()  ,
-		      Named("mu")           = ridge.get_mu()    ,
-		      Named("normx")        = ridge.get_normx() ,
-		      Named("lambda2")      = ridge.get_lambda(),
-		      Named("df")           = ridge.get_df()    );
-
-}
-
-// [[Rcpp::export]]
-Rcpp::List ridge2_cpp(
     const Environment &dataModel , // data structure
     arma::vec lambda             , // vector of L2 penalties
     const arma::uword& VERBOSE  ) {
-
+  
   const arma::mat &X        = dataModel["X"]      ; // design matrix
   const arma::vec &y        = dataModel["y"]      ; // response vector
   const arma::mat& C        = dataModel["C"]      ; // Cholesky decompostion of the structuring matrix
-  const arma::vec &penscale = dataModel["wx"]     ;  // penalty weights
-  const arma::rowvec xbar      = dataModel["mean_X"] ; // mean of the predictors
-  const arma::rowvec &normx    = dataModel["norm_X"] ; // norm of the predictors
-  const double ybar         = dataModel["mean_y"] ; // mean of the predictors
+  const arma::vec &penscale = dataModel["wx"]     ; // penalty weights
   const arma::vec& weights  = dataModel["wy"]     ; // observation weights (not use at the moment)
-
+  const arma::rowvec xbar   = dataModel["mean_X"] ; // mean of the predictors
+  const arma::rowvec &normx = dataModel["norm_X"] ; // norm of the predictors
+  const double ybar         = dataModel["mean_y"] ; // mean of the predictors
+  
   // ==============================================================
   // INSTANTIATE THE RIDGE PATH
   arma::mat beta     ; // matrix of coefficients
@@ -110,6 +61,58 @@ Rcpp::List ridge2_cpp(
                       Named("mu")           = mu,
                       Named("df")           = df);
   
+}
+
+
+RIDGE::RIDGE(const arma::mat X, 
+             const arma::vec Y,
+             const arma::mat C, 
+             const arma::vec WEIGHTS,
+             const arma::uword VERBOSE) :
+  x        (X), // predictors
+  y        (Y), // responses
+  c        (trimatu(C)), // Cholesky of L
+  w        (WEIGHTS), // observation weights
+  verbose  (VERBOSE)  // verbose mode (unused)
+{}
+
+
+// [[Rcpp::export]]
+Rcpp::List ridge_old_cpp(
+    const arma::mat& X  , // matrix of features
+	  const arma::vec& Y        , // vector of response
+	  const arma::mat& C        , // Cholesky decompostion of the structuring matrix
+	  SEXP LAMBDA,
+	  const arma::uword& NLAMBDA  ,
+	  const double& LAMBDAMIN,
+	  const double& LAMBDAMAX,
+	  const bool& INTERCEPT,
+	  const bool& NORMALIZE,
+	  const arma::vec& WEIGHTS  ,
+	  const arma::uword& VERBOSE  ) {
+
+  // ==============================================================
+  // INSTANTIATE THE RIDGE PATH
+  RIDGE ridge(X, Y, C, WEIGHTS, VERBOSE);
+
+  // ==============================================================
+  // DATA NORMALIZATION
+  ridge.standardize(INTERCEPT, NORMALIZE) ;
+
+  // ==============================================================
+  // GET LAMBDA VALUES
+  ridge.get_lambda(LAMBDA, NLAMBDA, LAMBDAMIN, LAMBDAMAX) ;
+
+  // ==============================================================
+  // COMPUTE THE PATH OF SOLUTIONS
+  ridge.LetsRoll();
+  
+  return List::create(Named("coefficients") = ridge.get_coef()  ,
+		      Named("mu")           = ridge.get_mu()    ,
+		      Named("normx")        = ridge.get_normx() ,
+		      Named("lambda2")      = ridge.get_lambda(),
+		      Named("df")           = ridge.get_df()    );
+
 }
 
 void RIDGE::LetsRoll() {

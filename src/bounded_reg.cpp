@@ -287,7 +287,6 @@ Rcpp::List bounded_reg_cpp(
   const arma::vec &y        = dataModel["y"]  ; // response vector
   const arma::sp_mat& S     = dataModel["S"]  ; // Structuring matrix
   const arma::vec &penscale = dataModel["wx"] ;  // penalty weights
-  const bool &intercept     = dataModel["has_intercept"] ; // boolean for intercept mode
   const arma::vec &xty      = dataModel["xty"]    ; // responses to predictors vector
   const arma::vec xbar      = dataModel["mean_X"] ; // mean of the predictors
   const arma::vec &normx    = dataModel["norm_X"] ; // norm of the predictors
@@ -470,9 +469,7 @@ Rcpp::List bounded_reg_cpp(
       }
       iB = join_cols(iB, m*ones(B.n_elem,1) );
       jB = join_cols(jB, conv_to<mat>::from(B) );
-      if (intercept == 1) {
-        mu[m] = dot(beta, xbar) ;
-      }
+      mu[m] = dot(beta, xbar) ;
     }
     
   }

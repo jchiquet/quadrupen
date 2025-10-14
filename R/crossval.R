@@ -127,10 +127,10 @@ crossval <- function(x,
     covariates  = x,
     outcome     = y,
     cov_struct  = args$struct,
-    intercept   = args$intercept,
-    standardize = args$normalize,
     cov_weights = args$penscale
   )
+  myData$standardize(intercept, normalize)
+  myData$getSufficientStat()
   
 ## Compute a grid of lambda1 (the same for each fold)
   if (is.null(args$lambda1)) {
