@@ -128,12 +128,12 @@ ridge <- function(x,
 
   ## ============================================
   ## INSTANTIATE THE PENALTY MODEL
-  myModel <- Ridge$new(myData, intercept, lambda_l2)
+  myModel <- Ridge$new(myData, intercept, list(lambda_l2 = lambda_l2))
   
   ## ============================================
   ## RECOVER LOW LEVEL OPTIONS
-  ctrl <- list(verbose      = 1, # default control options
-               timer        =  FALSE)
+  ctrl <- list(verbose = 1, # default control options
+               timer   =  FALSE)
   ctrl[names(control)] <- control # overwritten by user specifications
   if (ctrl$timer) {r.start <- proc.time()}
 

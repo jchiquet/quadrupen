@@ -172,11 +172,12 @@ elastic.net <- function(x,
                         nlambda1  = ifelse(is.null(lambda1),100,length(lambda1)),
                         min.ratio = ifelse(nrow(x) <= ncol(x), 1e-2, 1e-4),
                         max.feat  = ifelse(lambda2 < 1e-2, min(nrow(x),ncol(x)), min(4*nrow(x),ncol(x))),
-                        beta0     = NULL,
+                        beta0     = numeric(ncol(x)),
                         control   = list()) {
   
   ## ============================================
   ## INSTANTIATE THE DATA MODEL
+  ##
   myData <- GaussianModel$new(
     covariates  = x,
     outcome     = y,
@@ -189,36 +190,39 @@ elastic.net <- function(x,
 
   ## ============================================
   ## INSTANTIATE THE PENALTY MODEL
+  ##
   if (is.null(lambda1)) {
     stopifnot("min.ratio must be non negative." = min.ratio > 0)
     lmax <- max(abs(myData$xty))
     lambda1 <- 10^seq(from=log10(lmax), to=log10(lmax*min.ratio), len=nlambda1)  
   }
   
-  
   myModel <- ElasticNet$new(
     data      = myData,
     intercept = intercept,
-    lambda1   = lambda1,
-    lambda2   = lambda2, 
+    regParam  = list(lambda_l1 = lambda1, lambda_l2 = lambda2),
     naive   = naive
   )
   
   ## ============================================
-  ## RECOVER LOW LEVEL OPTIONS
+  ## RECOVER OPTIMIZATION CONFIGURATION
+  ##
   ctrl <- ctrl_default(ncol(x))
   ctrl$max.feat <- max.feat
   if (!is.null(control$method)) if (control$method != "quadra") ctrl$threshold <- 1e-2
   ctrl[names(control)] <- control # default overwritten by user specifications
   ctrl$method <- switch(ctrl$method, quadra = 0, pathwise = 1, fista = 2, 0)
   ctrl$naive  <- naive
+  ctrl$beta0  <- beta0
   
   ## ============================================
   ## FIT THE MODEL WITH ACTIVE SET ALGORITHM
-  myModel$fit(ctrl, beta0)
+  ##
+  myModel$fit(ctrl)
   
   ## ============================================
   ## DONE, SEND BACK THE RESULTING MODEL
+  ##
   myModel
 }
 

@@ -198,7 +198,7 @@ bounded.reg <- function(x,
   if (is.null(lambda1)) {
     stopifnot("min.ratio must be non negative." = min.ratio > 0)
     lmax <- sum(abs(myData$xty))
-    lambda_inf <- 10^seq(from=log10(lmax), to=log10(lmax*min.ratio), len=nlambda1)  
+    lambda_linf <- 10^seq(from=log10(lmax), to=log10(lmax*min.ratio), len=nlambda1)  
   }
 
   ## ============================================
@@ -206,8 +206,7 @@ bounded.reg <- function(x,
   myModel <- BoundedReg$new(
     data      = myData,
     intercept = intercept,
-    lambda1   = lambda_inf,
-    lambda2   = lambda2,
+    regParam  = list(lambda_linf = lambda_linf, lambda_l2 = lambda2),
     naive     = naive
   )
 

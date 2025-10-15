@@ -12,10 +12,11 @@ using namespace arma;
 
 // [[Rcpp::export]]
 Rcpp::List ridge_cpp(
-    const Environment &dataModel , // data structure
-    arma::vec lambda             , // vector of L2 penalties
+    const Environment &dataModel   , // data structure
+    const List        &tuningParam , // List of tuning parameters
     const arma::uword& VERBOSE  ) {
   
+  arma::vec lambda          = tuningParam["lambda_l2"]   ; // vector of L2 penalties  
   const arma::mat &X        = dataModel["X"]      ; // design matrix
   const arma::vec &y        = dataModel["y"]      ; // response vector
   const arma::mat& C        = dataModel["C"]      ; // Cholesky decompostion of the structuring matrix

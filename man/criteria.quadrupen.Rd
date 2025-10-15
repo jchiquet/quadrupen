@@ -210,12 +210,21 @@ See also \code{\link{plot.quadrupen}}.
 
 \code{\linkS4class{quadrupen}}.
 }
+\section{Public fields}{
+\if{html}{\out{<div class="r6-fields">}}
+\describe{
+\item{\code{major_penalty}}{vector of "leading" tuning parameters (either l1, linf or l2)}
+
+\item{\code{minor_penalty}}{vector of "minor" tuning parameters (either l1 or l2)}
+}
+\if{html}{\out{</div>}}
+}
 \section{Active bindings}{
 \if{html}{\out{<div class="r6-active-bindings">}}
 \describe{
-\item{\code{major_penalty}}{vector of "leading" penalties (either l1, linf or l2)}
+\item{\code{major_penalty}}{vector of "leading" tuning parameters (either l1, linf or l2)}
 
-\item{\code{minor_penalty}}{vector of "minor" penalties (either l1 or l2)}
+\item{\code{minor_penalty}}{vector of "minor" tuning parameters (either l1 or l2)}
 }
 \if{html}{\out{</div>}}
 }
@@ -237,7 +246,7 @@ See also \code{\link{plot.quadrupen}}.
 \if{latex}{\out{\hypertarget{method-QuadrupenFit-new}{}}}
 \subsection{Method \code{new()}}{
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{QuadrupenFit$new(data, intercept, lambda1, lambda2)}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{QuadrupenFit$new(data, intercept, regParam)}\if{html}{\out{</div>}}
 }
 
 \subsection{Arguments}{
@@ -245,13 +254,6 @@ See also \code{\link{plot.quadrupen}}.
 \describe{
 \item{\code{intercept}}{logical; indicates if an intercept has
 been included to the model.}
-
-\item{\code{lambda1}}{Vector (class \code{"numeric"}) of penalty
-levels (either \eqn{\ell_1}{l1} or \eqn{\ell_\infty}{l-infinity})
-for which the model has eventually been fitted.}
-
-\item{\code{lambda2}}{Scalar (class \code{"numeric"}) for the
-amount of \eqn{\ell_2}{l2} (ridge-like) penalty.}
 }
 \if{html}{\out{</div>}}
 }

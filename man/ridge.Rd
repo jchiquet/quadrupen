@@ -8,12 +8,12 @@ ridge(
   x,
   y,
   lambda2 = NULL,
-  struct = NULL,
+  struct = Diagonal(ncol(x), 1),
   penscale = rep(1, ncol(x)),
   intercept = TRUE,
   normalize = TRUE,
   nlambda = 100,
-  lambda.min = ifelse(nrow(x) <= ncol(x), 0.01, 1e-04),
+  min.ratio = 1e-04,
   lambda.max = 100,
   control = list()
 )
@@ -42,9 +42,6 @@ included in the model. Default is \code{TRUE}.}
 normalized to have unit L2 norm before fitting.  Default is
 \code{TRUE}.}
 
-\item{lambda.min}{the minimal amount of penalty used to generated
-the vector \code{lambda2}. Ignored if \code{lambda2} is provided.}
-
 \item{lambda.max}{the maximal amount of penalty used to generated
 the vector \code{lambda2}. Ignored if \code{lambda2} is provided.}
 
@@ -67,6 +64,9 @@ algorithm. Default is \code{FALSE}.}
 \item{nlambda2}{integer that indicates the number of values to put
 in the \code{lambda2} vector.  Ignored if \code{lambda2} is
 provided.}
+
+\item{lambda.min}{the minimal amount of penalty used to generated
+the vector \code{lambda2}. Ignored if \code{lambda2} is provided.}
 }
 \value{
 an object with class \code{quadrupen}, see the

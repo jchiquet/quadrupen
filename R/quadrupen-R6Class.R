@@ -88,10 +88,10 @@ QuadrupenFit <- R6Class(
     mu          = numeric() ,
     activeSet   = Matrix()  ,
     df          = numeric() ,
-    lambda1     = numeric() ,
-    lambda2     = numeric() ,
-    intercept_  = NA        ,
+    tuning      = numeric() ,
+    intercept   = NA        ,
     control     = list()    ,
+    optimizer   = NA,
     monitoring  = list()
   ),
   ## ____________________________________________________
@@ -102,11 +102,11 @@ QuadrupenFit <- R6Class(
     ncoef = function(value) {private$data$d},
     nsample = function(value) {private$data$n},
     dataModel = function(value) {private$data},
-    has_intercept = function(value) {private$intercept_},
-    #' @field major_penalty vector of "leading" penalties (either l1, linf or l2)
-    major_penalty = function(value) data.frame(lambda1 = private$lambda1),
-    #' @field minor_penalty vector of "minor" penalties (either l1 or l2)
-    minor_penalty = function(value) setNames(private$lambda2, "lambda2"),
+    has_intercept = function(value) {private$intercept},
+    #' @field major_penalty vector of "leading" tuning parameters (either l1, linf or l2)
+    major_tuning = function(value) private$tuning[[1]],
+    #' @field minor_penalty vector of "minor" tuning parameters (either l1 or l2)
+    minor_tuning= function(value) private$tuning[[2]],
     optim_monitoring = function(value) {private$monitoring},
     optim_config = function(value) {private$control},
     fitted = function(value) {
@@ -115,7 +115,7 @@ QuadrupenFit <- R6Class(
       res
     },
     coefficients = function(value) {private$beta},
-    intercept = function(value) {private$mu},
+    interceptTerm = function(value) {private$mu},
     residuals = function(value) {apply(self$fitted, 2, function(y_hat) private$data$y - y_hat)},
     deviance = function(value) {colSums(self$residuals^2)},
     degrees_freedom = function(value) {private$df + ifelse(self$has_intercept, 1L, 0L)},
@@ -126,23 +126,22 @@ QuadrupenFit <- R6Class(
   ## PUBLIC MEMBERS
   ## ____________________________________________________
   public  = list(
-    initialize = function(data, intercept, lambda1, lambda2) {
+    initialize = function(data, intercept, regParam) {
 
       stopifnot("The data object must be an instance of DataModel"
                 = inherits(data, "DataModel"))
-      stopifnot("entries inlambda1 must all be postive." =
-                  (all(lambda1 > 0)))
-      stopifnot("lambda1 values must be sorted in decreasing order." =
-                  !is.unsorted(rev(lambda1)))
-      stopifnot("lambda2 must be a scalar." = 
-                  (length(lambda2) == 1 & inherits(lambda2, "numeric")))
-      stopifnot("lambda2 must be a non negative scalar." =  
-                  (lambda2 >= 0))
-      
-      private$data       <- data
-      private$intercept_ <- intercept
-      private$lambda1    <- lambda1
-      private$lambda2    <- lambda2
+      stopifnot("regParam must be a list" = is.list(regParam))
+      stopifnot("All regularization parameters must be positive." =
+                  all(unlist(regParam) >= 0))
+      stopifnot("The first entry of regParam must be sorted in decreasing order." =
+                  !is.unsorted(rev(regParam[[1]])))
+      if (length(regParam) > 1)
+        stopifnot("The second entry of regParam must be a scalar (cannot be a vector)." = 
+                  (length(regParam[[2]]) == 1 & inherits(regParam[[2]], "numeric")))
+
+      private$data      <- data
+      private$intercept <- intercept
+      private$tuning    <- regParam
     },
     show = function() {
       cat("Linear regression with", self$penalty, "penalizer.\n")
@@ -151,11 +150,11 @@ QuadrupenFit <- R6Class(
       } else {
         cat("- number of coefficients:", self$ncoef,"(no intercept)\n")
       }
-      cat("- penalty parameter ",names(self$major_penalty), ": ",
+      cat("- regularization parameter ",names(self$major_tuning), ": ",
           length(self$major_penalty), " points from ",
-          format(max(self$major_penalty), digits = 3)," to ",
-          format(min(self$major_penalty), digits = 3),"\n", sep="")
-      cat("- penalty parameter ",names(self$minor_penalty),": ", self$minor_penalty, "\n", sep="")
+          format(max(self$major_tuning), digits = 3)," to ",
+          format(min(self$major_tuning), digits = 3),"\n", sep="")
+      cat("- penalty parameter ",names(self$minor_tuning),": ", self$minor_tuning, "\n", sep="")
       invisible(self)
     },
     #' @description User friendly print method
@@ -168,23 +167,17 @@ QuadrupenFit <- R6Class(
       }
       res
     },
-    # getLInfPenaltyRange = function(length, min_ratio) {
-    #   stopifnot("min.ratio must be non negative." = min_ratio > 0)
-    #   lmax <- sum(abs(self$xty))
-    #   lambda <- 10^seq(from=log10(lmax), to=log10(lmax*min_ratio), len=length)  
-    #   lambda
-    # },
-    # getL2PenaltyRange = function(length, lmin, lmax) {
-    #   stopifnot("lambda.min must be non negative." = lmin > 0)
-    #   lambda <- 10^seq(from=log10(lmax), to=log10(lmin), len=length)  
-    #   lambda
-    # }
     cross_validate = 
       function(
           K     = 10,
           folds = split(sample(1:self$ncoef), rep(1:K, length=self$nsample)),
           verbose = TRUE) {
       
+        CVData <- self$dataModel$splitTrainTest(K = K, folds = folds)
+        
+        lapply(CVData, function(fold){
+          
+        })
     },
     #' Plot method for a quadrupen object
     #'
@@ -247,9 +240,8 @@ QuadrupenFit <- R6Class(
                     main = paste(self$penalty," path", sep=""),
                     log.scale = TRUE, standardize=TRUE, labels = NULL, plot = TRUE, ...) {
       
-      lambda <- as.numeric(unlist(self$major_penalty))
-      if (length(lambda) == 1) {
-        stop("Not available when the leading vector of penalties boild down to a scalar.")
+      if (length(self$major_tuning) == 1) {
+        stop("Not available when the leading vector of tuning parameters boild down to a scalar.")
       }
       
       nzeros <- which(colSums(private$beta) != 0)
@@ -265,7 +257,7 @@ QuadrupenFit <- R6Class(
       if (xvar == "fraction") {
         xv <-  apply(abs(beta),1,sum)/max(apply(abs(beta),1,sum))
       } else {
-        xv <- lambda
+        xv <- self$major_tuning
       }
       
       ## Creating the data.frame fior ggploting purposes
@@ -405,7 +397,7 @@ QuadrupenFit <- R6Class(
                          log.scale=TRUE, xvar = "lambda", plot=TRUE) {
       
       betas <- private$beta
-      lambda <- as.numeric(unlist(self$major_penalty))
+      lambda <- self$major_tuning
       
       n <- self$nsample
       p <- self$ncoef
@@ -449,7 +441,7 @@ QuadrupenFit <- R6Class(
                                ifelse(log.scale,expression(log[10](lambda[1])),expression(lambda[1])) ) )
         
         d <- ggplot(data.plot, aes(x=xvar, y=value, colour=criterion, group=criterion)) +
-          geom_line(aes(x=xvar,y=value)) + geom_point(aes(x=xvar,y=value)) +
+          geom_line(aes(x=xvar,y=value)) + geom_point(aes(x=xvar,y=value)) + theme_bw() + 
           labs(x=xlab, y="criterion's value",  title=paste("Information Criteria for a", self$penalty,"fit"))
         
         if (log.scale & (xvar=="lambda")) {
@@ -487,9 +479,10 @@ residuals.QuadrupenFit <- function(object, newx=NULL, newy=NULL, ...) {
   if (is.null(newx) | is.null(newy)) {
     res <- object$residuals
   } else {
-    n <- length(res$lambda1)
+    n <- length(object$major_tuning)
     res <- matrix(rep(newy, n), ncol=n) - predict(object, newx)
   }
+  res
 }
 
 #' @export

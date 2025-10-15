@@ -132,16 +132,16 @@ crossval <- function(x,
   myData$standardize(intercept, normalize)
   myData$getSufficientStat()
   
-## Compute a grid of lambda1 (the same for each fold)
+  ## Compute a grid of lambda1 (the same for each fold)
   if (is.null(args$lambda1)) {
-    args$lambda1 <- switch(
+    lmax <- switch(
       penalty,
-      "elastic.net" = myData$getL1PenaltyRange(args$nlambda1, args$min.ratio),
-      "lasso"       = myData$getL1PenaltyRange(args$nlambda1, args$min.ratio),
-      "bounded.reg" = myData$getLInfPenaltyRange(args$nlambda1, args$min.ratio),
-      "ridge"       = NULL)
+      "elastic.net" = max(abs(myData$xty)),
+      "lasso"       = max(abs(myData$xty)),
+      "bounded.reg" = sum(abs(myData$xty)),
+      "ridge"       = 100)
+    lambda1 <- 10^seq(from=log10(lmax), to=log10(lmax*args$min.ratio), len=args$nlambda1)  
   }
-  
   if (penalty == "lasso") {lambda2 <- NULL}
   if (penalty == "ridge") {lambda1 <- 0}
 

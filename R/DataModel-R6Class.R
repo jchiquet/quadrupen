@@ -53,9 +53,14 @@ DataModel <- R6::R6Class(
         self$S  <- cov_struct
         self$wx <- cov_weights
         self$wy <- obs_weights
+        private$centered <- FALSE
+        private$scaled   <- FALSE
       },
     standardize = function(intercept, normalize) {
       ## X and y are not centered to keep efficiency with sparse encoding
+
+      private$centered <- intercept
+      private$scaled   <- normalize
       
       if (intercept) {
         private$names <- c("intercept", colnames(self$X))
@@ -92,7 +97,8 @@ DataModel <- R6::R6Class(
     d = function() ncol(self$X),
     n = function() nrow(self$X),
     has_intercept = function() {private$centered},
-    is_standardized = function() {private$scaled},
+    is_centered = function() {private$centered},
+    is_scaled = function() {private$scaled},
     sparse_encoding = function() {inherits(private$X, "sparseMatrix")},
     varnames = function() {private$names}
   )
@@ -107,6 +113,31 @@ GaussianModel <- R6::R6Class(
     getSufficientStat = function() {
       self$xty <- as.numeric(crossprod(self$X, self$y - self$mean_y) - 
                                sum(self$y - self$mean_y) * self$mean_X)
+    },
+    show = function() {
+      cat("Gaussian Data," ,
+          ifelse(private$centered, "centered", "not centered"), "and",
+          ifelse(private$scaled, "scaled", "not scaled.\n"))
+      invisible(self)
+    },
+    #' @description User friendly print method
+    print = function() { self$show() },
+    splitTrainTest = function(
+    nfolds = 10,
+    folds  = split(sample(1:self$n), rep(1:nfolds, length = self$n))
+    ) {
+      ## un-normalize data 
+      X <- Matrix::colScale(self$X, self$norm_X * self$wx)
+      if (!inherits(X, "sparseMatrix")) X <- as.matrix(X)
+      ## create the list of split each compose with couple of Train/Test
+      lapply(folds, function(omit) {
+        trainData <- GaussianModel$new(X[-omit, ], y[-omit], self$S, self$wx, self$wy[-omit])
+        trainData$standardize(self$is_centered, self$is_scaled)
+        testData  <- GaussianModel$new(X[omit, ], y[omit], self$S, self$wx, self$wy[omit])
+        testData$standardize(self$is_centered, self$is_scaled)
+        list(trainData = trainData, testData = testData,
+             trainID = setdiff(1:self$n, omit), testID = omit)
+      })
     }
     # loss = function(theta) {
     #   y_hat <- self$X %*% theta
