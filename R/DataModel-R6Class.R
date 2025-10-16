@@ -131,10 +131,8 @@ GaussianModel <- R6::R6Class(
       if (!inherits(X, "sparseMatrix")) X <- as.matrix(X)
       ## create the list of split each compose with couple of Train/Test
       lapply(folds, function(omit) {
-        trainData <- GaussianModel$new(X[-omit, ], y[-omit], self$S, self$wx, self$wy[-omit])
-        trainData$standardize(self$is_centered, self$is_scaled)
-        testData  <- GaussianModel$new(X[omit, ], y[omit], self$S, self$wx, self$wy[omit])
-        testData$standardize(self$is_centered, self$is_scaled)
+        trainData <- GaussianModel$new(X[-omit, ], self$y[-omit], self$S, self$wx, self$wy[-omit])
+        testData  <- GaussianModel$new(X[omit, ], self$y[omit], self$S, self$wx, self$wy[omit])
         list(trainData = trainData, testData = testData,
              trainID = setdiff(1:self$n, omit), testID = omit)
       })

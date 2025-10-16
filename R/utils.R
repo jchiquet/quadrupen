@@ -25,7 +25,7 @@ default.args <- function(penalty,n,p,user) {
            nlambda1  = ifelse(is.null(user$lambda1),100,length(user$lambda1)),
            min.ratio = ifelse(n<p,0.01,5e-3),
            max.feat  = min(4*n,p),
-           beta0     = NULL,
+           beta0     = numeric(p),
            control   = list()),
 
          "lasso"     = list(
@@ -36,7 +36,7 @@ default.args <- function(penalty,n,p,user) {
            nlambda1  = ifelse(is.null(user$lambda1),100,length(user$lambda1)),
            min.ratio = ifelse(n<p,0.01,5e-3),
            max.feat  = min(n,p),
-           beta0     = NULL,
+           beta0     = numeric(p),
            control   = list()),
 
          "ridge" = list(

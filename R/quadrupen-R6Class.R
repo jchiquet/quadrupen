@@ -76,7 +76,7 @@
 #' @importFrom stats fitted predict residuals deviance
 #' @export
 #' 
-QuadrupenFit <- R6Class(
+QuadrupenFit <- R6::R6Class(
   classname = "QuadrupenFit",
   ## ____________________________________________________
   ## 
@@ -170,27 +170,42 @@ QuadrupenFit <- R6Class(
     cross_validate = 
       function(
           K     = 10,
-          folds = split(sample(1:self$ncoef), rep(1:K, length=self$nsample)),
+          folds = split(sample(1:self$nsample), rep(1:K, length=self$nsample)),
           verbose = TRUE) {
         
-        CVData <- self$dataModel$splitTrainTest(K = K, folds = folds)
+        CVData <- self$dataModel$splitTrainTest(nfolds = K, folds = folds)
         control <- private$control
         control$verbose <- 0
-        
-        lapply(CVData, function(fold){
+
+        one_fold <- function(fold) {
+          fold$trainData$standardize(self$dataModel$is_centered, self$dataModel$is_scaled)
+          fold$trainData$getSufficientStat()
           out <- private$optimizer(fold$trainData, private$tuning, control)
-          
-          y_hat <- sweep(self$predict(fold$testData$X) %*% t(out$beta),2L,-out$mu, check.margin=FALSE)
+          y_hat <- sweep(tcrossprod(fold$testData$X, out$beta), 2L, -out$mu, check.margin=FALSE)
           err <- sweep(y_hat, 1L, fold$testData$y)^2
-          
-          err <- sweep(matrix(predict(fit,matrix(x[omit,], nrow=length(omit))), nrow=length(omit)), 1L, y[omit], check.margin = FALSE)^2
-          if (ncol(fold.err) < length(args$lambda1) & length(args$lambda2 == 1)) {
-            NAs <- length(args$lambda1)-ncol(fold.err)
-            fold.err <- cbind(fold.err, matrix(NA,nrow(fold.err),NAs))
+          if (ncol(err) < length(private$tuning[[1]])) {
+            NAs <- length(private$tuning[[1]]) - ncol(err)
+            err <- cbind(err, matrix(NA, nrow(err),NAs))
           }
-          return(fold.err)
-          
-        })
+          err
+        }
+        
+        ## turn a list to matrix
+        err <- do.call(rbind,
+                       mclapply(CVData, one_fold, mc.cores=1,
+                        mc.preschedule = ifelse(K > 10,TRUE,FALSE)))
+        ## efficient computation of means and the standard error
+        mean <- colMeans(err, na.rm=TRUE)
+        if (any(is.nan(mean))) {
+          warning("\nThere have been a lot of early stops along the path: 
+                  I keep on running, but you should reconsider the value of 
+                  the minimal penalty along the path regarding the n<<p setting.")
+        }
+        mean[is.nan(mean)] <- NA
+        serr <- sqrt((colSums(sweep(err, 2L, mean, check.margin = FALSE)^2,na.rm=TRUE)/(self$nsample-1))/K)
+        
+        data.frame(mean=mean, serr=serr)
+
     },
     #' Plot method for a quadrupen object
     #'
