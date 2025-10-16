@@ -81,9 +81,7 @@ Rcpp::List bounded_reg_cpp(
   vec    timing      (n_lambda)            ; // succesive timing in
   vec  df          (n_lambda)              ; // degrees of freedom
   wall_clock timer                         ; // clock
-  mat   iB                                 ; // contains row indices of the bounded variables
-  mat   jB                                 ; // contains column indices of the bounded variables
-  
+
   // Initializing "second level" variables (within the active set - for a fixed value of lamdba)
   int  nbr_opt  = 0                        ; // # of current calls to the optimization routine
   double L      = max (xtx.diag())         ; // Lipschitz coefficients
@@ -197,21 +195,15 @@ Rcpp::List bounded_reg_cpp(
     
     // Preparing next value of the penalty
     if (converge[m] == 2 || converge[m] == 3) {
-      lambda_linf     =    lambda_linf.subvec(0,m-1) ;
-      converge    =  converge.subvec(0,m)    ;
-      max_grd     =   max_grd.subvec(0,m-1)  ;
-      it_active   = it_active.subvec(0,m)    ;
-      timing      =    timing.subvec(0,m)    ;
-      df          =    df.subvec(0,m)        ;
+      lambda_linf = lambda_linf.subvec(0,m-1) ;
+      converge    = converge.subvec(0,m)      ;
+      max_grd     = max_grd.subvec(0,m-1)     ;
+      it_active   = it_active.subvec(0,m)     ;
+      timing      = timing.subvec(0,m)        ;
+      df          = df.subvec(0,m)            ;
       break;
     } else {
-      if (any(penscale != 1)) {
-        coef = join_rows(coef,beta/(normx % penscale));
-      } else {
-        coef = join_rows(coef,beta/normx);
-      }
-      iB = join_cols(iB, m*ones(B.n_elem,1) );
-      jB = join_cols(jB, conv_to<mat>::from(B) );
+      coef = join_rows(coef, beta/(normx % penscale));
       mu[m] = dot(beta, xbar) ;
     }
     
@@ -226,13 +218,11 @@ Rcpp::List bounded_reg_cpp(
   }
   
   return List::create(
-    Named("coef")       = strans(coef),
-    Named("iB")         = iB          ,
-    Named("jB")         = jB          ,
-    Named("mu")         = mu          ,
-    Named("lambda_linf") = lambda_linf     ,
-    Named("df")         = df          ,
-    Named("monitoring") = 
+    Named("tuning_lead") = lambda_linf ,
+    Named("beta")        = strans(coef),
+    Named("mu")          = mu          ,
+    Named("df")          = df          ,
+    Named("monitoring")  = 
       List::create(
         Named("it.active")      = it_active,
         Named("it.optim")       = it_optim ,

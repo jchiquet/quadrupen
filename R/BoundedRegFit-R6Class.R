@@ -30,22 +30,19 @@ BoundedReg <- R6::R6Class(
       ## END OF CALL
       ## ======================================================
 
-      private$tuning[[1]] <- out$lambda_linf
-      dimnames <- list(round(c(private$tuning[[1]]),3), colnames(private$data$X))
-      dims     <- c(length(private$tuning[[1]]),self$ncoef)
-      private$mu   <- drop(out$mu)
-      private$beta <- Matrix(out$coef, dimnames = dimnames)
-      private$activeSet <- sparseMatrix(
-        i = out$iB + 1,
-        j = out$jB + 1,
-        dims = dims, dimnames = dimnames
-      )
-      private$df <- drop(out$df)
-      private$monitoring <- out$monitoring
-      private$monitoring$internal.timer <- timer
+      private$tuning[[1]] <- out$tuning_lead
+      private$mu          <- drop(out$mu)
+      private$beta        <- out$beta
+      private$df          <- drop(out$df)
+      private$monitoring  <- out$monitoring
+      private$monitoring$timer <- timer
+      private$control     <- control
+      
       private$monitoring$convergence <- 
         sapply(private$monitoring$convergence, status_to_message)
-      private$control <- control
+      dimnames(private$beta) <- 
+        list(round(c(private$tuning[[1]]),3), colnames(private$data$X))
+    
     }
   )
 )

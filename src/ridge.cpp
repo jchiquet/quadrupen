@@ -58,9 +58,13 @@ Rcpp::List ridge_cpp(
   // estimating the intercept term
   mu = ybar - beta * xbar.t() ;
   
-  return List::create(Named("coefficients") = beta,
-                      Named("mu")           = mu,
-                      Named("df")           = df);
+  return List::create(
+    Named("tuning_lead") = lambda ,
+    Named("beta") = beta,
+    Named("mu")   = mu  ,
+    Named("df")   = df  ,
+    Named("monitoring")  = List::create()
+  );
   
 }
 

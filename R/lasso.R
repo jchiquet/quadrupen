@@ -140,7 +140,7 @@ lasso <- function(x,
                   nlambda1  = ifelse(is.null(lambda1),100,length(lambda1)),
                   min.ratio = ifelse(nrow(x) <= ncol(x), 1e-2, 1e-4),
                   max.feat  = min(nrow(x),ncol(x)),
-                  beta0     = NULL,
+                  beta0     = numeric(ncol(x)),
                   control   = list()) {
   
   out <- elastic.net(x,

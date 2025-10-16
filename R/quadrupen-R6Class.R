@@ -172,10 +172,23 @@ QuadrupenFit <- R6Class(
           K     = 10,
           folds = split(sample(1:self$ncoef), rep(1:K, length=self$nsample)),
           verbose = TRUE) {
-      
+        
         CVData <- self$dataModel$splitTrainTest(K = K, folds = folds)
+        control <- private$control
+        control$verbose <- 0
         
         lapply(CVData, function(fold){
+          out <- private$optimizer(fold$trainData, private$tuning, control)
+          
+          y_hat <- sweep(self$predict(fold$testData$X) %*% t(out$beta),2L,-out$mu, check.margin=FALSE)
+          err <- sweep(y_hat, 1L, fold$testData$y)^2
+          
+          err <- sweep(matrix(predict(fit,matrix(x[omit,], nrow=length(omit))), nrow=length(omit)), 1L, y[omit], check.margin = FALSE)^2
+          if (ncol(fold.err) < length(args$lambda1) & length(args$lambda2 == 1)) {
+            NAs <- length(args$lambda1)-ncol(fold.err)
+            fold.err <- cbind(fold.err, matrix(NA,nrow(fold.err),NAs))
+          }
+          return(fold.err)
           
         })
     },

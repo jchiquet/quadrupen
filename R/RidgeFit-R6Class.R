@@ -22,14 +22,18 @@ Ridge <- R6::R6Class(
       timer <- ifelse(control$timer, (proc.time() - cpp.start)[3], NA) 
       ## END OF CALL
       ## ======================================================
+
+      private$tuning[[1]] <- out$tuning_lead
+      private$mu          <- drop(out$mu)
+      private$beta        <- out$beta
+      private$df          <- drop(out$df)
+      private$monitoring  <- out$monitoring
+      private$monitoring$timer <- timer
+      private$control     <- control
+
+      dimnames(private$beta) <- 
+        list(round(c(private$tuning[[1]]),3), colnames(private$data$X))
       
-      private$df   <- drop(out$df)
-      private$mu   <- drop(out$mu)
-      private$beta <- Matrix(
-          out$coefficients,
-          dimnames = list(round(c(private$tuning[[1]]),3), colnames(private$data$X))
-        )
-      monitoring  <- list(internal.timer = timer)
     }
   )
 )

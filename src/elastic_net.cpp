@@ -88,9 +88,9 @@ Rcpp::List elastic_net_cpp(
   bool  success_optim = true             ; // was the internal system resolution successful?
   uvec  null                             ; // stores the variables which go to zero during optimization
   vec   grd_norm (p)                     ; // current value of the grd_norm for each variable
-  mat   nonzeros                         ; // contains non-zero value of beta
-  mat   iA                               ; // contains row indices of the non-zero values
-  mat   jA                               ; // contains column indices of the non-zero values
+  vec   nonzeros                         ; // contains non-zero value of beta
+  urowvec iA                             ; // contains row indices of the non-zero values
+  urowvec jA                             ; // contains column indices of the non-zero values
   
   // WARM START
   // if (BETA0 != R_NilValue) {
@@ -266,9 +266,9 @@ Rcpp::List elastic_net_cpp(
       break;
     } else {
       nonzeros = join_cols(nonzeros, betaA/(normx.elem(A) % penscale.elem(A)));
-      iA = join_cols(iA, m*ones(betaA.n_elem,1) );
-      jA = join_cols(jA, conv_to<mat>::from(A) ) ;
       mu[m] = dot(betaA, xbar.elem(A)) ;
+      iA = join_rows(iA, m*ones<urowvec>(betaA.n_elem) );
+      jA = join_rows(jA, A.t()) ;
     }
   }
   if (!naive) {
@@ -282,11 +282,9 @@ Rcpp::List elastic_net_cpp(
   if (monitor > 0) D_star = J_hat - J_star;
   
   return List::create(
-    Named("nzeros")     = nonzeros ,
-    Named("iA")         = iA       ,
-    Named("jA")         = jA       ,
+    Named("tuning_lead") = lambda_l1 ,
+    Named("beta")       = sp_mat(join_cols(iA, jA), nonzeros, lambda_l1.n_elem, p),
     Named("mu")         = mu       ,
-    Named("lambda_l1")    = lambda_l1  ,
     Named("df")         = df       ,
     Named("monitoring") = 
       List::create(
@@ -294,7 +292,7 @@ Rcpp::List elastic_net_cpp(
         Named("it.optim")       = it_optim ,
         Named("max.grd")        = max_grd  ,
         Named("converge")       = converge ,
-        Named("pensteps.timer") = timing, 
+        Named("pensteps.timer") = timing   , 
         Named("delta.hat")      = D_hat    ,
         Named("delta.star")     = D_star   
       )
@@ -302,6 +300,11 @@ Rcpp::List elastic_net_cpp(
   
 }
 
+
+
+// ============================================================================
+// OLD VERSION
+// 
 
 // [[Rcpp::export]]
 Rcpp::List elastic_net_old_cpp(
