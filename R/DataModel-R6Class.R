@@ -86,9 +86,6 @@ DataModel <- R6::R6Class(
       ##
       ## ===================================================
     },
-    scaleStruct = function(lambda) {
-      self$S <- dimScale(self$S, sqrt(lambda/self$wx))
-    },
     CholStruct = function() {
       self$C <- as.matrix(chol(self$S))
     }

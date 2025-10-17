@@ -140,7 +140,7 @@ crossval <- function(x,
       "lasso"       = max(abs(myData$xty)),
       "bounded.reg" = sum(abs(myData$xty)),
       "ridge"       = 100)
-    lambda1 <- 10^seq(from=log10(lmax), to=log10(lmax*args$min.ratio), len=args$nlambda1)  
+    args$lambda1 <- 10^seq(from=log10(lmax), to=log10(lmax*args$min.ratio), len=args$nlambda1)  
   }
   if (penalty == "lasso") {lambda2 <- NULL}
   if (penalty == "ridge") {lambda1 <- 0}
@@ -149,11 +149,11 @@ crossval <- function(x,
   if (length(lambda2) > 1 & penalty != "ridge") {
     ## CROSS-VALIDATION WORK ON A GRID
     if (verbose){
-      cat("\nCROSS-VALIDATION FOR ",penalty," REGULARIZER \n\n")
+      cat("\nCROSS-VALIDATION FOR ", penalty," REGULARIZER \n\n")
       cat(length(folds),"-fold CV on the lambda1 grid for each lambda2\n", sep="")
     }
     cv <- sapply(1:length(lambda2), function(i) {
-      if(verbose) { cat(round(lambda2[i],3),"\t"); if (i %% 5 == 0) {cat("\n")} }
+      if (verbose) cat(round(lambda2[i],3),"\t"); if (i %% 5 == 0) {cat("\n")}
       simple.cv(folds, x, y, fit.func, args, lambda2[i], mc.cores)
     }, simplify=FALSE)
     if(verbose){cat("\n")}

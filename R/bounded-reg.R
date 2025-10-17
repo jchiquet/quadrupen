@@ -191,7 +191,6 @@ bounded.reg <- function(x,
     cov_struct  = struct,
     cov_weights = penscale
   )
-  myData$scaleStruct(lambda2)
   myData$standardize(intercept, normalize)
   myData$getSufficientStat()
   

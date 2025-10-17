@@ -106,7 +106,7 @@ QuadrupenFit <- R6::R6Class(
     #' @field major_penalty vector of "leading" tuning parameters (either l1, linf or l2)
     major_tuning = function(value) private$tuning[[1]],
     #' @field minor_penalty vector of "minor" tuning parameters (either l1 or l2)
-    minor_tuning= function(value) private$tuning[[2]],
+    minor_tuning = function(value) private$tuning[[2]],
     optim_monitoring = function(value) {private$monitoring},
     optim_config = function(value) {private$control},
     fitted = function(value) {
@@ -169,43 +169,70 @@ QuadrupenFit <- R6::R6Class(
     },
     cross_validate = 
       function(
-          K     = 10,
-          folds = split(sample(1:self$nsample), rep(1:K, length=self$nsample)),
-          verbose = TRUE) {
-        
-        CVData <- self$dataModel$splitTrainTest(nfolds = K, folds = folds)
-        control <- private$control
-        control$verbose <- 0
+          K       = 10,
+          folds   = split(sample(1:self$nsample), rep(1:K, length=self$nsample)),
+          lambda2 = self$minor_tuning, verbose = TRUE, mc.cores = 1) {
 
-        one_fold <- function(fold) {
-          fold$trainData$standardize(self$dataModel$is_centered, self$dataModel$is_scaled)
-          fold$trainData$getSufficientStat()
-          out <- private$optimizer(fold$trainData, private$tuning, control)
-          y_hat <- sweep(tcrossprod(fold$testData$X, out$beta), 2L, -out$mu, check.margin=FALSE)
-          err <- sweep(y_hat, 1L, fold$testData$y)^2
-          if (ncol(err) < length(private$tuning[[1]])) {
-            NAs <- length(private$tuning[[1]]) - ncol(err)
+        ## Some variables and copies  useful for CV work
+        K <- length(folds)
+        control <- private$control; control$verbose <- 0
+        regParam <- private$tuning # copy of the currently used tuning parameters
+        nlambda1 <- length(regParam[[1]])
+        nlambda2 <- length(lambda2)
+        lambda2_vec <- rep(lambda2, each = K)
+        fold_id <- rep(1:K, nlambda2)
+        
+        if (verbose){
+          cat("\nCROSS-VALIDATION FOR ", self$penalty," REGULARIZER \n\n")
+          cat(K, "-fold CV on a grid of (", 
+              nlambda1, ",", nlambda2, ") tuning parameters\n", sep="")
+        }
+
+        ## Same data splitting is kept for varying lambda2 values
+        CVData <- self$dataModel$splitTrainTest(nfolds = K, folds = folds)
+        for (fold in 1:K) {
+          CVData[[fold]]$trainData$standardize(self$dataModel$is_centered, self$dataModel$is_scaled)
+          CVData[[fold]]$trainData$getSufficientStat()
+        }
+
+        ## CV err for a fixed couple fold/lambda2
+        one_fold <- function(fold, lambda2_) {
+          if (verbose & (fold == 1)) cat(round(lambda2_),"\t")
+          regParam[[2]] <- lambda2_
+          out <- private$optimizer(CVData[[fold]]$trainData, regParam, control)
+          y_hat <- scale(tcrossprod(CVData[[fold]]$testData$X, out$beta), -out$mu, FALSE)
+          err <- sweep(y_hat, 1L, CVData[[fold]]$testData$y)^2
+          if (ncol(err) < length(regParam[[1]])) {
+            NAs <- length(regParam[[1]]) - ncol(err)
             err <- cbind(err, matrix(NA, nrow(err),NAs))
           }
           err
         }
+
+        err <- do.call(rbind, 
+          mcmapply(FUN = one_fold, fold = fold_id, lambda = lambda2_vec, 
+                   mc.cores = mc.cores,
+                   mc.preschedule = ifelse(K > 10,TRUE,FALSE),
+                   SIMPLIFY = FALSE
+          )) |> as.matrix() |> as.data.frame()
+        if (verbose) cat("\n")
         
-        ## turn a list to matrix
-        err <- do.call(rbind,
-                       mclapply(CVData, one_fold, mc.cores=1,
-                        mc.preschedule = ifelse(K > 10,TRUE,FALSE)))
-        ## efficient computation of means and the standard error
-        mean <- colMeans(err, na.rm=TRUE)
-        if (any(is.nan(mean))) {
-          warning("\nThere have been a lot of early stops along the path: 
+        res <- do.call(rbind, tapply(err, rep(1:nlambda2, each=self$nsample), function(err_) {
+          mean <- colMeans(err_, na.rm = TRUE)
+          if (any(is.nan(mean))) {
+            warning("\nThere have been a lot of early stops along the path: 
                   I keep on running, but you should reconsider the value of 
                   the minimal penalty along the path regarding the n<<p setting.")
-        }
-        mean[is.nan(mean)] <- NA
-        serr <- sqrt((colSums(sweep(err, 2L, mean, check.margin = FALSE)^2,na.rm=TRUE)/(self$nsample-1))/K)
+          }
+          mean[is.nan(mean)] <- NA
+          serr <- colSums(sweep(err_, 2L, mean, check.margin = FALSE)^2, na.rm = TRUE)
+          serr <- sqrt((serr/(self$dataModel$n - 1))/K)
+          data.frame(mean = mean, serr = serr, lambda1 = private$tuning[[1]])
+        }))
+        res$lambda2 <- rep(lambda2, each = length(private$tuning[[1]]))
         
-        data.frame(mean=mean, serr=serr)
-
+        myCV <- CrossValidation$new(cv_error = res, folds = folds)
+        myCV
     },
     #' Plot method for a quadrupen object
     #'

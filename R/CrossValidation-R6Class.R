@@ -32,12 +32,13 @@ CrossValidation <- R6::R6Class(
     plotCV_1D = function(main = "Cross-validation error", log.scale=TRUE) {
       ## SIMPLE CROSS-VALIDATION GRAPH
       if (length(self$lambda1) > length(self$lambda2)) {
-        d <- ggplot(self$error, aes(x=.data$lambda1,y=.data$mean))
+        d <- ggplot(self$error, aes(x=.data$lambda1,y=.data$mean)) + theme_bw()
         xlab <- ifelse(log.scale,expression(log[10](lambda[1])),expression(lambda[1]))
         lambda <- data.frame(xval=c(self$lambda1_min,self$lambda1_1se),
                              lambda.choice=factor(c("min. MSE","1-se rule")))
         
       } else {
+        ### TODO
         ## ridge or not (meaning working on lambda1 or lambda2)
         d <- ggplot(self$error, aes(x=.data$lambda2,y=.data$mean))
         xlab <- ifelse(log.scale,expression(log[10](lambda[2])),expression(lambda[2]))
@@ -46,13 +47,17 @@ CrossValidation <- R6::R6Class(
       }
       d <- d + xlab(xlab) + ylab("Mean square error") + 
         geom_point(alpha=0.3) + 
-        geom_smooth(aes(ymin=.data$mean-.data$serr, ymax=.data$mean+.data$serr), data=self$error, alpha=0.2, stat="identity")
+        geom_smooth(aes(ymin=.data$mean-.data$serr, ymax=.data$mean+.data$serr, group=as.factor(.data$lambda2),
+                        colour=as.factor(.data$lambda2)), data=self$error, alpha=0.2, stat="identity")
       if (log.scale) {
         d <- d + scale_x_log10() + annotation_logticks(sides="b")
       }
       d <- d + ggtitle(main) +
-        geom_vline(data=lambda, aes(xintercept=.data$xval,colour=.data$lambda.choice),
-                   linetype="dashed",  alpha=0.5, show.legend = TRUE)
+        geom_vline(data=lambda, aes(xintercept=.data$xval, linetype=.data$lambda.choice),
+                   alpha=0.2, show.legend = TRUE) + 
+          scale_color_discrete(labels = round(self$lambda2, 3)) +
+        labs(colour = expression(explored~lambda[2]), linetype = expression(lambda[1]~choice))
+      
       d
     },
     plotCV_2D = function(main = "Cross-validation error") {

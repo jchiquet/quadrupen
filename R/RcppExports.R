@@ -5,16 +5,8 @@ bounded_reg_cpp <- function(dataModel, tuningParam, control) {
     .Call(`_quadrupen_bounded_reg_cpp`, dataModel, tuningParam, control)
 }
 
-bounded_reg_old_cpp <- function(X, Y, Struct, LAMBDA1, N_LAMBDA, MIN_RATIO, PENSCALE, LAMBDA2, INTERCEPT, NORMALIZE, WEIGHTS, NAIVE, EPS, MAXITER, MAXFEAT, FUN, VERBOSE, SPARSE, BULLETPROOF) {
-    .Call(`_quadrupen_bounded_reg_old_cpp`, X, Y, Struct, LAMBDA1, N_LAMBDA, MIN_RATIO, PENSCALE, LAMBDA2, INTERCEPT, NORMALIZE, WEIGHTS, NAIVE, EPS, MAXITER, MAXFEAT, FUN, VERBOSE, SPARSE, BULLETPROOF)
-}
-
 elastic_net_cpp <- function(dataModel, tuningParam, control) {
     .Call(`_quadrupen_elastic_net_cpp`, dataModel, tuningParam, control)
-}
-
-elastic_net_old_cpp <- function(BETA0, X, y, Struct, LAMBDA1, n_lambda, min_ratio, penscale, lambda2, intercept, normalize, weights, naive, eps, max_iter, max_feat, fun, verbose, sparse, usechol, monitor) {
-    .Call(`_quadrupen_elastic_net_old_cpp`, BETA0, X, y, Struct, LAMBDA1, n_lambda, min_ratio, penscale, lambda2, intercept, normalize, weights, naive, eps, max_iter, max_feat, fun, verbose, sparse, usechol, monitor)
 }
 
 ridge_cpp <- function(dataModel, tuningParam, VERBOSE) {

@@ -157,7 +157,7 @@
 #' ## Structured Elastic-net
 #' plot(lasso(x,y), label=labels) ## a mess
 #' plot(elastic.net(x,y,lambda2=10), label=labels) ## a lot better
-#' plot(elastic.net(x,y,lambda2=10,struct=L), label=labels) ## even better
+#' plot(elastic.net(x,y,lambda2=10,struct=solve(Sigma)), label=labels) ## even better
 #'
 #' @export
 elastic.net <- function(x,
@@ -184,12 +184,11 @@ elastic.net <- function(x,
     cov_struct  = struct,
     cov_weights = penscale
   )
-  myData$scaleStruct(lambda2)
   myData$standardize(intercept, normalize)
   myData$getSufficientStat()
 
   ## ============================================
-  ## INSTANTIATE THE PENALTY MODEL
+  ## INSTANTIATE THE PENALIZED MODEL
   ##
   if (is.null(lambda1)) {
     stopifnot("min.ratio must be non negative." = min.ratio > 0)
