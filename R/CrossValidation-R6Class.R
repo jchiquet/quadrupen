@@ -1,3 +1,29 @@
+#' Class CrossValidation"
+#' 
+#' Class of object returned by a cross-validation performed through
+#' the \code{$cross_validate()} method.
+#' 
+#' \@param lambda1 vector of \eqn{\lambda_1}{lambda1}
+#' (\eqn{\ell_1}{l1} or \eqn{\ell_\infty}{infinity} penalty levels)
+#' for which each cross-validation has been performed.
+#' @param lambda2 vector (or scalar) of \eqn{\ell_2}{l2}-penalty levels for
+#' which each cross-validation has been performed.
+#' @param lambda1.min level of \eqn{\lambda_1}{lambda1} that minimizes the
+#' error estimated by cross-validation.
+#' @param lambda1.1se largest level of \eqn{\lambda_1}{lambda1} such as
+#' the cross-validated error is within 1 standard error of the
+#' minimum.
+#' @param lambda2.min level of \eqn{\lambda_2}{lambda2} that minimizes the
+#' error estimated by cross-validation.
+#' @param lambda2.1se largest level of \eqn{\lambda_2}{lambda2}
+#'the cross-validated error is within 1 standard error of the
+#' minimum (only relevant for ridge regression).
+#' @param cv.error a data frame containing the mean
+#' cross-validated error and its associated standard error for each
+#' values of \code{lambda1} and \code{lambda2}.
+#' @param folds list of \code{K} vectors indicating the folds
+#' used for cross-validation.
+#' 
 #' @importFrom dplyr filter
 #' 
 #' @export
@@ -24,10 +50,6 @@ CrossValidation <- R6::R6Class(
         private$cv_1se <- cv_error |> 
           dplyr::filter(lambda2 == self$lambda2_min) |> 
           dplyr::filter(mean < min(mean + serr) + 1e-5)
-      },
-    get_best_fit = function(x, y, fit_func, args) {
-      args$lambda2 <- self$lambda2_min
-      private$best_fit <- do.call(fit_func, c(list(x=x,y=y),args))
     },
     plotCV_1D = function(main = "Cross-validation error", log.scale=TRUE) {
       ## SIMPLE CROSS-VALIDATION GRAPH
@@ -85,26 +107,6 @@ CrossValidation <- R6::R6Class(
     lambda1_min = function(value) max(private$cv_min$lambda1),
     lambda2_min = function(value) max(private$cv_min$lambda2),
     lambda1_1se = function(value) max(private$cv_1se$lambda1),
-    lambda2_1se = function(value) max(private$cv_1se$lambda2),
-    best_model  = function(value) private$best_fit,     
-    beta_min = function(value) {
-      lambda <- unlist(private$best_fit$major_penalty)
-      if (private$best_fit$penalty == "ridge") {
-        i_min <- min(match(self$lambda2_min, lambda),length(lambda))
-      } else {
-        i_min <- min(match(self$lambda1_min, lambda),length(lambda))
-      } 
-      private$best_fit$coefficients[i_min, ]
-    },
-    beta_1se = function(value) {
-      lambda <- unlist(private$best_fit$major_penalty)
-      if (private$best_fit$penalty == "ridge") {
-        i_1se <- min(match(self$lambda1_2se, lambda),length(lambda))
-      } else {
-        i_1se <- min(match(self$lambda1_1se, lambda),length(lambda))
-      } 
-      private$best_fit$coefficients[i_1se, ]
-    }
-
+    lambda2_1se = function(value) max(private$cv_1se$lambda2)
   )
 )

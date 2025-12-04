@@ -292,7 +292,6 @@ elastic.net.old <- function(x,
       max.feat <- as.integer(max.feat)
   }
   
-  
   ## ============================================
   ## RECOVERING LOW LEVEL OPTIONS
   quadra <- TRUE

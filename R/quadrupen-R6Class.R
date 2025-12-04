@@ -91,7 +91,8 @@ QuadrupenFit <- R6::R6Class(
     tuning      = numeric() ,
     intercept   = NA        ,
     control     = list()    ,
-    optimizer   = NA,
+    optimizer   = NA        ,
+    crossval    = NA        ,
     monitoring  = list()
   ),
   ## ____________________________________________________
@@ -104,9 +105,17 @@ QuadrupenFit <- R6::R6Class(
     dataModel = function(value) {private$data},
     has_intercept = function(value) {private$intercept},
     #' @field major_penalty vector of "leading" tuning parameters (either l1, linf or l2)
-    major_tuning = function(value) private$tuning[[1]],
+    major_tuning = function(value) {
+      if (missing(value))
+        return(private$tuning[[1]])
+      else private$tuning[[1]] <- value
+    },
     #' @field minor_penalty vector of "minor" tuning parameters (either l1 or l2)
-    minor_tuning = function(value) private$tuning[[2]],
+    minor_tuning = function(value) {
+      if (missing(value))
+        return(private$tuning[[2]])
+      else private$tuning[[2]] <- value
+    },
     optim_monitoring = function(value) {private$monitoring},
     optim_config = function(value) {private$control},
     fitted = function(value) {
@@ -114,12 +123,13 @@ QuadrupenFit <- R6::R6Class(
       res <- sweep(tcrossprod(Xs, private$beta),2L,-private$mu,check.margin=FALSE)
       res
     },
-    coefficients = function(value) {private$beta},
-    interceptTerm = function(value) {private$mu},
-    residuals = function(value) {apply(self$fitted, 2, function(y_hat) private$data$y - y_hat)},
-    deviance = function(value) {colSums(self$residuals^2)},
-    degrees_freedom = function(value) {private$df + ifelse(self$has_intercept, 1L, 0L)},
-    r_squared = function(value) {1 - colSums(self$residuals^2) / private$data$rss}
+    coefficients     = function(value) {private$beta},
+    interceptTerm    = function(value) {private$mu},
+    residuals        = function(value) {apply(self$fitted, 2, function(y_hat) private$data$y - y_hat)},
+    deviance         = function(value) {colSums(self$residuals^2)},
+    degrees_freedom  = function(value) {private$df + ifelse(self$has_intercept, 1L, 0L)},
+    r_squared        = function(value) {1 - colSums(self$residuals^2) / private$data$rss},
+    cv_job           = function(value) {private$crossval}
   ),
   ## ____________________________________________________
   ## 
@@ -128,11 +138,9 @@ QuadrupenFit <- R6::R6Class(
   public  = list(
     initialize = function(data, intercept, regParam) {
 
-      stopifnot("The data object must be an instance of DataModel"
-                = inherits(data, "DataModel"))
+      stopifnot("The data object must be an instance of DataModel" = inherits(data, "DataModel"))
       stopifnot("regParam must be a list" = is.list(regParam))
-      stopifnot("All regularization parameters must be positive." =
-                  all(unlist(regParam) >= 0))
+      stopifnot("All regularization parameters must be positive." = all(unlist(regParam) >= 0))
       stopifnot("The first entry of regParam must be sorted in decreasing order." =
                   !is.unsorted(rev(regParam[[1]])))
       if (length(regParam) > 1)
@@ -163,7 +171,7 @@ QuadrupenFit <- R6::R6Class(
       if (is.null(newx)) {
         res <- self$fitted
       } else {
-        res <- sweep(newx %*% t(private$beta),2L,-private$mu, check.margin=FALSE)
+        res <- sweep(newx %*% t(private$beta), 2L, -private$mu)
       }
       res
     },
@@ -173,9 +181,9 @@ QuadrupenFit <- R6::R6Class(
           folds   = split(sample(1:self$nsample), rep(1:K, length=self$nsample)),
           lambda2 = self$minor_tuning, verbose = TRUE, mc.cores = 1) {
 
-        ## Some variables and copies  useful for CV work
+        ## Some variables and copies useful for CV work
         K <- length(folds)
-        control <- private$control; control$verbose <- 0
+        control  <- private$control; control$verbose <- 0
         regParam <- private$tuning # copy of the currently used tuning parameters
         nlambda1 <- length(regParam[[1]])
         nlambda2 <- length(lambda2)
@@ -197,7 +205,7 @@ QuadrupenFit <- R6::R6Class(
 
         ## CV err for a fixed couple fold/lambda2
         one_fold <- function(fold, lambda2_) {
-          if (verbose & (fold == 1)) cat(round(lambda2_),"\t")
+          if (verbose & (fold == 1)) cat(round(lambda2_, 3),"\t")
           regParam[[2]] <- lambda2_
           out <- private$optimizer(CVData[[fold]]$trainData, regParam, control)
           y_hat <- scale(tcrossprod(CVData[[fold]]$testData$X, out$beta), -out$mu, FALSE)
@@ -210,7 +218,7 @@ QuadrupenFit <- R6::R6Class(
         }
 
         err <- do.call(rbind, 
-          mcmapply(FUN = one_fold, fold = fold_id, lambda = lambda2_vec, 
+          parallel::mcmapply(FUN = one_fold, fold = fold_id, lambda = lambda2_vec, 
                    mc.cores = mc.cores,
                    mc.preschedule = ifelse(K > 10,TRUE,FALSE),
                    SIMPLIFY = FALSE
@@ -230,9 +238,8 @@ QuadrupenFit <- R6::R6Class(
           data.frame(mean = mean, serr = serr, lambda1 = private$tuning[[1]])
         }))
         res$lambda2 <- rep(lambda2, each = length(private$tuning[[1]]))
-        
-        myCV <- CrossValidation$new(cv_error = res, folds = folds)
-        myCV
+        private$crossval <- CrossValidation$new(cv_error = res, folds = folds)
+        invisible(private$crossval)
     },
     #' Plot method for a quadrupen object
     #'
@@ -448,7 +455,9 @@ QuadrupenFit <- R6::R6Class(
     #'
     #' @import ggplot2 reshape2 scales grid methods
     #' @exportMethod criteria
-    criteria = function(penalty=setNames(c(2, log(self$ncoef)), c("AIC","BIC")), sigma=NULL,
+    criteria = function(penalty=
+        setNames(c(2, log(self$nsample), log(self$ncoef), log(self$nsample) + 2*log(self$ncoef)),
+                 c("AIC","BIC", "mBIC", "eBIC")), sigma=NULL,
                          log.scale=TRUE, xvar = "lambda", plot=TRUE) {
       
       betas <- private$beta
@@ -457,25 +466,35 @@ QuadrupenFit <- R6::R6Class(
       n <- self$nsample
       p <- self$ncoef
       
-      ## Compute generalized cross-validation
-      GCV <- self$deviance/(n*(1 + self$degrees_freedom/n))^2
-      
+
       ## compute the penalized criteria
       if (is.null(sigma)) {
-        crit <- sapply(penalty, function(pen) log(self$deviance) + pen * self$degrees_freedom/n)
+        crit <- sapply(penalty, function(pen) n*log(self$deviance/n) + pen * self$degrees_freedom)
       } else {
-        crit <- sapply(penalty, function(pen) self$deviance/n + pen * self$degrees_freedom/n * sigma^2)
+        crit <- sapply(penalty, function(pen) self$deviance/sigma^2 + pen * self$degrees_freedom)
       }
-      
-      ## put together all relevant information about those criteria
-      criterion <- data.frame(crit, GCV=GCV, df=self$degrees_freedom, lambda=lambda, fraction = apply(abs(betas),1,sum)/max(apply(abs(betas),1,sum)), row.names=1:nrow(crit))
+      crit <- as.data.frame(crit)
+
+      ## Compute generalized cross-validation
+      crit$GCV <- self$deviance/(n*(1 - self$degrees_freedom/n)^2)
       
       ## recover the associated vectors of parameters
       beta.min  <- t(betas[apply(crit, 2, which.min), ])
-      ##     beta.min <- cbind2(beta.min, betas[, which.min(GCV)])
       if (!is.null(dim(beta.min)))
-        colnames(beta.min) <- names(penalty)
+        colnames(beta.min) <- c(names(penalty), "GCV")
+
+      if (inherits(self$cv_job, "CrossValidation")) {
+        crit$CV <- self$cv_job$error$mean
+        i_min <- min(match(self$cv_job$lambda1_min, lambda),length(lambda))
+        i_1se <- min(match(self$cv_job$lambda1_1se, lambda),length(lambda))
+        beta_CV <- t(betas[c(i_min, i_1se), ])
+        colnames(beta_CV)  <- c("CV_min", "CV_1se")
+        beta.min <- cbind(beta.min, beta_CV)
+      }
       
+      ## put together all relevant information about those criteria
+      criterion <- data.frame(crit, df=self$degrees_freedom, lambda=lambda, fraction = apply(abs(betas),1,sum)/max(apply(abs(betas),1,sum)), row.names=1:nrow(crit))
+
       ## plot the critera, if required
       if (plot) {
         
@@ -507,8 +526,6 @@ QuadrupenFit <- R6::R6Class(
       } else {
         return(list(criterion=criterion, beta.min=beta.min))
       }
-      
-      return(list(criterion=criterion, beta.min=beta.min))
     }
   )
 )
