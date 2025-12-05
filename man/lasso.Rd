@@ -14,7 +14,7 @@ lasso(
   nlambda1 = ifelse(is.null(lambda1), 100, length(lambda1)),
   min.ratio = ifelse(nrow(x) <= ncol(x), 0.01, 1e-04),
   max.feat = min(nrow(x), ncol(x)),
-  beta0 = NULL,
+  beta0 = numeric(ncol(x)),
   control = list()
 )
 }

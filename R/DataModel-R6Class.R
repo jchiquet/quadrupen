@@ -120,8 +120,7 @@ GaussianModel <- R6::R6Class(
     #' @description User friendly print method
     print = function() { self$show() },
     splitTrainTest = function(
-    nfolds = 10,
-    folds  = split(sample(1:self$n), rep(1:nfolds, length = self$n))
+      nfolds = 10, folds  = split(sample(1:self$n), rep(1:nfolds, length = self$n))
     ) {
       ## un-normalize data 
       X <- Matrix::colScale(self$X, self$norm_X * self$wx)
@@ -133,7 +132,26 @@ GaussianModel <- R6::R6Class(
         list(trainData = trainData, testData = testData,
              trainID = setdiff(1:self$n, omit), testID = omit)
       })
+    },
+    splitSubSamples = function(
+      n_subsamples = 50,
+      subsample_size = floor(self$n/2),
+      subsamples = replicate(n_subsamples, sample(1:self$n, subsample_size), simplify=FALSE),
+      weakness = 1
+    ) {
+      ## un-normalize data 
+      X <- Matrix::colScale(self$X, self$norm_X * self$wx)
+      if (!inherits(X, "sparseMatrix")) X <- as.matrix(X)
+      ## create the list of split each compose with couple of Train/Test
+      lapply(subsamples, function(keep) {
+        wx <- self$wx / runif(self$d ,weakness, 1)
+        sampleData <- GaussianModel$new(X[keep, ], self$y[keep], self$S, wx, self$wy[keep])
+        sampleData$standardize(self$is_centered, self$is_scaled)
+        sampleData$getSufficientStat()
+        sampleData
+      })
     }
+      
     # loss = function(theta) {
     #   y_hat <- self$X %*% theta
     #   res <- .5 * mean( (self$y - y_hat)^2 )

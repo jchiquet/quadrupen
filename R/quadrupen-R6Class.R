@@ -93,11 +93,12 @@ QuadrupenFit <- R6::R6Class(
     control     = list()    ,
     optimizer   = NA        ,
     crossval    = NA        ,
+    stabsel     = NA        ,
     monitoring  = list()
   ),
   ## ____________________________________________________
   ## 
-  ## ACTIVE BINDINGS MEMBERS
+  ## ACTIVE BINDINGS
   ## ____________________________________________________
   active = list(
     ncoef = function(value) {private$data$d},
@@ -129,7 +130,8 @@ QuadrupenFit <- R6::R6Class(
     deviance         = function(value) {colSums(self$residuals^2)},
     degrees_freedom  = function(value) {private$df + ifelse(self$has_intercept, 1L, 0L)},
     r_squared        = function(value) {1 - colSums(self$residuals^2) / private$data$rss},
-    cv_job           = function(value) {private$crossval}
+    cv_job           = function(value) {private$crossval},
+    stabsel_job      = function(value) {private$stabsel}
   ),
   ## ____________________________________________________
   ## 
@@ -175,11 +177,80 @@ QuadrupenFit <- R6::R6Class(
       }
       res
     },
+    #' @description Function that computes K-fold cross-validated error of a
+    #' \code{quadrupen} fit, possibly on a grid of
+    #' \code{lambda1,lambda2}.
+    #'
+    #' @param K integer indicating the number of folds. Default is 10.
+    #'
+    #' @param folds list of \code{K} vectors that describes the folds to
+    #' use for the cross-validation. By default, the folds are randomly
+    #' sampled with the specified K. The same folds are used for each
+    #' values of \code{lambda2}.
+    #'
+    #' @param lambda2 tunes the \eqn{\ell_2}{l2}-penalty (ridge-like) of
+    #' the fit. If none is provided, a vector of values is generated and
+    #' a CV is performed on a grid of \code{lambda2} and \code{lambda1},
+    #' using the same folds for each \code{lambda2}). Ignored when
+    #' \code{penalty} equals \code{"lasso"}. CV is only performed on
+    #' \code{lambda2} when the \code{ridge} penalty is used.
+    #'
+    #' @param verbose logical; indicates if the progression (the current
+    #' lambda2) should be displayed. Default is \code{TRUE}.
+    #'
+    #' @param mc.cores the number of cores to use. The default uses all
+    #' the cores available.
+    #'
+    #' @note If the user runs the fitting method with option
+    #' \code{'bulletproof'} set to \code{FALSE}, the algorithm may stop
+    #' at an early stage of the path. Early stops are handled internally,
+    #' in order to provide results on the same grid of penalty tuned by
+    #' \eqn{\lambda_1}{lambda1}.  This is done by means of \code{NA}
+    #' values, so as mean and standard error are consistently
+    #' evaluated. If, while cross-validating, the procedure experiences
+    #' too much early stoppings, a warning is sent to the user, in which
+    #' case you should reconsider the grid of \code{lambda1} used for the
+    #' cross-validation.  If \code{bulletproof} is \code{TRUE} (the
+    #' default), there is nothing to worry about, except a possible slow
+    #' down when any switching to the proximal algorithm is required.
+    #'
+    #' @return An object of class "CrossValidation" for which a \code{plot} method
+    #' is available.
+    #'
+    #' @examples \dontrun{
+    #' ## Simulating multivariate Gaussian with blockwise correlation
+    #' ## and piecewise constant vector of parameters
+    #' beta <- rep(c(0,1,0,-1,0), c(25,10,25,10,25))
+    #' cor  <- 0.75
+    #' Soo  <- toeplitz(cor^(0:(25-1))) ## Toeplitz correlation for irrelevant variable
+    #' Sww  <- matrix(cor,10,10) ## bloc correlation between active variables
+    #' Sigma <- bdiag(Soo,Sww,Soo,Sww,Soo) + 0.1
+    #' diag(Sigma) <- 1
+    #' n <- 100
+    #' x <- as.matrix(matrix(rnorm(95*n),n,95) %*% chol(Sigma))
+    #' y <- 10 + x %*% beta + rnorm(n,0,10)
+    #'
+    #' ## Use fewer lambda1 values by overwritting the default parameters
+    #' ## and cross-validate over the sequences lambda1 and lambda2
+    #' cv.grid <- crossval(x,y, lambda2=10^seq(2,-2,len=50), nlambda1=50)
+    #' ## Rerun simple cross-validation with the appropriate lambda2
+    #' cv.10K <- crossval(x,y, lambda2=cv.grid$lambda2_min)
+    #' ## Try leave one out also
+    #' cv.loo <- crossval(x,y, K=n, lambda2=cv.grid$lambda2_min)
+    #'
+    #' plot(cv.grid)
+    #' plot(cv.10K)
+    #' plot(cv.loo)
+    #'
+    #' ## Performance for selection purpose
+    #' cat("\nFalse positives with the minimal 10-CV choice: ", sum(sign(beta) != sign(cv.10K$beta_min )))
+    #' cat("\nFalse positives with the minimal LOO-CV choice: ", sum(sign(beta) != sign(cv.loo$beta_min)))
+    #' }
     cross_validate = 
       function(
           K       = 10,
           folds   = split(sample(1:self$nsample), rep(1:K, length=self$nsample)),
-          lambda2 = self$minor_tuning, verbose = TRUE, mc.cores = 1) {
+          lambda2 = self$minor_tuning, verbose = TRUE, mc.cores = detectCores() - 2) {
 
         ## Some variables and copies useful for CV work
         K <- length(folds)
@@ -197,7 +268,7 @@ QuadrupenFit <- R6::R6Class(
         }
 
         ## Same data splitting is kept for varying lambda2 values
-        CVData <- self$dataModel$splitTrainTest(nfolds = K, folds = folds)
+        CVData <- self$dataModel$splitTrainTest(K, folds)
         for (fold in 1:K) {
           CVData[[fold]]$trainData$standardize(self$dataModel$is_centered, self$dataModel$is_scaled)
           CVData[[fold]]$trainData$getSufficientStat()
@@ -238,17 +309,160 @@ QuadrupenFit <- R6::R6Class(
           data.frame(mean = mean, serr = serr, lambda1 = private$tuning[[1]])
         }))
         res$lambda2 <- rep(lambda2, each = length(private$tuning[[1]]))
+
         private$crossval <- CrossValidation$new(cv_error = res, folds = folds)
         invisible(private$crossval)
     },
-    #' Plot method for a quadrupen object
+    #' @description Compute the stability path of a (possibly randomized) fitting
+    #' procedure as introduced by Meinshausen and Buhlmann (2010).
     #'
-    #' Produce a plot of the solution path of a \code{quadrupen} fit.
+    #' @param x matrix of features, possibly sparsely encoded
+    #' (experimental). Do NOT include intercept.
     #'
-    #' @usage plot.quadrupen(x, y, xvar = "lambda",
-    #'         main = self$penalty," path", sep=""),
-    #'         log.scale = TRUE, standardize=TRUE, reverse=FALSE,
-    #'         labels = NULL, plot = TRUE, ...)
+    #' @param y response vector.
+    #'
+    #' @param n_subsamples integer indicating the number of subsamplings
+    #' used to estimate the selection probabilities. Default is 100.
+    #'
+    #' @param subsample_size integer indicating the size of each subsamples.
+    #' Default is \code{floor(n/2)}.
+    #'
+    #' @param subsamples list with \code{subsamples} entries with vectors
+    #' describing the folds to use for the stability procedure. By
+    #' default, the folds are randomly sampled with the specified
+    #' \code{n_subsamples} and \code{subsample_size} argument.
+    #'
+    #' @param weakness Coefficient used for randomizing the weights of each features.
+    #' Default is \code{0.5}. Set to 1 for no randomization. See
+    #' details below.
+    #' 
+    #' @param verbose logical; indicates if the progression should be
+    #' displayed. Default is \code{TRUE}.
+    #'
+    #' @param mc.cores the number of cores to use. The default uses all
+    #' the cores available.
+    #'
+    #' @return An object of class \code{StabilityPath}.
+    #'
+    #' @note When \code{randomized = TRUE}, the \code{penscale} argument
+    #' that weights the penalty tuned by \eqn{\lambda_1}{lambda1} is
+    #' perturbed (divided) for each subsample by a random variable
+    #' uniformly distributed on
+    #' \if{latex}{\eqn{[\alpha,1]}}\if{html}{[&#945;,1]}\if{text}{\eqn{[alpha,1]}},
+    #' where
+    #' \if{latex}{\eqn{\alpha}}\if{html}{&#945;}\if{text}{\eqn{alpha}} is
+    #' the weakness parameter.
+    #'
+    #' If the user runs the fitting method with option
+    #' \code{'bulletproof'} set to \code{FALSE}, the algorithm may stop
+    #' at an early stage of the path. Early stops of the underlying
+    #' fitting function are handled internally, in the following way: we
+    #' chose to simply skip the results associated with such runs, in
+    #' order not to bias the stability selection procedure. If it occurs
+    #' too often, a warning is sent to the user, in which case you should
+    #' reconsider the grid of \code{lambda1} for stability selection. If
+    #' \code{bulletproof} is \code{TRUE} (the default), there is nothing
+    #' to worry about, except a possible slow down when any switching to
+    #' the proximal algorithm is required.
+    #'
+    #' @references N. Meinshausen and P. Buhlmann (2010). Stability
+    #' Selection, JRSS(B).
+    #'
+    #' @examples \dontrun{
+    #' ## Simulating multivariate Gaussian with blockwise correlation
+    #' ## and piecewise constant vector of parameters
+    #' beta <- rep(c(0,1,0,-1,0), c(25,10,25,10,25))
+    #' Soo  <- matrix(0.75,25,25) ## bloc correlation between zero variables
+    #' Sww  <- matrix(0.75,10,10) ## bloc correlation between active variables
+    #' Sigma <- bdiag(Soo,Sww,Soo,Sww,Soo) + 0.2
+    #' diag(Sigma) <- 1
+    #' n <- 100
+    #' x <- as.matrix(matrix(rnorm(95*n),n,95) %*% chol(Sigma))
+    #' y <- 10 + x %*% beta + rnorm(n,0,10)
+    #'
+    #' ## Build a vector of label for true nonzeros
+    #' labels <- rep("irrelevant", length(beta))
+    #' labels[beta != 0] <- c("relevant")
+    #' labels <- factor(labels, ordered=TRUE, levels=c("relevant","irrelevant"))
+    #'
+    #' ## Call to stability selection function, 200 subsampling
+    #' stab <- stability(x,y, subsamples=200, lambda2=1, min.ratio=1e-2)
+    #' ## Recover the selected variables for a given cutoff
+    #' ## and per-family error rate, without producing any plot
+    #' stabpath <- plot(stab, cutoff=0.75, PFER=1, plot=FALSE)
+    #'
+    #' cat("\nFalse positives for the randomized Elastic-net with stability selection: ",
+    #'      sum(labels[stabpath$selected] != "relevant"))
+    #' cat("\nDONE.\n")
+    #'}
+    #'
+    stability = function(
+          n_subsamples   = 50,
+          subsample_size = floor(self$nsample/2),
+          subsamples     = replicate(n_subsamples, sample(1:self$nsample, subsample_size), simplify=FALSE),
+          weakness       = 1,
+          verbose        = TRUE,
+          mc.cores       = detectCores() - 2) {
+      
+      ## =============================================================
+      ## INITIALIZATION & PARAMETERS RECOVERY
+      if (Sys.info()[['sysname']] == "Windows") {
+        warning("\nWindows does not support fork, enforcing mc.cores to '1'.")
+        mc.cores <- 1
+      }
+      
+      control  <- private$control; 
+      control$verbose <- 0
+      control$max.feat  <- self$ncoef
+      nlambda1 <- length(private$tuning[[1]])
+
+      ## Prepare blocs of sub samples to run jobs parallely
+      blocs <- suppressWarnings(split(1:n_subsamples, 1:mc.cores))
+      
+      if (verbose) {
+        cat(paste("\n\nSTABILITY SELECTION ",ifelse(weakness < 1,"with","without")," randomization (weakness = ",weakness,")",sep=""))
+        cat(paste("\nFitting procedure: ", self$penalty," with ", nlambda1,"-dimensional grid of lambda1.", sep=""))
+        cat("\nRunning",length(blocs),"jobs parallely (1 per core)")
+        cat("\nApprox.", length(blocs[[1]]),"subsamplings for each job for a total of", n_subsamples)
+      }
+      ## get data samples
+      SubsampledData <- self$dataModel$splitSubSamples(n_subsamples, subsample_size, subsamples, weakness)
+
+      ## function to run on each core
+      bloc_stability <- function(subsets) {
+        select <- Matrix(0, nlambda1, self$ncoef)
+        subsamples_ok <- 0
+        for (s in 1:length(subsets)) {
+          active <- private$optimizer(SubsampledData[[subsets[s]]], private$tuning, control)$active
+          if (nrow(active) == nlambda1) {
+            subsamples_ok <- subsamples_ok + 1
+            select <- select + active
+          }
+        }
+        if (subsamples_ok < 0.5*length(subsets)) {
+          cat("\nWarning: more than 50% of the run were discarded in that core due to early stops of the fitting procedure. You should consider largest 'min.ratio' or strongest 'lambda2'.")
+        }
+        return(select/(subsamples_ok*length(blocs)))
+      }
+      
+      ## Now launch the B jobs...
+      prob_bloc <- mclapply(blocs, bloc_stability, mc.cores=mc.cores)
+      
+      ## Construct the probability path
+      path <- Matrix(0, nlambda1, self$ncoef)
+      for (b in 1:length(prob_bloc)) {
+        path <- path + prob_bloc[[b]]
+      }
+
+      private$stabsel <- StabilityPath$new(
+        probabilities = path          ,
+        regParam      = private$tuning,
+        subsamples    = subsamples
+      )
+      invisible(private$stabsel)
+    },
+    #' @description Produce a plot of the solution path of a \code{quadrupen} fit.
+    #'
     #' @param x output of a fitting procedure of the \pkg{quadrupen}
     #' package (\code{\link{elastic.net}} or \code{\link{bounded.reg}}
     #' for the moment). Must be of class \code{quadrupen}.
@@ -372,9 +586,6 @@ QuadrupenFit <- R6::R6Class(
     #' respective factor \eqn{\log(n)}{log(n)} and \eqn{2}{2}) yet the user can specify any
     #' penalty.
     #'
-    #' @usage criteria(object, penalty=setNames(c(2, log(p)), c("AIC","BIC")), sigma=NULL,
-    #'            log.scale=TRUE, xvar = "lambda", plot=TRUE)
-    #'
     #' @param object output of a fitting procedure of the \pkg{quadrupen}
     #' package (e.g. \code{\link{elastic.net}}). Must be of class
     #' \code{quadrupen}.
@@ -426,13 +637,6 @@ QuadrupenFit <- R6::R6Class(
     #' @references Ryan Tibshirani and Jonathan Taylor. Degrees of
     #' freedom in lasso problems, Annals of Statistics, 40(2) 2012.
     #'
-    #' @name criteria,quadrupen-method
-    #' @aliases criteria,quadrupen-method
-    #' @aliases criteria.quadrupen
-    #' @aliases criteria
-    #' @docType methods
-    #' @rdname criteria.quadrupen
-    #'
     #' @examples \dontrun{
     #' ## Simulating multivariate Gaussian with blockwise correlation
     #' ## and piecewise constant vector of parameters
@@ -454,7 +658,6 @@ QuadrupenFit <- R6::R6Class(
     #' }
     #'
     #' @import ggplot2 reshape2 scales grid methods
-    #' @exportMethod criteria
     criteria = function(penalty=
         setNames(c(2, log(self$nsample), log(self$ncoef), log(self$nsample) + 2*log(self$ncoef)),
                  c("AIC","BIC", "mBIC", "eBIC")), sigma=NULL,
@@ -530,7 +733,7 @@ QuadrupenFit <- R6::R6Class(
   )
 )
 
-## Auxiliary functions to check the given class of an objet
+## Auxiliary functions to check the given class of an object
 isQuadrupenFit <- function(Robject) {inherits(Robject, "QuadrupenFit"          )}
 
 #' @export

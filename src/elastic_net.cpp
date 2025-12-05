@@ -285,10 +285,11 @@ Rcpp::List elastic_net_cpp(
   
   return List::create(
     Named("tuning_lead") = lambda_l1 ,
-    Named("beta")       = sp_mat(join_cols(iA, jA), nonzeros, lambda_l1.n_elem, p),
-    Named("mu")         = mu       ,
-    Named("df")         = df       ,
-    Named("monitoring") = 
+    Named("beta")        = sp_mat(join_cols(iA, jA), nonzeros, lambda_l1.n_elem, p),
+    Named("active")      = sp_mat(join_cols(iA, jA), vec(iA.n_elem, fill::ones), lambda_l1.n_elem, p),
+    Named("mu")          = mu       ,
+    Named("df")          = df       ,
+    Named("monitoring")  = 
       List::create(
         Named("it.active")      = it_active,
         Named("it.optim")       = it_optim ,

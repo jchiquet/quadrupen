@@ -73,6 +73,8 @@ Rcpp::List bounded_reg_cpp(
   uvec all(p);
   for (uword i=0;i<p;i++){all(i) = i;}
   uvec   B           = all                 ; // guys reaching the boundary
+  urowvec iB                               ; // contains row indices of the bounded variables
+  urowvec jB                               ; // contains column indices of the bounded variables
   uvec   I = setdiff(all,B)                ; // guys living in between the supremum
   mat    coef                              ; // matrice of solution path
   vec    grd                               ; // smooth part of the gradient
@@ -209,6 +211,8 @@ Rcpp::List bounded_reg_cpp(
     } else {
       coef = join_rows(coef, beta/(normx % penscale));
       mu[m] = dot(beta, xbar) ;
+      iB = join_rows(iB, m*ones<urowvec>(B.n_elem) );
+      jB = join_rows(jB, B.t()) ;
     }
     
   }
@@ -224,6 +228,7 @@ Rcpp::List bounded_reg_cpp(
   return List::create(
     Named("tuning_lead") = lambda_linf ,
     Named("beta")        = strans(coef),
+    Named("active")      = sp_mat(join_cols(iB, jB), vec(iB.n_elem, fill::ones), lambda_linf.n_elem, p),
     Named("mu")          = mu          ,
     Named("df")          = df          ,
     Named("monitoring")  = 

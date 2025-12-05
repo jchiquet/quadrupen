@@ -10,7 +10,7 @@ elastic.net(
   lambda1 = NULL,
   lambda2 = 0.01,
   penscale = rep(1, ncol(x)),
-  struct = Diagonal(ncol(x), 1),
+  struct = Matrix::Diagonal(ncol(x), 1),
   intercept = TRUE,
   normalize = TRUE,
   naive = FALSE,
@@ -176,7 +176,7 @@ labels[beta != 0] <- "relevant"
 ## Structured Elastic-net
 plot(lasso(x,y), label=labels) ## a mess
 plot(elastic.net(x,y,lambda2=10), label=labels) ## a lot better
-plot(elastic.net(x,y,lambda2=10,struct=L), label=labels) ## even better
+plot(elastic.net(x,y,lambda2=10,struct=solve(Sigma)), label=labels) ## even better
 
 }
 \seealso{

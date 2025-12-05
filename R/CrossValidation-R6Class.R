@@ -30,22 +30,17 @@
 CrossValidation <- R6::R6Class(
   classname = "CrossValidation",
   private = list(
-    cv_min = NA, 
-    cv_1se = NA,
-    best_fit = NA
+    cv_min = NA,
+    cv_1se = NA
   ),
   public = list(
     ## model-related fields
-    lambda1 = numeric(),
-    lambda2 = numeric(),
     error   = data.frame(),
     folds   = "list",
     initialize = 
       function(cv_error, folds) {
         self$error <- cv_error 
         self$folds <- folds 
-        self$lambda1 <- unique(self$error$lambda1)
-        self$lambda2 <- unique(self$error$lambda2)
         private$cv_min <- cv_error |> dplyr::filter(mean <= min(mean))
         private$cv_1se <- cv_error |> 
           dplyr::filter(lambda2 == self$lambda2_min) |> 
@@ -104,6 +99,8 @@ CrossValidation <- R6::R6Class(
     }
   ),
   active = list(
+    lambda1     = function(value) unique(self$error$lambda1),
+    lambda2     = function(value) unique(self$error$lambda2),
     lambda1_min = function(value) max(private$cv_min$lambda1),
     lambda2_min = function(value) max(private$cv_min$lambda2),
     lambda1_1se = function(value) max(private$cv_1se$lambda1),
