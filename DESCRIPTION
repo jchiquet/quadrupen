@@ -36,8 +36,8 @@ LinkingTo:
 Collate:
     'init.R'
     'quadrupen-package.R'
-    'quadrupen-class.R'
     'quadrupen-R6Class.R'
+    'quadrupen-S3Methods.R'
     'DataModel-R6Class.R'
     'BoundedRegFit-R6Class.R'
     'ElasticNetFit-R6Class.R'
@@ -49,7 +49,6 @@ Collate:
     'utils.R'
     'lasso.R'
     'ridge.R'
-    'group_lasso.R'
     'RcppExports.R'
 Packaged: 2013-03-25 19:41:00 UTC; jchiquet
 RoxygenNote: 7.3.3

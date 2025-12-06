@@ -43,7 +43,6 @@ Rcpp::List bounded_reg_cpp(
   const arma::uword max_feat = control["max.feat"]  ; // max # of variables activated
         arma::uword fun      = control["method"]    ; // solver (0=quadra, 1=pathwise, 2=fista)
   const arma::uword verbose  = control["verbose"]   ; // int for verbose mode (0/1/2)
-  const bool naive           = control["naive"]     ; // use Cholesky decomposition or not
   const bool bullet          = control["bulletproof"];// use Cholesky decomposition or not
 
   // STRUCTURATING MATRIX (embed lambda_l2)
@@ -218,18 +217,11 @@ Rcpp::List bounded_reg_cpp(
   }
   // END OF THE LOOP OVER LAMBDA
   
-  if (!naive) {
-    coef *= 1+lambda_l2;
-    mu = ybar - (1+lambda_l2) * mu;
-  } else {
-    mu = ybar - mu;
-  }
-  
   return List::create(
     Named("tuning_lead") = lambda_linf ,
     Named("beta")        = strans(coef),
     Named("active")      = sp_mat(join_cols(iB, jB), vec(iB.n_elem, fill::ones), lambda_linf.n_elem, p),
-    Named("mu")          = mu          ,
+    Named("mu")          = ybar - mu   ,
     Named("df")          = df          ,
     Named("monitoring")  = 
       List::create(

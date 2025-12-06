@@ -155,11 +155,13 @@ QuadrupenFit <- R6::R6Class(
     },
     show = function() {
       cat("Linear regression with", self$penalty, "penalizer.\n")
+      # cat("Linear regression with", x@penalty, "penalizer,", self$rescaling, "rescaling applied to the coefficients.\n")
       if (self$has_intercept) {
         cat("- number of coefficients:", self$ncoef,"+ intercept\n")
       } else {
         cat("- number of coefficients:", self$ncoef,"(no intercept)\n")
       }
+      
       cat("- regularization parameter ",names(self$major_tuning), ": ",
           length(self$major_penalty), " points from ",
           format(max(self$major_tuning), digits = 3)," to ",
@@ -177,6 +179,26 @@ QuadrupenFit <- R6::R6Class(
       }
       res
     },
+    
+    #' Debiasing for quadrupen object
+    #' 
+    #' @description Apply various debiasing schemes to correct effect of shrinkage 
+    #' on the estimation of the coefficients
+    #' 
+    #' @param type a character, either "rescaled", "relaxed" or "original. See details
+    #' 
+    #' @details
+    #' the 'rescaled' debaising is as defined in Zou and Hastie (2006): the vector of
+    #' parameters is rescaled by a coefficient \code{(1+lambda2)}. 'Original' reset to 
+    #' the original scaling
+    #' 
+    #' @return nothing is return, the beta are internaly rescaled
+    #'
+    debias = function(type = c("rescaled")) {
+      ### TODO
+    },
+    #' Cross-validation for quadrupen object
+    #' 
     #' @description Function that computes K-fold cross-validated error of a
     #' \code{quadrupen} fit, possibly on a grid of
     #' \code{lambda1,lambda2}.

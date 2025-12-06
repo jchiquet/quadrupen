@@ -24,7 +24,7 @@ Rcpp::List elastic_net_cpp(
   const uword p             = dataModel["d"]  ; // problem size
   const SEXP &X             = dataModel["X"]  ; // design matrix
   const arma::vec &y        = dataModel["y"]  ; // response vector
-  const arma::sp_mat& S           = dataModel["S"]  ; // Structuring matrix
+  const arma::sp_mat& S     = dataModel["S"]  ; // Structuring matrix
   const arma::vec &penscale = dataModel["wx"] ;  // penalty weights
   const arma::vec& weights  = dataModel["wy"]     ; // observation weights (not use at the moment)
   const arma::vec &xty      = dataModel["xty"]    ; // responses to predictors vector
@@ -45,7 +45,6 @@ Rcpp::List elastic_net_cpp(
   const arma::uword fun      = control["method"]    ; // solver (0=quadra, 1=pathwise, 2=fista)
   const arma::uword verbose  = control["verbose"]   ; // int for verbose mode (0/1/2)
   const bool usechol         = control["usechol"]   ; // use Cholesky decomposition or not
-  const bool naive           = control["naive"]     ; // use Cholesky decomposition or not
   const arma::uword monitor  = control["monitor"]   ; // convergence monitoring (1 == Grandvalet's bound ;-) 2 == Fenchel duality gap)
 
   // STRUCTURATING MATRIX (embed lambda_l2)
@@ -273,12 +272,6 @@ Rcpp::List elastic_net_cpp(
       jA = join_rows(jA, A.t()) ;
     }
   }
-  if (!naive) {
-    nonzeros *= 1+lambda_l2;
-    mu = ybar - (1+lambda_l2) * mu;
-  } else {
-    mu = ybar - mu;
-  }
   
   // Updating monitored quantities
   if (monitor > 0) D_star = J_hat - J_star;
@@ -287,7 +280,7 @@ Rcpp::List elastic_net_cpp(
     Named("tuning_lead") = lambda_l1 ,
     Named("beta")        = sp_mat(join_cols(iA, jA), nonzeros, lambda_l1.n_elem, p),
     Named("active")      = sp_mat(join_cols(iA, jA), vec(iA.n_elem, fill::ones), lambda_l1.n_elem, p),
-    Named("mu")          = mu       ,
+    Named("mu")          = ybar - mu,
     Named("df")          = df       ,
     Named("monitoring")  = 
       List::create(

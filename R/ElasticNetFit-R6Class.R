@@ -4,20 +4,10 @@ ElasticNet <- R6::R6Class(
   classname = "ElasticNet",
   inherit = QuadrupenFit,
   active  = list(penalty = function(value) "elastic.net"),
-  private = list(naive = NA),
   public  = list(
-    initialize =  function(data, intercept, regParam, naive) {
+    initialize =  function(data, intercept, regParam) {
       super$initialize(data, intercept, regParam)
-      private$naive <- naive
       private$optimizer <- elastic_net_cpp
-    },
-    show = function() {
-      super$show()
-      if (private$naive) {
-        cat("No rescaling of the coefficients (naive Elastic-net).\n")
-      } else {
-        cat("Coefficients rescaled by (1+lambda2).\n")
-      }
     },
     fit = function(control) {
 

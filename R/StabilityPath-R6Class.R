@@ -154,7 +154,7 @@ StabilityPath <- R6::R6Class(
         labs(x=switch(xvar,
                       "fraction" = expression(lambda[1]/max[lambda[1]]),
                       ifelse(log.scale,expression(log[10](lambda[1])),expression(lambda[1]))),
-             y="selection probabilities") + ggtitle(main)
+             y="selection probabilities") + ggtitle(main) + theme_bw()
       d <- d + scale_x_reverse()
       if (is.null(labels)) {
         d <- d + theme(legend.position="none")

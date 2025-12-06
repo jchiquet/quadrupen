@@ -4,20 +4,10 @@ BoundedReg <- R6::R6Class(
   classname = "BoundedReg",
   inherit = QuadrupenFit,
   active  = list(penalty = function(value) "bounded.reg"),
-  private = list(naive = NA),
   public  = list(
     initialize =  function(data, intercept, regParam, naive) {
       super$initialize(data, intercept, regParam)
-      private$naive <- naive
       private$optimizer <- bounded_reg_cpp
-    },
-    show = function() {
-      super$show()
-      if (private$naive) {
-        cat("No rescaling of the coefficients (naive bounded regression).\n")
-      } else {
-        cat("Coefficients rescaled by (1+lambda2).\n")
-      }
     },
     fit = function(control) {
 

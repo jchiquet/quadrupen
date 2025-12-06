@@ -4,9 +4,6 @@ Ridge <- R6::R6Class(
   classname = "Ridge",
   inherit = QuadrupenFit,
   active  = list(penalty = function(value) "ridge"),
-  private = list(
-    naive = NA
-  ),
   public  = list(
     initialize =  function(data, intercept, regParam) {
       super$initialize(data, intercept, regParam)
