@@ -13,7 +13,6 @@ bounded.reg(
   struct = Diagonal(ncol(x), 1),
   intercept = TRUE,
   normalize = TRUE,
-  naive = FALSE,
   nlambda1 = ifelse(is.null(lambda1), 100, length(lambda1)),
   min.ratio = ifelse(nrow(x) <= ncol(x), 0.01, 1e-04),
   max.feat = ifelse(lambda2 < 0.01, min(nrow(x), ncol(x)), min(4 * nrow(x), ncol(x))),
@@ -56,12 +55,6 @@ included in the model. Default is \code{TRUE}.}
 \item{normalize}{logical; indicates if variables should be
 normalized to have unit L2 norm before fitting.  Default is
 \code{TRUE}.}
-
-\item{naive}{logical; Compute either 'naive' of 'classic' bounded
-regression: mimicing the Elastic-net, the vector of parameters is
-rescaled by a coefficient \code{(1+lambda2)} when \code{naive}
-equals \code{FALSE}.  No rescaling otherwise. Default is
-\code{FALSE}.}
 
 \item{nlambda1}{integer that indicates the number of values to put
 in the \code{lambda1} vector.  Ignored if \code{lambda1} is
@@ -113,6 +106,12 @@ this threshold. Default is \code{1e-7} for \code{"quadra"} and
 \item{\code{bulletproof}: }{logical; indicates if the bulletproof
 mode should be used while running the \code{"quadra"}
 method. Default is \code{TRUE}. See details below.}}}
+
+\item{naive}{logical; Compute either 'naive' of 'classic' bounded
+regression: mimicing the Elastic-net, the vector of parameters is
+rescaled by a coefficient \code{(1+lambda2)} when \code{naive}
+equals \code{FALSE}.  No rescaling otherwise. Default is
+\code{FALSE}.}
 }
 \value{
 an object with class \code{quadrupen}, see the

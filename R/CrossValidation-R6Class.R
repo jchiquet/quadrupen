@@ -1,4 +1,4 @@
-#' Class CrossValidation"
+#' Class CrossValidation
 #' 
 #' Class of object returned by a cross-validation performed through
 #' the \code{$cross_validate()} method.
@@ -31,15 +31,24 @@ CrossValidation <- R6::R6Class(
   classname = "CrossValidation",
   private = list(
     cv_min = NA,
-    cv_1se = NA
+    cv_1se = NA,
+    value  = NA
+  ),
+  active = list(
+    data        = function(value) {private$value},
+    lambda1     = function(value) unique(self$error$lambda1),
+    lambda2     = function(value) unique(self$error$lambda2),
+    lambda1_min = function(value) max(private$cv_min$lambda1),
+    lambda2_min = function(value) max(private$cv_min$lambda2),
+    lambda1_1se = function(value) max(private$cv_1se$lambda1),
+    lambda2_1se = function(value) max(private$cv_1se$lambda2)
   ),
   public = list(
     ## model-related fields
-    error   = data.frame(),
     folds   = "list",
     initialize = 
       function(cv_error, folds) {
-        self$error <- cv_error 
+        private$value <- cv_error 
         self$folds <- folds 
         private$cv_min <- cv_error |> dplyr::filter(mean <= min(mean))
         private$cv_1se <- cv_error |> 
@@ -97,13 +106,5 @@ CrossValidation <- R6::R6Class(
       if (plot) print(d)
       invisible(d)
     }
-  ),
-  active = list(
-    lambda1     = function(value) unique(self$error$lambda1),
-    lambda2     = function(value) unique(self$error$lambda2),
-    lambda1_min = function(value) max(private$cv_min$lambda1),
-    lambda2_min = function(value) max(private$cv_min$lambda2),
-    lambda1_1se = function(value) max(private$cv_1se$lambda1),
-    lambda2_1se = function(value) max(private$cv_1se$lambda2)
   )
 )

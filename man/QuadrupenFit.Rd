@@ -20,6 +20,11 @@ This class comes with the usual \code{predict(object, newx, ...)},
 
 A specific plotting method is available and documented
 (\code{\link{plot.quadrupen}}).
+
+
+the 'rescaled' debaising is as defined in Zou and Hastie (2006): the vector of
+parameters is rescaled by a coefficient \code{(1+lambda2)}. 'Original' reset to 
+the original scaling
 }
 \note{
 If the user runs the fitting method with option
@@ -143,34 +148,6 @@ cat("\nFalse positives for the randomized Elastic-net with stability selection: 
 cat("\nDONE.\n")
 }
 
-
-## ------------------------------------------------
-## Method `QuadrupenFit$plot`
-## ------------------------------------------------
-
-\dontrun{
-## Simulating multivariate Gaussian with blockwise correlation
-## and piecewise constant vector of parameters
-beta <- rep(c(0,1,0,-1,0), c(25,10,25,10,25))
-cor <- 0.75
-Soo <- toeplitz(cor^(0:(25-1))) ## Toeplitz correlation for irrelevant variables
-Sww  <- matrix(cor,10,10) ## bloc correlation between active variables
-Sigma <- bdiag(Soo,Sww,Soo,Sww,Soo)
-diag(Sigma) <- 1
-n <- 50
-x <- as.matrix(matrix(rnorm(95*n),n,95) \%*\% chol(Sigma))
-y <- 10 + x \%*\% beta + rnorm(n,0,10)
-
-## Plot the Lasso path
-plot(elastic.net(x,y, lambda2=0), main="Lasso solution path")
-## Plot the Elastic-net path
-plot(enet, main = "Elastic-net solution path")
-## Plot the Elastic-net path (fraction on X-axis, unstandardized coefficient)
-plot(elastic.net(x,y, lambda2=10), standardize=FALSE, xvar="fraction")
-## Plot the Bounded regression path (fraction on X-axis)
-plot(bounded.reg(x,y, lambda2=10), xvar="fraction")
-}
-
 Penalized criteria based on estimation of degrees of freedom
 
 Produce a plot or send back the values of some penalized criteria
@@ -202,6 +179,34 @@ criteria(elastic.net(x,y, lambda2=1))
 
 #' Plot penalized criteria for the Bounded regression
 criteria(bounded.reg(x,y, lambda2=1))
+}
+
+
+## ------------------------------------------------
+## Method `QuadrupenFit$plot`
+## ------------------------------------------------
+
+\dontrun{
+## Simulating multivariate Gaussian with blockwise correlation
+## and piecewise constant vector of parameters
+beta <- rep(c(0,1,0,-1,0), c(25,10,25,10,25))
+cor <- 0.75
+Soo <- toeplitz(cor^(0:(25-1))) ## Toeplitz correlation for irrelevant variables
+Sww  <- matrix(cor,10,10) ## bloc correlation between active variables
+Sigma <- bdiag(Soo,Sww,Soo,Sww,Soo)
+diag(Sigma) <- 1
+n <- 50
+x <- as.matrix(matrix(rnorm(95*n),n,95) \%*\% chol(Sigma))
+y <- 10 + x \%*\% beta + rnorm(n,0,10)
+
+## Plot the Lasso path
+plot(elastic.net(x,y, lambda2=0), main="Lasso solution path")
+## Plot the Elastic-net path
+plot(enet, main = "Elastic-net solution path")
+## Plot the Elastic-net path (fraction on X-axis, unstandardized coefficient)
+plot(elastic.net(x,y, lambda2=10), standardize=FALSE, xvar="fraction")
+## Plot the Bounded regression path (fraction on X-axis)
+plot(bounded.reg(x,y, lambda2=10), xvar="fraction")
 }
 
 }
@@ -241,11 +246,13 @@ See also \code{\link{plot.quadrupen}}.
 \item \href{#method-QuadrupenFit-new}{\code{QuadrupenFit$new()}}
 \item \href{#method-QuadrupenFit-show}{\code{QuadrupenFit$show()}}
 \item \href{#method-QuadrupenFit-print}{\code{QuadrupenFit$print()}}
+\item \href{#method-QuadrupenFit-get_model}{\code{QuadrupenFit$get_model()}}
 \item \href{#method-QuadrupenFit-predict}{\code{QuadrupenFit$predict()}}
+\item \href{#method-QuadrupenFit-debias}{\code{QuadrupenFit$debias()}}
 \item \href{#method-QuadrupenFit-cross_validate}{\code{QuadrupenFit$cross_validate()}}
 \item \href{#method-QuadrupenFit-stability}{\code{QuadrupenFit$stability()}}
-\item \href{#method-QuadrupenFit-plot}{\code{QuadrupenFit$plot()}}
 \item \href{#method-QuadrupenFit-criteria}{\code{QuadrupenFit$criteria()}}
+\item \href{#method-QuadrupenFit-plot}{\code{QuadrupenFit$plot()}}
 \item \href{#method-QuadrupenFit-clone}{\code{QuadrupenFit$clone()}}
 }
 }
@@ -280,19 +287,65 @@ been included to the model.}
 \if{latex}{\out{\hypertarget{method-QuadrupenFit-print}{}}}
 \subsection{Method \code{print()}}{
 User friendly print method
+Model Extraction
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{QuadrupenFit$print()}\if{html}{\out{</div>}}
 }
 
 }
 \if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-QuadrupenFit-get_model"></a>}}
+\if{latex}{\out{\hypertarget{method-QuadrupenFit-get_model}{}}}
+\subsection{Method \code{get_model()}}{
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{QuadrupenFit$get_model(selection, type = c("coefficients", "penalty", "index"))}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{selection}}{either a character (model selection criteria) of a scalar (lambda value)}
+
+\item{\code{type}}{character for the desired output}
+}
+\if{html}{\out{</div>}}
+}
+\subsection{Returns}{
+either a vector of coefficients, a scalar the the model index
+Debiasing for quadrupen object
+}
+}
+\if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-QuadrupenFit-predict"></a>}}
 \if{latex}{\out{\hypertarget{method-QuadrupenFit-predict}{}}}
 \subsection{Method \code{predict()}}{
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{QuadrupenFit$predict(newx = NULL, ...)}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{QuadrupenFit$predict(newx = NULL, selection = NULL, ...)}\if{html}{\out{</div>}}
 }
 
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-QuadrupenFit-debias"></a>}}
+\if{latex}{\out{\hypertarget{method-QuadrupenFit-debias}{}}}
+\subsection{Method \code{debias()}}{
+Apply various debiasing schemes to correct effect of shrinkage 
+on the estimation of the coefficients
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{QuadrupenFit$debias(type = c("rescaled"))}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{type}}{a character, either "rescaled", "relaxed" or "original". See details}
+}
+\if{html}{\out{</div>}}
+}
+\subsection{Returns}{
+nothing is return, the beta are internaly rescaled
+
+Cross-validation for quadrupen object
+}
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-QuadrupenFit-cross_validate"></a>}}
@@ -307,7 +360,7 @@ Function that computes K-fold cross-validated error of a
   folds = split(sample(1:self$nsample), rep(1:K, length = self$nsample)),
   lambda2 = self$minor_tuning,
   verbose = TRUE,
-  mc.cores = detectCores() - 2
+  cores = detectCores() - 2
 )}\if{html}{\out{</div>}}
 }
 
@@ -331,7 +384,7 @@ using the same folds for each \code{lambda2}). Ignored when
 \item{\code{verbose}}{logical; indicates if the progression (the current
 lambda2) should be displayed. Default is \code{TRUE}.}
 
-\item{\code{mc.cores}}{the number of cores to use. The default uses all
+\item{\code{cores}}{the number of cores to use. The default uses all
 the cores available.}
 }
 \if{html}{\out{</div>}}
@@ -391,7 +444,7 @@ procedure as introduced by Meinshausen and Buhlmann (2010).
     FALSE),
   weakness = 1,
   verbose = TRUE,
-  mc.cores = detectCores() - 2
+  cores = detectCores() - 2
 )}\if{html}{\out{</div>}}
 }
 
@@ -416,7 +469,7 @@ details below.}
 \item{\code{verbose}}{logical; indicates if the progression should be
 displayed. Default is \code{TRUE}.}
 
-\item{\code{mc.cores}}{the number of cores to use. The default uses all
+\item{\code{cores}}{the number of cores to use. The default uses all
 the cores available.}
 
 \item{\code{x}}{matrix of features, possibly sparsely encoded
@@ -457,6 +510,93 @@ stabpath <- plot(stab, cutoff=0.75, PFER=1, plot=FALSE)
 cat("\nFalse positives for the randomized Elastic-net with stability selection: ",
      sum(labels[stabpath$selected] != "relevant"))
 cat("\nDONE.\n")
+}
+
+Penalized criteria based on estimation of degrees of freedom
+
+Produce a plot or send back the values of some penalized criteria
+accompanied with the vector(s) of parameters selected
+accordingly. The default behavior plots the BIC and the AIC (with
+respective factor \eqn{\log(n)}{log(n)} and \eqn{2}{2}) yet the user can specify any
+penalty.
+
+}
+\if{html}{\out{</div>}}
+
+}
+
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-QuadrupenFit-criteria"></a>}}
+\if{latex}{\out{\hypertarget{method-QuadrupenFit-criteria}{}}}
+\subsection{Method \code{criteria()}}{
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{QuadrupenFit$criteria(
+  penalty = setNames(c(2, log(self$nsample), log(self$ncoef), log(self$nsample) + 2 *
+    log(self$ncoef)), c("AIC", "BIC", "mBIC", "eBIC")),
+  sigma = NULL
+)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{penalty}}{a vector with as many penalties a desired. The
+default contains the penalty corresponding to the AIC and the BIC
+(\eqn{2}{2} and \eqn{\log(n)}{log(n)}). Setting the "names"
+attribute, as done in the default definition, leads to outputs
+which are easier to read.}
+
+\item{\code{sigma}}{scalar: an estimate of the residual variance. When
+available, it is plugged-in the criteria, which may be more
+relevant. If \code{NULL} (the default), it is estimated as usual
+(see details).}
+
+\item{\code{object}}{output of a fitting procedure of the \pkg{quadrupen}
+package (e.g. \code{\link{elastic.net}}). Must be of class
+\code{quadrupen}.}
+
+\item{\code{xvar}}{variable to plot on the X-axis: either \code{"df"}
+(the estimated degrees of freedom), \code{"lambda"}
+(\eqn{\lambda_1}{lambda1} penalty level) or \code{"fraction"}
+(\eqn{\ell_1}{l1}-norm of the coefficients). Default is set to
+\code{"lambda"}.}
+
+\item{\code{log.scale}}{logical; indicates if a log-scale should be used
+when \code{xvar="lambda"}. Default is \code{TRUE}.}
+
+\item{\code{plot}}{logical; indicates if the graph should be plotted on
+call. Default is \code{TRUE}.}
+}
+\if{html}{\out{</div>}}
+}
+\subsection{Returns}{
+When \code{plot} is set to \code{TRUE}, an invisible
+\pkg{ggplot2} object is returned, which can be plotted via the
+\code{print} method. On the other hand, a list with a two data
+frames containing the criteria and the chosen vector of parameters
+are returned.
+}
+\subsection{Examples}{
+\if{html}{\out{<div class="r example copy">}}
+\preformatted{\dontrun{
+## Simulating multivariate Gaussian with blockwise correlation
+## and piecewise constant vector of parameters
+beta <- rep(c(0,1,0,-1,0), c(25,10,25,10,25))
+cor <- 0.75
+Soo <- toeplitz(cor^(0:(25-1))) ## Toeplitz correlation for irrelevant variables
+Sww  <- matrix(cor,10,10) ## bloc correlation between active variables
+Sigma <- bdiag(Soo,Sww,Soo,Sww,Soo)
+diag(Sigma) <- 1
+n <- 50
+x <- as.matrix(matrix(rnorm(95*n),n,95) \%*\% chol(Sigma))
+y <- 10 + x \%*\% beta + rnorm(n,0,10)
+
+## Plot penalized criteria for the Elastic-net path
+criteria(elastic.net(x,y, lambda2=1))
+
+#' Plot penalized criteria for the Bounded regression
+criteria(bounded.reg(x,y, lambda2=1))
 }
 
 }
@@ -544,96 +684,6 @@ plot(enet, main = "Elastic-net solution path")
 plot(elastic.net(x,y, lambda2=10), standardize=FALSE, xvar="fraction")
 ## Plot the Bounded regression path (fraction on X-axis)
 plot(bounded.reg(x,y, lambda2=10), xvar="fraction")
-}
-
-Penalized criteria based on estimation of degrees of freedom
-
-Produce a plot or send back the values of some penalized criteria
-accompanied with the vector(s) of parameters selected
-accordingly. The default behavior plots the BIC and the AIC (with
-respective factor \eqn{\log(n)}{log(n)} and \eqn{2}{2}) yet the user can specify any
-penalty.
-
-}
-\if{html}{\out{</div>}}
-
-}
-
-}
-\if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-QuadrupenFit-criteria"></a>}}
-\if{latex}{\out{\hypertarget{method-QuadrupenFit-criteria}{}}}
-\subsection{Method \code{criteria()}}{
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{QuadrupenFit$criteria(
-  penalty = setNames(c(2, log(self$nsample), log(self$ncoef), log(self$nsample) + 2 *
-    log(self$ncoef)), c("AIC", "BIC", "mBIC", "eBIC")),
-  sigma = NULL,
-  log.scale = TRUE,
-  xvar = "lambda",
-  plot = TRUE
-)}\if{html}{\out{</div>}}
-}
-
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{penalty}}{a vector with as many penalties a desired. The
-default contains the penalty corresponding to the AIC and the BIC
-(\eqn{2}{2} and \eqn{\log(n)}{log(n)}). Setting the "names"
-attribute, as done in the default definition, leads to outputs
-which are easier to read.}
-
-\item{\code{sigma}}{scalar: an estimate of the residual variance. When
-available, it is plugged-in the criteria, which may be more
-relevant. If \code{NULL} (the default), it is estimated as usual
-(see details).}
-
-\item{\code{log.scale}}{logical; indicates if a log-scale should be used
-when \code{xvar="lambda"}. Default is \code{TRUE}.}
-
-\item{\code{xvar}}{variable to plot on the X-axis: either \code{"df"}
-(the estimated degrees of freedom), \code{"lambda"}
-(\eqn{\lambda_1}{lambda1} penalty level) or \code{"fraction"}
-(\eqn{\ell_1}{l1}-norm of the coefficients). Default is set to
-\code{"lambda"}.}
-
-\item{\code{plot}}{logical; indicates if the graph should be plotted on
-call. Default is \code{TRUE}.}
-
-\item{\code{object}}{output of a fitting procedure of the \pkg{quadrupen}
-package (e.g. \code{\link{elastic.net}}). Must be of class
-\code{quadrupen}.}
-}
-\if{html}{\out{</div>}}
-}
-\subsection{Returns}{
-When \code{plot} is set to \code{TRUE}, an invisible
-\pkg{ggplot2} object is returned, which can be plotted via the
-\code{print} method. On the other hand, a list with a two data
-frames containing the criteria and the chosen vector of parameters
-are returned.
-}
-\subsection{Examples}{
-\if{html}{\out{<div class="r example copy">}}
-\preformatted{\dontrun{
-## Simulating multivariate Gaussian with blockwise correlation
-## and piecewise constant vector of parameters
-beta <- rep(c(0,1,0,-1,0), c(25,10,25,10,25))
-cor <- 0.75
-Soo <- toeplitz(cor^(0:(25-1))) ## Toeplitz correlation for irrelevant variables
-Sww  <- matrix(cor,10,10) ## bloc correlation between active variables
-Sigma <- bdiag(Soo,Sww,Soo,Sww,Soo)
-diag(Sigma) <- 1
-n <- 50
-x <- as.matrix(matrix(rnorm(95*n),n,95) \%*\% chol(Sigma))
-y <- 10 + x \%*\% beta + rnorm(n,0,10)
-
-## Plot penalized criteria for the Elastic-net path
-criteria(elastic.net(x,y, lambda2=1))
-
-#' Plot penalized criteria for the Bounded regression
-criteria(bounded.reg(x,y, lambda2=1))
 }
 
 }

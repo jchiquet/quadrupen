@@ -2,7 +2,7 @@
 % Please edit documentation in R/CrossValidation-R6Class.R
 \name{CrossValidation}
 \alias{CrossValidation}
-\title{Class CrossValidation"}
+\title{Class CrossValidation}
 \description{
 Class of object returned by a cross-validation performed through
 the \code{$cross_validate()} method.
