@@ -1,3 +1,7 @@
+#' Data Class 
+#' 
+#' @description Class for storing data and various fixed quantity
+#' 
 DataModel <- R6::R6Class(
   classname = "DataModel",
   private = list(
@@ -7,17 +11,34 @@ DataModel <- R6::R6Class(
   ),
   public = list(
     ## model-related fields
+    #' @field X matrix of regressor 
     X = Matrix(),
+    #' @field y vector of response
     y = numeric(),
+    #' @field C Cholesky decomposition of the structring matrix S
     C = matrix(),
+    #' @field S SDP structuring matrix 
     S = Matrix(),
+    #' @field wx vector of regressor weights
     wx = numeric(),
+    #' @field wy vector of observation weights
     wy = numeric(),
+    #' @field mean_X vector of regressor means
     mean_X = numeric(),
+    #' @field norm_X vector of regressor norms
     norm_X = double(),
+    #' @field mean_y mean of the response vector
     mean_y = numeric(),
+    #' @field norm_y norm of the response vector
     norm_y = double(),
     initialize = 
+      #' @description constructor for DataModel
+      #' @param covariates matrix of covariates/regressors
+      #' @param outcome vector of outcome/response
+      #' @param cov_struct sdp matrix structuring the covariates/regressors
+      #' @param cov_weights vector of covariates/regressors weights
+      #' @param obs_weights vector of observations weights
+      #' @param check_args logical, should args be check at initialization?
       function(covariates, outcome, cov_struct,
                cov_weights = rep(1,ncol(covariates)),
                obs_weights = rep(1,length(outcome)), check_args = TRUE) {
@@ -56,6 +77,10 @@ DataModel <- R6::R6Class(
         private$centered <- FALSE
         private$scaled   <- FALSE
       },
+    #' @description Perform standardization of the data an store the auxiliaries 
+    #' quantities
+    #' @param intercept logical, is there an intercept in the model?
+    #' @param normalize logical, shall the regressor be standardized?
     standardize = function(intercept, normalize) {
       ## X and y are not centered to keep efficiency with sparse encoding
 
@@ -86,17 +111,23 @@ DataModel <- R6::R6Class(
       ##
       ## ===================================================
     },
+    #' @description Compute Cholesky factorization of the Structuring matrix 
     CholStruct = function() {
       self$C <- as.matrix(chol(self$S))
     }
   ), 
   active = list(
+    #' @field d number of regressor
     d = function() ncol(self$X),
+    #' @field n sample size
     n = function() nrow(self$X),
-    has_intercept = function() {private$centered},
+    #' @field is_centered logical indicating if the data has been centered
     is_centered = function() {private$centered},
+    #' @field is_scaled logical indicating if the data has been scaled
     is_scaled = function() {private$scaled},
+    #' @field sparse_encoding logical indicating if the matrix of regressor is sparsely encoded
     sparse_encoding = function() {inherits(private$X, "sparseMatrix")},
+    #' @field varnames character, the names of the covariates/regressors
     varnames = function() {private$names}
   )
 )
@@ -106,11 +137,14 @@ GaussianModel <- R6::R6Class(
   classname = "GaussianModel",
   inherit = DataModel,
   public = list(
+    #' @field xty sufficient statistics for the Gaussian Data
     xty    = double(),
+    #' @description compute sufficient statistics for the Gaussian Data
     getSufficientStat = function() {
       self$xty <- as.numeric(crossprod(self$X, self$y - self$mean_y) - 
                                sum(self$y - self$mean_y) * self$mean_X)
     },
+    #' @description a print method
     show = function() {
       cat("Gaussian Data," ,
           ifelse(private$centered, "centered", "not centered"), "and",
@@ -119,6 +153,10 @@ GaussianModel <- R6::R6Class(
     },
     #' @description User friendly print method
     print = function() { self$show() },
+    #' @description a function splitting the data into train and test folds
+    #' @param nfolds the number of folds
+    #' @param folds a list of vectors describing the folds (optional)
+    #' @return a list with train and test data and id.
     splitTrainTest = function(
       nfolds = 10, folds  = split(sample(1:self$n), rep(1:nfolds, length = self$n))
     ) {
@@ -133,6 +171,12 @@ GaussianModel <- R6::R6Class(
              trainID = setdiff(1:self$n, omit), testID = omit)
       })
     },
+    #' @description a function splitting data into subsamples
+    #' @param n_subsamples the number of subsamples
+    #' @param subsample_size the subsample size
+    #' @param subsamples list with vector of subsamples (optional)
+    #' @param weakness coefficient for randmonly reweighting the regressor, default to 1
+    #' @return  a list of DataModel, resampling of the original
     splitSubSamples = function(
       n_subsamples = 50,
       subsample_size = floor(self$n/2),
@@ -160,7 +204,9 @@ GaussianModel <- R6::R6Class(
     # }
   ),
   active = list(
+    #' @field name Type of data
     name = function() "Gaussian response (Linear Regression)",
+    #' @field rss residuals sum of squares of the responses sum((y - mean(y))^2)
     rss  = function(value) {sum((self$y - self$mean_y)^2)}
   )
 )

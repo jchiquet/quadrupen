@@ -13,177 +13,23 @@ Class of object returned by any fitting function of the
 \pkg{quadrupen} package (\code{elastic.net} or
 \code{bounded.reg}).
 
-This class comes with the usual \code{predict(object, newx, ...)},
-\code{fitted(object, ...)}, \code{residuals(object, ...)},
-\code{print(object, ...)}, \code{show(object)} and
-\code{deviance(object, ...)} generic (undocumented) methods.
+This class comes with the usual [predict()], [fitted()], [coef()],
+[residuals()], [show()], [print()] and [deviance()] S3 methods.
 
-A specific plotting method is available and documented
-(\code{\link{plot.quadrupen}}).
+Specific R6 methods are available for model extraction [QuadrupenFit$get_model()], 
+cross validation [QuadrupenFit$cross_validate()], stability selection [QuadrupenFit$stability_path()], criteria derivation [QuadrupenFit$criteria()] 
+and plotting [QuadrupenFit$plot()]. They come with equivalent S3 methods : [cross_validate()], 
+[stability()] and [plot()].
 
 
 the 'rescaled' debaising is as defined in Zou and Hastie (2006): the vector of
 parameters is rescaled by a coefficient \code{(1+lambda2)}. 'Original' reset to 
 the original scaling
 }
-\note{
-If the user runs the fitting method with option
-\code{'bulletproof'} set to \code{FALSE}, the algorithm may stop
-at an early stage of the path. Early stops are handled internally,
-in order to provide results on the same grid of penalty tuned by
-\eqn{\lambda_1}{lambda1}.  This is done by means of \code{NA}
-values, so as mean and standard error are consistently
-evaluated. If, while cross-validating, the procedure experiences
-too much early stoppings, a warning is sent to the user, in which
-case you should reconsider the grid of \code{lambda1} used for the
-cross-validation.  If \code{bulletproof} is \code{TRUE} (the
-default), there is nothing to worry about, except a possible slow
-down when any switching to the proximal algorithm is required.
-
-When \code{randomized = TRUE}, the \code{penscale} argument
-that weights the penalty tuned by \eqn{\lambda_1}{lambda1} is
-perturbed (divided) for each subsample by a random variable
-uniformly distributed on
-\if{latex}{\eqn{[\alpha,1]}}\if{html}{[&#945;,1]}\if{text}{\eqn{[alpha,1]}},
-where
-\if{latex}{\eqn{\alpha}}\if{html}{&#945;}\if{text}{\eqn{alpha}} is
-the weakness parameter.
-
-If the user runs the fitting method with option
-\code{'bulletproof'} set to \code{FALSE}, the algorithm may stop
-at an early stage of the path. Early stops of the underlying
-fitting function are handled internally, in the following way: we
-chose to simply skip the results associated with such runs, in
-order not to bias the stability selection procedure. If it occurs
-too often, a warning is sent to the user, in which case you should
-reconsider the grid of \code{lambda1} for stability selection. If
-\code{bulletproof} is \code{TRUE} (the default), there is nothing
-to worry about, except a possible slow down when any switching to
-the proximal algorithm is required.
-
-When \code{sigma} is provided, the criterion takes the form
-
-\if{latex}{\deqn{\left\|\mathbf{y} - \mathbf{X} \hat{\beta} \right\|^2 +
-\mathrm{penalty} \times \frac{\hat{\mathrm{df}}}{n} \ \sigma^2.}}
-\if{html}{\out{ <center> RSS + penalty * df / n * sigma<sup>2</sup> </center>}}
-\if{text}{\deqn{RSS + penalty * df / n * sigma^2}}
-
-When it is unknown, it writes
-
-\if{latex}{\deqn{\log\left(\left\|\mathbf{y} - \mathbf{X} \hat{\beta} \right\|^2\right) +
-\mathrm{penalty} \times \hat{\mathrm{df}}.}}
-\if{html}{\out{ <center> n*log(RSS) + penalty * df </center>}}
-\if{text}{\deqn{n*log(RSS) + penalty * df}}
-
-Estimation of the degrees of freedom (for the elastic-net, the
-LASSO and also bounded regression) are computed by applying and
-adpating the results of Tibshirani and Taylor (see references
-below).
-}
 \examples{
 
 ## ------------------------------------------------
-## Method `QuadrupenFit$cross_validate`
-## ------------------------------------------------
-
-\dontrun{
-## Simulating multivariate Gaussian with blockwise correlation
-## and piecewise constant vector of parameters
-beta <- rep(c(0,1,0,-1,0), c(25,10,25,10,25))
-cor  <- 0.75
-Soo  <- toeplitz(cor^(0:(25-1))) ## Toeplitz correlation for irrelevant variable
-Sww  <- matrix(cor,10,10) ## bloc correlation between active variables
-Sigma <- bdiag(Soo,Sww,Soo,Sww,Soo) + 0.1
-diag(Sigma) <- 1
-n <- 100
-x <- as.matrix(matrix(rnorm(95*n),n,95) \%*\% chol(Sigma))
-y <- 10 + x \%*\% beta + rnorm(n,0,10)
-
-## Use fewer lambda1 values by overwritting the default parameters
-## and cross-validate over the sequences lambda1 and lambda2
-cv.grid <- crossval(x,y, lambda2=10^seq(2,-2,len=50), nlambda1=50)
-## Rerun simple cross-validation with the appropriate lambda2
-cv.10K <- crossval(x,y, lambda2=cv.grid$lambda2_min)
-## Try leave one out also
-cv.loo <- crossval(x,y, K=n, lambda2=cv.grid$lambda2_min)
-
-plot(cv.grid)
-plot(cv.10K)
-plot(cv.loo)
-
-## Performance for selection purpose
-cat("\nFalse positives with the minimal 10-CV choice: ", sum(sign(beta) != sign(cv.10K$beta_min )))
-cat("\nFalse positives with the minimal LOO-CV choice: ", sum(sign(beta) != sign(cv.loo$beta_min)))
-}
-
-## ------------------------------------------------
-## Method `QuadrupenFit$stability`
-## ------------------------------------------------
-
-\dontrun{
-## Simulating multivariate Gaussian with blockwise correlation
-## and piecewise constant vector of parameters
-beta <- rep(c(0,1,0,-1,0), c(25,10,25,10,25))
-Soo  <- matrix(0.75,25,25) ## bloc correlation between zero variables
-Sww  <- matrix(0.75,10,10) ## bloc correlation between active variables
-Sigma <- bdiag(Soo,Sww,Soo,Sww,Soo) + 0.2
-diag(Sigma) <- 1
-n <- 100
-x <- as.matrix(matrix(rnorm(95*n),n,95) \%*\% chol(Sigma))
-y <- 10 + x \%*\% beta + rnorm(n,0,10)
-
-## Build a vector of label for true nonzeros
-labels <- rep("irrelevant", length(beta))
-labels[beta != 0] <- c("relevant")
-labels <- factor(labels, ordered=TRUE, levels=c("relevant","irrelevant"))
-
-## Call to stability selection function, 200 subsampling
-stab <- stability(x,y, subsamples=200, lambda2=1, min.ratio=1e-2)
-## Recover the selected variables for a given cutoff
-## and per-family error rate, without producing any plot
-stabpath <- plot(stab, cutoff=0.75, PFER=1, plot=FALSE)
-
-cat("\nFalse positives for the randomized Elastic-net with stability selection: ",
-     sum(labels[stabpath$selected] != "relevant"))
-cat("\nDONE.\n")
-}
-
-Penalized criteria based on estimation of degrees of freedom
-
-Produce a plot or send back the values of some penalized criteria
-accompanied with the vector(s) of parameters selected
-accordingly. The default behavior plots the BIC and the AIC (with
-respective factor \eqn{\log(n)}{log(n)} and \eqn{2}{2}) yet the user can specify any
-penalty.
-
-
-## ------------------------------------------------
-## Method `QuadrupenFit$criteria`
-## ------------------------------------------------
-
-\dontrun{
-## Simulating multivariate Gaussian with blockwise correlation
-## and piecewise constant vector of parameters
-beta <- rep(c(0,1,0,-1,0), c(25,10,25,10,25))
-cor <- 0.75
-Soo <- toeplitz(cor^(0:(25-1))) ## Toeplitz correlation for irrelevant variables
-Sww  <- matrix(cor,10,10) ## bloc correlation between active variables
-Sigma <- bdiag(Soo,Sww,Soo,Sww,Soo)
-diag(Sigma) <- 1
-n <- 50
-x <- as.matrix(matrix(rnorm(95*n),n,95) \%*\% chol(Sigma))
-y <- 10 + x \%*\% beta + rnorm(n,0,10)
-
-## Plot penalized criteria for the Elastic-net path
-criteria(elastic.net(x,y, lambda2=1))
-
-#' Plot penalized criteria for the Bounded regression
-criteria(bounded.reg(x,y, lambda2=1))
-}
-
-
-## ------------------------------------------------
-## Method `QuadrupenFit$plot`
+## Method `QuadrupenFit$plot_path`
 ## ------------------------------------------------
 
 \dontrun{
@@ -210,33 +56,63 @@ plot(bounded.reg(x,y, lambda2=10), xvar="fraction")
 }
 
 }
-\references{
-N. Meinshausen and P. Buhlmann (2010). Stability
-Selection, JRSS(B).
-
-Ryan Tibshirani and Jonathan Taylor. Degrees of
-freedom in lasso problems, Annals of Statistics, 40(2) 2012.
-}
 \seealso{
 See also \code{\link{plot.quadrupen}}.
 
-\code{\linkS4class{quadrupen}}.
-}
-\section{Public fields}{
-\if{html}{\out{<div class="r6-fields">}}
-\describe{
-\item{\code{major_penalty}}{vector of "leading" tuning parameters (either l1, linf or l2)}
+[cross_validate()]
+Stability selection for Quadrupen object
 
-\item{\code{minor_penalty}}{vector of "minor" tuning parameters (either l1 or l2)}
-}
-\if{html}{\out{</div>}}
+[stability()]
+Penalized criteria based on estimation of degrees of freedom
+
+[criteria()]
+Plot method
 }
 \section{Active bindings}{
 \if{html}{\out{<div class="r6-active-bindings">}}
 \describe{
-\item{\code{major_penalty}}{vector of "leading" tuning parameters (either l1, linf or l2)}
+\item{\code{ncoef}}{number of coefficient (without intercept)}
 
-\item{\code{minor_penalty}}{vector of "minor" tuning parameters (either l1 or l2)}
+\item{\code{nsample}}{sample size}
+
+\item{\code{dataModel}}{an object with class [`DataModel`] storing the data}
+
+\item{\code{has_intercept}}{boolean indicating wether an intercept is included in the model}
+
+\item{\code{major_tuning}}{vector of "leading" tuning parameters (either l1, linf or l2)}
+
+\item{\code{minor_tuning}}{vector of "minor" tuning parameters (either l1 or l2)}
+
+\item{\code{optim_monitoring}}{list monitoring the optimization}
+
+\item{\code{optim_config}}{list with low level options used for optimization.}
+
+\item{\code{fitted}}{Matrix of fitted values, each column corresponding to a value of \code{lambda1}.}
+
+\item{\code{coefficients}}{Matrix (class `"dgCMatrix"`) of
+coefficients with respect to the original input. The number of
+rows corresponds the length of \code{lambda1}.}
+
+\item{\code{interceptTerm}}{A vector containing the successive values of the 
+(unpenalized) intercept.
+Equals to zero if \code{intercept} has been set to `FALSE`.}
+
+\item{\code{residuals}}{Matrix of residuals, each column corresponding to a value of `lambda1`.}
+
+\item{\code{deviance}}{the model deviance}
+
+\item{\code{degrees_freedom}}{Estimated degree of freedoms for the successive `lambda1`.}
+
+\item{\code{r_squared}}{vector giving the coefficient of determination as a function of lambda1.}
+
+\item{\code{information_criteria}}{object with class [`Criteria`] storing various information criteria 
+(AIC, BIC, GCV, etc) for the current fit.}
+
+\item{\code{cross_validation}}{object with class [`CrossValidation`] storing output of CV job. 
+Only available once method cross_validate has been called.}
+
+\item{\code{stability_path}}{object with class [`StabilityPath`] storing output of stability selection. 
+Only available once method $stability has been called.}
 }
 \if{html}{\out{</div>}}
 }
@@ -252,7 +128,7 @@ See also \code{\link{plot.quadrupen}}.
 \item \href{#method-QuadrupenFit-cross_validate}{\code{QuadrupenFit$cross_validate()}}
 \item \href{#method-QuadrupenFit-stability}{\code{QuadrupenFit$stability()}}
 \item \href{#method-QuadrupenFit-criteria}{\code{QuadrupenFit$criteria()}}
-\item \href{#method-QuadrupenFit-plot}{\code{QuadrupenFit$plot()}}
+\item \href{#method-QuadrupenFit-plot_path}{\code{QuadrupenFit$plot_path()}}
 \item \href{#method-QuadrupenFit-clone}{\code{QuadrupenFit$clone()}}
 }
 }
@@ -260,6 +136,7 @@ See also \code{\link{plot.quadrupen}}.
 \if{html}{\out{<a id="method-QuadrupenFit-new"></a>}}
 \if{latex}{\out{\hypertarget{method-QuadrupenFit-new}{}}}
 \subsection{Method \code{new()}}{
+Initialize a [`QuadrupenFit`] model
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{QuadrupenFit$new(data, intercept, regParam)}\if{html}{\out{</div>}}
 }
@@ -267,8 +144,11 @@ See also \code{\link{plot.quadrupen}}.
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{intercept}}{logical; indicates if an intercept has
-been included to the model.}
+\item{\code{data}}{a [`DataModel`] object}
+
+\item{\code{intercept}}{a logical; should an intercept be included in the mode?}
+
+\item{\code{regParam}}{a list with two elements, a vector and a scalar, for the regularization}
 }
 \if{html}{\out{</div>}}
 }
@@ -277,6 +157,7 @@ been included to the model.}
 \if{html}{\out{<a id="method-QuadrupenFit-show"></a>}}
 \if{latex}{\out{\hypertarget{method-QuadrupenFit-show}{}}}
 \subsection{Method \code{show()}}{
+User friendly print method
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{QuadrupenFit$show()}\if{html}{\out{</div>}}
 }
@@ -287,7 +168,6 @@ been included to the model.}
 \if{latex}{\out{\hypertarget{method-QuadrupenFit-print}{}}}
 \subsection{Method \code{print()}}{
 User friendly print method
-Model Extraction
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{QuadrupenFit$print()}\if{html}{\out{</div>}}
 }
@@ -297,6 +177,7 @@ Model Extraction
 \if{html}{\out{<a id="method-QuadrupenFit-get_model"></a>}}
 \if{latex}{\out{\hypertarget{method-QuadrupenFit-get_model}{}}}
 \subsection{Method \code{get_model()}}{
+Model extraction
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{QuadrupenFit$get_model(selection, type = c("coefficients", "penalty", "index"))}\if{html}{\out{</div>}}
 }
@@ -311,18 +192,31 @@ Model Extraction
 \if{html}{\out{</div>}}
 }
 \subsection{Returns}{
-either a vector of coefficients, a scalar the the model index
-Debiasing for quadrupen object
+either a vector of coefficients, a scalar or the model index
 }
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-QuadrupenFit-predict"></a>}}
 \if{latex}{\out{\hypertarget{method-QuadrupenFit-predict}{}}}
 \subsection{Method \code{predict()}}{
+Predict response for new sample based on the current model
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{QuadrupenFit$predict(newx = NULL, selection = NULL, ...)}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{QuadrupenFit$predict(newx = NULL, selection = NULL)}\if{html}{\out{</div>}}
 }
 
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{newx}}{matrix of new values for the regressor with which to predict. If omitted, the fitted values are used.}
+
+\item{\code{selection}}{either a character (model selection criteria) of a scalar (lambda value)}
+}
+\if{html}{\out{</div>}}
+}
+\subsection{Returns}{
+a vector of predicted value
+Debias model coefficients
+}
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-QuadrupenFit-debias"></a>}}
@@ -344,7 +238,7 @@ on the estimation of the coefficients
 \subsection{Returns}{
 nothing is return, the beta are internaly rescaled
 
-Cross-validation for quadrupen object
+Cross-validation for Quadrupen object
 }
 }
 \if{html}{\out{<hr>}}
@@ -352,8 +246,7 @@ Cross-validation for quadrupen object
 \if{latex}{\out{\hypertarget{method-QuadrupenFit-cross_validate}{}}}
 \subsection{Method \code{cross_validate()}}{
 Function that computes K-fold cross-validated error of a
-\code{quadrupen} fit, possibly on a grid of
-\code{lambda1,lambda2}.
+\code{quadrupen} fit, possibly on a grid of `lambda1`, `lambda2`.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{QuadrupenFit$cross_validate(
   K = 10,
@@ -369,20 +262,18 @@ Function that computes K-fold cross-validated error of a
 \describe{
 \item{\code{K}}{integer indicating the number of folds. Default is 10.}
 
-\item{\code{folds}}{list of \code{K} vectors that describes the folds to
+\item{\code{folds}}{list of `K` vectors that describes the folds to
 use for the cross-validation. By default, the folds are randomly
 sampled with the specified K. The same folds are used for each
-values of \code{lambda2}.}
+values of `lambda2`.}
 
 \item{\code{lambda2}}{tunes the \eqn{\ell_2}{l2}-penalty (ridge-like) of
 the fit. If none is provided, a vector of values is generated and
-a CV is performed on a grid of \code{lambda2} and \code{lambda1},
-using the same folds for each \code{lambda2}). Ignored when
-\code{penalty} equals \code{"lasso"}. CV is only performed on
-\code{lambda2} when the \code{ridge} penalty is used.}
+a CV is performed on a grid of `lambda2` and `lambda1`,
+using the same folds for each `lambda2`.}
 
 \item{\code{verbose}}{logical; indicates if the progression (the current
-lambda2) should be displayed. Default is \code{TRUE}.}
+`lambda2` should be displayed. Default is `TRUE.`}
 
 \item{\code{cores}}{the number of cores to use. The default uses all
 the cores available.}
@@ -390,45 +281,9 @@ the cores available.}
 \if{html}{\out{</div>}}
 }
 \subsection{Returns}{
-An object of class "CrossValidation" for which a \code{plot} method
-is available.
+an object with class [`CrossValidation`] is sent back and stored as a 
+field of the original [`QuadrupenFit`] object.
 }
-\subsection{Examples}{
-\if{html}{\out{<div class="r example copy">}}
-\preformatted{\dontrun{
-## Simulating multivariate Gaussian with blockwise correlation
-## and piecewise constant vector of parameters
-beta <- rep(c(0,1,0,-1,0), c(25,10,25,10,25))
-cor  <- 0.75
-Soo  <- toeplitz(cor^(0:(25-1))) ## Toeplitz correlation for irrelevant variable
-Sww  <- matrix(cor,10,10) ## bloc correlation between active variables
-Sigma <- bdiag(Soo,Sww,Soo,Sww,Soo) + 0.1
-diag(Sigma) <- 1
-n <- 100
-x <- as.matrix(matrix(rnorm(95*n),n,95) \%*\% chol(Sigma))
-y <- 10 + x \%*\% beta + rnorm(n,0,10)
-
-## Use fewer lambda1 values by overwritting the default parameters
-## and cross-validate over the sequences lambda1 and lambda2
-cv.grid <- crossval(x,y, lambda2=10^seq(2,-2,len=50), nlambda1=50)
-## Rerun simple cross-validation with the appropriate lambda2
-cv.10K <- crossval(x,y, lambda2=cv.grid$lambda2_min)
-## Try leave one out also
-cv.loo <- crossval(x,y, K=n, lambda2=cv.grid$lambda2_min)
-
-plot(cv.grid)
-plot(cv.10K)
-plot(cv.loo)
-
-## Performance for selection purpose
-cat("\nFalse positives with the minimal 10-CV choice: ", sum(sign(beta) != sign(cv.10K$beta_min )))
-cat("\nFalse positives with the minimal LOO-CV choice: ", sum(sign(beta) != sign(cv.loo$beta_min)))
-}
-}
-\if{html}{\out{</div>}}
-
-}
-
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-QuadrupenFit-stability"></a>}}
@@ -455,81 +310,38 @@ procedure as introduced by Meinshausen and Buhlmann (2010).
 used to estimate the selection probabilities. Default is 100.}
 
 \item{\code{subsample_size}}{integer indicating the size of each subsamples.
-Default is \code{floor(n/2)}.}
+Default is `floor(n/2)`.}
 
-\item{\code{subsamples}}{list with \code{subsamples} entries with vectors
+\item{\code{subsamples}}{list with `subsamples` entries with vectors
 describing the folds to use for the stability procedure. By
 default, the folds are randomly sampled with the specified
-\code{n_subsamples} and \code{subsample_size} argument.}
+\code{n_subsamples} and `subsample_size` argument.}
 
 \item{\code{weakness}}{Coefficient used for randomizing the weights of each features.
-Default is \code{0.5}. Set to 1 for no randomization. See
-details below.}
+Default is 1` for no randomization. See details below.}
 
 \item{\code{verbose}}{logical; indicates if the progression should be
-displayed. Default is \code{TRUE}.}
+displayed. Default is `TRUE`.}
 
 \item{\code{cores}}{the number of cores to use. The default uses all
 the cores available.}
-
-\item{\code{x}}{matrix of features, possibly sparsely encoded
-(experimental). Do NOT include intercept.}
-
-\item{\code{y}}{response vector.}
 }
 \if{html}{\out{</div>}}
 }
 \subsection{Returns}{
-An object of class \code{StabilityPath}.
+an object with class [`StabilityPath`] is sent back and stored as a 
+field of the original [`QuadrupenFit`] object.
 }
-\subsection{Examples}{
-\if{html}{\out{<div class="r example copy">}}
-\preformatted{\dontrun{
-## Simulating multivariate Gaussian with blockwise correlation
-## and piecewise constant vector of parameters
-beta <- rep(c(0,1,0,-1,0), c(25,10,25,10,25))
-Soo  <- matrix(0.75,25,25) ## bloc correlation between zero variables
-Sww  <- matrix(0.75,10,10) ## bloc correlation between active variables
-Sigma <- bdiag(Soo,Sww,Soo,Sww,Soo) + 0.2
-diag(Sigma) <- 1
-n <- 100
-x <- as.matrix(matrix(rnorm(95*n),n,95) \%*\% chol(Sigma))
-y <- 10 + x \%*\% beta + rnorm(n,0,10)
-
-## Build a vector of label for true nonzeros
-labels <- rep("irrelevant", length(beta))
-labels[beta != 0] <- c("relevant")
-labels <- factor(labels, ordered=TRUE, levels=c("relevant","irrelevant"))
-
-## Call to stability selection function, 200 subsampling
-stab <- stability(x,y, subsamples=200, lambda2=1, min.ratio=1e-2)
-## Recover the selected variables for a given cutoff
-## and per-family error rate, without producing any plot
-stabpath <- plot(stab, cutoff=0.75, PFER=1, plot=FALSE)
-
-cat("\nFalse positives for the randomized Elastic-net with stability selection: ",
-     sum(labels[stabpath$selected] != "relevant"))
-cat("\nDONE.\n")
-}
-
-Penalized criteria based on estimation of degrees of freedom
-
-Produce a plot or send back the values of some penalized criteria
-accompanied with the vector(s) of parameters selected
-accordingly. The default behavior plots the BIC and the AIC (with
-respective factor \eqn{\log(n)}{log(n)} and \eqn{2}{2}) yet the user can specify any
-penalty.
-
-}
-\if{html}{\out{</div>}}
-
-}
-
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-QuadrupenFit-criteria"></a>}}
 \if{latex}{\out{\hypertarget{method-QuadrupenFit-criteria}{}}}
 \subsection{Method \code{criteria()}}{
+Produce a plot or send back the values of some penalized criteria
+accompanied with the vector(s) of parameters selected
+accordingly. The default behavior plots the BIC and the AIC (with
+respective factor \eqn{\log(n)}{log(n)} and \eqn{2}{2}) yet the user can specify any
+penalty.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{QuadrupenFit$criteria(
   penalty = setNames(c(2, log(self$nsample), log(self$ncoef), log(self$nsample) + 2 *
@@ -549,76 +361,28 @@ which are easier to read.}
 
 \item{\code{sigma}}{scalar: an estimate of the residual variance. When
 available, it is plugged-in the criteria, which may be more
-relevant. If \code{NULL} (the default), it is estimated as usual
+relevant. If `NULL` (the default), it is estimated as usual
 (see details).}
-
-\item{\code{object}}{output of a fitting procedure of the \pkg{quadrupen}
-package (e.g. \code{\link{elastic.net}}). Must be of class
-\code{quadrupen}.}
-
-\item{\code{xvar}}{variable to plot on the X-axis: either \code{"df"}
-(the estimated degrees of freedom), \code{"lambda"}
-(\eqn{\lambda_1}{lambda1} penalty level) or \code{"fraction"}
-(\eqn{\ell_1}{l1}-norm of the coefficients). Default is set to
-\code{"lambda"}.}
-
-\item{\code{log.scale}}{logical; indicates if a log-scale should be used
-when \code{xvar="lambda"}. Default is \code{TRUE}.}
-
-\item{\code{plot}}{logical; indicates if the graph should be plotted on
-call. Default is \code{TRUE}.}
 }
 \if{html}{\out{</div>}}
 }
 \subsection{Returns}{
-When \code{plot} is set to \code{TRUE}, an invisible
-\pkg{ggplot2} object is returned, which can be plotted via the
-\code{print} method. On the other hand, a list with a two data
-frames containing the criteria and the chosen vector of parameters
-are returned.
+an object with class [`Criteria`] is sent back and stored as a 
+field of the original [`QuadrupenFit`] object.
 }
-\subsection{Examples}{
-\if{html}{\out{<div class="r example copy">}}
-\preformatted{\dontrun{
-## Simulating multivariate Gaussian with blockwise correlation
-## and piecewise constant vector of parameters
-beta <- rep(c(0,1,0,-1,0), c(25,10,25,10,25))
-cor <- 0.75
-Soo <- toeplitz(cor^(0:(25-1))) ## Toeplitz correlation for irrelevant variables
-Sww  <- matrix(cor,10,10) ## bloc correlation between active variables
-Sigma <- bdiag(Soo,Sww,Soo,Sww,Soo)
-diag(Sigma) <- 1
-n <- 50
-x <- as.matrix(matrix(rnorm(95*n),n,95) \%*\% chol(Sigma))
-y <- 10 + x \%*\% beta + rnorm(n,0,10)
-
-## Plot penalized criteria for the Elastic-net path
-criteria(elastic.net(x,y, lambda2=1))
-
-#' Plot penalized criteria for the Bounded regression
-criteria(bounded.reg(x,y, lambda2=1))
-}
-
-}
-\if{html}{\out{</div>}}
-
-}
-
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-QuadrupenFit-plot"></a>}}
-\if{latex}{\out{\hypertarget{method-QuadrupenFit-plot}{}}}
-\subsection{Method \code{plot()}}{
+\if{html}{\out{<a id="method-QuadrupenFit-plot_path"></a>}}
+\if{latex}{\out{\hypertarget{method-QuadrupenFit-plot_path}{}}}
+\subsection{Method \code{plot_path()}}{
 Produce a plot of the solution path of a \code{quadrupen} fit.
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{QuadrupenFit$plot(
+\if{html}{\out{<div class="r">}}\preformatted{QuadrupenFit$plot_path(
   xvar = "lambda",
   main = paste(self$penalty, " path", sep = ""),
   log.scale = TRUE,
   standardize = TRUE,
-  labels = NULL,
-  plot = TRUE,
-  ...
+  labels = NULL
 )}\if{html}{\out{</div>}}
 }
 
@@ -635,25 +399,19 @@ of the coefficients). Default is set to \code{"lambda"}.}
 by what is on the Y-axis.}
 
 \item{\code{log.scale}}{logical; indicates if a log-scale should be used
-when \code{xvar="lambda"}. Default is \code{TRUE}.}
+when `xvar="lambda"`. Default is `TRUE`.}
 
 \item{\code{standardize}}{logical; standardize the coefficients before
-plotting (with the norm of the predictor). Default is \code{TRUE}.}
+plotting (with the norm of the predictor). Default is `TRUE`.}
 
-\item{\code{plot}}{logical; indicates if the graph should be plotted on
-call. Default is \code{TRUE}.}
-
-\item{\code{x}}{output of a fitting procedure of the \pkg{quadrupen}
-package (\code{\link{elastic.net}} or \code{\link{bounded.reg}}
-for the moment). Must be of class \code{quadrupen}.}
-
-\item{\code{y}}{used for S4 compatibility.}
-
-\item{\code{label}}{vector indicating the names associated to the plotted
+\item{\code{labels}}{vector indicating the names associated to the plotted
 variables. When specified, a legend is drawn in order to identify
 each variable. Only relevant when the number of predictor is
 small. Remind that the intercept does not count. Default is
 \code{NULL}.}
+
+\item{\code{plot}}{logical; indicates if the graph should be plotted on
+call. Default is \code{TRUE}.}
 }
 \if{html}{\out{</div>}}
 }

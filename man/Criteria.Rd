@@ -40,6 +40,30 @@ for which each cross-validation has been performed.
 )}\if{html}{\out{</div>}}
 }
 
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{log.scale}}{logical; indicates if a log-scale should be used
+when \code{xvar="lambda"}. Default is \code{TRUE}.}
+
+\item{\code{xvar}}{variable to plot on the X-axis: either \code{"df"}
+(the estimated degrees of freedom), \code{"lambda"}
+(\eqn{\lambda_1}{lambda1} penalty level) or \code{"fraction"}
+(\eqn{\ell_1}{l1}-norm of the coefficients). Default is set to
+\code{"lambda"}.}
+
+\item{\code{plot}}{logical; indicates if the graph should be plotted on
+call. Default is \code{TRUE}.}
+}
+\if{html}{\out{</div>}}
+}
+\subsection{Returns}{
+When \code{plot} is set to \code{TRUE}, an invisible
+\pkg{ggplot2} object is returned, which can be plotted via the
+\code{print} method. On the other hand, a list with a two data
+frames containing the criteria and the chosen vector of parameters
+are returned.
+}
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-CrossValidation-clone"></a>}}

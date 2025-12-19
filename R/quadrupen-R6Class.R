@@ -4,78 +4,18 @@
 #' \pkg{quadrupen} package (\code{elastic.net} or
 #' \code{bounded.reg}).
 #' 
-#' This class comes with the usual \code{predict(object, newx, ...)},
-#' \code{fitted(object, ...)}, \code{residuals(object, ...)},
-#' \code{print(object, ...)}, \code{show(object)} and
-#' \code{deviance(object, ...)} generic (undocumented) methods.
+#' This class comes with the usual [predict()], [fitted()], [coef()],
+#' [residuals()], [show()], [print()] and [deviance()] S3 methods.
 #'
-#' A specific plotting method is available and documented
-#' (\code{\link{plot.quadrupen}}).
-#'
-#' @param coefficients Matrix (class \code{"dgCMatrix"}) of
-#' coefficients with respect to the original input. The number of
-#' rows corresponds the length of \code{lambda1}.
-#'
-#' @param activeSet Matrix (class \code{"dgCMatrix"}, generally
-#' sparse) indicating the 'active' variables, in the sense that they
-#' activate the constraints. For the \code{\link{elastic.net}}, it
-#' corresponds to the nonzero variables; for the
-#' \code{\link{bounded.reg}} function, it is the set of variables
-#' reaching the boundary along the path of solutions.
-#'
-#' @param intercept logical; indicates if an intercept has
-#'  been included to the model.
-#'
-#' @param mu A vector (class \code{"numeric"})
-#' containing the successive values of the (unpenalized) intercept.
-#' Equals to zero if \code{intercept} has been set to \code{FALSE}.
-#'
-#' @param normx Vector (class \code{"numeric"}) containing the
-#' square root of the sum of squares of each column of the design
-#' matrix.
-#'
-#' @param penscale Vector \code{"numeric"} with real positive
-#' values that have been used to weight the penalty tuned by
-#' \eqn{\lambda_1}{lambda1}.
-#'
-#' @param penalty Object of class \code{"character"}
-#' indicating the method used (\code{"elastic-net"} or \code{"bounded
-#' regression"}).
-#'
-#' @param naive logical; was the \code{naive} mode on?
-#'
-#' @param lambda1 Vector (class \code{"numeric"}) of penalty
-#' levels (either \eqn{\ell_1}{l1} or \eqn{\ell_\infty}{l-infinity})
-#' for which the model has eventually been fitted.
-#'
-#' @param lambda2 Scalar (class \code{"numeric"}) for the
-#' amount of \eqn{\ell_2}{l2} (ridge-like) penalty.
-#'
-#' @param control Object of class \code{"list"} with low
-#' level options used for optimization.
-#'
-#' @param monitoring List (class \code{"list"}) which
-#' contains various indicators dealing with the optimization
-#' process.
-#'
-#' @param residuals Matrix of residuals, each column
-#' corresponding to a value of \code{lambda1}.
-#'
-#' @param df Estimated degree of freedoms for the successive
-#' \code{lambda1}.  Only available for 'elastic.net' using tCholesky
-#' factorization.
-#'
-#' @param r.squared Vector (class \code{"numeric"}) given the
-#' coefficient of determination as a function of lambda1.
-#'
-#' @param fitted Matrix of fitted values, each column
-#' corresponding to a value of \code{lambda1}.  
+#' Specific R6 methods are available for model extraction [QuadrupenFit$get_model()], 
+#' cross validation [QuadrupenFit$cross_validate()], stability selection [QuadrupenFit$stability_path()], criteria derivation [QuadrupenFit$criteria()] 
+#' and plotting [QuadrupenFit$plot()]. They come with equivalent S3 methods : [cross_validate()], 
+#' [stability()] and [plot()].
 #'
 #' @seealso See also \code{\link{plot.quadrupen}}.
 #'
 #' @importFrom stats fitted predict residuals deviance
 #' @export
-#' 
 QuadrupenFit <- R6::R6Class(
   classname = "QuadrupenFit",
   ## ____________________________________________________
@@ -102,44 +42,73 @@ QuadrupenFit <- R6::R6Class(
   ## ACTIVE BINDINGS
   ## ____________________________________________________
   active = list(
+    #' @field ncoef number of coefficient (without intercept)
     ncoef = function(value) {private$data$d},
+    #' @field nsample sample size
     nsample = function(value) {private$data$n},
+    #' @field dataModel an object with class [`DataModel`] storing the data
     dataModel = function(value) {private$data},
+    #' @field has_intercept boolean indicating wether an intercept is included in the model
     has_intercept = function(value) {private$intercept},
-    #' @field major_penalty vector of "leading" tuning parameters (either l1, linf or l2)
+    #' @field major_tuning vector of "leading" tuning parameters (either l1, linf or l2)
     major_tuning = function(value) {
       if (missing(value))
         return(private$tuning[[1]])
       else private$tuning[[1]] <- value
     },
-    #' @field minor_penalty vector of "minor" tuning parameters (either l1 or l2)
+    #' @field minor_tuning vector of "minor" tuning parameters (either l1 or l2)
     minor_tuning = function(value) {
       if (missing(value))
         return(private$tuning[[2]])
       else private$tuning[[2]] <- value
     },
+    #' @field optim_monitoring list monitoring the optimization
     optim_monitoring = function(value) {private$monitoring},
+    #' @field optim_config list with low level options used for optimization.
     optim_config = function(value) {private$control},
+    #' @field fitted Matrix of fitted values, each column corresponding to a value of \code{lambda1}.
     fitted = function(value) {
       Xs <- Matrix::colScale(private$data$X, private$data$norm_X)
       res <- sweep(tcrossprod(Xs, private$beta),2L,-private$mu,check.margin=FALSE)
       res
     },
+    #' @field coefficients Matrix (class `"dgCMatrix"`) of
+    #' coefficients with respect to the original input. The number of
+    #' rows corresponds the length of \code{lambda1}.
     coefficients         = function(value) {private$beta},
+    #' @field interceptTerm A vector containing the successive values of the 
+    #' (unpenalized) intercept.
+    #' Equals to zero if \code{intercept} has been set to `FALSE`.
     interceptTerm        = function(value) {private$mu},
+    #' @field residuals Matrix of residuals, each column corresponding to a value of `lambda1`.
     residuals            = function(value) {apply(self$fitted, 2, function(y_hat) private$data$y - y_hat)},
+    #' @field deviance the model deviance
     deviance             = function(value) {colSums(self$residuals^2)},
+    #' @field degrees_freedom Estimated degree of freedoms for the successive `lambda1`.
     degrees_freedom      = function(value) {private$df + ifelse(self$has_intercept, 1L, 0L)},
+    #' @field r_squared vector giving the coefficient of determination as a function of lambda1.
     r_squared            = function(value) {1 - colSums(self$residuals^2) / private$data$rss},
+    #' @field information_criteria object with class [`Criteria`] storing various information criteria 
+    #' (AIC, BIC, GCV, etc) for the current fit.
     information_criteria = function(value) {private$infocrit},
+    #' @field cross_validation object with class [`CrossValidation`] storing output of CV job. 
+    #' Only available once method cross_validate has been called.
     cross_validation     = function(value) {private$crossval},
+    #' @field stability_path object with class [`StabilityPath`] storing output of stability selection. 
+    #' Only available once method $stability has been called.
     stability_path       = function(value) {private$stabsel}
   ),
+  
   ## ____________________________________________________
   ## 
   ## PUBLIC MEMBERS
   ## ____________________________________________________
   public  = list(
+    
+    #' @description Initialize a [`QuadrupenFit`] model
+    #' @param data a [`DataModel`] object
+    #' @param intercept a logical; should an intercept be included in the mode?
+    #' @param regParam a list with two elements, a vector and a scalar, for the regularization
     initialize = function(data, intercept, regParam) {
 
       stopifnot("The data object must be an instance of DataModel" = inherits(data, "DataModel"))
@@ -155,6 +124,7 @@ QuadrupenFit <- R6::R6Class(
       private$intercept <- intercept
       private$tuning    <- regParam
     },
+    #' @description User friendly print method
     show = function() {
       cat("Linear regression with", self$penalty, "penalizer.\n")
       # cat("Linear regression with", x@penalty, "penalizer,", self$rescaling, "rescaling applied to the coefficients.\n")
@@ -173,11 +143,10 @@ QuadrupenFit <- R6::R6Class(
     },
     #' @description User friendly print method
     print = function() { self$show() },
-    #' Model Extraction
-    #' 
+    #' @description Model extraction
     #' @param selection either a character (model selection criteria) of a scalar (lambda value)
     #' @param type character for the desired output
-    #' @return either a vector of coefficients, a scalar the the model index
+    #' @return either a vector of coefficients, a scalar or the model index
     get_model = function(
           selection,
           type = c("coefficients", "penalty", "index")) {
@@ -214,8 +183,12 @@ QuadrupenFit <- R6::R6Class(
         setNames(c(private$mu[index], private$beta[index, ]), c("intercept", colnames(private$beta)))
         )
       res
-    },    
-    predict = function(newx = NULL, selection = NULL, ... ) {
+    },
+    #' @description Predict response for new sample based on the current model
+    #' @param newx matrix of new values for the regressor with which to predict. If omitted, the fitted values are used.
+    #' @param selection either a character (model selection criteria) of a scalar (lambda value)
+    #' @return a vector of predicted value
+    predict = function(newx = NULL, selection = NULL) {
       
       if (is.null(selection)) {
         index <- 1:length(private$tuning[[1]])
@@ -230,12 +203,10 @@ QuadrupenFit <- R6::R6Class(
       }
       res
     },
-    
-    #' Debiasing for quadrupen object
+    #' Debias model coefficients
     #' 
     #' @description Apply various debiasing schemes to correct effect of shrinkage 
     #' on the estimation of the coefficients
-    #' 
     #' @param type a character, either "rescaled", "relaxed" or "original". See details
     #' 
     #' @details
@@ -249,77 +220,33 @@ QuadrupenFit <- R6::R6Class(
       ### TODO
       stop("not implemented yet")
     },
-    #' Cross-validation for quadrupen object
+    #' Cross-validation for Quadrupen object
     #' 
     #' @description Function that computes K-fold cross-validated error of a
-    #' \code{quadrupen} fit, possibly on a grid of
-    #' \code{lambda1,lambda2}.
+    #' \code{quadrupen} fit, possibly on a grid of `lambda1`, `lambda2`.
     #'
     #' @param K integer indicating the number of folds. Default is 10.
     #'
-    #' @param folds list of \code{K} vectors that describes the folds to
+    #' @param folds list of `K` vectors that describes the folds to
     #' use for the cross-validation. By default, the folds are randomly
     #' sampled with the specified K. The same folds are used for each
-    #' values of \code{lambda2}.
+    #' values of `lambda2`.
     #'
     #' @param lambda2 tunes the \eqn{\ell_2}{l2}-penalty (ridge-like) of
     #' the fit. If none is provided, a vector of values is generated and
-    #' a CV is performed on a grid of \code{lambda2} and \code{lambda1},
-    #' using the same folds for each \code{lambda2}). Ignored when
-    #' \code{penalty} equals \code{"lasso"}. CV is only performed on
-    #' \code{lambda2} when the \code{ridge} penalty is used.
+    #' a CV is performed on a grid of `lambda2` and `lambda1`,
+    #' using the same folds for each `lambda2`.
     #'
     #' @param verbose logical; indicates if the progression (the current
-    #' lambda2) should be displayed. Default is \code{TRUE}.
+    #' `lambda2` should be displayed. Default is `TRUE.`
     #'
     #' @param cores the number of cores to use. The default uses all
     #' the cores available.
     #'
-    #' @note If the user runs the fitting method with option
-    #' \code{'bulletproof'} set to \code{FALSE}, the algorithm may stop
-    #' at an early stage of the path. Early stops are handled internally,
-    #' in order to provide results on the same grid of penalty tuned by
-    #' \eqn{\lambda_1}{lambda1}.  This is done by means of \code{NA}
-    #' values, so as mean and standard error are consistently
-    #' evaluated. If, while cross-validating, the procedure experiences
-    #' too much early stoppings, a warning is sent to the user, in which
-    #' case you should reconsider the grid of \code{lambda1} used for the
-    #' cross-validation.  If \code{bulletproof} is \code{TRUE} (the
-    #' default), there is nothing to worry about, except a possible slow
-    #' down when any switching to the proximal algorithm is required.
-    #'
-    #' @return An object of class "CrossValidation" for which a \code{plot} method
-    #' is available.
-    #'
-    #' @examples \dontrun{
-    #' ## Simulating multivariate Gaussian with blockwise correlation
-    #' ## and piecewise constant vector of parameters
-    #' beta <- rep(c(0,1,0,-1,0), c(25,10,25,10,25))
-    #' cor  <- 0.75
-    #' Soo  <- toeplitz(cor^(0:(25-1))) ## Toeplitz correlation for irrelevant variable
-    #' Sww  <- matrix(cor,10,10) ## bloc correlation between active variables
-    #' Sigma <- bdiag(Soo,Sww,Soo,Sww,Soo) + 0.1
-    #' diag(Sigma) <- 1
-    #' n <- 100
-    #' x <- as.matrix(matrix(rnorm(95*n),n,95) %*% chol(Sigma))
-    #' y <- 10 + x %*% beta + rnorm(n,0,10)
-    #'
-    #' ## Use fewer lambda1 values by overwritting the default parameters
-    #' ## and cross-validate over the sequences lambda1 and lambda2
-    #' cv.grid <- crossval(x,y, lambda2=10^seq(2,-2,len=50), nlambda1=50)
-    #' ## Rerun simple cross-validation with the appropriate lambda2
-    #' cv.10K <- crossval(x,y, lambda2=cv.grid$lambda2_min)
-    #' ## Try leave one out also
-    #' cv.loo <- crossval(x,y, K=n, lambda2=cv.grid$lambda2_min)
-    #'
-    #' plot(cv.grid)
-    #' plot(cv.10K)
-    #' plot(cv.loo)
-    #'
-    #' ## Performance for selection purpose
-    #' cat("\nFalse positives with the minimal 10-CV choice: ", sum(sign(beta) != sign(cv.10K$beta_min )))
-    #' cat("\nFalse positives with the minimal LOO-CV choice: ", sum(sign(beta) != sign(cv.loo$beta_min)))
-    #' }
+    #' @return an object with class [`CrossValidation`] is sent back and stored as a 
+    #' field of the original [`QuadrupenFit`] object.
+    #' 
+    #' @seealso [cross_validate()]
     cross_validate = 
       function(
           K       = 10,
@@ -387,89 +314,35 @@ QuadrupenFit <- R6::R6Class(
         private$crossval <- CrossValidation$new(cv_error = res, folds = folds)
         invisible(private$crossval)
     },
+    #' Stability selection for Quadrupen object
+    #' 
     #' @description Compute the stability path of a (possibly randomized) fitting
     #' procedure as introduced by Meinshausen and Buhlmann (2010).
-    #'
-    #' @param x matrix of features, possibly sparsely encoded
-    #' (experimental). Do NOT include intercept.
-    #'
-    #' @param y response vector.
-    #'
+    #' 
     #' @param n_subsamples integer indicating the number of subsamplings
     #' used to estimate the selection probabilities. Default is 100.
     #'
     #' @param subsample_size integer indicating the size of each subsamples.
-    #' Default is \code{floor(n/2)}.
+    #' Default is `floor(n/2)`.
     #'
-    #' @param subsamples list with \code{subsamples} entries with vectors
+    #' @param subsamples list with `subsamples` entries with vectors
     #' describing the folds to use for the stability procedure. By
     #' default, the folds are randomly sampled with the specified
-    #' \code{n_subsamples} and \code{subsample_size} argument.
+    #' \code{n_subsamples} and `subsample_size` argument.
     #'
     #' @param weakness Coefficient used for randomizing the weights of each features.
-    #' Default is \code{0.5}. Set to 1 for no randomization. See
-    #' details below.
+    #' Default is 1` for no randomization. See details below.
     #' 
     #' @param verbose logical; indicates if the progression should be
-    #' displayed. Default is \code{TRUE}.
+    #' displayed. Default is `TRUE`.
     #'
     #' @param cores the number of cores to use. The default uses all
     #' the cores available.
     #'
-    #' @return An object of class \code{StabilityPath}.
-    #'
-    #' @note When \code{randomized = TRUE}, the \code{penscale} argument
-    #' that weights the penalty tuned by \eqn{\lambda_1}{lambda1} is
-    #' perturbed (divided) for each subsample by a random variable
-    #' uniformly distributed on
-    #' \if{latex}{\eqn{[\alpha,1]}}\if{html}{[&#945;,1]}\if{text}{\eqn{[alpha,1]}},
-    #' where
-    #' \if{latex}{\eqn{\alpha}}\if{html}{&#945;}\if{text}{\eqn{alpha}} is
-    #' the weakness parameter.
-    #'
-    #' If the user runs the fitting method with option
-    #' \code{'bulletproof'} set to \code{FALSE}, the algorithm may stop
-    #' at an early stage of the path. Early stops of the underlying
-    #' fitting function are handled internally, in the following way: we
-    #' chose to simply skip the results associated with such runs, in
-    #' order not to bias the stability selection procedure. If it occurs
-    #' too often, a warning is sent to the user, in which case you should
-    #' reconsider the grid of \code{lambda1} for stability selection. If
-    #' \code{bulletproof} is \code{TRUE} (the default), there is nothing
-    #' to worry about, except a possible slow down when any switching to
-    #' the proximal algorithm is required.
-    #'
-    #' @references N. Meinshausen and P. Buhlmann (2010). Stability
-    #' Selection, JRSS(B).
-    #'
-    #' @examples \dontrun{
-    #' ## Simulating multivariate Gaussian with blockwise correlation
-    #' ## and piecewise constant vector of parameters
-    #' beta <- rep(c(0,1,0,-1,0), c(25,10,25,10,25))
-    #' Soo  <- matrix(0.75,25,25) ## bloc correlation between zero variables
-    #' Sww  <- matrix(0.75,10,10) ## bloc correlation between active variables
-    #' Sigma <- bdiag(Soo,Sww,Soo,Sww,Soo) + 0.2
-    #' diag(Sigma) <- 1
-    #' n <- 100
-    #' x <- as.matrix(matrix(rnorm(95*n),n,95) %*% chol(Sigma))
-    #' y <- 10 + x %*% beta + rnorm(n,0,10)
-    #'
-    #' ## Build a vector of label for true nonzeros
-    #' labels <- rep("irrelevant", length(beta))
-    #' labels[beta != 0] <- c("relevant")
-    #' labels <- factor(labels, ordered=TRUE, levels=c("relevant","irrelevant"))
-    #'
-    #' ## Call to stability selection function, 200 subsampling
-    #' stab <- stability(x,y, subsamples=200, lambda2=1, min.ratio=1e-2)
-    #' ## Recover the selected variables for a given cutoff
-    #' ## and per-family error rate, without producing any plot
-    #' stabpath <- plot(stab, cutoff=0.75, PFER=1, plot=FALSE)
-    #'
-    #' cat("\nFalse positives for the randomized Elastic-net with stability selection: ",
-    #'      sum(labels[stabpath$selected] != "relevant"))
-    #' cat("\nDONE.\n")
-    #'}
-    #'
+    #' @return an object with class [`StabilityPath`] is sent back and stored as a 
+    #' field of the original [`QuadrupenFit`] object.
+    #' 
+    #' @seealso [stability()]
     stability = function(
           n_subsamples   = 50,
           subsample_size = floor(self$nsample/2),
@@ -537,15 +410,12 @@ QuadrupenFit <- R6::R6Class(
     },
     #' Penalized criteria based on estimation of degrees of freedom
     #'
-    #' Produce a plot or send back the values of some penalized criteria
+    #' @description Produce a plot or send back the values of some penalized criteria
     #' accompanied with the vector(s) of parameters selected
     #' accordingly. The default behavior plots the BIC and the AIC (with
     #' respective factor \eqn{\log(n)}{log(n)} and \eqn{2}{2}) yet the user can specify any
     #' penalty.
     #'
-    #' @param object output of a fitting procedure of the \pkg{quadrupen}
-    #' package (e.g. \code{\link{elastic.net}}). Must be of class
-    #' \code{quadrupen}.
     #' @param penalty a vector with as many penalties a desired. The
     #' default contains the penalty corresponding to the AIC and the BIC
     #' (\eqn{2}{2} and \eqn{\log(n)}{log(n)}). Setting the "names"
@@ -553,68 +423,13 @@ QuadrupenFit <- R6::R6Class(
     #' which are easier to read.
     #' @param sigma scalar: an estimate of the residual variance. When
     #' available, it is plugged-in the criteria, which may be more
-    #' relevant. If \code{NULL} (the default), it is estimated as usual
+    #' relevant. If `NULL` (the default), it is estimated as usual
     #' (see details).
-    #' @param xvar variable to plot on the X-axis: either \code{"df"}
-    #' (the estimated degrees of freedom), \code{"lambda"}
-    #' (\eqn{\lambda_1}{lambda1} penalty level) or \code{"fraction"}
-    #' (\eqn{\ell_1}{l1}-norm of the coefficients). Default is set to
-    #' \code{"lambda"}.
-    #' @param log.scale logical; indicates if a log-scale should be used
-    #' when \code{xvar="lambda"}. Default is \code{TRUE}.
-    #' @param plot logical; indicates if the graph should be plotted on
-    #' call. Default is \code{TRUE}.
-    #'
-    #' @return When \code{plot} is set to \code{TRUE}, an invisible
-    #' \pkg{ggplot2} object is returned, which can be plotted via the
-    #' \code{print} method. On the other hand, a list with a two data
-    #' frames containing the criteria and the chosen vector of parameters
-    #' are returned.
-    #' @seealso \code{\linkS4class{quadrupen}}.
-    #'
-    #' @note When \code{sigma} is provided, the criterion takes the form
-    #'
-    #' \if{latex}{\deqn{\left\|\mathbf{y} - \mathbf{X} \hat{\beta} \right\|^2 +
-    #' \mathrm{penalty} \times \frac{\hat{\mathrm{df}}}{n} \ \sigma^2.}}
-    #' \if{html}{\out{ <center> RSS + penalty * df / n * sigma<sup>2</sup> </center>}}
-    #' \if{text}{\deqn{RSS + penalty * df / n * sigma^2}}
-    #'
-    #' When it is unknown, it writes
-    #'
-    #' \if{latex}{\deqn{\log\left(\left\|\mathbf{y} - \mathbf{X} \hat{\beta} \right\|^2\right) +
-    #' \mathrm{penalty} \times \hat{\mathrm{df}}.}}
-    #' \if{html}{\out{ <center> n*log(RSS) + penalty * df </center>}}
-    #' \if{text}{\deqn{n*log(RSS) + penalty * df}}
-    #'
-    #' Estimation of the degrees of freedom (for the elastic-net, the
-    #' LASSO and also bounded regression) are computed by applying and
-    #' adpating the results of Tibshirani and Taylor (see references
-    #' below).
-    #'
-    #' @references Ryan Tibshirani and Jonathan Taylor. Degrees of
-    #' freedom in lasso problems, Annals of Statistics, 40(2) 2012.
-    #'
-    #' @examples \dontrun{
-    #' ## Simulating multivariate Gaussian with blockwise correlation
-    #' ## and piecewise constant vector of parameters
-    #' beta <- rep(c(0,1,0,-1,0), c(25,10,25,10,25))
-    #' cor <- 0.75
-    #' Soo <- toeplitz(cor^(0:(25-1))) ## Toeplitz correlation for irrelevant variables
-    #' Sww  <- matrix(cor,10,10) ## bloc correlation between active variables
-    #' Sigma <- bdiag(Soo,Sww,Soo,Sww,Soo)
-    #' diag(Sigma) <- 1
-    #' n <- 50
-    #' x <- as.matrix(matrix(rnorm(95*n),n,95) %*% chol(Sigma))
-    #' y <- 10 + x %*% beta + rnorm(n,0,10)
-    #'
-    #' ## Plot penalized criteria for the Elastic-net path
-    #' criteria(elastic.net(x,y, lambda2=1))
-    #'
-    #' #' Plot penalized criteria for the Bounded regression
-    #' criteria(bounded.reg(x,y, lambda2=1))
-    #' }
-    #'
-    #' @import ggplot2 reshape2 scales grid methods
+    #' 
+    #' @return an object with class [`Criteria`] is sent back and stored as a 
+    #' field of the original [`QuadrupenFit`] object.
+    #' 
+    #' @seealso [criteria()]
     criteria = function(penalty=
                           setNames(c(2, log(self$nsample), log(self$ncoef), log(self$nsample) + 2*log(self$ncoef)),
                                    c("AIC","BIC", "mBIC", "eBIC")), sigma=NULL) {
@@ -648,12 +463,10 @@ QuadrupenFit <- R6::R6Class(
         )
       invisible(private$infocrit)
     },
+    #' Plot method
+    #' 
     #' @description Produce a plot of the solution path of a \code{quadrupen} fit.
     #'
-    #' @param x output of a fitting procedure of the \pkg{quadrupen}
-    #' package (\code{\link{elastic.net}} or \code{\link{bounded.reg}}
-    #' for the moment). Must be of class \code{quadrupen}.
-    #' @param y used for S4 compatibility.
     #' @param xvar variable to plot on the X-axis: either \code{"lambda"}
     #' (\eqn{\lambda_1}{lambda1} penalty level or
     #' \eqn{\lambda_2}{lambda2} for ridge regression) or
@@ -662,10 +475,10 @@ QuadrupenFit <- R6::R6Class(
     #' @param main the main title. Default is set to the model name followed
     #' by what is on the Y-axis.
     #' @param log.scale logical; indicates if a log-scale should be used
-    #' when \code{xvar="lambda"}. Default is \code{TRUE}.
+    #' when `xvar="lambda"`. Default is `TRUE`.
     #' @param standardize logical; standardize the coefficients before
-    #' plotting (with the norm of the predictor). Default is \code{TRUE}.
-    #' @param label vector indicating the names associated to the plotted
+    #' plotting (with the norm of the predictor). Default is `TRUE`.
+    #' @param labels vector indicating the names associated to the plotted
     #' variables. When specified, a legend is drawn in order to identify
     #' each variable. Only relevant when the number of predictor is
     #' small. Remind that the intercept does not count. Default is
@@ -699,9 +512,9 @@ QuadrupenFit <- R6::R6Class(
     #' plot(bounded.reg(x,y, lambda2=10), xvar="fraction")
     #' }
     #'
-    plot = function(xvar = "lambda",
+    plot_path = function(xvar = "lambda",
                     main = paste(self$penalty," path", sep=""),
-                    log.scale = TRUE, standardize=TRUE, labels = NULL, plot = TRUE, ...) {
+                    log.scale = TRUE, standardize=TRUE, labels = NULL) {
       
       if (length(self$major_tuning) == 1) {
         stop("Not available when the leading vector of tuning parameters boild down to a scalar.")
@@ -761,7 +574,7 @@ QuadrupenFit <- R6::R6Class(
           d <- d + theme(legend.position="none")
         }
       }
-      if (plot) print(d)
+      print(d)
       
       invisible(d)
     }

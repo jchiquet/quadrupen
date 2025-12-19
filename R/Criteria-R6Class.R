@@ -25,6 +25,21 @@ Criteria <- R6::R6Class(
     initialize = function(value) {
       private$value <- value
     },
+    #' @param xvar variable to plot on the X-axis: either \code{"df"}
+    #' (the estimated degrees of freedom), \code{"lambda"}
+    #' (\eqn{\lambda_1}{lambda1} penalty level) or \code{"fraction"}
+    #' (\eqn{\ell_1}{l1}-norm of the coefficients). Default is set to
+    #' \code{"lambda"}.
+    #' @param log.scale logical; indicates if a log-scale should be used
+    #' when \code{xvar="lambda"}. Default is \code{TRUE}.
+    #' @param plot logical; indicates if the graph should be plotted on
+    #' call. Default is \code{TRUE}.
+    #'
+    #' @return When \code{plot} is set to \code{TRUE}, an invisible
+    #' \pkg{ggplot2} object is returned, which can be plotted via the
+    #' \code{print} method. On the other hand, a list with a two data
+    #' frames containing the criteria and the chosen vector of parameters
+    #' are returned.
     plot = function(log.scale=TRUE, xvar = c("lambda", "fraction", "df"), title = "Information Criteria") {
       if (length(self$lambda) == 1) {
         stop("Not available when the leading vector of penalties boild down to a scalar.")
