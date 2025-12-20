@@ -10,7 +10,7 @@ bounded.reg(
   lambda1 = NULL,
   lambda2 = 0.01,
   penscale = rep(1, ncol(x)),
-  struct = Diagonal(ncol(x), 1),
+  struct = Matrix::Diagonal(ncol(x), 1),
   intercept = TRUE,
   normalize = TRUE,
   nlambda1 = ifelse(is.null(lambda1), 100, length(lambda1)),
@@ -106,12 +106,6 @@ this threshold. Default is \code{1e-7} for \code{"quadra"} and
 \item{\code{bulletproof}: }{logical; indicates if the bulletproof
 mode should be used while running the \code{"quadra"}
 method. Default is \code{TRUE}. See details below.}}}
-
-\item{naive}{logical; Compute either 'naive' of 'classic' bounded
-regression: mimicing the Elastic-net, the vector of parameters is
-rescaled by a coefficient \code{(1+lambda2)} when \code{naive}
-equals \code{FALSE}.  No rescaling otherwise. Default is
-\code{FALSE}.}
 }
 \value{
 an object with class \code{quadrupen}, see the

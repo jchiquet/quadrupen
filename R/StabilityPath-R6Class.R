@@ -37,7 +37,8 @@ StabilityPath <- R6::R6Class(
         cat("- penalty parameter lambda2:", self$regParam[[2]], "\n")
       invisible(self)
     },
-    
+    #' @description User friendly print method
+    print = function() { self$show() },
     #' @description Produce a plot of the stability path obtained by stability
     #' selection.
     #'

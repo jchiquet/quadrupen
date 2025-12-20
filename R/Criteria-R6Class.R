@@ -32,12 +32,14 @@ Criteria <- R6::R6Class(
     #' @description User friendly print method
     show = function() {
       cat("Information criteria for a Quadrupen fit.\n")
-      cat("- Criteria considered: ", self$names, "\n")
+      cat("- Criteria considered:", self$names, "\n")
       cat("- main penalty parameter lambda:", length(self$lambda), "points from",
           format(max(self$lambda), digits = 3),"to",
           format(min(self$lambda), digits = 3),"\n")
       invisible(self)
     },
+    #' @description User friendly print method
+    print = function() { self$show() },
     #' @description Plot the the desired criteria 
     #' 
     #' @param criteria a vector of character with the criteria to plot. 
@@ -62,7 +64,7 @@ Criteria <- R6::R6Class(
       xvar <- match.arg(xvar)
 
       data_plot <- 
-        dplyr::select(self$data, criteria | starts_with(xvar) ) |> 
+        dplyr::select(self$data, starts_with(criteria) | starts_with(xvar) ) |> 
                     tidyr::pivot_longer(cols = -xvar, names_to = "criterion") |>
                     dplyr::rename(xvar = 1)
 

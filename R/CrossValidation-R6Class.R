@@ -25,10 +25,10 @@ CrossValidation <- R6::R6Class(
     #' @field lambda1 vector of \eqn{\lambda_1}{lambda1}
     #' (\eqn{\ell_1}{l1} or \eqn{\ell_\infty}{infinity} penalty levels)
     #' for which each cross-validation has been performed.
-    lambda1     = function(value) unique(self$error$lambda1),
+    lambda1     = function(value) unique(self$data$lambda1),
     #' @field lambda2 vector (or scalar) of \eqn{\ell_2}{l2}-penalty levels for
     #' which each cross-validation has been performed.
-    lambda2     = function(value) unique(self$error$lambda2),
+    lambda2     = function(value) unique(self$data$lambda2),
     #' @field lambda1_min level of \eqn{\lambda_1}{lambda1} that minimizes the
     #' error estimated by cross-validation.
     lambda1_min = function(value) max(private$cv_min$lambda1),
@@ -51,7 +51,7 @@ CrossValidation <- R6::R6Class(
     #' @param folds  list of K folds used for cross-validation
     initialize = 
       function(cv_error, folds) {
-        private$value  <- cv_error 
+        private$value  <- cv_error
         private$folds_ <- folds 
         private$cv_min <- cv_error |> dplyr::filter(mean <= min(mean))
         private$cv_1se <- cv_error |> 
@@ -73,6 +73,8 @@ CrossValidation <- R6::R6Class(
       }
       invisible(self)
     },
+    #' @description User friendly print method
+    print = function() { self$show() },
     #' @description Plot 1-dimensional cross-validation
     #' @param log_scale logical, should a log-scale be used for the x-axis
     #' @param title graph title
@@ -80,7 +82,7 @@ CrossValidation <- R6::R6Class(
     plotCV_1D = function(log_scale=TRUE, title = "Cross-validation error") {
       ## SIMPLE CROSS-VALIDATION GRAPH
       if (length(self$lambda1) > length(self$lambda2)) {
-        d <- ggplot(self$error, aes(x=.data$lambda1,y=.data$mean)) + theme_bw()
+        d <- ggplot(self$data, aes(x=.data$lambda1,y=.data$mean)) + theme_bw()
         xlab <- ifelse(log_scale,expression(log[10](lambda[1])),expression(lambda[1]))
         lambda <- data.frame(xval=c(self$lambda1_min,self$lambda1_1se),
                              lambda.choice=factor(c("min. MSE","1-se rule")))
@@ -88,7 +90,7 @@ CrossValidation <- R6::R6Class(
       } else {
         ### TODO
         ## ridge or not (meaning working on lambda1 or lambda2)
-        d <- ggplot(self$error, aes(x=.data$lambda2,y=.data$mean))
+        d <- ggplot(self$data, aes(x=.data$lambda2,y=.data$mean))
         xlab <- ifelse(log_scale,expression(log[10](lambda[2])),expression(lambda[2]))
         lambda <- data.frame(xval=c(self$lambda2_min,self$lambda2_1se),
                              lambda.choice=factor(c("min. MSE","1-se rule")))
@@ -96,7 +98,7 @@ CrossValidation <- R6::R6Class(
       d <- d + xlab(xlab) + ylab("Mean square error") + 
         geom_point(alpha=0.3) + 
         geom_smooth(aes(ymin=.data$mean-.data$serr, ymax=.data$mean+.data$serr, group=as.factor(.data$lambda2),
-                        colour=as.factor(.data$lambda2)), data=self$error, alpha=0.2, stat="identity")
+                        colour=as.factor(.data$lambda2)), data=self$data, alpha=0.2, stat="identity")
       if (log_scale) {
         d <- d + scale_x_log10() + annotation_logticks(sides="b")
       }
@@ -112,13 +114,13 @@ CrossValidation <- R6::R6Class(
     #' @param title graph title
     #' @return a \pkg{ggplot2} object 
     plotCV_2D = function(title = "Cross-validation error") {
-      d <- ggplot(data=self$error, aes(x=.data$lambda1, y=.data$lambda2, z=.data$mean))
-      d <- d + geom_tile(aes(fill=.data$mean)) + stat_contour(linewidth=0.2, binwidth=diff(range(self$error$mean))/10) + ggtitle(title)
+      d <- ggplot(data=self$data, aes(x=.data$lambda1, y=.data$lambda2, z=.data$mean))
+      d <- d + geom_tile(aes(fill=.data$mean)) + stat_contour(linewidth=0.2, binwidth=diff(range(self$data$mean))/10) + ggtitle(title)
       d <- d + scale_x_continuous(trans=log10_trans()) + xlab(expression(log[10](lambda[1])))
       d <- d + scale_y_continuous(trans=log10_trans()) + ylab(expression(log[10](lambda[2])))
       d <- d + annotation_logticks() + theme_bw()
-      i_1se <- which(self$error$mean - self$error$serr <= min(self$error$mean))
-      d <- d + stat_contour(alpha=0.5, colour="#CCCCCC", linewidth=0.65, breaks=quantile(self$error$mean[i_1se], probs=seq(0,1,len=6)))
+      i_1se <- which(self$data$mean - self$data$serr <= min(self$data$mean))
+      d <- d + stat_contour(alpha=0.5, colour="#CCCCCC", linewidth=0.65, breaks=quantile(self$data$mean[i_1se], probs=seq(0,1,len=6)))
       d
     },
     #' @description Plot cross-validation job by choosing the most appropriate output (1D- or 2D)

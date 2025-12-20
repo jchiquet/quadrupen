@@ -44,12 +44,6 @@
 #' normalized to have unit L2 norm before fitting.  Default is
 #' \code{TRUE}.
 #'
-#' @param naive logical; Compute either 'naive' of 'classic' bounded
-#' regression: mimicing the Elastic-net, the vector of parameters is
-#' rescaled by a coefficient \code{(1+lambda2)} when \code{naive}
-#' equals \code{FALSE}.  No rescaling otherwise. Default is
-#' \code{FALSE}.
-#'
 #' @param nlambda1 integer that indicates the number of values to put
 #' in the \code{lambda1} vector.  Ignored if \code{lambda1} is
 #' provided.
@@ -143,8 +137,7 @@
 #'
 #' @seealso See also \code{\linkS4class{quadrupen}},
 #' \code{\link{plot.quadrupen}} and \code{\link{crossval}}.
-#' @name bounded.reg
-#' @rdname bounded.reg
+#' 
 #' @keywords models, regression
 #'
 #' @examples
@@ -174,7 +167,7 @@ bounded.reg <- function(x,
                         lambda1   = NULL,
                         lambda2   = 0.01,
                         penscale  = rep(1,ncol(x)),
-                        struct    = Diagonal(ncol(x), 1),
+                        struct    = Matrix::Diagonal(ncol(x), 1),
                         intercept = TRUE,
                         normalize = TRUE,
                         nlambda1  = ifelse(is.null(lambda1),100,length(lambda1)),
@@ -220,6 +213,8 @@ bounded.reg <- function(x,
   myModel$fit(ctrl)
   
   ## ============================================
-  ## DONE, SEND BACK THE RESULTING MODEL
+  ## POSTREATMENT + SEND BACK THE RESULTING MODEL
+  ##
+  myModel$criteria()
   myModel
 }
