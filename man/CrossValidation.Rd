@@ -4,18 +4,52 @@
 \alias{CrossValidation}
 \title{Class CrossValidation}
 \description{
-Class of object returned by a cross-validation performed through
-the \code{$cross_validate()} method.
+Class CrossValidation
+
+Class CrossValidation
 }
 \details{
-\@param lambda1 vector of \eqn{\lambda_1}{lambda1}
+Class of object returned by the [`QuadrupenFit$cross_validate()`] method or the
+[`cross_validate()`] function.  Owns [print()] and [plot()] methods.
+}
+\section{Active bindings}{
+\if{html}{\out{<div class="r6-active-bindings">}}
+\describe{
+\item{\code{data}}{a data frame containing the mean
+cross-validated error and its associated standard error for each
+values of \code{lambda1} and \code{lambda2}.}
+
+\item{\code{folds}}{list of \code{K} vectors indicating the folds
+used for cross-validation.}
+
+\item{\code{lambda1}}{vector of \eqn{\lambda_1}{lambda1}
 (\eqn{\ell_1}{l1} or \eqn{\ell_\infty}{infinity} penalty levels)
-for which each cross-validation has been performed.
+for which each cross-validation has been performed.}
+
+\item{\code{lambda2}}{vector (or scalar) of \eqn{\ell_2}{l2}-penalty levels for
+which each cross-validation has been performed.}
+
+\item{\code{lambda1_min}}{level of \eqn{\lambda_1}{lambda1} that minimizes the
+error estimated by cross-validation.}
+
+\item{\code{lambda2_min}}{level of \eqn{\lambda_2}{lambda2} that minimizes the
+error estimated by cross-validation.}
+
+\item{\code{lambda1_1se}}{largest level of \eqn{\lambda_1}{lambda1} such as
+the cross-validated error is within 1 standard error of the
+minimum.}
+
+\item{\code{lambda2_1se}}{largest level of \eqn{\lambda_2}{lambda2}
+the cross-validated error is within 1 standard error of the
+minimum (only relevant for ridge regression).}
+}
+\if{html}{\out{</div>}}
 }
 \section{Methods}{
 \subsection{Public methods}{
 \itemize{
 \item \href{#method-CrossValidation-new}{\code{CrossValidation$new()}}
+\item \href{#method-CrossValidation-show}{\code{CrossValidation$show()}}
 \item \href{#method-CrossValidation-plotCV_1D}{\code{CrossValidation$plotCV_1D()}}
 \item \href{#method-CrossValidation-plotCV_2D}{\code{CrossValidation$plotCV_2D()}}
 \item \href{#method-CrossValidation-plot}{\code{CrossValidation$plot()}}
@@ -26,6 +60,8 @@ for which each cross-validation has been performed.
 \if{html}{\out{<a id="method-CrossValidation-new"></a>}}
 \if{latex}{\out{\hypertarget{method-CrossValidation-new}{}}}
 \subsection{Method \code{new()}}{
+Constructor for a [`CrossValidation`] object
+Should be called internally by an object [`QuadrupenFit$cross_validate()`]
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{CrossValidation$new(cv_error, folds)}\if{html}{\out{</div>}}
 }
@@ -33,43 +69,86 @@ for which each cross-validation has been performed.
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{folds}}{list of \code{K} vectors indicating the folds
-used for cross-validation.}
+\item{\code{cv_error}}{data frame storing output of a cv job}
+
+\item{\code{folds}}{list of K folds used for cross-validation}
 }
 \if{html}{\out{</div>}}
 }
 }
 \if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-CrossValidation-show"></a>}}
+\if{latex}{\out{\hypertarget{method-CrossValidation-show}{}}}
+\subsection{Method \code{show()}}{
+User friendly print method
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{CrossValidation$show()}\if{html}{\out{</div>}}
+}
+
+}
+\if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-CrossValidation-plotCV_1D"></a>}}
 \if{latex}{\out{\hypertarget{method-CrossValidation-plotCV_1D}{}}}
 \subsection{Method \code{plotCV_1D()}}{
+Plot 1-dimensional cross-validation
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{CrossValidation$plotCV_1D(main = "Cross-validation error", log.scale = TRUE)}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{CrossValidation$plotCV_1D(log_scale = TRUE, title = "Cross-validation error")}\if{html}{\out{</div>}}
 }
 
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{log_scale}}{logical, should a log-scale be used for the x-axis}
+
+\item{\code{title}}{graph title}
+}
+\if{html}{\out{</div>}}
+}
+\subsection{Returns}{
+a ggplot object
+}
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-CrossValidation-plotCV_2D"></a>}}
 \if{latex}{\out{\hypertarget{method-CrossValidation-plotCV_2D}{}}}
 \subsection{Method \code{plotCV_2D()}}{
+Plot 2-dimensional cross-validation output (grid lambda1 x lambda2)
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{CrossValidation$plotCV_2D(main = "Cross-validation error")}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{CrossValidation$plotCV_2D(title = "Cross-validation error")}\if{html}{\out{</div>}}
 }
 
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{title}}{graph title}
+}
+\if{html}{\out{</div>}}
+}
+\subsection{Returns}{
+a \pkg{ggplot2} object
+}
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-CrossValidation-plot"></a>}}
 \if{latex}{\out{\hypertarget{method-CrossValidation-plot}{}}}
 \subsection{Method \code{plot()}}{
+Plot cross-validation job by choosing the most appropriate output (1D- or 2D)
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{CrossValidation$plot(
-  log.scale = TRUE,
-  plot = TRUE,
-  main = "Cross-validation error",
-  ...
-)}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{CrossValidation$plot(log_scale = TRUE, title = "Cross-validation error")}\if{html}{\out{</div>}}
 }
 
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{log_scale}}{logical, should a log-scale be used for the x-axis}
+
+\item{\code{title}}{graph title}
+}
+\if{html}{\out{</div>}}
+}
+\subsection{Returns}{
+a ggplot object
+}
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-CrossValidation-clone"></a>}}

@@ -132,6 +132,10 @@ DataModel <- R6::R6Class(
   )
 )
 
+#' Gaussian Data Class
+#' 
+#' @description Class for storing data and various fixed quantity
+#' 
 #' @export
 GaussianModel <- R6::R6Class(
   classname = "GaussianModel",

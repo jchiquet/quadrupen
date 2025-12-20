@@ -1,12 +1,7 @@
 #' Class Criteria
 #' 
-#' Class of object returned by a call to the \code{$criteria()} method.
-#' 
-#' \@param lambda vector of \eqn{\lambda_1}{lambda}
-#' (\eqn{\ell_1}{l1} or \eqn{\ell_\infty}{infinity} penalty levels)
-#' for which each cross-validation has been performed.
-#' @param lambda2 vector (or scalar) of \eqn{\ell_2}{l2}-penalty levels for
-#' which each cross-validation has been performed.
+#' Class of object returned by the [`QuadrupenFit$criteria()`] method or the
+#' [`criteria()`] function.  Owns [print()] and [plot()] methods.
 #' 
 #' @importFrom dplyr filter
 #' 
@@ -17,42 +12,57 @@ Criteria <- R6::R6Class(
     value     = NA
   ),
   active = list(
-    lambda = function(value) {private$value$lambda},
+    #' @field data a data frame containing the values of various information
+    #' criteria (AIC, BIC, lmBIC, eBIC, GCV) along the value of \code{lambda1}.
     data   = function(value) {private$value},
-    names  = function(value) {colnames(private$value)[1:(ncol(private$value)-3)]}
+    #' @field lambda vector of \eqn{\lambda_1}{lambda}
+    #' (\eqn{\ell_1}{l1} or \eqn{\ell_\infty}{infinity} penalty levels)
+    #' for which each cross-validation has been performed.
+    lambda = function(value) {private$value$lambda},
+    #' @field names a vector of characters storing the names of the precomputed criteria
+    names  = function(value) {colnames(private$value)[1:(ncol(private$value) - 3)]}
   ),
   public = list(
+    #' @description Constructor for a [`Criteria`] object
+    #' Should be called internally by an object [`QuadrupenFit$criteria()`]
+    #' @param value data frame storing output of [`QuadrupenFit$criteria()`]
     initialize = function(value) {
       private$value <- value
     },
-    #' @param xvar variable to plot on the X-axis: either \code{"df"}
-    #' (the estimated degrees of freedom), \code{"lambda"}
-    #' (\eqn{\lambda_1}{lambda1} penalty level) or \code{"fraction"}
+    #' @description User friendly print method
+    show = function() {
+      cat("Information criteria for a Quadrupen fit.\n")
+      cat("- Criteria considered: ", self$names, "\n")
+      cat("- main penalty parameter lambda:", length(self$lambda), "points from",
+          format(max(self$lambda), digits = 3),"to",
+          format(min(self$lambda), digits = 3),"\n")
+      invisible(self)
+    },
+    #' @description Plot the the desired criteria 
+    #' 
+    #' @param criteria a vector of character with the criteria to plot. 
+    #' The default plot all the criteria available (stored in the field `names`)
+    #' 
+    #' @param log_scale logical; indicates if a log-scale should be used
+    #' when `xvar="lambda"`. Default is `TRUE`.
+    #' 
+    #' @param xvar variable to plot on the X-axis: either `"df"`
+    #' (the estimated degrees of freedom), `"lambda"`
+    #' (\eqn{\lambda_1}{lambda1} penalty level) or `"fraction"`
     #' (\eqn{\ell_1}{l1}-norm of the coefficients). Default is set to
-    #' \code{"lambda"}.
-    #' @param log.scale logical; indicates if a log-scale should be used
-    #' when \code{xvar="lambda"}. Default is \code{TRUE}.
-    #' @param plot logical; indicates if the graph should be plotted on
-    #' call. Default is \code{TRUE}.
+    #' `"lambda"`.
+    #' 
+    #' @param title graph title
     #'
-    #' @return When \code{plot} is set to \code{TRUE}, an invisible
-    #' \pkg{ggplot2} object is returned, which can be plotted via the
-    #' \code{print} method. On the other hand, a list with a two data
-    #' frames containing the criteria and the chosen vector of parameters
-    #' are returned.
-    plot = function(log.scale=TRUE, xvar = c("lambda", "fraction", "df"), title = "Information Criteria") {
+    #' @return a \pkg{ggplot2} object
+    plot = function(log_scale=TRUE, criteria = self$names, xvar = c("lambda", "fraction", "df"), title = "Information Criteria") {
       if (length(self$lambda) == 1) {
         stop("Not available when the leading vector of penalties boild down to a scalar.")
       }
       xvar <- match.arg(xvar)
 
-      data.plot <- melt(self$data, id=xvar, measure=1:(ncol(self$data)-3), variable.name="criterion", value.name="value")
-      rownames(data.plot) <- 1:nrow(data.plot)
-      colnames(data.plot)[1] <- "xvar"
-      
-      
       data_plot <- 
-        dplyr::select(self$data, (1:(ncol(self$data) - 3)) | starts_with(xvar) ) |> 
+        dplyr::select(self$data, criteria | starts_with(xvar) ) |> 
                     tidyr::pivot_longer(cols = -xvar, names_to = "criterion") |>
                     dplyr::rename(xvar = 1)
 
@@ -60,7 +70,7 @@ Criteria <- R6::R6Class(
         xvar,
         "fraction" = expression(paste("|",beta[lambda[1]],"|",{}[1]/max[lambda[1]],"|",beta[lambda[1]],"|",{}[1],sep="")),
         "df" = "Estimated degrees of freedom",
-        ifelse(log.scale,expression(log[10](lambda[1])),expression(lambda[1]))
+        ifelse(log_scale,expression(log[10](lambda[1])),expression(lambda[1]))
         )
       
       d <- ggplot(data_plot) +
@@ -68,11 +78,10 @@ Criteria <- R6::R6Class(
         geom_line() + geom_point() + theme_bw() + 
         labs(x = xlab, y = "criterion's value",  title = title)
       
-      if (log.scale & (xvar == "lambda")) {
+      if (log_scale & (xvar == "lambda")) {
         d <- d + scale_x_log10()
       }
-      print(d)
-      return(invisible(d))
+      d
     }
   )
 )  

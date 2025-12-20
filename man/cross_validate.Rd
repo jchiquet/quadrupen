@@ -85,9 +85,11 @@ n <- 100
 x <- as.matrix(matrix(rnorm(95*n),n,95) \%*\% chol(Sigma))
 y <- 10 + x \%*\% beta + rnorm(n,0,10)
 
+enet <- elastic.net(x, y, nlambda1=50)
+
 ## Use fewer lambda1 values by overwritting the default parameters
 ## and cross-validate over the sequences lambda1 and lambda2
-cv.grid <- crossval(x,y, lambda2=10^seq(2,-2,len=50), nlambda1=50)
+cv.grid <- cross_validate(enet, lambda2=10^seq(2,-2,len=50))
 ## Rerun simple cross-validation with the appropriate lambda2
 cv.10K <- crossval(x,y, lambda2=cv.grid$lambda2_min)
 ## Try leave one out also

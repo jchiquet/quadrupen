@@ -4,17 +4,33 @@
 \alias{Criteria}
 \title{Class Criteria}
 \description{
-Class of object returned by a call to the \code{$criteria()} method.
+Class Criteria
+
+Class Criteria
 }
 \details{
-\@param lambda vector of \eqn{\lambda_1}{lambda}
+Class of object returned by the [`QuadrupenFit$criteria()`] method or the
+[`criteria()`] function.  Owns [print()] and [plot()] methods.
+}
+\section{Active bindings}{
+\if{html}{\out{<div class="r6-active-bindings">}}
+\describe{
+\item{\code{data}}{a data frame containing the values of various information
+criteria (AIC, BIC, lmBIC, eBIC, GCV) along the value of \code{lambda1}.}
+
+\item{\code{lambda}}{vector of \eqn{\lambda_1}{lambda}
 (\eqn{\ell_1}{l1} or \eqn{\ell_\infty}{infinity} penalty levels)
-for which each cross-validation has been performed.
+for which each cross-validation has been performed.}
+
+\item{\code{names}}{a vector of characters storing the names of the precomputed criteria}
+}
+\if{html}{\out{</div>}}
 }
 \section{Methods}{
 \subsection{Public methods}{
 \itemize{
 \item \href{#method-CrossValidation-new}{\code{Criteria$new()}}
+\item \href{#method-CrossValidation-show}{\code{Criteria$show()}}
 \item \href{#method-CrossValidation-plot}{\code{Criteria$plot()}}
 \item \href{#method-CrossValidation-clone}{\code{Criteria$clone()}}
 }
@@ -23,8 +39,27 @@ for which each cross-validation has been performed.
 \if{html}{\out{<a id="method-CrossValidation-new"></a>}}
 \if{latex}{\out{\hypertarget{method-CrossValidation-new}{}}}
 \subsection{Method \code{new()}}{
+Constructor for a [`Criteria`] object
+Should be called internally by an object [`QuadrupenFit$criteria()`]
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{Criteria$new(value)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{value}}{data frame storing output of [`QuadrupenFit$criteria()`]}
+}
+\if{html}{\out{</div>}}
+}
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-CrossValidation-show"></a>}}
+\if{latex}{\out{\hypertarget{method-CrossValidation-show}{}}}
+\subsection{Method \code{show()}}{
+User friendly print method
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{Criteria$show()}\if{html}{\out{</div>}}
 }
 
 }
@@ -32,9 +67,11 @@ for which each cross-validation has been performed.
 \if{html}{\out{<a id="method-CrossValidation-plot"></a>}}
 \if{latex}{\out{\hypertarget{method-CrossValidation-plot}{}}}
 \subsection{Method \code{plot()}}{
+Plot the the desired criteria
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{Criteria$plot(
-  log.scale = TRUE,
+  log_scale = TRUE,
+  criteria = self$names,
   xvar = c("lambda", "fraction", "df"),
   title = "Information Criteria"
 )}\if{html}{\out{</div>}}
@@ -43,26 +80,24 @@ for which each cross-validation has been performed.
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{log.scale}}{logical; indicates if a log-scale should be used
-when \code{xvar="lambda"}. Default is \code{TRUE}.}
+\item{\code{log_scale}}{logical; indicates if a log-scale should be used
+when `xvar="lambda"`. Default is `TRUE`.}
 
-\item{\code{xvar}}{variable to plot on the X-axis: either \code{"df"}
-(the estimated degrees of freedom), \code{"lambda"}
-(\eqn{\lambda_1}{lambda1} penalty level) or \code{"fraction"}
+\item{\code{criteria}}{a vector of character with the criteria to plot. 
+The default plot all the criteria available (stored in the field `names`)}
+
+\item{\code{xvar}}{variable to plot on the X-axis: either `"df"`
+(the estimated degrees of freedom), `"lambda"`
+(\eqn{\lambda_1}{lambda1} penalty level) or `"fraction"`
 (\eqn{\ell_1}{l1}-norm of the coefficients). Default is set to
-\code{"lambda"}.}
+`"lambda"`.}
 
-\item{\code{plot}}{logical; indicates if the graph should be plotted on
-call. Default is \code{TRUE}.}
+\item{\code{title}}{graph title}
 }
 \if{html}{\out{</div>}}
 }
 \subsection{Returns}{
-When \code{plot} is set to \code{TRUE}, an invisible
-\pkg{ggplot2} object is returned, which can be plotted via the
-\code{print} method. On the other hand, a list with a two data
-frames containing the criteria and the chosen vector of parameters
-are returned.
+a \pkg{ggplot2} object
 }
 }
 \if{html}{\out{<hr>}}

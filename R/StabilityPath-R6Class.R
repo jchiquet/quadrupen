@@ -1,27 +1,33 @@
-#' Class "StabilityPath"
+#' Class StabilityPath
 #'
-#' Class of object returned by the \code{stability} function, with
-#' methods \code{print}, \code{show} and \code{plot}.
+#' Class of object returned by the [`QuadrupenFit$cross_validate()`] method or the
+#' [`cross_validate()`] function. Owns [print()] and [plot()] methods.
 #'
-#' @param probabilities a \code{Matrix} object containing the
-#' estimated probabilities of selection along the path of solutions.
-#' @param regParam a lsit with the levels of the regularizing parameters used
-#' @param subsamples a list that contains the folds used for each subsample.
-#' 
 #' @export
 StabilityPath <- R6::R6Class(
   classname = "StabilityPath",
   public = list(
+    #' @field probabilities a `Matrix` object containing the
+    #' estimated probabilities of selection along the path of solutions.
     probabilities = NA, 
+    #' @field regParam a lsit with the levels of the regularizing parameters used
     regParam      = NA, 
+    #' @field subsamples a list that contains the folds used for each subsample.
     subsamples    = NA, 
     ## model-related fields
+    #' @description Constructor for a [`Stability_path`] object
+    #' Should be called internally by an object [`QuadrupenFit$stability()`]
+    #' @param probabilities a `Matrix` object containing the
+    #' estimated probabilities of selection along the path of solutions.
+    #' @param regParam a lsit with the levels of the regularizing parameters used
+    #' @param subsamples a list that contains the folds used for each subsample.
     initialize = 
       function(probabilities, regParam, subsamples) {
         self$probabilities <- probabilities
         self$regParam      <- regParam
         self$subsamples    <- subsamples
       },
+    #' @description User friendly print method
     show = function() {
       cat("Stability path with", length(subsamples), "resamplings.\n")
       cat("- penalty parameter lambda1:", length(self$regParam[[1]]), "points from",
@@ -35,39 +41,39 @@ StabilityPath <- R6::R6Class(
     #' @description Produce a plot of the stability path obtained by stability
     #' selection.
     #'
-    #' @param main main title. If none given, a somewhat appropriate
+    #' @param title title title. If none given, a somewhat appropriate
     #' title is automatically generated.
-    #' @param xvar variable to plot on the X-axis: either \code{"lambda"}
-    #' (first penalty level) or \code{"fraction"} (fraction of the
+    #' @param xvar variable to plot on the X-axis: either `"lambda"`
+    #' (first penalty level) or `"fraction"` (fraction of the
     #' penalty level applied tune by \eqn{\lambda_1}{lambda1}). Default
-    #' is \code{"lambda"}.
-    #' @param log.scale logical; indicates if a log-scale should be used
-    #' when \code{xvar="lambda"}. Default is \code{TRUE}.
+    #' is `"lambda"`.
+    #' @param log_scale logical; indicates if a log-scale should be used
+    #' when \code{xvar="lambda"}. Default is `TRUE`.
     #' @param plot logical; indicates if the graph should be
-    #' plotted. Default is \code{TRUE}. If \code{FALSE}, only the
+    #' plotted. Default is `TRUE`. If `FALSE`, only the
     #' \pkg{ggplot2} object is sent back.
-    #' @param sel.mode a character string, either \code{'rank'} or
-    #' \code{'PFER'}. In the first case, the selection is based on the
+    #' @param sel_mode a character string, either `"rank"` or
+    #' `"PFER"`. In the first case, the selection is based on the
     #' rank of total probabilties by variables along the path: the first
     #' \code{nvar} variables are selected (see below). In the second
     #' case, the PFER control is used as described in Meinshausen and
-    #' Buhlmannn's paper. Default is \code{'rank'}.
+    #' Buhlmannn's paper. Default is `"rank"`.
     #' @param nvar number of variables selected (only relevant when
-    #' \code{sel.mode} equals \code{'rank'}. Default is \code{floor(n/log(p))}.
+    #' `sel_mode` equals `"rank"`. Default is `floor(n/log(p))`.
     #' @param cutoff value of the cutoff probability (only relevant when
-    #' \code{sel.mode} equals \code{'PFER'}).
+    #' `sel_mode` equals `"PFER"`).
     #' @param PFER value of the per-family error rate to control (only
-    #' relevant when \code{sel.mode} equals \code{'PFER'}).
+    #' relevant when `sel_mode` equals `"PFER"`).
     #' @param labels an optional vector of labels for each variable in
     #' the path (e.g., 'relevant'/'irrelevant'). See examples.
     #' @param annot logical; should annotation be made on the graph
-    #' regarding controlled PFER (only relevant when \code{sel.mode}
-    #' equals \code{'PFER'})? Default is \code{TRUE}.
+    #' regarding controlled PFER (only relevant when `sel_mode`
+    #' equals `"PFER"`)? Default is `TRUE`.
     #' @param ... used for S4 compatibility.
     #' @return a list with a \pkg{ggplot2} object which can be plotted
     #' via the \code{print} method, and a vector of selected variables
-    #' corresponding to method of choice (\code{'rank'} or
-    #' \code{'PFER'}).
+    #' corresponding to method of choice (`"rank"` or
+    #' `"PFER"`).
     #'
     #' @examples \dontrun{
     #' ## Simulating multivariate Gaussian with blockwise correlation
@@ -91,19 +97,19 @@ StabilityPath <- R6::R6Class(
     #' 
     #' ## Build the plot an recover the selected variable
     #' plot(stab, labels=labels)
-    #' plot(stab, xvar="fraction", labels=labels, sel.mode="PFER", cutoff=0.75, PFER=2)
+    #' plot(stab, xvar="fraction", labels=labels, sel_mode="PFER", cutoff=0.75, PFER=2)
     #' }
     #' @importFrom graphics plot
     #' @import ggplot2 scales grid
     #' 
-    plot = function(xvar = "lambda", annot=TRUE,
-      main = "Stability path",
-      log.scale = TRUE,  labels = rep("unknown status",p), plot = TRUE,
-      sel.mode = c("rank", "PFER"), cutoff=0.75, PFER=2, nvar=floor(n/log(p))) {
+    plot = function(
+      xvar = "lambda", log_scale = TRUE, title = "Stability path",
+      annot = TRUE, labels = rep("unknown status",p), 
+      sel_mode = c("rank", "PFER"), cutoff=0.75, PFER=2, nvar=floor(n/log(p))) {
       
       p <- ncol(self$probabilities)
       n <- max(unlist(self$subsamples))
-      sel.mode <- match.arg(sel.mode)
+      sel_mode <- match.arg(sel_mode)
       nzeros <- which(colSums(self$probabilities) != 0)
     
       stopifnot("Not available when length(lambda1) == 1" = (length(self$regParam[[1]]) > 1))
@@ -116,7 +122,7 @@ StabilityPath <- R6::R6Class(
       rownames(prob) <- NULL
       
       selection <- rep("unselected",ncol(prob))
-      if (sel.mode == "PFER") {
+      if (sel_mode == "PFER") {
         ## estimate the average number of selected variables on the current path
         ## and pick the one controlling the PFER at the desired level
         q    <- rowSums(prob >= cutoff)
@@ -153,8 +159,8 @@ StabilityPath <- R6::R6Class(
         geom_line(aes(x=.data$xvar,y=.data$prob)) +
         labs(x=switch(xvar,
                       "fraction" = expression(lambda[1]/max[lambda[1]]),
-                      ifelse(log.scale,expression(log[10](lambda[1])),expression(lambda[1]))),
-             y="selection probabilities") + ggtitle(main) + theme_bw()
+                      ifelse(log_scale,expression(log[10](lambda[1])),expression(lambda[1]))),
+             y="selection probabilities") + ggtitle(title) + theme_bw()
       d <- d + scale_x_reverse()
       if (is.null(labels)) {
         d <- d + theme(legend.position="none")
@@ -165,7 +171,7 @@ StabilityPath <- R6::R6Class(
       }
       
       ## Manage the annotation for the selected variables (PFER mode)
-      if (annot & sel.mode == "PFER") {
+      if (annot & sel_mode == "PFER") {
         d <- d + annotate("rect", xmin=xv[1], xmax=xv[iq], ymin=cutoff, ymax=1, alpha=0.15)
         d <- d + annotate("text", x=c(xv[length(xv)],xv[1],xv[iq]), y=c(cutoff,1,0), hjust=c(0,0,0.25), vjust=c(0,1.1,1.1),
                           label=c(paste("pi[thr]"),paste("PFER <=",PFER),paste("hat(q)==",round(q[iq],2))),
@@ -173,9 +179,7 @@ StabilityPath <- R6::R6Class(
         d <- d + geom_hline(yintercept=cutoff, linetype="dashed", alpha=0.35, linewidth=.5)
         d <- d + geom_vline(xintercept=xv[iq], linetype="dashed", alpha=0.35, linewidth=.5)
       }
-      
-      if (plot) {print(d)}
-      invisible(list(ggplot.object=d, selected=nzeros[selection == "selected"]))
+      d
     }
   )
 )

@@ -2,15 +2,15 @@
 % Please edit documentation in R/StabilityPath-R6Class.R
 \name{StabilityPath}
 \alias{StabilityPath}
-\title{Class "StabilityPath"}
+\title{Class StabilityPath}
 \description{
-Class "StabilityPath"
+Class StabilityPath
 
-Class "StabilityPath"
+Class StabilityPath
 }
 \details{
-Class of object returned by the \code{stability} function, with
-methods \code{print}, \code{show} and \code{plot}.
+Class of object returned by the [`QuadrupenFit$cross_validate()`] method or the
+[`cross_validate()`] function. Owns [print()] and [plot()] methods.
 }
 \examples{
 
@@ -40,8 +40,20 @@ stab <- stability(x,y, subsamples=200, lambda2=1, min.ratio=1e-2)
 
 ## Build the plot an recover the selected variable
 plot(stab, labels=labels)
-plot(stab, xvar="fraction", labels=labels, sel.mode="PFER", cutoff=0.75, PFER=2)
+plot(stab, xvar="fraction", labels=labels, sel_mode="PFER", cutoff=0.75, PFER=2)
 }
+}
+\section{Public fields}{
+\if{html}{\out{<div class="r6-fields">}}
+\describe{
+\item{\code{probabilities}}{a `Matrix` object containing the
+estimated probabilities of selection along the path of solutions.}
+
+\item{\code{regParam}}{a lsit with the levels of the regularizing parameters used}
+
+\item{\code{subsamples}}{a list that contains the folds used for each subsample.}
+}
+\if{html}{\out{</div>}}
 }
 \section{Methods}{
 \subsection{Public methods}{
@@ -56,6 +68,8 @@ plot(stab, xvar="fraction", labels=labels, sel.mode="PFER", cutoff=0.75, PFER=2)
 \if{html}{\out{<a id="method-StabilityPath-new"></a>}}
 \if{latex}{\out{\hypertarget{method-StabilityPath-new}{}}}
 \subsection{Method \code{new()}}{
+Constructor for a [`Stability_path`] object
+Should be called internally by an object [`QuadrupenFit$stability()`]
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{StabilityPath$new(probabilities, regParam, subsamples)}\if{html}{\out{</div>}}
 }
@@ -63,7 +77,7 @@ plot(stab, xvar="fraction", labels=labels, sel.mode="PFER", cutoff=0.75, PFER=2)
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{probabilities}}{a \code{Matrix} object containing the
+\item{\code{probabilities}}{a `Matrix` object containing the
 estimated probabilities of selection along the path of solutions.}
 
 \item{\code{regParam}}{a lsit with the levels of the regularizing parameters used}
@@ -77,6 +91,7 @@ estimated probabilities of selection along the path of solutions.}
 \if{html}{\out{<a id="method-StabilityPath-show"></a>}}
 \if{latex}{\out{\hypertarget{method-StabilityPath-show}{}}}
 \subsection{Method \code{show()}}{
+User friendly print method
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{StabilityPath$show()}\if{html}{\out{</div>}}
 }
@@ -91,12 +106,11 @@ selection.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{StabilityPath$plot(
   xvar = "lambda",
+  log_scale = TRUE,
+  title = "Stability path",
   annot = TRUE,
-  main = "Stability path",
-  log.scale = TRUE,
   labels = rep("unknown status", p),
-  plot = TRUE,
-  sel.mode = c("rank", "PFER"),
+  sel_mode = c("rank", "PFER"),
   cutoff = 0.75,
   PFER = 2,
   nvar = floor(n/log(p))
@@ -106,43 +120,43 @@ selection.
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{xvar}}{variable to plot on the X-axis: either \code{"lambda"}
-(first penalty level) or \code{"fraction"} (fraction of the
+\item{\code{xvar}}{variable to plot on the X-axis: either `"lambda"`
+(first penalty level) or `"fraction"` (fraction of the
 penalty level applied tune by \eqn{\lambda_1}{lambda1}). Default
-is \code{"lambda"}.}
+is `"lambda"`.}
 
-\item{\code{annot}}{logical; should annotation be made on the graph
-regarding controlled PFER (only relevant when \code{sel.mode}
-equals \code{'PFER'})? Default is \code{TRUE}.}
+\item{\code{log_scale}}{logical; indicates if a log-scale should be used
+when \code{xvar="lambda"}. Default is `TRUE`.}
 
-\item{\code{main}}{main title. If none given, a somewhat appropriate
+\item{\code{title}}{title title. If none given, a somewhat appropriate
 title is automatically generated.}
 
-\item{\code{log.scale}}{logical; indicates if a log-scale should be used
-when \code{xvar="lambda"}. Default is \code{TRUE}.}
+\item{\code{annot}}{logical; should annotation be made on the graph
+regarding controlled PFER (only relevant when `sel_mode`
+equals `"PFER"`)? Default is `TRUE`.}
 
 \item{\code{labels}}{an optional vector of labels for each variable in
 the path (e.g., 'relevant'/'irrelevant'). See examples.}
 
-\item{\code{plot}}{logical; indicates if the graph should be
-plotted. Default is \code{TRUE}. If \code{FALSE}, only the
-\pkg{ggplot2} object is sent back.}
-
-\item{\code{sel.mode}}{a character string, either \code{'rank'} or
-\code{'PFER'}. In the first case, the selection is based on the
+\item{\code{sel_mode}}{a character string, either `"rank"` or
+`"PFER"`. In the first case, the selection is based on the
 rank of total probabilties by variables along the path: the first
 \code{nvar} variables are selected (see below). In the second
 case, the PFER control is used as described in Meinshausen and
-Buhlmannn's paper. Default is \code{'rank'}.}
+Buhlmannn's paper. Default is `"rank"`.}
 
 \item{\code{cutoff}}{value of the cutoff probability (only relevant when
-\code{sel.mode} equals \code{'PFER'}).}
+`sel_mode` equals `"PFER"`).}
 
 \item{\code{PFER}}{value of the per-family error rate to control (only
-relevant when \code{sel.mode} equals \code{'PFER'}).}
+relevant when `sel_mode` equals `"PFER"`).}
 
 \item{\code{nvar}}{number of variables selected (only relevant when
-\code{sel.mode} equals \code{'rank'}. Default is \code{floor(n/log(p))}.}
+`sel_mode` equals `"rank"`. Default is `floor(n/log(p))`.}
+
+\item{\code{plot}}{logical; indicates if the graph should be
+plotted. Default is `TRUE`. If `FALSE`, only the
+\pkg{ggplot2} object is sent back.}
 
 \item{\code{...}}{used for S4 compatibility.}
 }
@@ -151,8 +165,8 @@ relevant when \code{sel.mode} equals \code{'PFER'}).}
 \subsection{Returns}{
 a list with a \pkg{ggplot2} object which can be plotted
 via the \code{print} method, and a vector of selected variables
-corresponding to method of choice (\code{'rank'} or
-\code{'PFER'}).
+corresponding to method of choice (`"rank"` or
+`"PFER"`).
 }
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}
@@ -178,7 +192,7 @@ stab <- stability(x,y, subsamples=200, lambda2=1, min.ratio=1e-2)
 
 ## Build the plot an recover the selected variable
 plot(stab, labels=labels)
-plot(stab, xvar="fraction", labels=labels, sel.mode="PFER", cutoff=0.75, PFER=2)
+plot(stab, xvar="fraction", labels=labels, sel_mode="PFER", cutoff=0.75, PFER=2)
 }
 }
 \if{html}{\out{</div>}}
