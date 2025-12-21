@@ -31,6 +31,7 @@ for which each cross-validation has been performed.}
 \itemize{
 \item \href{#method-CrossValidation-new}{\code{Criteria$new()}}
 \item \href{#method-CrossValidation-show}{\code{Criteria$show()}}
+\item \href{#method-CrossValidation-print}{\code{Criteria$print()}}
 \item \href{#method-CrossValidation-plot}{\code{Criteria$plot()}}
 \item \href{#method-CrossValidation-clone}{\code{Criteria$clone()}}
 }
@@ -60,6 +61,16 @@ Should be called internally by an object [`QuadrupenFit$criteria()`]
 User friendly print method
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{Criteria$show()}\if{html}{\out{</div>}}
+}
+
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-CrossValidation-print"></a>}}
+\if{latex}{\out{\hypertarget{method-CrossValidation-print}{}}}
+\subsection{Method \code{print()}}{
+User friendly print method
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{Criteria$print()}\if{html}{\out{</div>}}
 }
 
 }

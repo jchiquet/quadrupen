@@ -63,7 +63,12 @@ QuadrupenFit <- R6::R6Class(
       else private$tuning[[2]] <- value
     },
     #' @field optim_monitoring list monitoring the optimization
-    optim_monitoring = function(value) {private$monitoring},
+    optim_monitoring = function(value) {
+      if (!is.null(private$monitoring$convergence))
+        private$monitoring$convergence <- 
+          sapply(private$monitoring$convergence, status_to_message)
+      private$monitoring
+    },
     #' @field optim_config list with low level options used for optimization.
     optim_config = function(value) {private$control},
     #' @field fitted Matrix of fitted values, each column corresponding to a value of \code{lambda1}.
@@ -75,7 +80,11 @@ QuadrupenFit <- R6::R6Class(
     #' @field coefficients Matrix (class `"dgCMatrix"`) of
     #' coefficients with respect to the original input. The number of
     #' rows corresponds the length of \code{lambda1}.
-    coefficients         = function(value) {private$beta},
+    coefficients         = function(value) {
+      dimnames(private$beta) <- 
+        list(round(c(private$tuning[[1]]),3), colnames(private$data$X))
+      private$beta
+    },
     #' @field interceptTerm A vector containing the successive values of the 
     #' (unpenalized) intercept.
     #' Equals to zero if \code{intercept} has been set to `FALSE`.
@@ -134,15 +143,35 @@ QuadrupenFit <- R6::R6Class(
         cat("- number of coefficients:", self$ncoef,"(no intercept)\n")
       }
       
-      cat("- regularization parameter ",names(self$major_tuning), ": ",
+      cat("- regularization parameter ", names(self$major_tuning), ": ",
           length(self$major_penalty), " points from ",
           format(max(self$major_tuning), digits = 3)," to ",
           format(min(self$major_tuning), digits = 3),"\n", sep="")
-      cat("- penalty parameter ",names(self$minor_tuning),": ", self$minor_tuning, "\n", sep="")
+      if (!is.null(self$minor_tuning))
+        cat("- penalty parameter ",names(self$minor_tuning),": ", self$minor_tuning, "\n", sep="")
       invisible(self)
     },
     #' @description User friendly print method
     print = function() { self$show() },
+    #' @description function performing the optimization
+    #' @param control list contrlling the optimization process
+    fit = function(control) {
+      ## ======================================================
+      ## C++ CALL OPTIMIZER
+      ## 
+      if (control$timer) {cpp.start <- proc.time()}
+      out <- private$optimizer(private$data, private$tuning, control)
+      timer <- ifelse(control$timer, (proc.time() - cpp.start)[3], NA) 
+      ## END OF CALL
+      ## ======================================================
+      private$tuning      <- out$tuning_param
+      private$mu          <- drop(out$mu)
+      private$beta        <- out$beta
+      private$df          <- drop(out$df)
+      private$monitoring  <- out$monitoring
+      private$monitoring$timer <- timer
+      private$control     <- control
+    },
     #' @description Model extraction
     #' @param selection either a character (model selection criteria) of a scalar (lambda value)
     #' @param type character for the desired output

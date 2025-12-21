@@ -3,10 +3,6 @@
  *         julien.chiquet@inrae.fr
  */
 
-#include "RcppArmadillo.h"
-
-// [[Rcpp::depends(RcppArmadillo)]]
-
 #include "quadrupen_headers.h"
 
 using namespace Rcpp;
@@ -33,8 +29,8 @@ Rcpp::List bounded_reg_cpp(
   const arma::vec& weights  = dataModel["wy"]     ; // observation weights (not use at the moment)
   const bool sparse         = dataModel["sparse_encoding"] ; // boolean for sparse mode
 
-  arma::vec lambda_linf      = tuningParam["lambda_linf"] ; // vector of LInf penalties
-  const double lambda_l2     = tuningParam["lambda_l2"]   ; // scalar for the amount L2 penalty
+  arma::vec lambda_linf      = tuningParam["linf"] ; // vector of LInf penalties
+  const double lambda_l2     = tuningParam["l2"]   ; // scalar for the amount L2 penalty
   
   // double eps           = control["threshold"] ; // precision required
   const double eps           = control["threshold"] ; // precision required
@@ -218,7 +214,10 @@ Rcpp::List bounded_reg_cpp(
   // END OF THE LOOP OVER LAMBDA
   
   return List::create(
-    Named("tuning_lead") = lambda_linf ,
+    Named("tuning_param") = List::create(
+      Named("l1") = lambda_linf,
+      Named("l2") = lambda_l2 
+    ),
     Named("beta")        = strans(coef),
     Named("active")      = sp_mat(join_cols(iB, jB), vec(iB.n_elem, fill::ones), lambda_linf.n_elem, p),
     Named("mu")          = ybar - mu   ,

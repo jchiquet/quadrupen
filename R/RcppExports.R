@@ -9,11 +9,7 @@ elastic_net_cpp <- function(dataModel, tuningParam, control) {
     .Call(`_quadrupen_elastic_net_cpp`, dataModel, tuningParam, control)
 }
 
-ridge_cpp <- function(dataModel, tuningParam, VERBOSE) {
-    .Call(`_quadrupen_ridge_cpp`, dataModel, tuningParam, VERBOSE)
-}
-
-ridge_old_cpp <- function(X, Y, C, LAMBDA, NLAMBDA, LAMBDAMIN, LAMBDAMAX, INTERCEPT, NORMALIZE, WEIGHTS, VERBOSE) {
-    .Call(`_quadrupen_ridge_old_cpp`, X, Y, C, LAMBDA, NLAMBDA, LAMBDAMIN, LAMBDAMAX, INTERCEPT, NORMALIZE, WEIGHTS, VERBOSE)
+ridge_cpp <- function(dataModel, tuningParam, control) {
+    .Call(`_quadrupen_ridge_cpp`, dataModel, tuningParam, control)
 }
 

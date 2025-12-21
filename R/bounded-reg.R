@@ -197,7 +197,7 @@ bounded.reg <- function(x,
   myModel <- BoundedReg$new(
     data      = myData,
     intercept = intercept,
-    regParam  = list(lambda_linf = lambda_linf, lambda_l2 = lambda2)
+    regParam  = list(linf = lambda_linf, l2 = lambda2)
   )
 
   ## ============================================

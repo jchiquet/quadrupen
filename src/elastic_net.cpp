@@ -4,10 +4,6 @@
  *         MIA Paris-Saclay
  */
 
-#include "RcppArmadillo.h"
-
-// [[Rcpp::depends(RcppArmadillo)]]
-
 #include "quadrupen_headers.h"
 
 using namespace Rcpp;
@@ -34,8 +30,8 @@ Rcpp::List elastic_net_cpp(
   const double normy        = dataModel["norm_y"] ; // norm of the response
   const bool sparse         = dataModel["sparse_encoding"] ; // boolean for sparse mode
   
-  arma::vec lambda_l1       = tuningParam["lambda_l1"]   ; // vector of L1 penalties
-  const double lambda_l2    = tuningParam["lambda_l2"]   ; // scalar for the amount L2 penalty
+  arma::vec lambda_l1       = tuningParam["l1"]   ; // vector of L1 penalties
+  const double lambda_l2    = tuningParam["l2"]   ; // scalar for the amount L2 penalty
 
   const vec beta0            = control["beta0"]     ; // initial vector of coefficients
   const double eps           = control["threshold"] ; // precision required
@@ -277,7 +273,10 @@ Rcpp::List elastic_net_cpp(
   if (monitor > 0) D_star = J_hat - J_star;
   
   return List::create(
-    Named("tuning_lead") = lambda_l1 ,
+    Named("tuning_param") = List::create(
+      Named("l1") = lambda_l1,
+      Named("l2") = lambda_l2 
+    ),
     Named("beta")        = sp_mat(join_cols(iA, jA), nonzeros, lambda_l1.n_elem, p),
     Named("active")      = sp_mat(join_cols(iA, jA), vec(iA.n_elem, fill::ones), lambda_l1.n_elem, p),
     Named("mu")          = ybar - mu,

@@ -60,6 +60,7 @@ estimated probabilities of selection along the path of solutions.}
 \itemize{
 \item \href{#method-StabilityPath-new}{\code{StabilityPath$new()}}
 \item \href{#method-StabilityPath-show}{\code{StabilityPath$show()}}
+\item \href{#method-StabilityPath-print}{\code{StabilityPath$print()}}
 \item \href{#method-StabilityPath-plot}{\code{StabilityPath$plot()}}
 \item \href{#method-StabilityPath-clone}{\code{StabilityPath$clone()}}
 }
@@ -94,6 +95,16 @@ estimated probabilities of selection along the path of solutions.}
 User friendly print method
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{StabilityPath$show()}\if{html}{\out{</div>}}
+}
+
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-StabilityPath-print"></a>}}
+\if{latex}{\out{\hypertarget{method-StabilityPath-print}{}}}
+\subsection{Method \code{print()}}{
+User friendly print method
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{StabilityPath$print()}\if{html}{\out{</div>}}
 }
 
 }

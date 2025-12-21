@@ -128,7 +128,7 @@ ridge <- function(x,
 
   ## ============================================
   ## INSTANTIATE THE PENALTY MODEL
-  myModel <- Ridge$new(myData, intercept, list(lambda_l2 = lambda_l2))
+  myModel <- Ridge$new(myData, intercept, list(l2 = lambda_l2, l1 = 0))
   
   ## ============================================
   ## RECOVER LOW LEVEL OPTIONS

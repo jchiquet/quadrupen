@@ -38,36 +38,15 @@ BEGIN_RCPP
 END_RCPP
 }
 // ridge_cpp
-Rcpp::List ridge_cpp(const Environment& dataModel, const List& tuningParam, const arma::uword& VERBOSE);
-RcppExport SEXP _quadrupen_ridge_cpp(SEXP dataModelSEXP, SEXP tuningParamSEXP, SEXP VERBOSESEXP) {
+Rcpp::List ridge_cpp(const Environment& dataModel, const List& tuningParam, const List& control);
+RcppExport SEXP _quadrupen_ridge_cpp(SEXP dataModelSEXP, SEXP tuningParamSEXP, SEXP controlSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< const Environment& >::type dataModel(dataModelSEXP);
     Rcpp::traits::input_parameter< const List& >::type tuningParam(tuningParamSEXP);
-    Rcpp::traits::input_parameter< const arma::uword& >::type VERBOSE(VERBOSESEXP);
-    rcpp_result_gen = Rcpp::wrap(ridge_cpp(dataModel, tuningParam, VERBOSE));
-    return rcpp_result_gen;
-END_RCPP
-}
-// ridge_old_cpp
-Rcpp::List ridge_old_cpp(const arma::mat& X, const arma::vec& Y, const arma::mat& C, SEXP LAMBDA, const arma::uword& NLAMBDA, const double& LAMBDAMIN, const double& LAMBDAMAX, const bool& INTERCEPT, const bool& NORMALIZE, const arma::vec& WEIGHTS, const arma::uword& VERBOSE);
-RcppExport SEXP _quadrupen_ridge_old_cpp(SEXP XSEXP, SEXP YSEXP, SEXP CSEXP, SEXP LAMBDASEXP, SEXP NLAMBDASEXP, SEXP LAMBDAMINSEXP, SEXP LAMBDAMAXSEXP, SEXP INTERCEPTSEXP, SEXP NORMALIZESEXP, SEXP WEIGHTSSEXP, SEXP VERBOSESEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< const arma::mat& >::type X(XSEXP);
-    Rcpp::traits::input_parameter< const arma::vec& >::type Y(YSEXP);
-    Rcpp::traits::input_parameter< const arma::mat& >::type C(CSEXP);
-    Rcpp::traits::input_parameter< SEXP >::type LAMBDA(LAMBDASEXP);
-    Rcpp::traits::input_parameter< const arma::uword& >::type NLAMBDA(NLAMBDASEXP);
-    Rcpp::traits::input_parameter< const double& >::type LAMBDAMIN(LAMBDAMINSEXP);
-    Rcpp::traits::input_parameter< const double& >::type LAMBDAMAX(LAMBDAMAXSEXP);
-    Rcpp::traits::input_parameter< const bool& >::type INTERCEPT(INTERCEPTSEXP);
-    Rcpp::traits::input_parameter< const bool& >::type NORMALIZE(NORMALIZESEXP);
-    Rcpp::traits::input_parameter< const arma::vec& >::type WEIGHTS(WEIGHTSSEXP);
-    Rcpp::traits::input_parameter< const arma::uword& >::type VERBOSE(VERBOSESEXP);
-    rcpp_result_gen = Rcpp::wrap(ridge_old_cpp(X, Y, C, LAMBDA, NLAMBDA, LAMBDAMIN, LAMBDAMAX, INTERCEPT, NORMALIZE, WEIGHTS, VERBOSE));
+    Rcpp::traits::input_parameter< const List& >::type control(controlSEXP);
+    rcpp_result_gen = Rcpp::wrap(ridge_cpp(dataModel, tuningParam, control));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -76,7 +55,6 @@ static const R_CallMethodDef CallEntries[] = {
     {"_quadrupen_bounded_reg_cpp", (DL_FUNC) &_quadrupen_bounded_reg_cpp, 3},
     {"_quadrupen_elastic_net_cpp", (DL_FUNC) &_quadrupen_elastic_net_cpp, 3},
     {"_quadrupen_ridge_cpp", (DL_FUNC) &_quadrupen_ridge_cpp, 3},
-    {"_quadrupen_ridge_old_cpp", (DL_FUNC) &_quadrupen_ridge_old_cpp, 11},
     {NULL, NULL, 0}
 };
 

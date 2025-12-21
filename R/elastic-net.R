@@ -192,7 +192,7 @@ elastic.net <- function(x,
   myModel <- ElasticNet$new(
     data      = myData,
     intercept = intercept,
-    regParam  = list(lambda_l1 = lambda1, lambda_l2 = lambda2)
+    regParam  = list(l1 = lambda1, l2 = lambda2)
   )
   
   ## ============================================

@@ -50,6 +50,7 @@ minimum (only relevant for ridge regression).}
 \itemize{
 \item \href{#method-CrossValidation-new}{\code{CrossValidation$new()}}
 \item \href{#method-CrossValidation-show}{\code{CrossValidation$show()}}
+\item \href{#method-CrossValidation-print}{\code{CrossValidation$print()}}
 \item \href{#method-CrossValidation-plotCV_1D}{\code{CrossValidation$plotCV_1D()}}
 \item \href{#method-CrossValidation-plotCV_2D}{\code{CrossValidation$plotCV_2D()}}
 \item \href{#method-CrossValidation-plot}{\code{CrossValidation$plot()}}
@@ -83,6 +84,16 @@ Should be called internally by an object [`QuadrupenFit$cross_validate()`]
 User friendly print method
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{CrossValidation$show()}\if{html}{\out{</div>}}
+}
+
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-CrossValidation-print"></a>}}
+\if{latex}{\out{\hypertarget{method-CrossValidation-print}{}}}
+\subsection{Method \code{print()}}{
+User friendly print method
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{CrossValidation$print()}\if{html}{\out{</div>}}
 }
 
 }
