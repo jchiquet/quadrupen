@@ -500,9 +500,9 @@ QuadrupenFit <- R6::R6Class(
     #' \eqn{\lambda_2}{lambda2} for ridge regression) or
     #' \code{"fraction"} (\eqn{\ell_1}{l1}-norm
     #' of the coefficients). Default is set to \code{"lambda"}.
-    #' @param main the main title. Default is set to the model name followed
+    #' @param title the title title. Default is set to the model name followed
     #' by what is on the Y-axis.
-    #' @param log.scale logical; indicates if a log-scale should be used
+    #' @param log_scale logical; indicates if a log-scale should be used
     #' when `xvar="lambda"`. Default is `TRUE`.
     #' @param standardize logical; standardize the coefficients before
     #' plotting (with the norm of the predictor). Default is `TRUE`.
@@ -511,11 +511,8 @@ QuadrupenFit <- R6::R6Class(
     #' each variable. Only relevant when the number of predictor is
     #' small. Remind that the intercept does not count. Default is
     #' \code{NULL}.
-    #' @param plot logical; indicates if the graph should be plotted on
-    #' call. Default is \code{TRUE}.
     #'
-    #' @return a \pkg{ggplot2} object which can be plotted via the
-    #' \code{print} method.
+    #' @return a \pkg{ggplot2} object .
     #'
     #' @examples \dontrun{
     #' ## Simulating multivariate Gaussian with blockwise correlation
@@ -531,18 +528,18 @@ QuadrupenFit <- R6::R6Class(
     #' y <- 10 + x %*% beta + rnorm(n,0,10)
     #'
     #' ## Plot the Lasso path
-    #' plot(elastic.net(x,y, lambda2=0), main="Lasso solution path")
+    #' plot(elastic.net(x,y, lambda2=0), title="Lasso solution path")
     #' ## Plot the Elastic-net path
-    #' plot(enet, main = "Elastic-net solution path")
+    #' plot(enet, title = "Elastic-net solution path")
     #' ## Plot the Elastic-net path (fraction on X-axis, unstandardized coefficient)
     #' plot(elastic.net(x,y, lambda2=10), standardize=FALSE, xvar="fraction")
     #' ## Plot the Bounded regression path (fraction on X-axis)
     #' plot(bounded.reg(x,y, lambda2=10), xvar="fraction")
     #' }
     #'
-    plot_path = function(xvar = "lambda",
-                    main = paste(self$penalty," path", sep=""),
-                    log.scale = TRUE, standardize=TRUE, labels = NULL) {
+    plot_path = function(xvar = "lambda", log_scale = TRUE,
+                    title = paste(self$penalty," path", sep=""),
+                    standardize=TRUE, labels = NULL) {
       
       if (length(self$major_tuning) == 1) {
         stop("Not available when the leading vector of tuning parameters boild down to a scalar.")
@@ -578,22 +575,11 @@ QuadrupenFit <- R6::R6Class(
         }
       }
       colnames(data.coef) <- c("xvar","var","coef", "variables")
+      
       d <- ggplot(data.coef,aes(x=xvar,y=coefficients, colour=variables, group=var)) +
         geom_line(aes(x=xvar,y=coef)) +  geom_hline(yintercept=0, alpha=0.5, linetype="dotted") +
-        ylab(ifelse(standardize, "standardized coefficients","coefficients")) + ggtitle(main) +
+        ylab(ifelse(standardize, "standardized coefficients","coefficients")) + ggtitle(title) +
         theme_bw()
-      
-      if (xvar=="lambda") {
-        d <- d + xlab(switch(
-          self$penalty,
-          "ridge" = ifelse(log.scale,expression(log[10](lambda[2])),expression(lambda[2])),
-                    ifelse(log.scale,expression(log[10](lambda[1])),expression(lambda[1]))
-          ))
-        if (log.scale)
-          d <- d + scale_x_log10() + annotation_logticks(sides="b")
-      } else {
-        d <- d + xlab(expression(paste("|",beta[lambda[1]],"|",{}[1]/max[lambda[1]],"|",beta[lambda[1]],"|",{}[1],sep="")))
-      }
       
       if (is.null(labels)) {
         d <- d + theme(legend.position="none") 
@@ -602,9 +588,7 @@ QuadrupenFit <- R6::R6Class(
           d <- d + theme(legend.position="none")
         }
       }
-      print(d)
-      
-      invisible(d)
+      d
     }
   )
 )
