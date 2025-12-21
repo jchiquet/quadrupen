@@ -215,8 +215,8 @@ Rcpp::List bounded_reg_cpp(
   
   return List::create(
     Named("tuning_param") = List::create(
-      Named("l1") = lambda_linf,
-      Named("l2") = lambda_l2 
+      Named("linf") = lambda_linf,
+      Named("l2")   = lambda_l2 
     ),
     Named("beta")        = strans(coef),
     Named("active")      = sp_mat(join_cols(iB, jB), vec(iB.n_elem, fill::ones), lambda_linf.n_elem, p),
@@ -224,11 +224,11 @@ Rcpp::List bounded_reg_cpp(
     Named("df")          = df          ,
     Named("monitoring")  = 
       List::create(
-        Named("it.active")      = it_active,
-        Named("it.optim")       = it_optim ,
-        Named("max.grd")        = max_grd  ,
-        Named("converge")       = converge ,
-        Named("pensteps.timer") = timing 
+        Named("it_active")      = it_active,
+        Named("it_optim")       = it_optim ,
+        Named("max_grd")        = max_grd  ,
+        Named("convergence")    = converge ,
+        Named("pensteps_timer") = timing 
     )
   );
 }

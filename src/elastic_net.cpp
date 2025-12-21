@@ -283,13 +283,13 @@ Rcpp::List elastic_net_cpp(
     Named("df")          = df       ,
     Named("monitoring")  = 
       List::create(
-        Named("it.active")      = it_active,
-        Named("it.optim")       = it_optim ,
-        Named("max.grd")        = max_grd  ,
-        Named("converge")       = converge ,
-        Named("pensteps.timer") = timing   , 
-        Named("delta.hat")      = D_hat    ,
-        Named("delta.star")     = D_star   
+        Named("it_active")      = it_active,
+        Named("it_optim")       = it_optim ,
+        Named("max_grd")        = max_grd  ,
+        Named("convergence")    = converge ,
+        Named("pensteps_timer") = timing   , 
+        Named("delta_hat")      = D_hat    ,
+        Named("delta_star")     = D_star   
       )
   );
   

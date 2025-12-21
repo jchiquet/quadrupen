@@ -26,7 +26,6 @@ QuadrupenFit <- R6::R6Class(
     data        = NA,
     beta        = Matrix()  ,
     mu          = numeric() ,
-    activeSet   = Matrix()  ,
     df          = numeric() ,
     tuning      = numeric() ,
     intercept   = NA        ,
@@ -142,13 +141,13 @@ QuadrupenFit <- R6::R6Class(
       } else {
         cat("- number of coefficients:", self$ncoef,"(no intercept)\n")
       }
-      
-      cat("- regularization parameter ", names(self$major_tuning), ": ",
-          length(self$major_penalty), " points from ",
+      cat("- ", names(private$tuning)[[1]], " regularization: ",
+          length(self$major_tuning), " points from ",
           format(max(self$major_tuning), digits = 3)," to ",
-          format(min(self$major_tuning), digits = 3),"\n", sep="")
-      if (!is.null(self$minor_tuning))
-        cat("- penalty parameter ",names(self$minor_tuning),": ", self$minor_tuning, "\n", sep="")
+          format(min(self$major_tuning), digits = 3),"\n", 
+          "- ", names(private$tuning)[[2]], " regularization: ",
+          self$minor_tuning, "\n", sep=""
+        )
       invisible(self)
     },
     #' @description User friendly print method
@@ -317,7 +316,7 @@ QuadrupenFit <- R6::R6Class(
           }
           err
         }
-
+        
         err <- do.call(rbind, 
           parallel::mcmapply(FUN = one_fold, fold = fold_id, lambda = lambda2_vec, 
                    mc.cores = cores,

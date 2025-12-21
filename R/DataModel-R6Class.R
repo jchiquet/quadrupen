@@ -171,6 +171,8 @@ GaussianModel <- R6::R6Class(
       lapply(folds, function(omit) {
         trainData <- GaussianModel$new(X[-omit, ], self$y[-omit], self$S, self$wx, self$wy[-omit])
         testData  <- GaussianModel$new(X[omit, ], self$y[omit], self$S, self$wx, self$wy[omit])
+        trainData$C <- self$C # Cholesky factorization remain the same
+        testData$C  <- self$C # Cholesky factorization remain the same
         list(trainData = trainData, testData = testData,
              trainID = setdiff(1:self$n, omit), testID = omit)
       })
