@@ -57,7 +57,7 @@ Criteria <- R6::R6Class(
     #' @param title graph title
     #'
     #' @return a \pkg{ggplot2} object
-    plot = function(log_scale=TRUE, criteria = self$names, xvar = c("lambda", "fraction", "df"), title = "Information Criteria") {
+    plot = function(criteria = self$names, log_scale=TRUE, xvar = c("lambda", "fraction", "df"), title = "Information Criteria") {
       if (length(self$lambda) == 1) {
         stop("Not available when the leading vector of penalties boild down to a scalar.")
       }
@@ -70,9 +70,9 @@ Criteria <- R6::R6Class(
 
       xlab <- switch(
         xvar,
-        "fraction" = expression(paste("|",beta[lambda[1]],"|",{}[1]/max[lambda[1]],"|",beta[lambda[1]],"|",{}[1],sep="")),
+        "fraction" = expression(paste("|",beta[lambda],"|",{}[1]/max[lambda],"|",beta[lambda],"|",{}[1],sep="")),
         "df" = "Estimated degrees of freedom",
-        ifelse(log_scale,expression(log[10](lambda[1])),expression(lambda[1]))
+        ifelse(log_scale,expression(log[10](lambda)),expression(lambda))
         )
       
       d <- ggplot(data_plot) +

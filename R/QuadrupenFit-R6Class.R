@@ -493,13 +493,14 @@ QuadrupenFit <- R6::R6Class(
     },
     #' Plot method
     #' 
-    #' @description Produce a plot of the solution path of a \code{quadrupen} fit.
+    #' @description Produce a plot of the solution path of a [`QuadrupenFit`] object.
     #'
-    #' @param xvar variable to plot on the X-axis: either \code{"lambda"}
-    #' (\eqn{\lambda_1}{lambda1} penalty level or
-    #' \eqn{\lambda_2}{lambda2} for ridge regression) or
-    #' \code{"fraction"} (\eqn{\ell_1}{l1}-norm
-    #' of the coefficients). Default is set to \code{"lambda"}.
+    #' @param xvar variable to plot on the X-axis: either `"lambda"`
+    #' (\eqn{\ell_1}{l1} penalty level, or
+    #' \eqn{\ell_2}{l2} for ridge  and \eqn{\ell_\infty}{l_inf}) or
+    #' `"fraction"` (\eqn{\ell_1}{l1}-norm
+    #' of the coefficients) or `df` for estimated degrees of freedom. 
+    #' Default is set to `"lambda"`.
     #' @param title the title title. Default is set to the model name followed
     #' by what is on the Y-axis.
     #' @param log_scale logical; indicates if a log-scale should be used
@@ -528,22 +529,23 @@ QuadrupenFit <- R6::R6Class(
     #' y <- 10 + x %*% beta + rnorm(n,0,10)
     #'
     #' ## Plot the Lasso path
-    #' plot(elastic.net(x,y, lambda2=0), title="Lasso solution path")
+    #' plot(lasso(x,y), title="Lasso solution path")
     #' ## Plot the Elastic-net path
-    #' plot(enet, title = "Elastic-net solution path")
+    #' plot(elastic.net(x,y), title = "Elastic-net solution path")
     #' ## Plot the Elastic-net path (fraction on X-axis, unstandardized coefficient)
     #' plot(elastic.net(x,y, lambda2=10), standardize=FALSE, xvar="fraction")
     #' ## Plot the Bounded regression path (fraction on X-axis)
     #' plot(bounded.reg(x,y, lambda2=10), xvar="fraction")
     #' }
     #'
-    plot_path = function(xvar = "lambda", log_scale = TRUE,
+    plot_path = function(xvar = c("lambda", "fraction", "df"), log_scale = TRUE,
                     title = paste(self$penalty," path", sep=""),
                     standardize=TRUE, labels = NULL) {
       
       if (length(self$major_tuning) == 1) {
         stop("Not available when the leading vector of tuning parameters boild down to a scalar.")
       }
+      xvar <- match.arg(xvar)
       
       nzeros <- which(colSums(private$beta) != 0)
       if (length(nzeros) == 0) {
@@ -555,14 +557,15 @@ QuadrupenFit <- R6::R6Class(
       
       if (standardize) beta <- scale(beta, FALSE, 1/private$data$norm_X[nzeros])
 
-      if (xvar == "fraction") {
-        xv <-  apply(abs(beta),1,sum)/max(apply(abs(beta),1,sum))
-      } else {
-        xv <- self$major_tuning
-      }
-      
-      ## Creating the data.frame fior ggploting purposes
+      xv <- switch(xvar,
+        "fraction" = apply(abs(beta),1,sum)/max(apply(abs(beta),1,sum)),
+        "df"       = private$df,
+         self$major_tuning
+      )
+
       data.coef <- melt(data.frame(xvar=xv, beta=beta),id="xvar")
+      # data.coef <- data.frame(xvar=xv, beta=beta) |> 
+      #   tidyr::pivot_longer(cols = -xvar)
       if (is.null(labels)) {
         data.coef$labels <- factor(rep(nzeros, each=length(xv)))
       } else {
