@@ -7,14 +7,14 @@
 ridge(
   x,
   y,
-  lambda2 = NULL,
+  lambda = NULL,
   struct = Diagonal(ncol(x), 1),
   penscale = rep(1, ncol(x)),
   intercept = TRUE,
   normalize = TRUE,
   nlambda = 100,
-  min.ratio = 1e-04,
-  lambda.max = 100,
+  minratio = 1e-04,
+  lambda_max = 100,
   control = list()
 )
 }
@@ -26,8 +26,11 @@ scale.}
 
 \item{y}{response vector.}
 
-\item{lambda2}{real scalar; tunes the \eqn{\ell_2}{l2} penalty in
-the Elastic-net. Default is 0.01. Set to 0 to recover the Lasso.}
+\item{lambda}{sequence of decreasing \eqn{\ell_2}{l2}-penalty
+levels. If `NULL` (the default), a vector is generated with
+`nlambda` entries, starting from a guessed level
+`lambda_max` where only the intercept is included, then
+shrunken to `minratio*lambda_max`.}
 
 \item{struct}{matrix structuring the coefficients, possibly
 sparsely encoded. Must be at least positive semidefinite (this is
@@ -45,7 +48,10 @@ included in the model. Default is `TRUE`.}
 normalized to have unit L2 norm before fitting.  Default is
 `TRUE`.}
 
-\item{min.ratio}{minimal value of \eqn{\ell_1}{l1}-part of the
+\item{nlambda}{integer that indicates the number of values to put
+in the `lambda` vector.  Ignored if `lambda` is provided.}
+
+\item{minratio}{minimal value of \eqn{\ell_1}{l1}-part of the
 penalty that will be tried, as a fraction of the maximal
 `lambda1` value. A too small value might lead to unstability
 at the end of the solution path corresponding to small
@@ -53,16 +59,18 @@ at the end of the solution path corresponding to small
 default value tries to avoid this, adapting to the
 '\eqn{n<p}{n<p}' context. Ignored if `lambda1` is provided.}
 
+\item{lambda_max}{the largest value of `lambda` considered}
+
 \item{control}{list of argument controlling low level options of
 the algorithm --use with care and at your own risk-- :
-* verbose`: integer; activate verbose mode --this one is not 
+* `verbose`: integer; activate verbose mode --this one is not 
 too risky!-- set to `0` for no output; `1` for warnings only, 
 and `2` for tracing the whole progression. Default is `1`. 
 Automatically set to `0` when the method is embedded within 
 cross-validation or stability selection.
 * `timer`: logical; use to record the timing of the
 algorithm. Default is `FALSE`.
-* `max.iter` the maximal number of iteration used to solve the
+* `maxiter` the maximal number of iteration used to solve the
  problem for a given value of lambda1. Default is 500.
 * `method` a string for the underlying solver used. Either 
 `"quadra"`, `"pathwise"` or `"fista"`. Default is `"quadra"`.

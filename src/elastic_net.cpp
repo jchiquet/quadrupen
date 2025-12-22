@@ -36,8 +36,8 @@ Rcpp::List elastic_net_cpp(
   const vec beta0            = control["beta0"]     ; // initial vector of coefficients
   const double eps           = control["threshold"] ; // precision required
   const double eps2          = pow(eps, 2) ;
-  const arma::uword max_iter = control["max.iter"]  ; // max # of iterates of the active set
-  const arma::uword max_feat = control["max.feat"]  ; // max # of variables activated
+  const arma::uword maxiter  = control["maxiter"]   ; // max # of iterates of the active set
+  const arma::uword maxfeat  = control["maxfeat"]   ; // max # of variables activated
   const arma::uword fun      = control["method"]    ; // solver (0=quadra, 1=pathwise, 2=fista)
   const arma::uword verbose  = control["verbose"]   ; // int for verbose mode (0/1/2)
   const bool usechol         = control["usechol"]   ; // use Cholesky decomposition or not
@@ -145,7 +145,7 @@ Rcpp::List elastic_net_cpp(
     max_grd[m] = grd_norm(var_in) ;
     if (max_grd[m] < 0) {max_grd[m] = 0;}
     
-    while ((max_grd[m] > eps) && (it_active[m] < max_iter)) {
+    while ((max_grd[m] > eps) && (it_active[m] < maxiter)) {
       // _____________________________________________________________
       //
       // (1) VARIABLE ACTIVATION IF APPLICABLE
@@ -248,8 +248,8 @@ Rcpp::List elastic_net_cpp(
     timing[m] = timer.toc() ;
     
     // Checking convergence status
-    if (it_active[m] >= max_iter) converge[m] = 1 ;
-    if (nbr_in > max_feat)        converge[m] = 2 ;
+    if (it_active[m] >= maxiter) converge[m] = 1 ;
+    if (nbr_in > maxfeat)        converge[m] = 2 ;
     if (!success_optim)           converge[m] = 3 ;
 
     // Stop now if relevant
@@ -317,8 +317,8 @@ Rcpp::List elastic_net_cpp(
 //     const arma::vec weights    , // observation weights (not use at the moment)
 //     const bool naive           , // naive elastic-net or not
 //     const double eps           , // precision required
-//     const arma::uword max_iter , // max # of iterates of the active set
-//     const arma::uword max_feat , // max # of variables activated
+//     const arma::uword maxiter , // max # of iterates of the active set
+//     const arma::uword maxfeat , // max # of variables activated
 //     const arma::uword fun      , // solver (0=quadra, 1=pathwise, 2=fista)
 //     const arma::uword verbose  , // int for verbose mode (0/1/2)
 //     const bool sparse          , // boolean for sparse mode
@@ -449,7 +449,7 @@ Rcpp::List elastic_net_cpp(
 //     max_grd[m] = grd_norm(var_in) ;
 //     if (max_grd[m] < 0) {max_grd[m] = 0;}
 //     
-//     while ((max_grd[m] > eps) && (it_active[m] < max_iter)) {
+//     while ((max_grd[m] > eps) && (it_active[m] < maxiter)) {
 //       // _____________________________________________________________
 //       //
 //       // (1) VARIABLE ACTIVATION IF APPLICABLE
@@ -552,10 +552,10 @@ Rcpp::List elastic_net_cpp(
 //     timing[m] = timer.toc() ;
 //     
 //     // Checking convergence status
-//     if (it_active[m] >= max_iter) {
+//     if (it_active[m] >= maxiter) {
 //       converge[m] = 1;
 //     }
-//     if (nbr_in > max_feat) {
+//     if (nbr_in > maxfeat) {
 //       converge[m] = 2 ;
 //     }
 //     if (!success_optim) {

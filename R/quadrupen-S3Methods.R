@@ -338,7 +338,7 @@ cross_validate.QuadrupenFit <-
 #' labels <- factor(labels, ordered=TRUE, levels=c("relevant","irrelevant"))
 #'
 #' ## Call to stability selection function, 200 subsampling
-#' stab <- stability(x,y, subsamples=200, lambda2=1, min.ratio=1e-2)
+#' stab <- stability(x,y, subsamples=200, lambda2=1, minratio=1e-2)
 #' ## Recover the selected variables for a given cutoff
 #' ## and per-family error rate, without producing any plot
 #' stabpath <- plot(stab, cutoff=0.75, PFER=1, plot=FALSE)

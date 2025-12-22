@@ -63,7 +63,7 @@ RidgeRegression <- R6::R6Class(
   #' @field penalty character describing the regularizer/penalty
   active  = list(penalty = function(value) "ridge"),
   public  = list(
-    #' @description Initialize a [`RdigeRegression`] model
+    #' @description Initialize a [`RidgeRegression`] model
     #' @param data a [`DataModel`] object
     #' @param intercept a logical; should an intercept be included in the mode?
     #' @param regParam a list with two elements, a vector and a scalar, for the regularization

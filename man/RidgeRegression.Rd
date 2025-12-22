@@ -53,7 +53,7 @@ and methods of [`QuadrupenFit`].
 \if{html}{\out{<a id="method-RidgeRegression-new"></a>}}
 \if{latex}{\out{\hypertarget{method-RidgeRegression-new}{}}}
 \subsection{Method \code{new()}}{
-Initialize a [`RdigeRegression`] model
+Initialize a [`RidgeRegression`] model
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{RidgeRegression$new(data, intercept, regParam)}\if{html}{\out{</div>}}
 }

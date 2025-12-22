@@ -18,7 +18,7 @@
 #' levels. If `NULL` (the default), a vector is generated with
 #' `nlambda1` entries, starting from a guessed level
 #' `lambda1.max` where only the intercept is included, then
-#' shrunken to `min.ratio*lambda1.max`.
+#' shrunken to `minratio*lambda1.max`.
 #'
 #' @param lambda2 real scalar; tunes the \eqn{\ell_2}{l2} penalty in
 #' the Elastic-net. Default is 0.01. Set to 0 to recover the Lasso.
@@ -43,7 +43,7 @@
 #' in the `lambda1` vector.  Ignored if `lambda1` is
 #' provided.
 #'
-#' @param min.ratio minimal value of \eqn{\ell_1}{l1}-part of the
+#' @param minratio minimal value of \eqn{\ell_1}{l1}-part of the
 #' penalty that will be tried, as a fraction of the maximal
 #' `lambda1` value. A too small value might lead to unstability
 #' at the end of the solution path corresponding to small
@@ -51,7 +51,7 @@
 #' default value tries to avoid this, adapting to the
 #' '\eqn{n<p}{n<p}' context. Ignored if `lambda1` is provided.
 #'
-#' @param max.feat integer; limits the number of features ever to
+#' @param maxfeat integer; limits the number of features ever to
 #' enter the model; i.e., non-zero coefficients for the Elastic-net:
 #' the algorithm stops if this number is exceeded and `lambda1`
 #' is cut at the corresponding level. Default is
@@ -65,14 +65,14 @@
 #'
 #' @param control list of argument controlling low level options of
 #' the algorithm --use with care and at your own risk-- :
-#' * verbose`: integer; activate verbose mode --this one is not 
+#' * `verbose`: integer; activate verbose mode --this one is not 
 #' too risky!-- set to `0` for no output; `1` for warnings only, 
 #' and `2` for tracing the whole progression. Default is `1`. 
 #' Automatically set to `0` when the method is embedded within 
 #' cross-validation or stability selection.
 #' * `timer`: logical; use to record the timing of the
 #' algorithm. Default is `FALSE`.
-#' * `max.iter` the maximal number of iteration used to solve the
+#' * `maxiter` the maximal number of iteration used to solve the
 #'  problem for a given value of lambda1. Default is 500.
 #' * `method` a string for the underlying solver used. Either 
 #' `"quadra"`, `"pathwise"` or `"fista"`. Default is `"quadra"`.
@@ -141,8 +141,8 @@ elastic.net <- function(x,
                         intercept = TRUE,
                         normalize = TRUE,
                         nlambda1  = ifelse(is.null(lambda1),100,length(lambda1)),
-                        min.ratio = ifelse(nrow(x) <= ncol(x), 1e-2, 1e-4),
-                        max.feat  = ifelse(lambda2 < 1e-2, min(nrow(x),ncol(x)), min(4*nrow(x),ncol(x))),
+                        minratio  = ifelse(nrow(x) <= ncol(x), 1e-2, 1e-4),
+                        maxfeat   = ifelse(lambda2 < 1e-2, min(nrow(x),ncol(x)), min(4*nrow(x),ncol(x))),
                         beta0     = numeric(ncol(x)),
                         control   = list()) {
   
@@ -162,11 +162,10 @@ elastic.net <- function(x,
   ## INSTANTIATE THE PENALIZED MODEL
   ##
   if (is.null(lambda1)) {
-    stopifnot("min.ratio must be non negative." = min.ratio > 0)
+    stopifnot("minratio must be non negative." = minratio > 0)
     lmax <- max(abs(myData$xty))
-    lambda1 <- 10^seq(from=log10(lmax), to=log10(lmax*min.ratio), len=nlambda1)  
+    lambda1 <- 10^seq(from=log10(lmax), to=log10(lmax*minratio), len=nlambda1)  
   }
-  
   myModel <- ElasticNet$new(
     data      = myData,
     intercept = intercept,
@@ -177,7 +176,7 @@ elastic.net <- function(x,
   ## RECOVER OPTIMIZATION CONFIGURATION
   ##
   ctrl <- ctrl_default(ncol(x))
-  ctrl$max.feat <- max.feat
+  ctrl$maxfeat <- maxfeat
   if (!is.null(control$method)) if (control$method != "quadra") ctrl$threshold <- 1e-2
   ctrl[names(control)] <- control # default overwritten by user specifications
   ctrl$method <- switch(ctrl$method, quadra = 0, pathwise = 1, fista = 2, 0)

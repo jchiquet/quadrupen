@@ -31,12 +31,10 @@ Rcpp::List bounded_reg_cpp(
 
   arma::vec lambda_linf      = tuningParam["linf"] ; // vector of LInf penalties
   const double lambda_l2     = tuningParam["l2"]   ; // scalar for the amount L2 penalty
-  
-  // double eps           = control["threshold"] ; // precision required
   const double eps           = control["threshold"] ; // precision required
   const double eps2 = pow(eps, 2) ;
-  const arma::uword max_iter = control["max.iter"]  ; // max # of iterates of the active set
-  const arma::uword max_feat = control["max.feat"]  ; // max # of variables activated
+  const arma::uword maxiter  = control["maxiter"]   ; // max # of iterates of the active set
+  const arma::uword maxfeat  = control["maxfeat"]   ; // max # of variables activated
         arma::uword fun      = control["method"]    ; // solver (0=quadra, 1=pathwise, 2=fista)
   const arma::uword verbose  = control["verbose"]   ; // int for verbose mode (0/1/2)
   const bool bullet          = control["bulletproof"];// use Cholesky decomposition or not
@@ -108,7 +106,7 @@ Rcpp::List bounded_reg_cpp(
       max_grd[m] = 0;
     }
     
-    while ((max_grd[m] > eps) && (it_active[m] <= max_iter)) {
+    while ((max_grd[m] > eps) && (it_active[m] <= maxiter)) {
       // _____________________________________________________________
       //
       // (1) KKT/SYSTEM RESOLUTION
@@ -126,7 +124,7 @@ Rcpp::List bounded_reg_cpp(
       default:
         try {
           // If no convergence up to now...
-          if (it_active[m] == max_iter) {
+          if (it_active[m] == maxiter) {
             throw std::runtime_error("Fail to converge...");
           } else {
             it_optim[nbr_opt] = quadra_breg(beta, xtx, xty, lambda_linf[m], grd, B, I);
@@ -181,10 +179,10 @@ Rcpp::List bounded_reg_cpp(
     timing[m] = timer.toc() ;
     
     // Checking convergence status
-    if (it_active[m] >= max_iter) {
+    if (it_active[m] >= maxiter) {
       converge[m] = 1;
     }
-    if (p-B.n_elem > max_feat) {
+    if (p-B.n_elem > maxfeat) {
       converge[m] = 2 ;
     }
     if (!success_optim) {
@@ -272,8 +270,8 @@ Rcpp::List bounded_reg_cpp(
 //   int    verbose(VERBOSE)     ; // int for verbose mode (0/1/2)
 //   bool   sparse(SPARSE)      ; // boolean for sparse mode
 //   bool   bullet(BULLETPROOF) ; // int for verbose mode (0/1/2)
-//   uword  max_iter(MAXITER)     ; // max # of iterates of the active set
-//   uword  max_feat(MAXFEAT)     ; // max # of variables activated
+//   uword  maxiter(MAXITER)     ; // max # of iterates of the active set
+//   uword  maxfeat(MAXFEAT)     ; // max # of variables activated
 //   
 //   vec    xty   ; // responses to predictors vector
 //   vec    xbar  ; // mean of the predictors
@@ -362,7 +360,7 @@ Rcpp::List bounded_reg_cpp(
 //       max_grd[m] = 0;
 //     }
 //     
-//     while ((max_grd[m] > eps) && (it_active[m] <= max_iter)) {
+//     while ((max_grd[m] > eps) && (it_active[m] <= maxiter)) {
 //       // _____________________________________________________________
 //       //
 //       // (1) KKT/SYSTEM RESOLUTION
@@ -380,7 +378,7 @@ Rcpp::List bounded_reg_cpp(
 //       default:
 //         try {
 //           // If no convergence up to now...
-//           if (it_active[m] == max_iter) {
+//           if (it_active[m] == maxiter) {
 //             throw std::runtime_error("Fail to converge...");
 //           } else {
 //             it_optim[nbr_opt] = quadra_breg(beta, xtx, xty, lambda1[m], grd, B, I);
@@ -436,10 +434,10 @@ Rcpp::List bounded_reg_cpp(
 //     timing[m] = timer.toc() ;
 //     
 //     // Checking convergence status
-//     if (it_active[m] >= max_iter) {
+//     if (it_active[m] >= maxiter) {
 //       converge[m] = 1;
 //     }
-//     if (p-B.n_elem > max_feat) {
+//     if (p-B.n_elem > maxfeat) {
 //       converge[m] = 2 ;
 //     }
 //     if (!success_optim) {

@@ -7,6 +7,17 @@
 #'
 #' @inheritParams elastic.net
 #' 
+#' @param lambda sequence of decreasing \eqn{\ell_2}{l2}-penalty
+#' levels. If `NULL` (the default), a vector is generated with
+#' `nlambda` entries, starting from a guessed level
+#' `lambda_max` where only the intercept is included, then
+#' shrunken to `minratio*lambda_max`.
+#' 
+#' @param nlambda integer that indicates the number of values to put
+#' in the `lambda` vector.  Ignored if `lambda` is provided.
+#'
+#' @param lambda_max the largest value of `lambda` considered
+#' 
 #' @return an object with class [`QuadrupenFit`].
 #'
 #' @note The optimized criterion is the following: \if{latex}{\deqn{%
@@ -46,14 +57,14 @@
 #' @export
 ridge <- function(x,
                   y,
-                  lambda2    = NULL,
+                  lambda     = NULL,
                   struct     = Diagonal(ncol(x),1),
                   penscale   = rep(1,ncol(x)),
                   intercept  = TRUE,
                   normalize  = TRUE,
                   nlambda    = 100 ,
-                  min.ratio  = 1e-4,
-                  lambda.max = 100,
+                  minratio   = 1e-4,
+                  lambda_max = 100,
                   control    = list()) {
 
   ## ============================================
@@ -67,14 +78,14 @@ ridge <- function(x,
   myData$CholStruct()
   myData$standardize(intercept, normalize)
   myData$getSufficientStat()
-  if (is.null(lambda2)) {
-    stopifnot("min.ratio must be non negative." = min.ratio > 0)
-    lambda_l2 <- 10^seq(from=log10(lambda.max), to=log10(lambda.max*min.ratio), len=nlambda)
-  }
 
   ## ============================================
   ## INSTANTIATE THE PENALTY MODEL
-  myModel <- RidgeRegression$new(myData, intercept, list(l2 = lambda_l2, l1 = 0))
+  if (is.null(lambda)) {
+    stopifnot("minratio must be non negative." = minratio > 0)
+    lambda <- 10^seq(from=log10(lambda_max), to=log10(lambda_max*minratio), len=nlambda)
+  }
+  myModel <- RidgeRegression$new(myData, intercept, list(l2 = lambda, l1 = 0))
   
   ## ============================================
   ## RECOVER LOW LEVEL OPTIONS

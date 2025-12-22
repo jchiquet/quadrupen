@@ -400,7 +400,7 @@ QuadrupenFit <- R6::R6Class(
       
       control  <- private$control; 
       control$verbose <- 0
-      control$max.feat  <- self$ncoef
+      control$maxfeat  <- self$ncoef
       nlambda1 <- length(private$tuning[[1]])
 
       ## Prepare blocs of sub samples to run jobs parallely
@@ -427,7 +427,7 @@ QuadrupenFit <- R6::R6Class(
           }
         }
         if (subsamples_ok < 0.5*length(subsets)) {
-          cat("\nWarning: more than 50% of the run were discarded in that core due to early stops of the fitting procedure. You should consider largest 'min.ratio' or strongest 'lambda2'.")
+          cat("\nWarning: more than 50% of the run were discarded in that core due to early stops of the fitting procedure. You should consider largest 'minratio' or strongest 'lambda2'.")
         }
         return(select/(subsamples_ok*length(blocs)))
       }

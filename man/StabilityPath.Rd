@@ -36,7 +36,7 @@ labels[beta != 0] <- c("relevant")
 labels <- factor(labels, ordered=TRUE, levels=c("relevant","irrelevant"))
 
 ## Call to stability selection function, 200 subsampling
-stab <- stability(x,y, subsamples=200, lambda2=1, min.ratio=1e-2)
+stab <- stability(x,y, subsamples=200, lambda2=1, minratio=1e-2)
 
 ## Build the plot an recover the selected variable
 plot(stab, labels=labels)
@@ -199,7 +199,7 @@ labels[beta != 0] <- c("relevant")
 labels <- factor(labels, ordered=TRUE, levels=c("relevant","irrelevant"))
 
 ## Call to stability selection function, 200 subsampling
-stab <- stability(x,y, subsamples=200, lambda2=1, min.ratio=1e-2)
+stab <- stability(x,y, subsamples=200, lambda2=1, minratio=1e-2)
 
 ## Build the plot an recover the selected variable
 plot(stab, labels=labels)

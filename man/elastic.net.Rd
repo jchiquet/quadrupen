@@ -14,8 +14,8 @@ elastic.net(
   intercept = TRUE,
   normalize = TRUE,
   nlambda1 = ifelse(is.null(lambda1), 100, length(lambda1)),
-  min.ratio = ifelse(nrow(x) <= ncol(x), 0.01, 1e-04),
-  max.feat = ifelse(lambda2 < 0.01, min(nrow(x), ncol(x)), min(4 * nrow(x), ncol(x))),
+  minratio = ifelse(nrow(x) <= ncol(x), 0.01, 1e-04),
+  maxfeat = ifelse(lambda2 < 0.01, min(nrow(x), ncol(x)), min(4 * nrow(x), ncol(x))),
   beta0 = numeric(ncol(x)),
   control = list()
 )
@@ -32,7 +32,7 @@ scale.}
 levels. If `NULL` (the default), a vector is generated with
 `nlambda1` entries, starting from a guessed level
 `lambda1.max` where only the intercept is included, then
-shrunken to `min.ratio*lambda1.max`.}
+shrunken to `minratio*lambda1.max`.}
 
 \item{lambda2}{real scalar; tunes the \eqn{\ell_2}{l2} penalty in
 the Elastic-net. Default is 0.01. Set to 0 to recover the Lasso.}
@@ -57,7 +57,7 @@ normalized to have unit L2 norm before fitting.  Default is
 in the `lambda1` vector.  Ignored if `lambda1` is
 provided.}
 
-\item{min.ratio}{minimal value of \eqn{\ell_1}{l1}-part of the
+\item{minratio}{minimal value of \eqn{\ell_1}{l1}-part of the
 penalty that will be tried, as a fraction of the maximal
 `lambda1` value. A too small value might lead to unstability
 at the end of the solution path corresponding to small
@@ -65,7 +65,7 @@ at the end of the solution path corresponding to small
 default value tries to avoid this, adapting to the
 '\eqn{n<p}{n<p}' context. Ignored if `lambda1` is provided.}
 
-\item{max.feat}{integer; limits the number of features ever to
+\item{maxfeat}{integer; limits the number of features ever to
 enter the model; i.e., non-zero coefficients for the Elastic-net:
 the algorithm stops if this number is exceeded and `lambda1`
 is cut at the corresponding level. Default is
@@ -79,14 +79,14 @@ time in some situation.}
 
 \item{control}{list of argument controlling low level options of
 the algorithm --use with care and at your own risk-- :
-* verbose`: integer; activate verbose mode --this one is not 
+* `verbose`: integer; activate verbose mode --this one is not 
 too risky!-- set to `0` for no output; `1` for warnings only, 
 and `2` for tracing the whole progression. Default is `1`. 
 Automatically set to `0` when the method is embedded within 
 cross-validation or stability selection.
 * `timer`: logical; use to record the timing of the
 algorithm. Default is `FALSE`.
-* `max.iter` the maximal number of iteration used to solve the
+* `maxiter` the maximal number of iteration used to solve the
  problem for a given value of lambda1. Default is 500.
 * `method` a string for the underlying solver used. Either 
 `"quadra"`, `"pathwise"` or `"fista"`. Default is `"quadra"`.

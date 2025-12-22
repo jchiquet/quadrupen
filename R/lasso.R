@@ -51,8 +51,8 @@ lasso <- function(x,
                   intercept = TRUE,
                   normalize = TRUE,
                   nlambda1  = ifelse(is.null(lambda1),100,length(lambda1)),
-                  min.ratio = ifelse(nrow(x) <= ncol(x), 1e-2, 1e-4),
-                  max.feat  = min(nrow(x),ncol(x)),
+                  minratio  = ifelse(nrow(x) <= ncol(x), 1e-2, 1e-4),
+                  maxfeat   = min(nrow(x),ncol(x)),
                   beta0     = numeric(ncol(x)),
                   control   = list()) {
   
@@ -64,8 +64,8 @@ lasso <- function(x,
                      intercept = intercept,
                      normalize = normalize,
                      nlambda1  = nlambda1,
-                     min.ratio = min.ratio,
-                     max.feat  = max.feat,
+                     minratio  = minratio,
+                     maxfeat   = maxfeat,
                      beta0     = beta0,
                      control   = control)
   # out@penalty <- "lasso"

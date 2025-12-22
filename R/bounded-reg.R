@@ -47,7 +47,7 @@
 #' Singularity of the system can also be avoided with a larger
 #' \eqn{\ell_2}{l2}-regularization, via \code{lambda2}, or a
 #' "not-too-small" \eqn{\ell_\infty}{l-infinity} regularization, via
-#' a larger \code{'min.ratio'} argument.
+#' a larger \code{'minratio'} argument.
 #'
 #' @seealso See also [`QuadrupenFit`].
 #' 
@@ -84,8 +84,8 @@ bounded.reg <- function(x,
                         intercept = TRUE,
                         normalize = TRUE,
                         nlambda1  = ifelse(is.null(lambda1),100,length(lambda1)),
-                        min.ratio = ifelse(nrow(x) <= ncol(x), 1e-2, 1e-4),
-                        max.feat  = ifelse(lambda2 < 1e-2, min(nrow(x),ncol(x)), min(4*nrow(x),ncol(x))),
+                        minratio  = ifelse(nrow(x) <= ncol(x), 1e-2, 1e-4),
+                        maxfeat   = ifelse(lambda2 < 1e-2, min(nrow(x),ncol(x)), min(4*nrow(x),ncol(x))),
                         control   = list()) {
   
   ## ============================================
@@ -100,9 +100,9 @@ bounded.reg <- function(x,
   myData$getSufficientStat()
   
   if (is.null(lambda1)) {
-    stopifnot("min.ratio must be non negative." = min.ratio > 0)
+    stopifnot("minratio must be non negative." = minratio > 0)
     lmax <- sum(abs(myData$xty))
-    lambda_linf <- 10^seq(from=log10(lmax), to=log10(lmax*min.ratio), len=nlambda1)  
+    lambda_linf <- 10^seq(from=log10(lmax), to=log10(lmax*minratio), len=nlambda1)  
   }
 
   ## ============================================
@@ -116,7 +116,7 @@ bounded.reg <- function(x,
   ## ============================================
   ## RECOVER LOW LEVEL OPTIONS
   ctrl <- ctrl_default(ncol(x))
-  ctrl$max.feat <- max.feat
+  ctrl$maxfeat <- maxfeat
   if (!is.null(control$method)) if (control$method != "quadra") ctrl$threshold <- 1e-2
   ctrl[names(control)] <- control # default overwritten by user specifications
   ctrl$method <- switch(ctrl$method, quadra = 0, pathwise = 1, fista = 2, 0)
