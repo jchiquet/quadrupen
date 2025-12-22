@@ -19,7 +19,7 @@ for model selection purpose (cross-validation, stability selection).
 devtools::install_github("jchiquet/quadrupen").
 ```
 
-Many examples and demos can be found in the `inst` repositories.  Here is a more illustraive one: 
+Many examples and demos can be found in the `inst` repositories.  Here is a more illustrative one: 
 
 ## Example: structured penalized regression
 
@@ -95,17 +95,17 @@ mu <- 0
 group  <- c(p/4,p/8,p/4,p/8,p/4)
 labels <- factor(rep(paste("group", 1:5), group))
 beta   <- rep(c(0.25,1,-0.25,-1,0.25), group)
-xx <- rPred.block(n, p, sizes = group, rho=c(0.25, 0.75, 0.25, 0.75, 0.25))
+x <- rPred.block(n, p, sizes = group, rho=c(0.25, 0.75, 0.25, 0.75, 0.25))
 ```
 
 Indeed, the correlation structure between the regressor exhibitis a strong pattern:
 ```{r echo=FALSE}
-Matrix::image(Matrix::Matrix(cor(xx)))
+Matrix::image(Matrix::Matrix(cor(x)))
 ```
 
 We draw the reponse variable by fixing the variance of the noise ratio to get an $R^2$ equal to $0.8$.
 ```{r}
-dat <- rlm(xx,beta,mu,r2=0.8)
+dat <- rlm(x,beta,mu,r2=0.8)
 y <- dat$y
 sigma <- dat$sigma
 ```
@@ -114,34 +114,38 @@ sigma <- dat$sigma
 
 No we try the available penalized regression method in `quadrupen` to fit the regularization path to this data set
 
+```{r}
+rg <- ridge(x,y, intercept=FALSE)
+```
+
 #### Ridge regression  ($\ell_2$ penalty)
 
 ```{r ridge_nostruct}
-plot(ridge(xx,y, intercept=FALSE), labels=labels)
+plot(ridge(x,y, intercept=FALSE), labels=labels)
 ```
 
 #### Lasso  ($\ell_1$ penalty)
 
 ```{r lasso_nostruct}
-plot(lasso(xx,y, intercept=FALSE), labels=labels)
+plot(lasso(x,y, intercept=FALSE), labels=labels)
 ```
 
 #### Elastic-net  ($\ell_1+\ell_2$ penalty)
 
 ```{r enet_nostruct}
-plot(elastic.net(xx,y, lambda2=1, intercept=FALSE), labels=labels)
+plot(elastic.net(x,y, lambda2=1, intercept=FALSE), labels=labels)
 ```
 
 #### Bounded regression ($\ell_\infty$ penalty)
 
 ```{r breg_nostruct}
-plot(bounded.reg(xx,y, lambda2=0, intercept=FALSE), labels=labels)
+plot(bounded.reg(x,y, lambda2=0, intercept=FALSE), labels=labels)
 ```
 
 #### Ridge + Bounded regression ($\ell_\infty+\ell_2$ penalty)
 
 ```{r bregridge_nostruct}
-plot(bounded.reg(xx,y, lambda2=5, intercept=FALSE), labels=labels)
+plot(bounded.reg(x,y, lambda2=5, intercept=FALSE), labels=labels)
 ```
 
 ### Regularization with prior knowledge
@@ -158,7 +162,7 @@ Now, we run all the method having a ridge-like regularization by replacing the r
 #### Structured/Generalized Ridge regression  ($\ell_2$ penalty)
 
 ```{r ridge_struct}
-plot(ridge(xx,y, lambda = 10^seq(4,-1,len=100), struct = L, intercept=FALSE), labels=labels)
+plot(ridge(x,y, lambda = 10^seq(4,-1,len=100), struct = L, intercept=FALSE), labels=labels)
 ```
 
 

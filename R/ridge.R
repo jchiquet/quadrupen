@@ -99,6 +99,8 @@ ridge <- function(x,
   myModel$fit(ctrl)
   
   ## ============================================
-  ## DONE, SEND BACK THE RESULTING MODEL
+  ## POSTREATMENT + SEND BACK THE RESULTING MODEL
+  ##
+  myModel$criteria()
   myModel
 }

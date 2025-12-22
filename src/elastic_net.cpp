@@ -253,12 +253,13 @@ Rcpp::List elastic_net_cpp(
 
     // Stop now if relevant
     if (converge[m] == 2 || converge[m] == 3) {
-      lambda_l1     =    lambda_l1.subvec(0,m-1) ;
-      converge    =  converge.subvec(0,m)    ;
-      max_grd     =   max_grd.subvec(0,m-1)  ;
-      it_active   = it_active.subvec(0,m)    ;
-      timing      =    timing.subvec(0,m)    ;
-      df          =    df.subvec(0,m)        ;
+      lambda_l1 = lambda_l1.subvec(0,m-1) ;
+      mu        = mu.subvec(0,m-1)        ;  
+      converge  =  converge.subvec(0,m)   ;
+      max_grd   =   max_grd.subvec(0,m-1) ;
+      it_active = it_active.subvec(0,m)   ;
+      timing    =    timing.subvec(0,m)   ;
+      df        =    df.subvec(0,m)       ;
       break;
     } else {
       nonzeros = join_cols(nonzeros, betaA/(normx.elem(A) % penscale.elem(A)));

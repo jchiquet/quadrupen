@@ -195,6 +195,7 @@ Rcpp::List bounded_reg_cpp(
     // Preparing next value of the penalty
     if (converge[m] == 2 || converge[m] == 3) {
       lambda_linf = lambda_linf.subvec(0,m-1) ;
+      mu          = mu.subvec(0,m-1)          ;  
       converge    = converge.subvec(0,m)      ;
       max_grd     = max_grd.subvec(0,m-1)     ;
       it_active   = it_active.subvec(0,m)     ;

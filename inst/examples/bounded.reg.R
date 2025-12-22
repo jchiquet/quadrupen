@@ -20,4 +20,3 @@ plot(bounded.reg(x,y,lambda2=0) , label=labels) ## a mess
 plot(bounded.reg(x,y,lambda2=10), label=labels) ## good guy are the boundaries
 plot(bounded.reg(x,y,lambda2=10,struct=solve(Sigma)), label=labels) ## even better
 
-cat("\nDONE.\n")

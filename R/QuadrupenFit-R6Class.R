@@ -190,7 +190,7 @@ QuadrupenFit <- R6::R6Class(
     get_model = function(
           selection,
           type = c("coefficients", "penalty", "index")) {
-
+      browser()
       lambda <- private$tuning[[1]]
       if (is.character(selection)) {
         stopifnot("must be a character in" = selection %in% c("AIC", "BIC", "mBIC", "eBIC", "GCV", "CV_min", "CV_1se"))
@@ -291,7 +291,7 @@ QuadrupenFit <- R6::R6Class(
       function(
           K       = 10,
           folds   = split(sample(1:self$nsample), rep(1:K, length=self$nsample)),
-          lambda2 = self$minor_tuning, verbose = TRUE, cores = detectCores() - 2) {
+          lambda2 = self$minor_tuning, verbose = TRUE, cores = max(K, detectCores() - 2)) {
 
         ## Some variables and copies useful for CV work
         K <- length(folds)
@@ -316,9 +316,9 @@ QuadrupenFit <- R6::R6Class(
         }
 
         ## CV err for a fixed couple fold/lambda2
-        one_fold <- function(fold, lambda2_) {
-          if (verbose & (fold == 1)) cat(round(lambda2_, 3),"\t")
-          regParam[[2]] <- lambda2_
+        one_fold <- function(fold, lambda2) {
+          if (verbose & (fold == 1)) cat(round(lambda2, 3),"\t")
+          regParam[[2]] <- lambda2
           out <- private$optimizer(CVData[[fold]]$trainData, regParam, control)
           y_hat <- scale(tcrossprod(CVData[[fold]]$testData$X, out$beta), -out$mu, FALSE)
           err <- sweep(y_hat, 1L, CVData[[fold]]$testData$y)^2
@@ -328,15 +328,15 @@ QuadrupenFit <- R6::R6Class(
           }
           err
         }
-        
+
         err <- do.call(rbind, 
-          parallel::mcmapply(FUN = one_fold, fold = fold_id, lambda = lambda2_vec, 
+          parallel::mcmapply(FUN = one_fold, fold = fold_id, lambda2 = lambda2_vec, 
                    mc.cores = cores,
                    mc.preschedule = ifelse(K > 10,TRUE,FALSE),
                    SIMPLIFY = FALSE
           )) |> as.matrix() |> as.data.frame()
         if (verbose) cat("\n")
-        
+
         res <- do.call(rbind, tapply(err, rep(1:nlambda2, each=self$nsample), function(err_) {
           mean <- colMeans(err_, na.rm = TRUE)
           if (any(is.nan(mean))) {
