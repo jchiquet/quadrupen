@@ -7,9 +7,13 @@
 \method{predict}{QuadrupenFit}(object, newx = NULL, selection = NULL, ...)
 }
 \arguments{
+\item{object}{an R object to evaluate}
+
+\item{newx}{matrix of new values for the regressor with which to predict. If omitted, the fitted values are used.}
+
 \item{selection}{either a character (model selection criteria) of a scalar (lambda value)}
 
-\item{newdata}{matrix of new values for the regressor with which to predict. If omitted, the fitted values are used.}
+\item{...}{not used, only here for S3 compatibility}
 }
 \value{
 a vector of predicted value

@@ -153,8 +153,8 @@
 "_PACKAGE"
 
 ## usethis namespace: start
-#' @import Matrix Rcpp RcppArmadillo parallel ggplot2 reshape2 scales grid methods
+#' @import R6 Matrix parallel ggplot2 dplyr scales grid methods
 #' @importFrom Rcpp sourceCpp
-#' @useDynLib quadrupen, .registration = TRUE
+#' @useDynLib quadrupen
 ## usethis namespace: end
 NULL

@@ -140,24 +140,28 @@ StabilityPath <- R6::R6Class(
       if (xvar == "lambda") xv <- log10(xv)
       
       ## Build the data frame for ggploting
-      data.coef <- melt(data.frame(xvar=xv, prob=prob),id="xvar")
-      data.coef$selection <- factor(rep(selection, each=length(xv)))
+      dplot <- data.frame(xvar=xv, prob=prob) |> 
+        tidyr::pivot_longer(cols = -xvar, names_to = "var", values_to = "prob") |>
+        mutate(selection = factor(rep(selection, length(xv))))
+      
+      # data.coef <- melt(data.frame(xvar=xv, prob=prob),id="xvar")
+      # data.coef$selection <- factor(rep(selection, each=length(xv)))
       if (is.null(labels)) {
-        data.coef$labels <- factor(rep(1:p, each=length(xv)))
+        dplot$labels <- factor(rep(1:p, length(xv)))
       } else {
         if (sum(is.na(labels[nzeros])) > 0 ) {
           labels <- NULL
           warning("The number of label is wrong, ignoring them.")
-          data.coef$labels <- factor(rep(nzeros, each=length(xv)))
+          dplot$labels <- factor(rep(nzeros, length(xv)))
         } else {
-          data.coef$labels <- factor(rep(labels[nzeros], each=length(xv)))
+          dplot$labels <- factor(rep(labels[nzeros], length(xv)))
         }
       }
-      colnames(data.coef) <- c("xvar","var","prob","selection","variables")
-      
+
       ## Build the ggplot object
-      d <- ggplot(data.coef,aes(x=.data$xvar,y=.data$prob, linetype=.data$variables, colour=.data$selection, group=.data$var)) +
-        geom_line(aes(x=.data$xvar,y=.data$prob)) +
+      d <- ggplot(dplot) + 
+        aes(x=xvar,y=prob, linetype=labels, color=selection, group=var) + 
+        geom_line() +
         labs(x=switch(xvar,
                       "fraction" = expression(lambda[1]/max[lambda[1]]),
                       ifelse(log_scale,expression(log[10](lambda[1])),expression(lambda[1]))),

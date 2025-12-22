@@ -8,6 +8,8 @@
 }
 \arguments{
 \item{object}{a [`QuadrupenFit`] object}
+
+\item{...}{not used, only here for S3 compatibility}
 }
 \value{
 A matrix of fitted values extracted from `object`.

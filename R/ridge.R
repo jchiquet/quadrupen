@@ -5,57 +5,9 @@
 #' at a grid of values for the \eqn{\ell_2}{l2}-penalty. See details
 #' for the criterion optimized.
 #'
-#' @param x matrix of features. Do NOT include intercept. When
-#' normalized os \code{TRUE}, coefficients will then be rescaled to
-#' the original scale.
-#'
-#' @param y response vector.
-#'
-#' @param lambda2 sequence of decreasing \eqn{\ell_2}{l2}-penalty
-#' levels. If \code{NULL} (the default), a vector is generated with
-#' \code{nlambda2} entries.
-#'
-#' @param struct matrix structuring the coefficients, possibly
-#' sparsely encoded. Must be at least positive semi-definite (this is
-#' checked internally if the \code{checkarg} argument is
-#' \code{TRUE}). If \code{NULL} (the default), the identity matrix is
-#' used. See details below.
-#'
-#' @param intercept logical; indicates if an intercept should be
-#' included in the model. Default is \code{TRUE}.
-#'
-#' @param normalize logical; indicates if variables should be
-#' normalized to have unit L2 norm before fitting.  Default is
-#' \code{TRUE}.
-#'
-#' @param nlambda2 integer that indicates the number of values to put
-#' in the \code{lambda2} vector.  Ignored if \code{lambda2} is
-#' provided.
-#'
-#' @param lambda.min the minimal amount of penalty used to generated
-#' the vector \code{lambda2}. Ignored if \code{lambda2} is provided.
-#'
-#' @param lambda.max the maximal amount of penalty used to generated
-#' the vector \code{lambda2}. Ignored if \code{lambda2} is provided.
-#'
-#' @param control list of argument controlling low level options of
-#' the algorithm --use with care and at your own risk-- :
-#' \itemize{%
-#'
-#' \item{\code{verbose}: }{integer; activate verbose mode --this one
-#' is not too much risky!-- set to \code{0} for no output; \code{1}
-#' for warnings only, and \code{2} for tracing the whole
-#' progression. Default is \code{1}. Automatically set to \code{0}
-#' when the method is embedded within cross-validation or stability
-#' selection.}
-#'
-#' \item{\code{timer}: }{logical; use to record the timing of the
-#' algorithm. Default is \code{FALSE}.}
-#'
-#' }
-#'
-#' @return an object with class \code{quadrupen}, see the
-#' documentation page \code{\linkS4class{quadrupen}} for details.
+#' @inheritParams elastic.net
+#' 
+#' @return an object with class [`QuadrupenFit`].
 #'
 #' @note The optimized criterion is the following: \if{latex}{\deqn{%
 #' \hat{\beta}_{\lambda_2} = \arg \min_{\beta} \frac{1}{2} (y - X
@@ -69,10 +21,8 @@
 #' \eqn{S}{S} is provided via the \code{struct} argument (possibly of
 #' class \code{Matrix}).
 #'
-#' @seealso See also \code{\linkS4class{quadrupen}},
-#' \code{\link{plot.quadrupen}} and \code{\link{crossval}}.
-#' @name ridge
-#' @rdname ridge
+#' @seealso See also [`QuadrupenFit`]
+#' 
 #' @keywords models, regression
 #' 
 #' @examples
@@ -82,7 +32,7 @@
 #' cor <- 0.75
 #' Soo <- toeplitz(cor^(0:(25-1))) ## Toeplitz correlation for irrelevant variables
 #' Sww  <- matrix(cor,10,10) ## bloc correlation between active variables
-#' Sigma <- bdiag(Soo,Sww,Soo,Sww,Soo)
+#' Sigma <- Matrix::bdiag(Soo,Sww,Soo,Sww,Soo)
 #' diag(Sigma) <- 1
 #' n <- 50
 #' x <- as.matrix(matrix(rnorm(95*n),n,95) %*% chol(Sigma))
@@ -92,10 +42,6 @@
 #' labels[beta != 0] <- "relevant"
 #' plot(ridge(x,y) , label=labels) ## a mess
 #' plot(ridge(x,y, struct=solve(Sigma)), label=labels) ## even better
-#'
-#' cat("\nFalse positives for the Lasso:", sum(sign(beta) != sign(beta.lasso)))
-#' cat("\nDONE.\n")
-#'
 #'
 #' @export
 ridge <- function(x,
@@ -128,7 +74,7 @@ ridge <- function(x,
 
   ## ============================================
   ## INSTANTIATE THE PENALTY MODEL
-  myModel <- Ridge$new(myData, intercept, list(l2 = lambda_l2, l1 = 0))
+  myModel <- RidgeRegression$new(myData, intercept, list(l2 = lambda_l2, l1 = 0))
   
   ## ============================================
   ## RECOVER LOW LEVEL OPTIONS

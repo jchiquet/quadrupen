@@ -12,9 +12,21 @@
 #' and plotting [QuadrupenFit$plot()]. They come with equivalent S3 methods : [cross_validate()], 
 #' [stability()] and [plot()].
 #'
-#' @seealso See also \code{\link{plot.quadrupen}}.
-#'
+#' @param log_scale logical; indicates if a log-scale should be used
+#' when `xvar="lambda"`. Default is `TRUE`.
+#' @param standardize logical; standardize the coefficients before
+#' plotting (with the norm of the predictor). Default is `TRUE`.
+#' @param labels vector indicating the names associated to the plotted
+#' variables. When specified, a legend is drawn in order to identify
+#' each variable. Only relevant when the number of predictor is
+#' small. Remind that the intercept does not count. Default is
+#' \code{NULL}.
+#' 
+#' @seealso See also [`InformationCriteria`], [`CrossValidation`] and
+#' [`StabilityPath`]
+#' 
 #' @importFrom stats fitted predict residuals deviance
+#'
 #' @export
 QuadrupenFit <- R6::R6Class(
   classname = "QuadrupenFit",
@@ -96,7 +108,7 @@ QuadrupenFit <- R6::R6Class(
     degrees_freedom      = function(value) {private$df + ifelse(self$has_intercept, 1L, 0L)},
     #' @field r_squared vector giving the coefficient of determination as a function of lambda1.
     r_squared            = function(value) {1 - colSums(self$residuals^2) / private$data$rss},
-    #' @field information_criteria object with class [`Criteria`] storing various information criteria 
+    #' @field information_criteria object with class [`InformationCriteria`] storing various information criteria 
     #' (AIC, BIC, GCV, etc) for the current fit.
     information_criteria = function(value) {private$infocrit},
     #' @field cross_validation object with class [`CrossValidation`] storing output of CV job. 
@@ -244,7 +256,7 @@ QuadrupenFit <- R6::R6Class(
     #' 
     #' @return nothing is return, the beta are internaly rescaled
     #'
-    debias = function(type = c("rescaled")) {
+    debias = function(type = c("none", "rescaled", "original")) {
       ### TODO
       stop("not implemented yet")
     },
@@ -454,7 +466,7 @@ QuadrupenFit <- R6::R6Class(
     #' relevant. If `NULL` (the default), it is estimated as usual
     #' (see details).
     #' 
-    #' @return an object with class [`Criteria`] is sent back and stored as a 
+    #' @return an object with class [`InformationCriteria`] is sent back and stored as a 
     #' field of the original [`QuadrupenFit`] object.
     #' 
     #' @seealso [criteria()]
@@ -480,7 +492,7 @@ QuadrupenFit <- R6::R6Class(
       
       ## Put together all relevant information about those criteria
       private$infocrit <- 
-        Criteria$new(
+        InformationCriteria$new(
           value = data.frame(
             crit, 
             df        = self$degrees_freedom, 
@@ -492,36 +504,38 @@ QuadrupenFit <- R6::R6Class(
       invisible(private$infocrit)
     },
     #' @description Plot method for QuadrupenFit
+    
     #' @param type the type of plot, either `"path"` for regularization path; 
     #' `"criteria"` for BIC-like  information criteria ; `"crossval"` for 
     #' cross-validation plot ; and `"stability"` for stability path.
     #' 
     #' @details  The `"path"`plot is available as soon as a fit has been performed.
-    #' For the other, the appropriate post-treatments must have been made via the
+    #' For the others, the appropriate post-treatments must have been made via the
     #' methods [`QuadrupenFit$criteria()`], [`QuadrupenFit$cross_validate()`] or
     #' [`QuadrupenFit$stability()`]
     #' 
-    #' All plot are given with the default arguments. If you need more 
-    #' control, please use the dedicated methods: [`QuadrupenFit$plot_path()`], 
-    #' [`Criteria$plot()`], [`CrossValidation$plot()`], [`StabilityPath$plot()`] or
+    #' All plots functions are given with the default arguments, except for `labels` and `log_scale`.
+    #' If you need more control, please use the dedicated methods: [`QuadrupenFit$plot_path()`], 
+    #' [`InformationCriteria$plot()`], [`CrossValidation$plot()`], [`StabilityPath$plot()`] or
     #' the corresponding S3 methods.
     #' 
-    plot = function(type = c("path", "criteria", "crossval", "stability")) {
+    plot = function(type = c("path", "criteria", "crossval", "stability"), 
+                    log_scale = TRUE, labels = NULL) {
       
       type <- match.arg(type)
 
       stopifnot("Not available: the method $criteria() has not been called yet." = 
-        (inherits(self$information_criteria, "Criteria") | type != "criteria"))
+        (inherits(self$information_criteria, "InformationCriteria") | type != "criteria"))
       stopifnot("Not available: the method $cross_validate() has not been called yet." = 
         (inherits(self$cross_validation, "CrossValidation") | type != "crossval"))
       stopifnot("Not available: the method $stability() has not been called yet." = 
         (inherits(self$stability_path, "StabilityPath") | type != "stability"))
       
       d <- switch(type, 
-              "path"      = self$plot_path(),
-              "criteria"  = self$information_criteria$plot(),
-              "crossval"  = self$cross_validation$plot(),
-              "stability" = self$stability_path$plot()
+              "path"      = self$plot_path(log_scale = log_scale, labels = labels),
+              "criteria"  = self$information_criteria$plot(log_scale = log_scale),
+              "crossval"  = self$cross_validation$plot(log_scale = log_scale),
+              "stability" = self$stability_path$plot(log_scale = log_scale, labels = labels)
       )
       d
       
@@ -536,17 +550,8 @@ QuadrupenFit <- R6::R6Class(
     #' `"fraction"` (\eqn{\ell_1}{l1}-norm
     #' of the coefficients) or `df` for estimated degrees of freedom. 
     #' Default is set to `"lambda"`.
-    #' @param title the title title. Default is set to the model name followed
+    #' @param title the title. Default is set to the model name followed
     #' by what is on the Y-axis.
-    #' @param log_scale logical; indicates if a log-scale should be used
-    #' when `xvar="lambda"`. Default is `TRUE`.
-    #' @param standardize logical; standardize the coefficients before
-    #' plotting (with the norm of the predictor). Default is `TRUE`.
-    #' @param labels vector indicating the names associated to the plotted
-    #' variables. When specified, a legend is drawn in order to identify
-    #' each variable. Only relevant when the number of predictor is
-    #' small. Remind that the intercept does not count. Default is
-    #' \code{NULL}.
     #'
     #' @return a \pkg{ggplot2} object .
     #'
@@ -624,6 +629,20 @@ QuadrupenFit <- R6::R6Class(
           d <- d + theme(legend.position="none")
         }
       }
+      
+      if (xvar == "lambda") {
+        d <- d + xlab(ifelse(log_scale,expression(log[10](lambda)),expression(lambda)))
+        if (log_scale)
+          d <- d + scale_x_log10() + annotation_logticks(sides="b")
+      } else if (xvar == "fraction") {
+        d <- d + xlab(expression(paste("|",beta[lambda],"|",{}[1]/max[lambda],"|",beta[lambda],"|",{}[1],sep="")))
+      } else {
+        d <- d + xlab("Degrees of freedom")
+      }
+      
+      d
+      
+      
       d
     }
   )

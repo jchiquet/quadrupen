@@ -1,11 +1,13 @@
 
 #' Auxiliary functions to check the given class of an object
-#' 
+#' @param Robject an R object to evaluate
+#' @return logical
 isQuadrupenFit <- function(Robject) {inherits(Robject, "QuadrupenFit")}
 
 #' Extracts model fitted values
 #'
 #' @param object a [`QuadrupenFit`] object
+#' @param ... not used, only here for S3 compatibility
 #'
 #' @return A matrix of fitted values extracted from `object`.
 #'
@@ -19,14 +21,16 @@ fitted.QuadrupenFit <- function(object, ...) {
 #' 
 #' @description Predict response for new sample based on the current model
 #' 
-#' @param newdata matrix of new values for the regressor with which to predict. If omitted, the fitted values are used.
+#' @param object an R object to evaluate
+#' @param newx matrix of new values for the regressor with which to predict. If omitted, the fitted values are used.
 #' @param selection either a character (model selection criteria) of a scalar (lambda value)
+#' @param ... not used, only here for S3 compatibility
 #' 
 #' @return a vector of predicted value
 #' @export
 predict.QuadrupenFit <- function(object, newx = NULL, selection = NULL, ...) {
   stopifnot(isQuadrupenFit(object))
-  object$predict(newx = newx, s = s, ...)
+  object$predict(newx = newx, selection = selection)
 }
 
 #' Extract model coefficients
@@ -34,6 +38,7 @@ predict.QuadrupenFit <- function(object, newx = NULL, selection = NULL, ...) {
 #' @description Extracts model coefficients from a [`QuadrupenFit`] object
 #' @param object a [`QuadrupenFit`] object
 #' @param selection either a character (model selection criteria) of a scalar (lambda value)
+#' @param ... not used, only here for S3 compatibility
 #' @return a vector of coefficients
 #' @export
 coef.QuadrupenFit <- function(object, selection = NULL, ...) {
@@ -49,9 +54,12 @@ coef.QuadrupenFit <- function(object, selection = NULL, ...) {
 #' @description Extracts model residuals from a [`QuadrupenFit`] object
 #' 
 #' @param object a [`QuadrupenFit`] object
+#' @param newx matrix of new values for the regressor with which to predict. If omitted, the fitted values are used.
+#' @param newy vector of new values for the response with which to compute the residuals. If omitted, the fitted values are used.
+#' @param ... not used, only here for S3 compatibility
 #' @return Matrix of residuals, each column corresponding to a value of \code{lambda1}.
 #' @export
-residuals.QuadrupenFit <- function(object, newx=NULL, newy=NULL, ...) {
+residuals.QuadrupenFit <- function(object, newx=NULL, newy, ...) {
   stopifnot(isQuadrupenFit(object))
   if (is.null(newx) | is.null(newy)) {
     res <- object$residuals
@@ -67,9 +75,10 @@ residuals.QuadrupenFit <- function(object, newx=NULL, newy=NULL, ...) {
 #' @description Extracts the deviance of a [`QuadrupenFit`] object
 #' 
 #' @param object a [`QuadrupenFit`] object
+#' @param ... not used, only here for S3 compatibility
 #' @return a scalar
 #' @export
-deviance.QuadrupenFit <- function(object, ...) {
+deviance.QuadrupenFit <- function(object, ...){
   stopifnot(isQuadrupenFit(object))
   object$deviance
 }
@@ -139,8 +148,7 @@ deviance.QuadrupenFit <- function(object, ...) {
 #' criteria(bounded.reg(x,y, lambda2=1))
 #' }
 #'
-#' @import ggplot2 reshape2 scales grid methods
-#' 
+#' @importFrom stats setNames
 #' @export
 criteria <- 
   function(object, 

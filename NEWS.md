@@ -1,0 +1,64 @@
+NEWS/Changelog
+
+# quadrupen 0.4-0	(2026-01-xx)
+
+- major updates
+  - complete rewriting of R code using R6 classes
+  - changing many parameters (badly) named, not backward compatibility
+- Integration of changes from CRAN versinons from 0.2-4 to 0.2-13
+
+# quadrupen 0.3-0	(2013-11)
+
+- major updates
+  -	added structured ridge regression (regression penalized by structured l2 norm)
+  -   added corresponding functionality for cross-validation and stability path
+- Minor:
+  - removed the not very useful 'reverse' argument for plotting    
+  - added demo for lasso, ridge and use of the criteria function    
+
+# quadrupen 0.2-4	(2014-01-16)
+    Minor:
+    +   memory leak corrected (sp_mat declaration)
+    +   linking to Rcpp/RcppArmadillo headers (requires R 3.0-2)
+
+# quadrupen 0.2-4	(2013-11-01)
+- added a 'lasso' function, simple wrapper to the elastic-net 'function'
+- added computation of degrees of freedom (for elastic net and bounded regression)
+- added a method to compute penalized criteria (BIC/AIC) of a quadrupen fit, with plot
+
+# 0.2-3	(2013-08-26)
+
+- added back the 'normalize' parameter
+- standardization is performed within the C++ code
+- use of sparse conversion from Matrix to Armadillo
+- corrected bug with the 'intercept' and 'residuals' components of the quadrupen class
+- added more tests in the inst directory
+- correction in the documentation
+- added r.squared to the quadrupen class
+
+# quadrupen 0.2-2	(2013-04-08)
+
+- minor fix to comply with recent ggplot2 updates.
+
+# quadrupen 0.2-1	(2013-02-27)
+
+- minor fix to pass CRAN check on Windows operating systems.
+
+quadrupen 0.2-0	(2013-02-26)
+
+- Major updates
+  - added bounded regression (regression penalized by infinity norm + structered l2 norm)
+  - added corresponding functionalies for cross-validation and stability path
+- Minor updates
+- corrected wrong annotations of the stability path (PFER)
+- handled normalization internally ('normalize' is no longer a parameter)
+- more simple internal handling of penscales and correction of the rescaling of the intercept
+- better use of multicore features
+- handled runtime error exception in RcppArmadillo when the system is singular (end of the solution path)
+  A consequence is quadrupen is less likely to crash due to user's "bad" parametrization
+- simplification of the C++ code, bugs corrected, probably new ones added :-'(
+- added 'examples' and 'tests' directories
+
+# quadrupen 0.1-0	(2012-10-09)
+
+- first build: structured elastic-net with (weighted) quadratic loss, cross-validation and stability selection methods.

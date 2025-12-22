@@ -28,13 +28,13 @@ the original scaling
 
 
  The `"path"`plot is available as soon as a fit has been performed.
-For the other, the appropriate post-treatments must have been made via the
+For the others, the appropriate post-treatments must have been made via the
 methods [`QuadrupenFit$criteria()`], [`QuadrupenFit$cross_validate()`] or
 [`QuadrupenFit$stability()`]
 
-All plot are given with the default arguments. If you need more 
-control, please use the dedicated methods: [`QuadrupenFit$plot_path()`], 
-[`Criteria$plot()`], [`CrossValidation$plot()`], [`StabilityPath$plot()`] or
+All plots functions are given with the default arguments, except for `labels` and `log_scale`.
+If you need more control, please use the dedicated methods: [`QuadrupenFit$plot_path()`], 
+[`InformationCriteria$plot()`], [`CrossValidation$plot()`], [`StabilityPath$plot()`] or
 the corresponding S3 methods.
 
 Plot method for regularization path
@@ -70,7 +70,8 @@ plot(bounded.reg(x,y, lambda2=10), xvar="fraction")
 
 }
 \seealso{
-See also \code{\link{plot.quadrupen}}.
+See also [`InformationCriteria`], [`CrossValidation`] and
+[`StabilityPath`]
 
 [cross_validate()]
 Stability selection for Quadrupen object
@@ -117,7 +118,7 @@ Equals to zero if \code{intercept} has been set to `FALSE`.}
 
 \item{\code{r_squared}}{vector giving the coefficient of determination as a function of lambda1.}
 
-\item{\code{information_criteria}}{object with class [`Criteria`] storing various information criteria 
+\item{\code{information_criteria}}{object with class [`InformationCriteria`] storing various information criteria 
 (AIC, BIC, GCV, etc) for the current fit.}
 
 \item{\code{cross_validation}}{object with class [`CrossValidation`] storing output of CV job. 
@@ -256,7 +257,7 @@ Debias model coefficients
 Apply various debiasing schemes to correct effect of shrinkage 
 on the estimation of the coefficients
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{QuadrupenFit$debias(type = c("rescaled"))}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{QuadrupenFit$debias(type = c("none", "rescaled", "original"))}\if{html}{\out{</div>}}
 }
 
 \subsection{Arguments}{
@@ -398,7 +399,7 @@ relevant. If `NULL` (the default), it is estimated as usual
 \if{html}{\out{</div>}}
 }
 \subsection{Returns}{
-an object with class [`Criteria`] is sent back and stored as a 
+an object with class [`InformationCriteria`] is sent back and stored as a 
 field of the original [`QuadrupenFit`] object.
 }
 }
@@ -408,7 +409,11 @@ field of the original [`QuadrupenFit`] object.
 \subsection{Method \code{plot()}}{
 Plot method for QuadrupenFit
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{QuadrupenFit$plot(type = c("path", "criteria", "crossval", "stability"))}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{QuadrupenFit$plot(
+  type = c("path", "criteria", "crossval", "stability"),
+  log_scale = TRUE,
+  labels = NULL
+)}\if{html}{\out{</div>}}
 }
 
 \subsection{Arguments}{
@@ -417,6 +422,15 @@ Plot method for QuadrupenFit
 \item{\code{type}}{the type of plot, either `"path"` for regularization path; 
 `"criteria"` for BIC-like  information criteria ; `"crossval"` for 
 cross-validation plot ; and `"stability"` for stability path.}
+
+\item{\code{log_scale}}{logical; indicates if a log-scale should be used
+when `xvar="lambda"`. Default is `TRUE`.}
+
+\item{\code{labels}}{vector indicating the names associated to the plotted
+variables. When specified, a legend is drawn in order to identify
+each variable. Only relevant when the number of predictor is
+small. Remind that the intercept does not count. Default is
+\code{NULL}.}
 }
 \if{html}{\out{</div>}}
 }
@@ -449,7 +463,7 @@ Default is set to `"lambda"`.}
 \item{\code{log_scale}}{logical; indicates if a log-scale should be used
 when `xvar="lambda"`. Default is `TRUE`.}
 
-\item{\code{title}}{the title title. Default is set to the model name followed
+\item{\code{title}}{the title. Default is set to the model name followed
 by what is on the Y-axis.}
 
 \item{\code{standardize}}{logical; standardize the coefficients before

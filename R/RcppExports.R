@@ -2,14 +2,14 @@
 # Generator token: 10BE3573-1514-4C36-9D1C-5A225CD40393
 
 bounded_reg_cpp <- function(dataModel, tuningParam, control) {
-    .Call(`_quadrupen_bounded_reg_cpp`, dataModel, tuningParam, control)
+    .Call('_quadrupen_bounded_reg_cpp', PACKAGE = 'quadrupen', dataModel, tuningParam, control)
 }
 
 elastic_net_cpp <- function(dataModel, tuningParam, control) {
-    .Call(`_quadrupen_elastic_net_cpp`, dataModel, tuningParam, control)
+    .Call('_quadrupen_elastic_net_cpp', PACKAGE = 'quadrupen', dataModel, tuningParam, control)
 }
 
 ridge_cpp <- function(dataModel, tuningParam, control) {
-    .Call(`_quadrupen_ridge_cpp`, dataModel, tuningParam, control)
+    .Call('_quadrupen_ridge_cpp', PACKAGE = 'quadrupen', dataModel, tuningParam, control)
 }
 

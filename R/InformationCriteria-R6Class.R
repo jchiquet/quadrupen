@@ -1,4 +1,4 @@
-#' Class Criteria
+#' Class InformationCriteria
 #' 
 #' Class of object returned by the [`QuadrupenFit$criteria()`] method or the
 #' [`criteria()`] function.  Owns [print()] and [plot()] methods.
@@ -6,8 +6,8 @@
 #' @importFrom dplyr filter
 #' 
 #' @export
-Criteria <- R6::R6Class(
-  classname = "Criteria",
+InformationCriteria <- R6::R6Class(
+  classname = "InformationCriteria",
   private = list(
     value     = NA
   ),
@@ -57,6 +57,8 @@ Criteria <- R6::R6Class(
     #' @param title graph title
     #'
     #' @return a \pkg{ggplot2} object
+    #' @importFrom tidyr pivot_longer starts_with
+    #' @importFrom dplyr rename select
     plot = function(criteria = self$names, log_scale=TRUE, xvar = c("lambda", "fraction", "df"), title = "Information Criteria") {
       if (length(self$lambda) == 1) {
         stop("Not available when the leading vector of penalties boild down to a scalar.")

@@ -10,6 +10,8 @@
 \item{object}{a [`QuadrupenFit`] object}
 
 \item{selection}{either a character (model selection criteria) of a scalar (lambda value)}
+
+\item{...}{not used, only here for S3 compatibility}
 }
 \value{
 a vector of coefficients

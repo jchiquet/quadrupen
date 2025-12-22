@@ -11,23 +11,23 @@ Description: This package fits classical sparse regression models with
     stability selection).
 URL: https://github.com/jchiquet/quadrupen
 BugReports: https://github.com/jchiquet/quadrupen/issues
-License: GPL (>=2)
+License: GPL (>= 3)
 Encoding: UTF-8
 Language: en-US
 LazyData: true
 Depends:
-    R (>= 3.0.2), 
-    Rcpp,
-    R6,
-    RcppArmadillo,
-    ggplot2,
-    Matrix
+    R (>= 4.1.0)
 Imports:
-    methods,
-    reshape2,
-    scales,
+    dplyr,
+    ggplot2,
     grid,
-    parallel
+    Matrix,
+    methods,
+    parallel,
+    R6,
+    Rcpp,
+    scales,
+    tidyr
 Suggests:
     testthat
 LinkingTo: 
@@ -42,7 +42,7 @@ Collate:
     'DataModel-R6Class.R'
     'StabilityPath-R6Class.R'
     'CrossValidation-R6Class.R'
-    'Criteria-R6Class.R'
+    'InformationCriteria-R6Class.R'
     'bounded-reg.R'
     'elastic-net.R'
     'utils.R'

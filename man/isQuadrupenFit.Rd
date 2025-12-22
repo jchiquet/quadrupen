@@ -6,6 +6,12 @@
 \usage{
 isQuadrupenFit(Robject)
 }
+\arguments{
+\item{Robject}{an R object to evaluate}
+}
+\value{
+logical
+}
 \description{
 Auxiliary functions to check the given class of an object
 }

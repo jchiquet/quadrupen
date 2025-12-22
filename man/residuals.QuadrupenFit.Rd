@@ -4,10 +4,16 @@
 \alias{residuals.QuadrupenFit}
 \title{Extract model residuals}
 \usage{
-\method{residuals}{QuadrupenFit}(object, newx = NULL, newy = NULL, ...)
+\method{residuals}{QuadrupenFit}(object, newx = NULL, newy, ...)
 }
 \arguments{
 \item{object}{a [`QuadrupenFit`] object}
+
+\item{newx}{matrix of new values for the regressor with which to predict. If omitted, the fitted values are used.}
+
+\item{newy}{vector of new values for the response with which to compute the residuals. If omitted, the fitted values are used.}
+
+\item{...}{not used, only here for S3 compatibility}
 }
 \value{
 Matrix of residuals, each column corresponding to a value of \code{lambda1}.
