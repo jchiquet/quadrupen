@@ -29,16 +29,16 @@ for which each cross-validation has been performed.}
 \section{Methods}{
 \subsection{Public methods}{
 \itemize{
-\item \href{#method-CrossValidation-new}{\code{Criteria$new()}}
-\item \href{#method-CrossValidation-show}{\code{Criteria$show()}}
-\item \href{#method-CrossValidation-print}{\code{Criteria$print()}}
-\item \href{#method-CrossValidation-plot}{\code{Criteria$plot()}}
-\item \href{#method-CrossValidation-clone}{\code{Criteria$clone()}}
+\item \href{#method-Criteria-new}{\code{Criteria$new()}}
+\item \href{#method-Criteria-show}{\code{Criteria$show()}}
+\item \href{#method-Criteria-print}{\code{Criteria$print()}}
+\item \href{#method-Criteria-plot}{\code{Criteria$plot()}}
+\item \href{#method-Criteria-clone}{\code{Criteria$clone()}}
 }
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-CrossValidation-new"></a>}}
-\if{latex}{\out{\hypertarget{method-CrossValidation-new}{}}}
+\if{html}{\out{<a id="method-Criteria-new"></a>}}
+\if{latex}{\out{\hypertarget{method-Criteria-new}{}}}
 \subsection{Method \code{new()}}{
 Constructor for a [`Criteria`] object
 Should be called internally by an object [`QuadrupenFit$criteria()`]
@@ -55,8 +55,8 @@ Should be called internally by an object [`QuadrupenFit$criteria()`]
 }
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-CrossValidation-show"></a>}}
-\if{latex}{\out{\hypertarget{method-CrossValidation-show}{}}}
+\if{html}{\out{<a id="method-Criteria-show"></a>}}
+\if{latex}{\out{\hypertarget{method-Criteria-show}{}}}
 \subsection{Method \code{show()}}{
 User friendly print method
 \subsection{Usage}{
@@ -65,8 +65,8 @@ User friendly print method
 
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-CrossValidation-print"></a>}}
-\if{latex}{\out{\hypertarget{method-CrossValidation-print}{}}}
+\if{html}{\out{<a id="method-Criteria-print"></a>}}
+\if{latex}{\out{\hypertarget{method-Criteria-print}{}}}
 \subsection{Method \code{print()}}{
 User friendly print method
 \subsection{Usage}{
@@ -75,14 +75,14 @@ User friendly print method
 
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-CrossValidation-plot"></a>}}
-\if{latex}{\out{\hypertarget{method-CrossValidation-plot}{}}}
+\if{html}{\out{<a id="method-Criteria-plot"></a>}}
+\if{latex}{\out{\hypertarget{method-Criteria-plot}{}}}
 \subsection{Method \code{plot()}}{
 Plot the the desired criteria
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{Criteria$plot(
-  log_scale = TRUE,
   criteria = self$names,
+  log_scale = TRUE,
   xvar = c("lambda", "fraction", "df"),
   title = "Information Criteria"
 )}\if{html}{\out{</div>}}
@@ -91,11 +91,11 @@ Plot the the desired criteria
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{log_scale}}{logical; indicates if a log-scale should be used
-when `xvar="lambda"`. Default is `TRUE`.}
-
 \item{\code{criteria}}{a vector of character with the criteria to plot. 
 The default plot all the criteria available (stored in the field `names`)}
+
+\item{\code{log_scale}}{logical; indicates if a log-scale should be used
+when `xvar="lambda"`. Default is `TRUE`.}
 
 \item{\code{xvar}}{variable to plot on the X-axis: either `"df"`
 (the estimated degrees of freedom), `"lambda"`
@@ -112,8 +112,8 @@ a \pkg{ggplot2} object
 }
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-CrossValidation-clone"></a>}}
-\if{latex}{\out{\hypertarget{method-CrossValidation-clone}{}}}
+\if{html}{\out{<a id="method-Criteria-clone"></a>}}
+\if{latex}{\out{\hypertarget{method-Criteria-clone}{}}}
 \subsection{Method \code{clone()}}{
 The objects of this class are cloneable with this method.
 \subsection{Usage}{

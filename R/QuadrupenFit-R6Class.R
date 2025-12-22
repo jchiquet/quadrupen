@@ -491,7 +491,42 @@ QuadrupenFit <- R6::R6Class(
         )
       invisible(private$infocrit)
     },
-    #' Plot method
+    #' @description Plot method for QuadrupenFit
+    #' @param type the type of plot, either `"path"` for regularization path; 
+    #' `"criteria"` for BIC-like  information criteria ; `"crossval"` for 
+    #' cross-validation plot ; and `"stability"` for stability path.
+    #' 
+    #' @details  The `"path"`plot is available as soon as a fit has been performed.
+    #' For the other, the appropriate post-treatments must have been made via the
+    #' methods [`QuadrupenFit$criteria()`], [`QuadrupenFit$cross_validate()`] or
+    #' [`QuadrupenFit$stability()`]
+    #' 
+    #' All plot are given with the default arguments. If you need more 
+    #' control, please use the dedicated methods: [`QuadrupenFit$plot_path()`], 
+    #' [`Criteria$plot()`], [`CrossValidation$plot()`], [`StabilityPath$plot()`] or
+    #' the corresponding S3 methods.
+    #' 
+    plot = function(type = c("path", "criteria", "crossval", "stability")) {
+      
+      type <- match.arg(type)
+
+      stopifnot("Not available: the method $criteria() has not been called yet." = 
+        (inherits(self$information_criteria, "Criteria") | type != "criteria"))
+      stopifnot("Not available: the method $cross_validate() has not been called yet." = 
+        (inherits(self$cross_validation, "CrossValidation") | type != "crossval"))
+      stopifnot("Not available: the method $stability() has not been called yet." = 
+        (inherits(self$stability_path, "StabilityPath") | type != "stability"))
+      
+      d <- switch(type, 
+              "path"      = self$plot_path(),
+              "criteria"  = self$information_criteria$plot(),
+              "crossval"  = self$cross_validation$plot(),
+              "stability" = self$stability_path$plot()
+      )
+      d
+      
+    },
+    #' Plot method for regularization path
     #' 
     #' @description Produce a plot of the solution path of a [`QuadrupenFit`] object.
     #'
@@ -562,27 +597,25 @@ QuadrupenFit <- R6::R6Class(
         "df"       = private$df,
          self$major_tuning
       )
-
-      data.coef <- melt(data.frame(xvar=xv, beta=beta),id="xvar")
-      # data.coef <- data.frame(xvar=xv, beta=beta) |> 
-      #   tidyr::pivot_longer(cols = -xvar)
+      
+      dplot <- data.frame(xvar=xv, beta=beta) |> 
+         tidyr::pivot_longer(cols = -xvar, names_to = "var", values_to = "coef")
       if (is.null(labels)) {
-        data.coef$labels <- factor(rep(nzeros, each=length(xv)))
+        dplot$labels <- factor(rep(nzeros, length(xv)))
       } else {
         if (sum(is.na(labels[nzeros]))>0 ) {
           labels <- NULL
           warning("The number of label is wrong, ignoring them.")
-          data.coef$labels <- factor(rep(nzeros, each=length(xv)))
+          dplot$labels <- factor(rep(nzeros, length(xv)))
         } else {
-          data.coef$labels <- factor(rep(labels[nzeros], each=length(xv)))
+          dplot$labels <- factor(rep(labels[nzeros], length(xv)))
         }
       }
-      colnames(data.coef) <- c("xvar","var","coef", "variables")
-      
-      d <- ggplot(data.coef,aes(x=xvar,y=coefficients, colour=variables, group=var)) +
-        geom_line(aes(x=xvar,y=coef)) +  geom_hline(yintercept=0, alpha=0.5, linetype="dotted") +
-        ylab(ifelse(standardize, "standardized coefficients","coefficients")) + ggtitle(title) +
-        theme_bw()
+
+      d <- ggplot(dplot) + aes(x=xvar,y=coef, color=labels, group=var) + 
+        geom_line() +  geom_hline(yintercept=0, alpha=0.5, linetype="dotted") +
+        ylab(ifelse(standardize, "standardized coefficients","coefficients")) + 
+          ggtitle(title) + theme_bw()
       
       if (is.null(labels)) {
         d <- d + theme(legend.position="none") 

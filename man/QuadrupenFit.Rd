@@ -25,6 +25,19 @@ and plotting [QuadrupenFit$plot()]. They come with equivalent S3 methods : [cros
 the 'rescaled' debaising is as defined in Zou and Hastie (2006): the vector of
 parameters is rescaled by a coefficient \code{(1+lambda2)}. 'Original' reset to 
 the original scaling
+
+
+ The `"path"`plot is available as soon as a fit has been performed.
+For the other, the appropriate post-treatments must have been made via the
+methods [`QuadrupenFit$criteria()`], [`QuadrupenFit$cross_validate()`] or
+[`QuadrupenFit$stability()`]
+
+All plot are given with the default arguments. If you need more 
+control, please use the dedicated methods: [`QuadrupenFit$plot_path()`], 
+[`Criteria$plot()`], [`CrossValidation$plot()`], [`StabilityPath$plot()`] or
+the corresponding S3 methods.
+
+Plot method for regularization path
 }
 \examples{
 
@@ -46,9 +59,9 @@ x <- as.matrix(matrix(rnorm(95*n),n,95) \%*\% chol(Sigma))
 y <- 10 + x \%*\% beta + rnorm(n,0,10)
 
 ## Plot the Lasso path
-plot(elastic.net(x,y, lambda2=0), main="Lasso solution path")
+plot(lasso(x,y), title="Lasso solution path")
 ## Plot the Elastic-net path
-plot(enet, main = "Elastic-net solution path")
+plot(elastic.net(x,y), title = "Elastic-net solution path")
 ## Plot the Elastic-net path (fraction on X-axis, unstandardized coefficient)
 plot(elastic.net(x,y, lambda2=10), standardize=FALSE, xvar="fraction")
 ## Plot the Bounded regression path (fraction on X-axis)
@@ -66,7 +79,6 @@ Stability selection for Quadrupen object
 Penalized criteria based on estimation of degrees of freedom
 
 [criteria()]
-Plot method
 }
 \section{Active bindings}{
 \if{html}{\out{<div class="r6-active-bindings">}}
@@ -129,6 +141,7 @@ Only available once method $stability has been called.}
 \item \href{#method-QuadrupenFit-cross_validate}{\code{QuadrupenFit$cross_validate()}}
 \item \href{#method-QuadrupenFit-stability}{\code{QuadrupenFit$stability()}}
 \item \href{#method-QuadrupenFit-criteria}{\code{QuadrupenFit$criteria()}}
+\item \href{#method-QuadrupenFit-plot}{\code{QuadrupenFit$plot()}}
 \item \href{#method-QuadrupenFit-plot_path}{\code{QuadrupenFit$plot_path()}}
 \item \href{#method-QuadrupenFit-clone}{\code{QuadrupenFit$clone()}}
 }
@@ -390,15 +403,34 @@ field of the original [`QuadrupenFit`] object.
 }
 }
 \if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-QuadrupenFit-plot"></a>}}
+\if{latex}{\out{\hypertarget{method-QuadrupenFit-plot}{}}}
+\subsection{Method \code{plot()}}{
+Plot method for QuadrupenFit
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{QuadrupenFit$plot(type = c("path", "criteria", "crossval", "stability"))}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{type}}{the type of plot, either `"path"` for regularization path; 
+`"criteria"` for BIC-like  information criteria ; `"crossval"` for 
+cross-validation plot ; and `"stability"` for stability path.}
+}
+\if{html}{\out{</div>}}
+}
+}
+\if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-QuadrupenFit-plot_path"></a>}}
 \if{latex}{\out{\hypertarget{method-QuadrupenFit-plot_path}{}}}
 \subsection{Method \code{plot_path()}}{
-Produce a plot of the solution path of a \code{quadrupen} fit.
+Produce a plot of the solution path of a [`QuadrupenFit`] object.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{QuadrupenFit$plot_path(
-  xvar = "lambda",
-  main = paste(self$penalty, " path", sep = ""),
-  log.scale = TRUE,
+  xvar = c("lambda", "fraction", "df"),
+  log_scale = TRUE,
+  title = paste(self$penalty, " path", sep = ""),
   standardize = TRUE,
   labels = NULL
 )}\if{html}{\out{</div>}}
@@ -407,17 +439,18 @@ Produce a plot of the solution path of a \code{quadrupen} fit.
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{xvar}}{variable to plot on the X-axis: either \code{"lambda"}
-(\eqn{\lambda_1}{lambda1} penalty level or
-\eqn{\lambda_2}{lambda2} for ridge regression) or
-\code{"fraction"} (\eqn{\ell_1}{l1}-norm
-of the coefficients). Default is set to \code{"lambda"}.}
+\item{\code{xvar}}{variable to plot on the X-axis: either `"lambda"`
+(\eqn{\ell_1}{l1} penalty level, or
+\eqn{\ell_2}{l2} for ridge  and \eqn{\ell_\infty}{l_inf}) or
+`"fraction"` (\eqn{\ell_1}{l1}-norm
+of the coefficients) or `df` for estimated degrees of freedom. 
+Default is set to `"lambda"`.}
 
-\item{\code{main}}{the main title. Default is set to the model name followed
-by what is on the Y-axis.}
-
-\item{\code{log.scale}}{logical; indicates if a log-scale should be used
+\item{\code{log_scale}}{logical; indicates if a log-scale should be used
 when `xvar="lambda"`. Default is `TRUE`.}
+
+\item{\code{title}}{the title title. Default is set to the model name followed
+by what is on the Y-axis.}
 
 \item{\code{standardize}}{logical; standardize the coefficients before
 plotting (with the norm of the predictor). Default is `TRUE`.}
@@ -427,15 +460,11 @@ variables. When specified, a legend is drawn in order to identify
 each variable. Only relevant when the number of predictor is
 small. Remind that the intercept does not count. Default is
 \code{NULL}.}
-
-\item{\code{plot}}{logical; indicates if the graph should be plotted on
-call. Default is \code{TRUE}.}
 }
 \if{html}{\out{</div>}}
 }
 \subsection{Returns}{
-a \pkg{ggplot2} object which can be plotted via the
-\code{print} method.
+a \pkg{ggplot2} object .
 }
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}
@@ -453,9 +482,9 @@ x <- as.matrix(matrix(rnorm(95*n),n,95) \%*\% chol(Sigma))
 y <- 10 + x \%*\% beta + rnorm(n,0,10)
 
 ## Plot the Lasso path
-plot(elastic.net(x,y, lambda2=0), main="Lasso solution path")
+plot(lasso(x,y), title="Lasso solution path")
 ## Plot the Elastic-net path
-plot(enet, main = "Elastic-net solution path")
+plot(elastic.net(x,y), title = "Elastic-net solution path")
 ## Plot the Elastic-net path (fraction on X-axis, unstandardized coefficient)
 plot(elastic.net(x,y, lambda2=10), standardize=FALSE, xvar="fraction")
 ## Plot the Bounded regression path (fraction on X-axis)

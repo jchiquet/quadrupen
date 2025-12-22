@@ -7,7 +7,7 @@
 #' 
 #' @export
 Criteria <- R6::R6Class(
-  classname = "CrossValidation",
+  classname = "Criteria",
   private = list(
     value     = NA
   ),
