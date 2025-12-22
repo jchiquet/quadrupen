@@ -68,8 +68,6 @@ lasso <- function(x,
                      maxfeat   = maxfeat,
                      beta0     = beta0,
                      control   = control)
-  # out@penalty <- "lasso"
   out
-
 }
 

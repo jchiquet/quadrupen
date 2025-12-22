@@ -257,7 +257,7 @@ Debias model coefficients
 Apply various debiasing schemes to correct effect of shrinkage 
 on the estimation of the coefficients
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{QuadrupenFit$debias(type = c("none", "rescaled", "original"))}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{QuadrupenFit$debias(type = c("none", "standard"))}\if{html}{\out{</div>}}
 }
 
 \subsection{Arguments}{
@@ -285,7 +285,7 @@ Function that computes K-fold cross-validated error of a
   folds = split(sample(1:self$nsample), rep(1:K, length = self$nsample)),
   lambda2 = self$minor_tuning,
   verbose = TRUE,
-  cores = detectCores() - 2
+  cores = max(K, detectCores() - 2)
 )}\if{html}{\out{</div>}}
 }
 

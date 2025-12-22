@@ -83,6 +83,7 @@ bounded.reg <- function(x,
                         struct    = Matrix::Diagonal(ncol(x), 1),
                         intercept = TRUE,
                         normalize = TRUE,
+                        debiasing = c("none", "standard", "ridge"),
                         nlambda1  = ifelse(is.null(lambda1),100,length(lambda1)),
                         minratio  = ifelse(nrow(x) <= ncol(x), 1e-2, 1e-4),
                         maxfeat   = ifelse(lambda2 < 1e-2, min(nrow(x),ncol(x)), min(4*nrow(x),ncol(x))),
@@ -120,7 +121,8 @@ bounded.reg <- function(x,
   if (!is.null(control$method)) if (control$method != "quadra") ctrl$threshold <- 1e-2
   ctrl[names(control)] <- control # default overwritten by user specifications
   ctrl$method <- switch(ctrl$method, quadra = 0, pathwise = 1, fista = 2, 0)
-
+  ctrl$rescaling <- match.arg(debiasing)
+  
   ## ============================================
   ## FIT THE MODEL WITH ACTIVE SET ALGORITHM
   myModel$fit(ctrl)
@@ -128,6 +130,7 @@ bounded.reg <- function(x,
   ## ============================================
   ## POSTREATMENT + SEND BACK THE RESULTING MODEL
   ##
+  myModel$debias(ctrl$rescaling)
   myModel$criteria()
   myModel
 }

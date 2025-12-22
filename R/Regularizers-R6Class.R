@@ -21,6 +21,15 @@ ElasticNet <- R6::R6Class(
       super$initialize(data, intercept, regParam)
       private$optimizer <- elastic_net_cpp
     }
+  ),
+  private = list(
+    rescaled = function() { # Zhou and Hastie Rescaling
+      factor <- ( 1 + private$tuning[[2]] )
+      list(
+        beta = factor * private$beta,
+        mu   = factor * private$mu - private$tuning[[2]] * private$data$mean_y
+      )
+    }
   )
 )
 
@@ -45,6 +54,15 @@ BoundedRegression <- R6::R6Class(
     initialize =  function(data, intercept, regParam) {
       super$initialize(data, intercept, regParam)
       private$optimizer <- bounded_reg_cpp
+    }
+  ),
+  private = list(
+    rescaled = function() { # Zhou and Hastie Rescaling
+      factor <- ( 1 + private$tuning[[2]] )
+      list(
+        beta = factor * private$beta,
+        mu   = factor * private$mu - private$tuning[[2]] * private$data$mean_y
+      )
     }
   )
 )

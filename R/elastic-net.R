@@ -39,6 +39,12 @@
 #' normalized to have unit L2 norm before fitting.  Default is
 #' `TRUE`.
 #'
+#' @param debiasing character picked in "none" or "standard": indicates if 
+#' coefficients should be rescaled to avoid excessive biais due to double 
+#' shrinkage. "standard" is Zou and Hastie (2006)
+#' orginal proposa: : the vector of parameters is rescaled by a factor 
+#' `(1+lambda2)`. "none" is for no rescaling, the default.
+#'
 #' @param nlambda1 integer that indicates the number of values to put
 #' in the `lambda1` vector.  Ignored if `lambda1` is
 #' provided.
@@ -140,6 +146,7 @@ elastic.net <- function(x,
                         struct    = Matrix::Diagonal(ncol(x), 1),
                         intercept = TRUE,
                         normalize = TRUE,
+                        debiasing = c("none", "standard", "ridge"),
                         nlambda1  = ifelse(is.null(lambda1),100,length(lambda1)),
                         minratio  = ifelse(nrow(x) <= ncol(x), 1e-2, 1e-4),
                         maxfeat   = ifelse(lambda2 < 1e-2, min(nrow(x),ncol(x)), min(4*nrow(x),ncol(x))),
@@ -181,6 +188,7 @@ elastic.net <- function(x,
   ctrl[names(control)] <- control # default overwritten by user specifications
   ctrl$method <- switch(ctrl$method, quadra = 0, pathwise = 1, fista = 2, 0)
   ctrl$beta0  <- beta0
+  ctrl$rescaling <- match.arg(debiasing)
   
   ## ============================================
   ## FIT THE MODEL WITH ACTIVE SET ALGORITHM
@@ -190,6 +198,7 @@ elastic.net <- function(x,
   ## ============================================
   ## POSTREATMENT + SEND BACK THE RESULTING MODEL
   ##
+  myModel$debias(ctrl$rescaling)
   myModel$criteria()
   myModel
 }

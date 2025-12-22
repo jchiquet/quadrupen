@@ -190,11 +190,10 @@ QuadrupenFit <- R6::R6Class(
     get_model = function(
           selection,
           type = c("coefficients", "penalty", "index")) {
-      browser()
       lambda <- private$tuning[[1]]
       if (is.character(selection)) {
         stopifnot("must be a character in" = selection %in% c("AIC", "BIC", "mBIC", "eBIC", "GCV", "CV_min", "CV_1se"))
-        if (selection %in% c("CV_min", "CV_1se") & is.na(private$crossval)) 
+        if (selection %in% c("CV_min", "CV_1se") & !inherits(private$crossval, "CrossValidation")) 
           stop("Cross-validation has not yet been performed")
         
         index <- 
@@ -204,8 +203,8 @@ QuadrupenFit <- R6::R6Class(
                  "mBIC" = which.min(private$infocrit$data$mBIC),
                  "eBIC" = which.min(private$infocrit$data$eBIC),
                  "GCV"  = which.min(private$infocrit$data$GCV),
-                 "CV_min" = min(match(private$cv_job$lambda1_min, lambda), length(lambda)),
-                 "CV_1se" = min(match(private$cv_job$lambda1_1se, lambda), length(lambda)),
+                 "CV_min" = min(match(private$crossval$lambda1_min, lambda), length(lambda)),
+                 "CV_1se" = min(match(private$crossval$lambda1_1se, lambda), length(lambda)),
           )
       } else {
         index <- match(selection, lambda)
@@ -220,7 +219,7 @@ QuadrupenFit <- R6::R6Class(
         match.arg(type), 
         "index"        = index,
         "penalty"      = lambda[index],
-        setNames(c(private$mu[index], private$beta[index, ]), c("intercept", colnames(private$beta)))
+        setNames(c(private$mu[index], private$beta[index, ]), private$data$varnames)
         )
       res
     },
@@ -256,9 +255,13 @@ QuadrupenFit <- R6::R6Class(
     #' 
     #' @return nothing is return, the beta are internaly rescaled
     #'
-    debias = function(type = c("none", "rescaled", "original")) {
-      ### TODO
-      stop("not implemented yet")
+    debias = function(type = c("none", "standard")) {
+      type <- match.arg(type)
+      if (type != "none"){
+        res <- private$rescaled()
+        private$mu   <- res$mu
+        private$beta <- res$beta
+      }
     },
     #' Cross-validation for Quadrupen object
     #' 
@@ -320,6 +323,11 @@ QuadrupenFit <- R6::R6Class(
           if (verbose & (fold == 1)) cat(round(lambda2, 3),"\t")
           regParam[[2]] <- lambda2
           out <- private$optimizer(CVData[[fold]]$trainData, regParam, control)
+          if (control$rescaling != "none"){
+            res <- private$rescaled()
+            out$mu   <- res$mu
+            out$beta <- res$beta
+          }
           y_hat <- scale(tcrossprod(CVData[[fold]]$testData$X, out$beta), -out$mu, FALSE)
           err <- sweep(y_hat, 1L, CVData[[fold]]$testData$y)^2
           if (ncol(err) < length(regParam[[1]])) {
