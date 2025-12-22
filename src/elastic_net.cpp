@@ -22,7 +22,6 @@ Rcpp::List elastic_net_cpp(
   const arma::vec &y        = dataModel["y"]  ; // response vector
   const arma::sp_mat& S     = dataModel["S"]  ; // Structuring matrix
   const arma::vec &penscale = dataModel["wx"] ;  // penalty weights
-  const arma::vec& weights  = dataModel["wy"]     ; // observation weights (not use at the moment)
   const arma::vec &xty      = dataModel["xty"]    ; // responses to predictors vector
   const arma::vec xbar      = dataModel["mean_X"] ; // mean of the predictors
   const arma::vec &normx    = dataModel["norm_X"] ; // norm of the predictors
