@@ -1,72 +1,26 @@
 ## ======================================================
 ## GENERATE A GRID OF PENALTY IF NONE HAS BEEN PROVIDED
-get.lambda1.l1 <- function(xty,nlambda1,min.ratio) {
+get.lambda1.l1 <- function(xty,nlambda1,minratio) {
   lmax <- max(abs(xty))
-  return(10^seq(log10(lmax), log10(min.ratio*lmax), len=nlambda1))
+  return(10^seq(log10(lmax), log10(minratio*lmax), len=nlambda1))
 }
 
-get.lambda1.li <- function(xty,nlambda1,min.ratio) {
+get.lambda1.li <- function(xty,nlambda1,minratio) {
   lmax <- sum(abs(xty))
-  return(10^seq(log10(lmax), log10(min.ratio*lmax), len=nlambda1))
+  return(10^seq(log10(lmax), log10(minratio*lmax), len=nlambda1))
 }
 
-## ======================================================
-## RECOVER THE LIST OF DEFAULT OPTIONAL ARGUMENTS
-default.args <- function(penalty,n,p,user) {
-  switch(penalty,
-         "elastic.net" = list(
-           lambda1   = NULL,
-           lambda2   = 0.01,
-           penscale  = rep(1,p),
-           struct    = NULL,
-           intercept = TRUE,
-           normalize = TRUE,
-           naive     = FALSE,
-           nlambda1  = ifelse(is.null(user$lambda1),100,length(user$lambda1)),
-           min.ratio = ifelse(n<p,0.01,5e-3),
-           max.feat  = min(4*n,p),
-           beta0     = NULL,
-           control   = list(),
-           checkargs = TRUE),
+ctrl_default <- function(d)
+  list(verbose     = 1, # default control options
+       timer       = FALSE,
+       maxiter     = max(500, d),
+       method      = "quadra",
+       threshold   = 1e-7,
+       monitor     = 0,
+       bulletproof = TRUE,
+       usechol     = TRUE
+  )
 
-         "lasso"     = list(
-           lambda1   = NULL,
-           penscale  = rep(1,p),
-           intercept = TRUE,
-           normalize = TRUE,
-           nlambda1  = ifelse(is.null(user$lambda1),100,length(user$lambda1)),
-           min.ratio = ifelse(n<p,0.01,5e-3),
-           max.feat  = min(n,p),
-           beta0     = NULL,
-           control   = list(),
-           checkargs = TRUE),
-         
-         "ridge" = list(
-           lambda2    = NULL,
-           struct     = NULL,
-           intercept  = TRUE,
-           normalize  = TRUE,
-           nlambda2   = 100 ,
-           lambda.min = ifelse(n<=p,0.01,1e-4),
-           lambda.max = 100 ,
-           control    = list(),
-           checkargs  = TRUE),
-
-         "bounded.reg" = list(
-           lambda1   = NULL,
-           lambda2   = 0.01,
-           penscale  = rep(1,p),
-           struct    = NULL,
-           intercept = TRUE,
-           normalize = TRUE,
-           naive     = FALSE,
-           nlambda1  = ifelse(is.null(user$lambda1),100,length(user$lambda1)),
-           min.ratio = ifelse(n<p,0.01,5e-3),
-           max.feat  = min(4*n,p),
-           control   = list(),
-           checkargs = TRUE)
-         )
-}
 
 ## ====================================================================
 ## STANDARDIZE THE PREDICTOR (NEEDED FOR CROSS-VALIDATION PURPOSES)
@@ -116,3 +70,15 @@ standardize <- function(x,y,intercept,normalize,penscale,zero=.Machine$double.ep
 
   return(list(xbar=xbar, ybar=ybar, normx=normx, normy=normy, xty=xty, x=x))
 }
+
+status_to_message <- function(status) {
+  message <- switch(as.character(status),
+                    "0"  = "converged",
+                    "1"  = "max # of iterate reached",
+                    "2"  = "max # of feature reached",
+                    "3"  = "system has become singular",
+                    "Return status not recognized"
+  )
+  message
+}
+

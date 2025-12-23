@@ -1,8 +1,8 @@
 Package: quadrupen
 Type: Package
 Title: Sparsity by Worst-Case Quadratic Penalties
-Version: 0.3-0
-Date: 2013-xx-xx
+Version: 0.3-9500
+Date: 2026-0x-xx
 Authors@R: person("Julien", "Chiquet", , "julien.chiquet@inrae.fr", role = c("aut", "cre"),
            comment = c(ORCID = "0000-0002-3629-3429"))
 Description: This package fits classical sparse regression models with
@@ -11,22 +11,23 @@ Description: This package fits classical sparse regression models with
     stability selection).
 URL: https://github.com/jchiquet/quadrupen
 BugReports: https://github.com/jchiquet/quadrupen/issues
-License: GPL (>=2)
+License: GPL (>= 3)
 Encoding: UTF-8
 Language: en-US
 LazyData: true
 Depends:
-    R (>= 3.0.2), 
-    Rcpp,
-    RcppArmadillo,
-    ggplot2,
-    Matrix
+    R (>= 4.1.0)
 Imports:
-    methods,
-    reshape2,
-    scales,
+    dplyr,
+    ggplot2,
     grid,
-    parallel
+    Matrix,
+    methods,
+    parallel,
+    R6,
+    Rcpp,
+    scales,
+    tidyr
 Suggests:
     testthat
 LinkingTo: 
@@ -35,17 +36,18 @@ LinkingTo:
 Collate:
     'init.R'
     'quadrupen-package.R'
-    'quadrupen-class.R'
-    'crossval-class.R'
-    'crossval.R'
-    'stability-class.R'
-    'stability.R'
+    'QuadrupenFit-R6Class.R'
+    'quadrupen-S3Methods.R'
+    'Regularizers-R6Class.R'
+    'DataModel-R6Class.R'
+    'StabilityPath-R6Class.R'
+    'CrossValidation-R6Class.R'
+    'InformationCriteria-R6Class.R'
     'bounded-reg.R'
     'elastic-net.R'
     'utils.R'
     'lasso.R'
     'ridge.R'
-    'group_lasso.R'
     'RcppExports.R'
 Packaged: 2013-03-25 19:41:00 UTC; jchiquet
 RoxygenNote: 7.3.3

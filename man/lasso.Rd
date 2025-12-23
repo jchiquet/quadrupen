@@ -8,107 +8,91 @@ lasso(
   x,
   y,
   lambda1 = NULL,
-  penscale = rep(1, p),
+  penscale = rep(1, ncol(x)),
   intercept = TRUE,
   normalize = TRUE,
   nlambda1 = ifelse(is.null(lambda1), 100, length(lambda1)),
-  min.ratio = ifelse(n <= p, 0.01, 1e-04),
-  max.feat = min(n, p),
-  beta0 = NULL,
-  control = list(),
-  checkargs = TRUE
+  minratio = ifelse(nrow(x) <= ncol(x), 0.01, 1e-04),
+  maxfeat = min(nrow(x), ncol(x)),
+  beta0 = numeric(ncol(x)),
+  control = list()
 )
 }
 \arguments{
 \item{x}{matrix of features, possibly sparsely encoded
 (experimental). Do NOT include intercept. When normalized os
-\code{TRUE}, coefficients will then be rescaled to the original
+`TRUE`, coefficients will then be rescaled to the original
 scale.}
 
 \item{y}{response vector.}
 
 \item{lambda1}{sequence of decreasing \eqn{\ell_1}{l1}-penalty
-levels. If \code{NULL} (the default), a vector is generated with
-\code{nlambda1} entries, starting from a guessed level
-\code{lambda1.max} where only the intercept is included, then
-shrunken to \code{min.ratio*lambda1.max}.}
+levels. If `NULL` (the default), a vector is generated with
+`nlambda1` entries, starting from a guessed level
+`lambda1.max` where only the intercept is included, then
+shrunken to `minratio*lambda1.max`.}
 
 \item{penscale}{vector with real positive values that weight the
 \eqn{\ell_1}{l1}-penalty of each feature. Default set all weights
 to 1.}
 
 \item{intercept}{logical; indicates if an intercept should be
-included in the model. Default is \code{TRUE}.}
+included in the model. Default is `TRUE`.}
 
 \item{normalize}{logical; indicates if variables should be
 normalized to have unit L2 norm before fitting.  Default is
-\code{TRUE}.}
+`TRUE`.}
 
 \item{nlambda1}{integer that indicates the number of values to put
-in the \code{lambda1} vector.  Ignored if \code{lambda1} is
+in the `lambda1` vector.  Ignored if `lambda1` is
 provided.}
 
-\item{min.ratio}{minimal value of \eqn{\ell_1}{l1}-part of the
+\item{minratio}{minimal value of \eqn{\ell_1}{l1}-part of the
 penalty that will be tried, as a fraction of the maximal
-\code{lambda1} value. A too small value might lead to unstability
+`lambda1` value. A too small value might lead to unstability
 at the end of the solution path corresponding to small
-\code{lambda1}.  The default value tries to avoid this, adapting
-to the '\eqn{n<p}{n<p}' context. Ignored if \code{lambda1} is
-provided.}
+`lambda1` combined with \eqn{\lambda_2=0}{lambda2=0}.  The
+default value tries to avoid this, adapting to the
+'\eqn{n<p}{n<p}' context. Ignored if `lambda1` is provided.}
 
-\item{max.feat}{integer; limits the number of features ever to
-enter the model; i.e., non-zero coefficients for the Lasso: the
-algorithm stops if this number is exceeded and \code{lambda1} is
-cutted at the corresponding level. Default is
-\code{min(nrow(x),ncol(x))}. Use with care, as it considerably
-changes the computation time.}
+\item{maxfeat}{integer; limits the number of features ever to
+enter the model; i.e., non-zero coefficients for the Elastic-net:
+the algorithm stops if this number is exceeded and `lambda1`
+is cut at the corresponding level. Default is
+`min(nrow(x),ncol(x))` for small `lambda2` (<0.01) and
+`min(4*nrow(x),ncol(x))` otherwise. Use with care, as it
+considerably changes the computation time.}
 
 \item{beta0}{a starting point for the vector of parameter. When
-\code{NULL} (the default), will be initialized at zero. May save
+`NULL` (the default), will be initialized at zero. May save
 time in some situation.}
 
 \item{control}{list of argument controlling low level options of
 the algorithm --use with care and at your own risk-- :
-\itemize{%
-
-\item{\code{verbose}: }{integer; activate verbose mode --this one
-is not too much risky!-- set to \code{0} for no output; \code{1}
-for warnings only, and \code{2} for tracing the whole
-progression. Default is \code{1}. Automatically set to \code{0}
-when the method is embedded within cross-validation or stability
-selection.}
-
-\item{\code{timer}: }{logical; use to record the timing of the
-algorithm. Default is \code{FALSE}.}
-
-\item{\code{max.iter}: }{the maximal number of iteration used to
-solve the problem for a given value of lambda1. Default is 500.}
-
-\item{\code{method}: }{a string for the underlying solver
-used. Either \code{"quadra"}, \code{"pathwise"} or
-\code{"fista"}. Default is \code{"quadra"}.}
-
-\item{\code{threshold}: }{a threshold for convergence. The
-algorithm stops when the optimality conditions are fulfill up to
-this threshold. Default is \code{1e-7} for \code{"quadra"} and
-\code{1e-2} for the first order methods.}
-
-\item{\code{monitor}: }{indicates if a monitoring of the
-convergence should be recorded, by computing a lower bound between
-the current solution and the optimum: when \code{'0'} (the
-default), no monitoring is provided; when \code{'1'}, the bound
-derived in Grandvalet et al. is computed; when \code{'>1'}, the
-Fenchel duality gap is computed along the algorithm.}
-}}
-
-\item{checkargs}{logical; should arguments be checked to
-(hopefully) avoid internal crashes? Default is
-\code{TRUE}. Automatically set to \code{FALSE} when calls are made
-from cross-validation or stability selection procedures.}
+* `verbose`: integer; activate verbose mode --this one is not 
+too risky!-- set to `0` for no output; `1` for warnings only, 
+and `2` for tracing the whole progression. Default is `1`. 
+Automatically set to `0` when the method is embedded within 
+cross-validation or stability selection.
+* `timer`: logical; use to record the timing of the
+algorithm. Default is `FALSE`.
+* `maxiter` the maximal number of iteration used to solve the
+ problem for a given value of lambda1. Default is 500.
+* `method` a string for the underlying solver used. Either 
+`"quadra"`, `"pathwise"` or `"fista"`. Default is `"quadra"`.
+* `threshold` a threshold for convergence. The algorithm stops 
+when the optimality conditions are fulfill up to this threshold.
+Default is `1e-7` for `"quadra"` and `1e-2` for the first order methods.
+* `bulletproof` logical; indicates if the bulletproof mode should 
+be used while running the `"quadra"` method. Default is `TRUE`. 
+* `monitor` indicates if a monitoring of the convergence should be 
+recorded, by computing a lower bound between the current solution and 
+the optimum: when `'0'` (the default), no monitoring is provided; 
+when `'1'`, the bound derived in Grandvalet et al. is computed; when 
+`'>1'`, the Fenchel duality gap is computed along the algorithm.}
 }
 \value{
-an object with class \code{quadrupen}, see the
-documentation page \code{\linkS4class{quadrupen}} for details.
+an object with class [`QuadrupenFit`].
 }
 \description{
 Adjust a linear model with lasso regularization, that is a
@@ -136,27 +120,20 @@ beta <- rep(c(0,1,0,-1,0), c(25,10,25,10,25))
 cor <- 0.75
 Soo <- toeplitz(cor^(0:(25-1))) ## Toeplitz correlation for irrelevant variables
 Sww  <- matrix(cor,10,10) ## bloc correlation between active variables
-Sigma <- bdiag(Soo,Sww,Soo,Sww,Soo)
+Sigma <- Matrix::bdiag(Soo,Sww,Soo,Sww,Soo)
 diag(Sigma) <- 1
 n <- 50
 x <- as.matrix(matrix(rnorm(95*n),n,95) \%*\% chol(Sigma))
 y <- 10 + x \%*\% beta + rnorm(n,0,10)
-
-beta.lasso <- slot(crossval(x,y, penalty="lasso", mc.cores=2) , "beta.min")
-
-cat("\nFalse positives for the Lasso:", sum(sign(beta) != sign(beta.lasso)))
-cat("\nDONE.\n")
 
 labels <- rep("irrelevant", length(beta))
 labels[beta != 0] <- "relevant"
 ## The solution path of the LASSO
 plot(lasso(x,y), label=labels)
 
-
 }
 \seealso{
-See also \code{\linkS4class{quadrupen}},
-\code{\link{plot.quadrupen}} and \code{\link{crossval}}.
+See also [`QuadrupenFit`],
 }
 \keyword{models,}
 \keyword{regression}

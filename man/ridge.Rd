@@ -7,75 +7,86 @@
 ridge(
   x,
   y,
-  lambda2 = NULL,
-  struct = NULL,
+  lambda = NULL,
+  struct = Diagonal(ncol(x), 1),
+  penscale = rep(1, ncol(x)),
   intercept = TRUE,
   normalize = TRUE,
-  nlambda2 = 100,
-  lambda.min = ifelse(n <= p, 0.01, 1e-04),
-  lambda.max = 100,
-  control = list(),
-  checkargs = TRUE
+  nlambda = 100,
+  minratio = 1e-04,
+  lambda_max = 100,
+  control = list()
 )
 }
 \arguments{
-\item{x}{matrix of features. Do NOT include intercept. When
-normalized os \code{TRUE}, coefficients will then be rescaled to
-the original scale.}
+\item{x}{matrix of features, possibly sparsely encoded
+(experimental). Do NOT include intercept. When normalized os
+`TRUE`, coefficients will then be rescaled to the original
+scale.}
 
 \item{y}{response vector.}
 
-\item{lambda2}{sequence of decreasing \eqn{\ell_2}{l2}-penalty
-levels. If \code{NULL} (the default), a vector is generated with
-\code{nlambda2} entries.}
+\item{lambda}{sequence of decreasing \eqn{\ell_2}{l2}-penalty
+levels. If `NULL` (the default), a vector is generated with
+`nlambda` entries, starting from a guessed level
+`lambda_max` where only the intercept is included, then
+shrunken to `minratio*lambda_max`.}
 
 \item{struct}{matrix structuring the coefficients, possibly
-sparsely encoded. Must be at least positive semi-definite (this is
-checked internally if the \code{checkarg} argument is
-\code{TRUE}). If \code{NULL} (the default), the identity matrix is
+sparsely encoded. Must be at least positive semidefinite (this is
+checked internally). If `NULL` (the default), the identity matrix is
 used. See details below.}
 
+\item{penscale}{vector with real positive values that weight the
+\eqn{\ell_1}{l1}-penalty of each feature. Default set all weights
+to 1.}
+
 \item{intercept}{logical; indicates if an intercept should be
-included in the model. Default is \code{TRUE}.}
+included in the model. Default is `TRUE`.}
 
 \item{normalize}{logical; indicates if variables should be
 normalized to have unit L2 norm before fitting.  Default is
-\code{TRUE}.}
+`TRUE`.}
 
-\item{nlambda2}{integer that indicates the number of values to put
-in the \code{lambda2} vector.  Ignored if \code{lambda2} is
-provided.}
+\item{nlambda}{integer that indicates the number of values to put
+in the `lambda` vector.  Ignored if `lambda` is provided.}
 
-\item{lambda.min}{the minimal amount of penalty used to generated
-the vector \code{lambda2}. Ignored if \code{lambda2} is provided.}
+\item{minratio}{minimal value of \eqn{\ell_1}{l1}-part of the
+penalty that will be tried, as a fraction of the maximal
+`lambda1` value. A too small value might lead to unstability
+at the end of the solution path corresponding to small
+`lambda1` combined with \eqn{\lambda_2=0}{lambda2=0}.  The
+default value tries to avoid this, adapting to the
+'\eqn{n<p}{n<p}' context. Ignored if `lambda1` is provided.}
 
-\item{lambda.max}{the maximal amount of penalty used to generated
-the vector \code{lambda2}. Ignored if \code{lambda2} is provided.}
+\item{lambda_max}{the largest value of `lambda` considered}
 
 \item{control}{list of argument controlling low level options of
 the algorithm --use with care and at your own risk-- :
-\itemize{%
-
-\item{\code{verbose}: }{integer; activate verbose mode --this one
-is not too much risky!-- set to \code{0} for no output; \code{1}
-for warnings only, and \code{2} for tracing the whole
-progression. Default is \code{1}. Automatically set to \code{0}
-when the method is embedded within cross-validation or stability
-selection.}
-
-\item{\code{timer}: }{logical; use to record the timing of the
-algorithm. Default is \code{FALSE}.}
-
-}}
-
-\item{checkargs}{logical; should arguments be checked to
-(hopefully) avoid internal crashes? Default is
-\code{TRUE}. Automatically set to \code{FALSE} when calls are made
-from cross-validation or stability selection procedures.}
+* `verbose`: integer; activate verbose mode --this one is not 
+too risky!-- set to `0` for no output; `1` for warnings only, 
+and `2` for tracing the whole progression. Default is `1`. 
+Automatically set to `0` when the method is embedded within 
+cross-validation or stability selection.
+* `timer`: logical; use to record the timing of the
+algorithm. Default is `FALSE`.
+* `maxiter` the maximal number of iteration used to solve the
+ problem for a given value of lambda1. Default is 500.
+* `method` a string for the underlying solver used. Either 
+`"quadra"`, `"pathwise"` or `"fista"`. Default is `"quadra"`.
+* `threshold` a threshold for convergence. The algorithm stops 
+when the optimality conditions are fulfill up to this threshold.
+Default is `1e-7` for `"quadra"` and `1e-2` for the first order methods.
+* `bulletproof` logical; indicates if the bulletproof mode should 
+be used while running the `"quadra"` method. Default is `TRUE`. 
+* `monitor` indicates if a monitoring of the convergence should be 
+recorded, by computing a lower bound between the current solution and 
+the optimum: when `'0'` (the default), no monitoring is provided; 
+when `'1'`, the bound derived in Grandvalet et al. is computed; when 
+`'>1'`, the Fenchel duality gap is computed along the algorithm.}
 }
 \value{
-an object with class \code{quadrupen}, see the
-documentation page \code{\linkS4class{quadrupen}} for details.
+an object with class [`QuadrupenFit`].
 }
 \description{
 Adjust a linear model with ridge regularization (possibly
@@ -103,23 +114,20 @@ beta <- rep(c(0,1,0,-1,0), c(25,10,25,10,25))
 cor <- 0.75
 Soo <- toeplitz(cor^(0:(25-1))) ## Toeplitz correlation for irrelevant variables
 Sww  <- matrix(cor,10,10) ## bloc correlation between active variables
-Sigma <- bdiag(Soo,Sww,Soo,Sww,Soo)
+Sigma <- Matrix::bdiag(Soo,Sww,Soo,Sww,Soo)
 diag(Sigma) <- 1
 n <- 50
 x <- as.matrix(matrix(rnorm(95*n),n,95) \%*\% chol(Sigma))
 y <- 10 + x \%*\% beta + rnorm(n,0,10)
 
-
-beta.lasso <- slot(crossval(x,y, penalty="lasso", mc.cores=2) , "beta.min")
-
-cat("\nFalse positives for the Lasso:", sum(sign(beta) != sign(beta.lasso)))
-cat("\nDONE.\n")
-
+labels <- rep("irrelevant", length(beta))
+labels[beta != 0] <- "relevant"
+plot(ridge(x,y) , label=labels) ## a mess
+plot(ridge(x,y, struct=solve(Sigma)), label=labels) ## even better
 
 }
 \seealso{
-See also \code{\linkS4class{quadrupen}},
-\code{\link{plot.quadrupen}} and \code{\link{crossval}}.
+See also [`QuadrupenFit`]
 }
 \keyword{models,}
 \keyword{regression}

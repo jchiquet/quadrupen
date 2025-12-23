@@ -10,7 +10,7 @@
 #' At the moment, two \code{R} fitting functions are available:
 #' \enumerate{%
 #'
-#' \item the \code{\link{elastic.net}} function, which solves a family of
+#' \item the [elastic.net()] function, which solves a family of
 #' linear regression problems penalized by a mixture of
 #' \eqn{\ell_1}{l1} and \eqn{\ell_2}{l2} norms. It notably includes
 #' the LASSO (Tibshirani, 1996), the adaptive-LASSO (Zou, 2006), the
@@ -18,7 +18,7 @@
 #' (Slawski et al., 2010). See examples as well as the available
 #' \code{demo(quad_enet)}.
 #'
-#' \item the \code{\link{bounded.reg}} function, which fits a linear model
+#' \item the [bounded.reg()] function, which fits a linear model
 #' penalized by a mixture of \eqn{\ell_\infty}{infinity} and
 #' \eqn{\ell_2}{l2} norms. It owns the same versatility as the
 #' \code{elastic.net} function regarding the \eqn{\ell_2}{l2} norm,
@@ -36,14 +36,14 @@
 #' &beta;<sup>T</sup> S &beta;, </center> }}
 #' \if{text}{\deqn{beta.hat(lambda1, lambda2) = argmin_beta 1/2
 #' RSS(beta) + lambda1 |D beta|_q + lambda2 beta' S beta,}} where
-#' \eqn{q=1}{q=1} for \code{elastic.net} and
-#' \eqn{q=\infty}{q=infinity} for \code{bounded.reg}.  The diagonal
+#' \eqn{q=1}{q=1} for [elastic.net()] and
+#' \eqn{q=\infty}{q=infinity} for [bounded.reg()].  The diagonal
 #' matrix \eqn{D}{D} allows different weights for the first part of
 #' the penalty. The structuring matrix \eqn{S}{S} can be used to
 #' introduce some prior information regarding the predictors. It is
 #' provided via a positive semidefinite matrix.
 #'
-#' The S4 objects produced by the fitting procedures own the
+#' The R6 objects produced by the fitting procedures own the
 #' classical methods for linear model in \code{R}, as well as methods
 #' for plotting, (double) cross-validation and for the stability
 #' selection procedure of Meinshausen and Buhlmann (2010).
@@ -110,11 +110,11 @@
 #'
 #' Most of the numerical work is done in C++, relying on the
 #' \pkg{RcppArmadillo} package. We also provide a (double)
-#' cross-validation procedure and functions for stabilty selection,
+#' cross-validation procedure and functions for stability selection,
 #' both using the multi-core capability of the computer, through the
 #' \pkg{parallel} package. This feature is not available for Windows
 #' user, though. Finally, note that the plot methods enjoy some
-#' (still very few) of the capabilities of the \pkg{ggplot2} package.
+#' of the capabilities of the \pkg{ggplot2} package.
 #'
 #' We hope to enrich \pkg{quadrupen} with other popular fitting
 #' procedures and develop other statistical tools, particularly
@@ -125,7 +125,7 @@
 #'
 #' @name quadrupen-package
 #' @aliases quadrupen
-#' @author Julien Chiquet \email{julien.chiquet@@inreae.fr}
+#' @author Julien Chiquet \email{julien.chiquet@@inrae.fr}
 #'
 #' @references
 #' Yves Grandvalet, Julien Chiquet and Christophe Ambroise,
@@ -153,8 +153,8 @@
 "_PACKAGE"
 
 ## usethis namespace: start
-#' @import Matrix Rcpp RcppArmadillo parallel ggplot2 reshape2 scales grid
+#' @import R6 Matrix parallel ggplot2 dplyr scales grid methods
 #' @importFrom Rcpp sourceCpp
-#' @useDynLib quadrupen, .registration = TRUE
+#' @useDynLib quadrupen
 ## usethis namespace: end
 NULL
