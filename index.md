@@ -61,7 +61,7 @@ x <- rPred.block(n, p, sizes = group, rho=c(0.25, 0.75, 0.25, 0.75, 0.25))
 Indeed, the correlation structure between the regressor exhibitis a
 strong pattern:
 
-![](man/figuresunnamed-chunk-3-1.png)
+![](reference/figures/unnamed-chunk-3-1.png)
 
 We draw the reponse variable by fixing the variance of the noise ratio
 to get an $R^{2}$ equal to $0.8$.
@@ -83,7 +83,7 @@ fit the regularization path to this data set
 plot(ridge(x,y, intercept=FALSE), labels=labels)
 ```
 
-![](man/figuresridge_nostruct-1.png)
+![](reference/figures/ridge_nostruct-1.png)
 
 #### Lasso ($\ell_{1}$ penalty)
 
@@ -91,7 +91,7 @@ plot(ridge(x,y, intercept=FALSE), labels=labels)
 plot(lasso(x,y, intercept=FALSE), labels=labels)
 ```
 
-![](man/figureslasso_nostruct-1.png)
+![](reference/figures/lasso_nostruct-1.png)
 
 #### Elastic-net ($\ell_{1} + \ell_{2}$ penalty)
 
@@ -99,7 +99,7 @@ plot(lasso(x,y, intercept=FALSE), labels=labels)
 plot(elastic.net(x,y, lambda2=1, intercept=FALSE), labels=labels)
 ```
 
-![](man/figuresenet_nostruct-1.png)
+![](reference/figures/enet_nostruct-1.png)
 
 #### Bounded regression ($\ell_{\infty}$ penalty)
 
@@ -107,7 +107,7 @@ plot(elastic.net(x,y, lambda2=1, intercept=FALSE), labels=labels)
 plot(bounded.reg(x,y, lambda2=0, intercept=FALSE), labels=labels)
 ```
 
-![](man/figuresbreg_nostruct-1.png)
+![](reference/figures/breg_nostruct-1.png)
 
 #### Ridge + Bounded regression ($\ell_{\infty} + \ell_{2}$ penalty)
 
@@ -115,7 +115,7 @@ plot(bounded.reg(x,y, lambda2=0, intercept=FALSE), labels=labels)
 plot(bounded.reg(x,y, lambda2=5, intercept=FALSE), labels=labels)
 ```
 
-![](man/figuresbregridge_nostruct-1.png)
+![](reference/figures/bregridge_nostruct-1.png)
 
 ### Regularization with prior knowledge
 
@@ -140,7 +140,7 @@ the solution paths look a lot more convincing.
 plot(ridge(x,y, lambda = 10^seq(4,-1,len=100), struct = L, intercept=FALSE), labels=labels)
 ```
 
-![](man/figuresridge_struct-1.png)
+![](reference/figures/ridge_struct-1.png)
 
 #### Structured/Generalized Elastic-net ($\ell_{1} + \ell_{2}$ penalty)
 
@@ -148,7 +148,7 @@ plot(ridge(x,y, lambda = 10^seq(4,-1,len=100), struct = L, intercept=FALSE), lab
 plot(elastic.net(x,y, struct = L, lambda2=1, intercept=FALSE), labels=labels)
 ```
 
-![](man/figuresenet_struct-1.png)
+![](reference/figures/enet_struct-1.png)
 
 #### Bounded regression + structured/Generalized Ridge ($\ell_{\infty} + \ell_{2}$ penalty)
 
@@ -156,7 +156,7 @@ plot(elastic.net(x,y, struct = L, lambda2=1, intercept=FALSE), labels=labels)
 plot(bounded.reg(x,y, struct = L, lambda2=5, intercept=FALSE), labels=labels)
 ```
 
-![](man/figuresbregridge_struct-1.png)
+![](reference/figures/bregridge_struct-1.png)
 
 ## Appendix: functions for data generation
 

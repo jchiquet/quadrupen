@@ -90,7 +90,7 @@
 <span><span class="va">beta</span>   <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.25</span>,<span class="fl">1</span>,<span class="op">-</span><span class="fl">0.25</span>,<span class="op">-</span><span class="fl">1</span>,<span class="fl">0.25</span><span class="op">)</span>, <span class="va">group</span><span class="op">)</span></span>
 <span><span class="va">x</span> <span class="op">&lt;-</span> <span class="fu">rPred.block</span><span class="op">(</span><span class="va">n</span>, <span class="va">p</span>, sizes <span class="op">=</span> <span class="va">group</span>, rho<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.25</span>, <span class="fl">0.75</span>, <span class="fl">0.25</span>, <span class="fl">0.75</span>, <span class="fl">0.25</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <p>Indeed, the correlation structure between the regressor exhibitis a strong pattern:</p>
-<p><img src="man/figuresunnamed-chunk-3-1.png"></p>
+<p><img src="reference/figures/unnamed-chunk-3-1.png"></p>
 <p>We draw the reponse variable by fixing the variance of the noise ratio to get an <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msup><mi>R</mi><mn>2</mn></msup><annotation encoding="application/x-tex">R^2</annotation></semantics></math> equal to <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mn>0.8</mn><annotation encoding="application/x-tex">0.8</annotation></semantics></math>.</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">dat</span> <span class="op">&lt;-</span> <span class="fu">rlm</span><span class="op">(</span><span class="va">x</span>,<span class="va">beta</span>,<span class="va">mu</span>,r2<span class="op">=</span><span class="fl">0.8</span><span class="op">)</span></span>
@@ -106,35 +106,35 @@
 </h4>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="fu"><a href="reference/ridge.html">ridge</a></span><span class="op">(</span><span class="va">x</span>,<span class="va">y</span>, intercept<span class="op">=</span><span class="cn">FALSE</span><span class="op">)</span>, labels<span class="op">=</span><span class="va">labels</span><span class="op">)</span></span></code></pre></div>
-<p><img src="man/figuresridge_nostruct-1.png"></p>
+<p><img src="reference/figures/ridge_nostruct-1.png"></p>
 </div>
 <div class="section level4">
 <h4 id="lasso-ell_1-penalty">Lasso (<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mo>ℓ</mo><mn>1</mn></msub><annotation encoding="application/x-tex">\ell_1</annotation></semantics></math> penalty)<a class="anchor" aria-label="anchor" href="#lasso-ell_1-penalty"></a>
 </h4>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="fu"><a href="reference/lasso.html">lasso</a></span><span class="op">(</span><span class="va">x</span>,<span class="va">y</span>, intercept<span class="op">=</span><span class="cn">FALSE</span><span class="op">)</span>, labels<span class="op">=</span><span class="va">labels</span><span class="op">)</span></span></code></pre></div>
-<p><img src="man/figureslasso_nostruct-1.png"></p>
+<p><img src="reference/figures/lasso_nostruct-1.png"></p>
 </div>
 <div class="section level4">
 <h4 id="elastic-net-ell_1ell_2-penalty">Elastic-net (<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mo>ℓ</mo><mn>1</mn></msub><mo>+</mo><msub><mo>ℓ</mo><mn>2</mn></msub></mrow><annotation encoding="application/x-tex">\ell_1+\ell_2</annotation></semantics></math> penalty)<a class="anchor" aria-label="anchor" href="#elastic-net-ell_1ell_2-penalty"></a>
 </h4>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="fu"><a href="reference/elastic.net.html">elastic.net</a></span><span class="op">(</span><span class="va">x</span>,<span class="va">y</span>, lambda2<span class="op">=</span><span class="fl">1</span>, intercept<span class="op">=</span><span class="cn">FALSE</span><span class="op">)</span>, labels<span class="op">=</span><span class="va">labels</span><span class="op">)</span></span></code></pre></div>
-<p><img src="man/figuresenet_nostruct-1.png"></p>
+<p><img src="reference/figures/enet_nostruct-1.png"></p>
 </div>
 <div class="section level4">
 <h4 id="bounded-regression-ell_infty-penalty">Bounded regression (<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mo>ℓ</mo><mi>∞</mi></msub><annotation encoding="application/x-tex">\ell_\infty</annotation></semantics></math> penalty)<a class="anchor" aria-label="anchor" href="#bounded-regression-ell_infty-penalty"></a>
 </h4>
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="fu"><a href="reference/bounded.reg.html">bounded.reg</a></span><span class="op">(</span><span class="va">x</span>,<span class="va">y</span>, lambda2<span class="op">=</span><span class="fl">0</span>, intercept<span class="op">=</span><span class="cn">FALSE</span><span class="op">)</span>, labels<span class="op">=</span><span class="va">labels</span><span class="op">)</span></span></code></pre></div>
-<p><img src="man/figuresbreg_nostruct-1.png"></p>
+<p><img src="reference/figures/breg_nostruct-1.png"></p>
 </div>
 <div class="section level4">
 <h4 id="ridge--bounded-regression-ell_inftyell_2-penalty">Ridge + Bounded regression (<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mo>ℓ</mo><mi>∞</mi></msub><mo>+</mo><msub><mo>ℓ</mo><mn>2</mn></msub></mrow><annotation encoding="application/x-tex">\ell_\infty+\ell_2</annotation></semantics></math> penalty)<a class="anchor" aria-label="anchor" href="#ridge--bounded-regression-ell_inftyell_2-penalty"></a>
 </h4>
 <div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="fu"><a href="reference/bounded.reg.html">bounded.reg</a></span><span class="op">(</span><span class="va">x</span>,<span class="va">y</span>, lambda2<span class="op">=</span><span class="fl">5</span>, intercept<span class="op">=</span><span class="cn">FALSE</span><span class="op">)</span>, labels<span class="op">=</span><span class="va">labels</span><span class="op">)</span></span></code></pre></div>
-<p><img src="man/figuresbregridge_nostruct-1.png"></p>
+<p><img src="reference/figures/bregridge_nostruct-1.png"></p>
 </div>
 </div>
 <div class="section level3">
@@ -150,21 +150,21 @@
 </h4>
 <div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="fu"><a href="reference/ridge.html">ridge</a></span><span class="op">(</span><span class="va">x</span>,<span class="va">y</span>, lambda <span class="op">=</span> <span class="fl">10</span><span class="op">^</span><span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq</a></span><span class="op">(</span><span class="fl">4</span>,<span class="op">-</span><span class="fl">1</span>,len<span class="op">=</span><span class="fl">100</span><span class="op">)</span>, struct <span class="op">=</span> <span class="va">L</span>, intercept<span class="op">=</span><span class="cn">FALSE</span><span class="op">)</span>, labels<span class="op">=</span><span class="va">labels</span><span class="op">)</span></span></code></pre></div>
-<p><img src="man/figuresridge_struct-1.png"></p>
+<p><img src="reference/figures/ridge_struct-1.png"></p>
 </div>
 <div class="section level4">
 <h4 id="structuredgeneralized-elastic-net-ell_1ell_2-penalty">Structured/Generalized Elastic-net (<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mo>ℓ</mo><mn>1</mn></msub><mo>+</mo><msub><mo>ℓ</mo><mn>2</mn></msub></mrow><annotation encoding="application/x-tex">\ell_1+\ell_2</annotation></semantics></math> penalty)<a class="anchor" aria-label="anchor" href="#structuredgeneralized-elastic-net-ell_1ell_2-penalty"></a>
 </h4>
 <div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="fu"><a href="reference/elastic.net.html">elastic.net</a></span><span class="op">(</span><span class="va">x</span>,<span class="va">y</span>, struct <span class="op">=</span> <span class="va">L</span>, lambda2<span class="op">=</span><span class="fl">1</span>, intercept<span class="op">=</span><span class="cn">FALSE</span><span class="op">)</span>, labels<span class="op">=</span><span class="va">labels</span><span class="op">)</span></span></code></pre></div>
-<p><img src="man/figuresenet_struct-1.png"></p>
+<p><img src="reference/figures/enet_struct-1.png"></p>
 </div>
 <div class="section level4">
 <h4 id="bounded-regression--structuredgeneralized-ridge-ell_inftyell_2-penalty">Bounded regression + structured/Generalized Ridge (<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mo>ℓ</mo><mi>∞</mi></msub><mo>+</mo><msub><mo>ℓ</mo><mn>2</mn></msub></mrow><annotation encoding="application/x-tex">\ell_\infty+\ell_2</annotation></semantics></math> penalty)<a class="anchor" aria-label="anchor" href="#bounded-regression--structuredgeneralized-ridge-ell_inftyell_2-penalty"></a>
 </h4>
 <div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="fu"><a href="reference/bounded.reg.html">bounded.reg</a></span><span class="op">(</span><span class="va">x</span>,<span class="va">y</span>, struct <span class="op">=</span> <span class="va">L</span>, lambda2<span class="op">=</span><span class="fl">5</span>, intercept<span class="op">=</span><span class="cn">FALSE</span><span class="op">)</span>, labels<span class="op">=</span><span class="va">labels</span><span class="op">)</span></span></code></pre></div>
-<p><img src="man/figuresbregridge_struct-1.png"></p>
+<p><img src="reference/figures/bregridge_struct-1.png"></p>
 </div>
 </div>
 </div>
