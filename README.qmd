@@ -8,7 +8,7 @@ format: gfm
 <!-- badges: end -->
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE, fig.path = "man/figures")
+knitr::opts_chunk$set(echo = TRUE, fig.path = "man/figures/")
 
 ```
 
