@@ -8,7 +8,7 @@
 cross_validate(
   object,
   K = 10,
-  folds = split(sample(1:object$nsample), rep(1:K, length = object$nsample)),
+  folds = split(sample(1:object$nobs), rep(1:K, length = object$nobs)),
   lambda2 = object$minor_tuning,
   verbose = TRUE,
   cores = parallel::detectCores() - 2
@@ -17,7 +17,7 @@ cross_validate(
 \method{cross_validate}{QuadrupenFit}(
   object,
   K = 10,
-  folds = split(sample(1:object$nsample), rep(1:K, length = object$nsample)),
+  folds = split(sample(1:object$nobs), rep(1:K, length = object$nobs)),
   lambda2 = object$minor_tuning,
   verbose = TRUE,
   cores = parallel::detectCores() - 2

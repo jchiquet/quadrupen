@@ -114,10 +114,6 @@ sigma <- dat$sigma
 
 No we try the available penalized regression method in `quadrupen` to fit the regularization path to this data set
 
-```{r}
-rg <- ridge(x,y, intercept=FALSE)
-```
-
 #### Ridge regression  ($\ell_2$ penalty)
 
 ```{r ridge_nostruct}

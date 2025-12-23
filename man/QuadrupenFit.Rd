@@ -84,9 +84,9 @@ Penalized criteria based on estimation of degrees of freedom
 \section{Active bindings}{
 \if{html}{\out{<div class="r6-active-bindings">}}
 \describe{
-\item{\code{ncoef}}{number of coefficient (without intercept)}
+\item{\code{nvar}}{number of coefficient (without intercept)}
 
-\item{\code{nsample}}{sample size}
+\item{\code{nobs}}{sample size}
 
 \item{\code{dataModel}}{an object with class [`DataModel`] storing the data}
 
@@ -282,7 +282,7 @@ Function that computes K-fold cross-validated error of a
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{QuadrupenFit$cross_validate(
   K = 10,
-  folds = split(sample(1:self$nsample), rep(1:K, length = self$nsample)),
+  folds = split(sample(1:self$nobs), rep(1:K, length = self$nobs)),
   lambda2 = self$minor_tuning,
   verbose = TRUE,
   cores = max(K, detectCores() - 2)
@@ -326,8 +326,8 @@ procedure as introduced by Meinshausen and Buhlmann (2010).
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{QuadrupenFit$stability(
   n_subsamples = 50,
-  subsample_size = floor(self$nsample/2),
-  subsamples = replicate(n_subsamples, sample(1:self$nsample, subsample_size), simplify =
+  subsample_size = floor(self$nobs/2),
+  subsamples = replicate(n_subsamples, sample(1:self$nobs, subsample_size), simplify =
     FALSE),
   weakness = 1,
   verbose = TRUE,
@@ -376,8 +376,8 @@ respective factor \eqn{\log(n)}{log(n)} and \eqn{2}{2}) yet the user can specify
 penalty.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{QuadrupenFit$criteria(
-  penalty = setNames(c(2, log(self$nsample), log(self$ncoef), log(self$nsample) + 2 *
-    log(self$ncoef)), c("AIC", "BIC", "mBIC", "eBIC")),
+  penalty = setNames(c(2, log(self$nobs), log(self$nvar), log(self$nobs) + 2 *
+    log(self$nvar)), c("AIC", "BIC", "mBIC", "eBIC")),
   sigma = NULL
 )}\if{html}{\out{</div>}}
 }

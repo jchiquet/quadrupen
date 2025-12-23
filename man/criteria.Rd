@@ -7,15 +7,15 @@
 \usage{
 criteria(
   object,
-  penalty = setNames(c(2, log(object$nsample), log(object$ncoef), log(object$nsample) + 2
-    * log(object$ncoef)), c("AIC", "BIC", "mBIC", "eBIC")),
+  penalty = setNames(c(2, log(object$nobs), log(object$nvar), log(object$nobs) + 2 *
+    log(object$nvar)), c("AIC", "BIC", "mBIC", "eBIC")),
   sigma = NULL
 )
 
 \method{criteria}{QuadrupenFit}(
   object,
-  penalty = setNames(c(2, log(object$nsample), log(object$ncoef), log(object$nsample) + 2
-    * log(object$ncoef)), c("AIC", "BIC", "mBIC", "eBIC")),
+  penalty = setNames(c(2, log(object$nobs), log(object$nvar), log(object$nobs) + 2 *
+    log(object$nvar)), c("AIC", "BIC", "mBIC", "eBIC")),
   sigma = NULL
 )
 }

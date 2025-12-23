@@ -54,7 +54,7 @@ Rcpp::List ridge_cpp(
   
   // estimating the intercept term
   mu = ybar - beta * xbar.t() ;
-  
+
   return List::create(
     Named("tuning_param") = List::create(
       Named("l2") = lambda,

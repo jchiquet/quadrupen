@@ -8,9 +8,9 @@
 stability(
   object,
   n_subsamples = 50,
-  subsample_size = floor(object$nsample/2),
-  subsamples = replicate(n_subsamples, sample(1:object$nsample, subsample_size), simplify
-    = FALSE),
+  subsample_size = floor(object$nobs/2),
+  subsamples = replicate(n_subsamples, sample(1:object$nobs, subsample_size), simplify =
+    FALSE),
   weakness = 1,
   verbose = TRUE,
   cores = parallel::detectCores() - 2
@@ -19,9 +19,9 @@ stability(
 \method{stability}{QuadrupenFit}(
   object,
   n_subsamples = 50,
-  subsample_size = floor(object$nsample/2),
-  subsamples = replicate(n_subsamples, sample(1:object$nsample, subsample_size), simplify
-    = FALSE),
+  subsample_size = floor(object$nobs/2),
+  subsamples = replicate(n_subsamples, sample(1:object$nobs, subsample_size), simplify =
+    FALSE),
   weakness = 1,
   verbose = TRUE,
   cores = parallel::detectCores() - 2

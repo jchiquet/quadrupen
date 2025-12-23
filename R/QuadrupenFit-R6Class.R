@@ -53,10 +53,10 @@ QuadrupenFit <- R6::R6Class(
   ## ACTIVE BINDINGS
   ## ____________________________________________________
   active = list(
-    #' @field ncoef number of coefficient (without intercept)
-    ncoef = function(value) {private$data$d},
-    #' @field nsample sample size
-    nsample = function(value) {private$data$n},
+    #' @field nvar number of coefficient (without intercept)
+    nvar = function(value) {private$data$d},
+    #' @field nobs sample size
+    nobs = function(value) {private$data$n},
     #' @field dataModel an object with class [`DataModel`] storing the data
     dataModel = function(value) {private$data},
     #' @field has_intercept boolean indicating wether an intercept is included in the model
@@ -149,9 +149,9 @@ QuadrupenFit <- R6::R6Class(
       cat("Linear regression with", self$penalty, "penalizer.\n")
       # cat("Linear regression with", x@penalty, "penalizer,", self$rescaling, "rescaling applied to the coefficients.\n")
       if (self$has_intercept) {
-        cat("- number of coefficients:", self$ncoef,"+ intercept\n")
+        cat("- number of coefficients:", self$nvar,"+ intercept\n")
       } else {
-        cat("- number of coefficients:", self$ncoef,"(no intercept)\n")
+        cat("- number of coefficients:", self$nvar,"(no intercept)\n")
       }
       cat("- ", names(private$tuning)[[1]], " regularization: ",
           length(self$major_tuning), " points from ",
@@ -293,7 +293,7 @@ QuadrupenFit <- R6::R6Class(
     cross_validate = 
       function(
           K       = 10,
-          folds   = split(sample(1:self$nsample), rep(1:K, length=self$nsample)),
+          folds   = split(sample(1:self$nobs), rep(1:K, length=self$nobs)),
           lambda2 = self$minor_tuning, verbose = TRUE, cores = max(K, detectCores() - 2)) {
 
         ## Some variables and copies useful for CV work
@@ -345,7 +345,7 @@ QuadrupenFit <- R6::R6Class(
           )) |> as.matrix() |> as.data.frame()
         if (verbose) cat("\n")
 
-        res <- do.call(rbind, tapply(err, rep(1:nlambda2, each=self$nsample), function(err_) {
+        res <- do.call(rbind, tapply(err, rep(1:nlambda2, each=self$nobs), function(err_) {
           mean <- colMeans(err_, na.rm = TRUE)
           if (any(is.nan(mean))) {
             warning("\nThere have been a lot of early stops along the path: 
@@ -393,8 +393,8 @@ QuadrupenFit <- R6::R6Class(
     #' @seealso [stability()]
     stability = function(
           n_subsamples   = 50,
-          subsample_size = floor(self$nsample/2),
-          subsamples     = replicate(n_subsamples, sample(1:self$nsample, subsample_size), simplify=FALSE),
+          subsample_size = floor(self$nobs/2),
+          subsamples     = replicate(n_subsamples, sample(1:self$nobs, subsample_size), simplify=FALSE),
           weakness       = 1,
           verbose        = TRUE,
           cores       = detectCores() - 2) {
@@ -408,7 +408,7 @@ QuadrupenFit <- R6::R6Class(
       
       control  <- private$control; 
       control$verbose <- 0
-      control$maxfeat  <- self$ncoef
+      control$maxfeat  <- self$nvar
       nlambda1 <- length(private$tuning[[1]])
 
       ## Prepare blocs of sub samples to run jobs parallely
@@ -425,7 +425,7 @@ QuadrupenFit <- R6::R6Class(
 
       ## function to run on each core
       bloc_stability <- function(subsets) {
-        select <- Matrix(0, nlambda1, self$ncoef)
+        select <- Matrix(0, nlambda1, self$nvar)
         subsamples_ok <- 0
         for (s in 1:length(subsets)) {
           active <- private$optimizer(SubsampledData[[subsets[s]]], private$tuning, control)$active
@@ -444,7 +444,7 @@ QuadrupenFit <- R6::R6Class(
       prob_bloc <- mclapply(blocs, bloc_stability, mc.cores=cores)
       
       ## Construct the probability path
-      path <- Matrix(0, nlambda1, self$ncoef)
+      path <- Matrix(0, nlambda1, self$nvar)
       for (b in 1:length(prob_bloc)) {
         path <- path + prob_bloc[[b]]
       }
@@ -479,14 +479,14 @@ QuadrupenFit <- R6::R6Class(
     #' 
     #' @seealso [criteria()]
     criteria = function(penalty=
-                          setNames(c(2, log(self$nsample), log(self$ncoef), log(self$nsample) + 2*log(self$ncoef)),
+                          setNames(c(2, log(self$nobs), log(self$nvar), log(self$nobs) + 2*log(self$nvar)),
                                    c("AIC","BIC", "mBIC", "eBIC")), sigma=NULL) {
       
       betas <- private$beta
       lambda <- self$major_tuning
       
-      n <- self$nsample
-      p <- self$ncoef
+      n <- self$nobs
+      p <- self$nvar
       
       ## Compute all the penalized criteria
       if (is.null(sigma)) {

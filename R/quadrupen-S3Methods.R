@@ -153,7 +153,7 @@ deviance.QuadrupenFit <- function(object, ...){
 criteria <- 
   function(object, 
            penalty=
-             setNames(c(2, log(object$nsample), log(object$ncoef), log(object$nsample) + 2*log(object$ncoef)),
+             setNames(c(2, log(object$nobs), log(object$nvar), log(object$nobs) + 2*log(object$nvar)),
                       c("AIC","BIC", "mBIC", "eBIC")), sigma=NULL) {
     UseMethod("criteria", object)
   }
@@ -163,7 +163,7 @@ criteria <-
 criteria.QuadrupenFit <- 
   function(object, 
            penalty=
-             setNames(c(2, log(object$nsample), log(object$ncoef), log(object$nsample) + 2*log(object$ncoef)),
+             setNames(c(2, log(object$nobs), log(object$nvar), log(object$nobs) + 2*log(object$nvar)),
                       c("AIC","BIC", "mBIC", "eBIC")), sigma=NULL) {
     stopifnot(isQuadrupenFit(object))
     object$criteria(penalty, sigma)
@@ -247,7 +247,7 @@ criteria.QuadrupenFit <-
 cross_validate <- 
   function(object, 
            K       = 10,
-           folds   = split(sample(1:object$nsample), rep(1:K, length=object$nsample)),
+           folds   = split(sample(1:object$nobs), rep(1:K, length=object$nobs)),
            lambda2 = object$minor_tuning, verbose = TRUE, cores = parallel::detectCores() - 2
   ) {
     UseMethod("cross_validate", object)
@@ -258,7 +258,7 @@ cross_validate <-
 cross_validate.QuadrupenFit <- 
   function(object, 
            K       = 10,
-           folds   = split(sample(1:object$nsample), rep(1:K, length=object$nsample)),
+           folds   = split(sample(1:object$nobs), rep(1:K, length=object$nobs)),
            lambda2 = object$minor_tuning, verbose = TRUE, cores = parallel::detectCores() - 2
     ) {
       stopifnot(isQuadrupenFit(object))
@@ -351,8 +351,8 @@ cross_validate.QuadrupenFit <-
 #' @export
 stability <- 
   function(object, n_subsamples   = 50,
-           subsample_size = floor(object$nsample/2),
-           subsamples     = replicate(n_subsamples, sample(1:object$nsample, subsample_size), simplify=FALSE),
+           subsample_size = floor(object$nobs/2),
+           subsamples     = replicate(n_subsamples, sample(1:object$nobs, subsample_size), simplify=FALSE),
            weakness       = 1,
            verbose        = TRUE,
            cores          = parallel::detectCores() - 2) {
@@ -363,8 +363,8 @@ stability <-
 #' @export
 stability.QuadrupenFit <- 
   function(object, n_subsamples   = 50,
-           subsample_size = floor(object$nsample/2),
-           subsamples     = replicate(n_subsamples, sample(1:object$nsample, subsample_size), simplify=FALSE),
+           subsample_size = floor(object$nobs/2),
+           subsamples     = replicate(n_subsamples, sample(1:object$nobs, subsample_size), simplify=FALSE),
            weakness       = 1,
            verbose        = TRUE,
            cores          = parallel::detectCores() - 2) {
