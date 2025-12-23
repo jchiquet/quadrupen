@@ -95,10 +95,9 @@ Rcpp::List elastic_net_cpp(
   A = find(beta0 != 0) ;
   betaA = beta0.elem(A) ;
   if (sparse) {
-    // WRONG - DO IT THE RIGHT WAY
-    xtxA = mat(sp_xt * sp_x.col(0)) ;
+    xtxA = mat(sp_xt * sp_x.col(0)) - n * xbar * (xbar.elem(A)).t();
   } else {
-    xtxA = mat(xt * x.cols(A)) ;
+    xtxA = mat(xt * x.cols(A)) - n * xbar * (xbar.elem(A)).t();
   }
   if (lambda_l2 > 0) {
     for (uword i=0; i<A.n_elem;i++) {
@@ -115,7 +114,7 @@ Rcpp::List elastic_net_cpp(
   if (fun == 1) {
     xtxw(nbr_in) = dot(xAtxA.col(nbr_in),betaA);
   }
-  
+
   // Additional variables for convergence monitoring
   vec D_hat, D_star, J_hat ; mat J_star ;
   

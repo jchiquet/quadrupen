@@ -17,7 +17,7 @@ test_that("warm_restart", {
     enet.up  <- elastic.net(x,y,lambda1=lambda1, beta0 = beta0_up, control=list(timer=TRUE))
 
     cat("\n\tTimings with warm-restart along the path")
-    cat("\n\t\tfrom stratch: ",enet.ref@monitoring$external.timer)
+    cat("\n\t\tfrom stratch: ",enet.ref$optim_monitoring$timer)
     cat("\n\t\tstarting from sparser solution: ",enet.bot$optim_monitoring$timer)
     cat("\n\t\tstarting from more dense solution: ",enet.up$optim_monitoring$timer)
 
@@ -33,7 +33,7 @@ test_that("warm_restart", {
 
   ## Run the tests...
   cat("\n  * tiny-size problem...")
-  out <-get.coef(x,y)
+  out <- get.coef(x,y)
   expect_that(out$coef.bot,is_equivalent_to(out$coef.ref))
   expect_that(out$coef.up ,is_equivalent_to(out$coef.ref))
 
