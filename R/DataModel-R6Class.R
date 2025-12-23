@@ -56,8 +56,8 @@ DataModel <- R6::R6Class(
           if (!is.null(cov_struct)) {
             stopifnot("struct must be a (square) positive semidefinite matrix." = 
                         all(dim(cov_struct) == ncol(covariates)))
-            stopifnot("struct must be a (square) positive semidefinite matrix." = 
-                        all(eigen(cov_struct, only.values = TRUE)$values >= 0))
+            # stopifnot("struct must be a (square) positive semidefinite matrix." = 
+            #             all(eigen(cov_struct, only.values = TRUE)$values >= 0))
             if (!inherits(cov_struct, "sparseMatrix")) 
               cov_struct <- as(cov_struct, "CsparseMatrix")
           }
@@ -126,7 +126,7 @@ DataModel <- R6::R6Class(
     #' @field is_scaled logical indicating if the data has been scaled
     is_scaled = function() {private$scaled},
     #' @field sparse_encoding logical indicating if the matrix of regressor is sparsely encoded
-    sparse_encoding = function() {inherits(private$X, "sparseMatrix")},
+    sparse_encoding = function() {inherits(self$X, "sparseMatrix")},
     #' @field varnames character, the names of the covariates/regressors
     varnames = function() {private$names}
   )

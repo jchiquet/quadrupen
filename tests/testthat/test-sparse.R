@@ -27,7 +27,7 @@ test_that("Consistency of quadrupen between sparse/non-sparse encoding of the pr
   p <- 10000
   lambda2 <- 0.05
   data <- rlm.sparse(n, p, prob=0.01, reg="med")
-  s <- sum(data$w !=0)
+  s <- sum(data$w != 0)
   y    <- data$y
   x.ns <- as.matrix(data$x)
   x.sp <- Matrix(data$x, sparse=TRUE)
@@ -40,18 +40,19 @@ test_that("Consistency of quadrupen between sparse/non-sparse encoding of the pr
   cat("\n\tdense coding...")
   out.enet.ns <- elastic.net(x.ns, y, lambda2=lambda2, maxfeat=max.feat, minratio=1e-3, control=list(timer=TRUE))
 
-  cat(" took", out.enet.ns$optim_monitoring, "seconds to activate",
-      rowSums(out.enet.ns@active.set)[length(out.enet.ns@lambda1)],"variables.")
+  cat(" took", out.enet.ns$optim_monitoring$timer, "seconds to activate",
+      rowSums(out.enet.ns$coefficients!=0)[length(out.enet.ns$major_tuning)],"variables.")
 
   cat("\n\tsparse coding...")
   out.enet.sp <- elastic.net(x.sp, y, lambda2=lambda2, maxfeat=max.feat, minratio=1e-3, control=list(timer=TRUE))
-  cat(" took", out.enet.sp@monitoring$external.timer, "seconds to activate",
-      rowSums(out.enet.sp@active.set)[length(out.enet.sp@lambda1)],"variables.")
-
+  cat(" took", out.enet.sp$optim_monitoring$timer, "seconds to activate",
+      rowSums(out.enet.sp$coefficients!=0)[length(out.enet.sp$major_tuning)],"variables.")
+  
   ## remove monitoring for fair comparison!!!
-  out.enet.sp@monitoring <- list()
-  out.enet.ns@monitoring <- list()
-  expect_equivalent(out.enet.sp, out.enet.ns)
+  out.enet.sp$optim_monitoring <- list()
+  out.enet.ns$optim_monitoring <- list()
+  expect_equivalent(out.enet.sp$coefficients, out.enet.ns$coefficients)
+  expect_equivalent(out.enet.sp$interceptTerm, out.enet.ns$interceptTerm)
 })
 
 

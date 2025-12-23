@@ -11,7 +11,7 @@ get.lambda1.li <- function(xty,nlambda1,minratio) {
 }
 
 ctrl_default <- function(d)
-  list(verbose     = 1, # default control options
+  list(verbose     = 0, # default control options
        timer       = FALSE,
        maxiter     = max(500, d),
        method      = "quadra",
