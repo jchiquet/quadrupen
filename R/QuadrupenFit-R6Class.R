@@ -481,7 +481,6 @@ QuadrupenFit <- R6::R6Class(
     criteria = function(penalty=
                           setNames(c(2, log(self$nobs), log(self$nvar), log(self$nobs) + 2*log(self$nvar)),
                                    c("AIC","BIC", "mBIC", "eBIC")), sigma=NULL) {
-      
       betas <- private$beta
       lambda <- self$major_tuning
       

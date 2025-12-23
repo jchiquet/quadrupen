@@ -258,7 +258,7 @@ Rcpp::List elastic_net_cpp(
       max_grd   =   max_grd.subvec(0,m-1) ;
       it_active = it_active.subvec(0,m)   ;
       timing    =    timing.subvec(0,m)   ;
-      df        =    df.subvec(0,m)       ;
+      df        =    df.subvec(0,m-1)     ;
       break;
     } else {
       nonzeros = join_cols(nonzeros, betaA/(normx.elem(A) % penscale.elem(A)));

@@ -200,7 +200,7 @@ Rcpp::List bounded_reg_cpp(
       max_grd     = max_grd.subvec(0,m-1)     ;
       it_active   = it_active.subvec(0,m)     ;
       timing      = timing.subvec(0,m)        ;
-      df          = df.subvec(0,m)            ;
+      df          = df.subvec(0,m-1)          ;
       break;
     } else {
       coef = join_rows(coef, beta/(normx % penscale));

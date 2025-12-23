@@ -40,7 +40,7 @@ test_that("Consistency of quadrupen between sparse/non-sparse encoding of the pr
   cat("\n\tdense coding...")
   out.enet.ns <- elastic.net(x.ns, y, lambda2=lambda2, maxfeat=max.feat, minratio=1e-3, control=list(timer=TRUE))
 
-  cat(" took", out.enet.ns@monitoring$external.timer, "seconds to activate",
+  cat(" took", out.enet.ns$optim_monitoring, "seconds to activate",
       rowSums(out.enet.ns@active.set)[length(out.enet.ns@lambda1)],"variables.")
 
   cat("\n\tsparse coding...")
