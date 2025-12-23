@@ -22,7 +22,7 @@ int quadra_enet(vec &x0,
   // Solving the quadratic problem
   vec x1 ;
   if (usechol) {
-    x1 = solve(trimatu(R), solve( trimatl(strans(R)), xty - pen * theta));
+    x1 = solve(trimatu(R), solve(trimatl(strans(R)), xty - pen * theta));
   } else {
     x1 = cg(xAtxA, xty - pen*theta, x0, tol) ;
   }

@@ -1,6 +1,8 @@
 /*
  * Author: Julien CHIQUET
  *         julien.chiquet@inrae.fr
+ *         Statistique et Génome
+ *         MIA Paris-Saclay
  */
 
 #include "quadrupen_headers.h"

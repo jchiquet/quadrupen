@@ -1,5 +1,6 @@
 /*
  * Author: Julien CHIQUET, INRAE
+ *         julien.chiquet@inrae.fr
  *         Statistique et Génome
  *         MIA Paris-Saclay
  */
@@ -234,7 +235,7 @@ Rcpp::List elastic_net_cpp(
     }
     
     // degrees of freedom
-    df[m] = get_df_enet(lambda_l2, R, xAtxA, S_lambda_l2, A, fun);
+    df[m] = get_df_enet(lambda_l2, R, xAtxA, S_lambda_l2, A, usechol, fun);
     
     // the reference parameter (obtained once optimum is met)
     if (monitor > 0) {
