@@ -22,13 +22,15 @@ y <- mu + x %*% beta + rnorm(n, 0, sigma)
 
 ## THESE SETTINGS SHOULD INDUCE EARLY STOPS: CHECK RELEVANCE OF THE
 ## CROSSVAL FUNCTION
+breg <- bounded.reg(x, y, lambda2=0, minratio=1e-5)
 
 ## FIRST, with bulletproof mode: should go at the end of the path, but slow (proximal)
-cv.simple.bp  <- crossval(x, y, penalty="bounded.reg", lambda2=0, min.ratio=1e-5)
+cv.simple.bp  <- cross_validate(breg)
 plot(cv.simple.bp)
 
 ## SECOND, without bulletproof: early stop, fast, but possible larger
 ## standard errors because of less points to average for small lambdas (irrelevant anyway in a sparse setting!)
-cv.simple.nbp <- crossval(x, y, penalty="bounded.reg", lambda2=0, min.ratio=1e-5, control=list(bulletproof=FALSE))
+breg <- bounded.reg(x, y, lambda2=0, minratio=1e-5, control=list(bulletproof=FALSE))
+cv.simple.nbp <- cross_validate(breg)
 plot(cv.simple.nbp)
 

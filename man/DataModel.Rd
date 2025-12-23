@@ -21,7 +21,7 @@ Class for storing data and various fixed quantity
 
 \item{\code{wy}}{vector of observation weights}
 
-\item{\code{mean_X}}{vector of regressor means}
+\item{\code{mean_X}}{vector of (normalized) regressor means}
 
 \item{\code{norm_X}}{vector of regressor norms}
 

@@ -28,13 +28,13 @@ fenchel <- elastic.net(x[subset, ], y[subset], lambda2=lambda2, nlambda1=6, cont
 grandvt <- elastic.net(x[subset, ], y[subset], lambda2=lambda2, nlambda1=6, control=list(monitor=1))
 
 ## TRICK FOR FOR LOG-SCALE...
-delta_fenchel <- fenchel@monitoring$dist.to.opt
+delta_fenchel <- fenchel$optim_monitoring$delta_hat
 delta_fenchel [delta_fenchel < .Machine$double.eps] <- .Machine$double.eps
 
-delta_grandvt <- grandvt@monitoring$dist.to.opt
+delta_grandvt <- grandvt$optim_monitoring$delta_hat
 delta_grandvt [delta_grandvt < .Machine$double.eps] <- .Machine$double.eps
 
-delta_optimal <- grandvt@monitoring$dist.to.str
+delta_optimal <- grandvt$optim_monitoring$delta_star
 delta_optimal[delta_optimal < .Machine$double.eps] <- .Machine$double.eps
 
 plot(log10(delta_optimal), xlab="# iteration", type="l", lty=3, col="black", main="",

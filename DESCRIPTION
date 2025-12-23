@@ -29,7 +29,10 @@ Imports:
     scales,
     tidyr
 Suggests:
-    testthat
+    testthat,
+    elasticnet,
+    glmnet,
+    lars
 LinkingTo: 
     Rcpp,
     RcppArmadillo
