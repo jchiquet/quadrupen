@@ -23,7 +23,7 @@ DataModel <- R6::R6Class(
     wx = numeric(),
     #' @field wy vector of observation weights
     wy = numeric(),
-    #' @field mean_X vector of regressor means
+    #' @field mean_X vector of (normalized) regressor means
     mean_X = numeric(),
     #' @field norm_X vector of regressor norms
     norm_X = double(),
