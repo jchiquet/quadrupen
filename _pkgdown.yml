@@ -1,0 +1,40 @@
+url: https://jchiquet.github.io/quadrupen/
+template:
+  bootstrap: 5
+
+reference:
+- title: "Main functions for user"
+  desc: >
+    Functions for fitting various structured regularization models
+  contents: 
+  - bounded.reg
+  - elastic.net
+  - lasso
+  - ridge
+- title: "Classes and methods for handling the Quadrupen fits"
+  desc: "R6 Classes for the user to manipulate the ouput of the main functions"
+  contents:
+  - QuadrupenFit
+  - ElasticNet
+  - BoundedRegression
+  - RidgeRegression
+- title: "Auxiliaries Classes and methods"
+  desc: "R6 Classes used as fields of the main Class Quadrupen fit"
+  contents:
+  - DataModel
+  - GaussianModel
+  - CrossValidation
+  - StabilityPath
+  - InformationCriteria
+- title: "Auxiliaries S3 methods"
+  desc: "S3 methods, aliases for the most useful R6 methods."
+  contents:
+  - criteria
+  - cross_validate
+  - stability
+  - residuals.QuadrupenFit
+  - coef.QuadrupenFit
+  - predict.QuadrupenFit
+  - fitted.QuadrupenFit
+  - deviance.QuadrupenFit
+  - isQuadrupenFit

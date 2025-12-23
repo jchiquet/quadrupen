@@ -23,7 +23,7 @@ x <- as.matrix(matrix(rnorm(95*n),n,95) %*% chol(Sigma))
 y <- mu + x %*% beta + rnorm(n,0,10)
 
 ## fails of the quadratic solver, correctly handled by 'bullet proof' mode...
-fit01 <- bounded.reg(x,y, lambda2=0,min.ratio=1e-4, control=list(bulletproof=FALSE)) ## Early fail in Cholesky decompostion ...
-fit11 <- bounded.reg(x,y, lambda2=0,min.ratio=1e-4)
-fit02 <- bounded.reg(x,y, lambda2=0.1,min.ratio=1e-4, control=list(bulletproof=FALSE)) ## out of convergence
-fit12 <- bounded.reg(x,y, lambda2=0.1,min.ratio=1e-4)
+fit01 <- bounded.reg(x,y, lambda2=0, minratio=1e-4, control=list(bulletproof=FALSE)) ## Early fail in Cholesky decompostion ...
+fit11 <- bounded.reg(x,y, lambda2=0, minratio=1e-4)
+fit02 <- bounded.reg(x,y, lambda2=0.1, minratio=1e-4, control=list(bulletproof=FALSE)) ## out of convergence
+fit12 <- bounded.reg(x,y, lambda2=0.1, minratio=1e-4)

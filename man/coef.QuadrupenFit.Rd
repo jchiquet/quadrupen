@@ -7,7 +7,7 @@
 \method{coef}{QuadrupenFit}(object, selection = NULL, ...)
 }
 \arguments{
-\item{object}{a [`QuadrupenFit`] object}
+\item{object}{a \link{QuadrupenFit} object}
 
 \item{selection}{either a character (model selection criteria) of a scalar (lambda value)}
 
@@ -17,5 +17,5 @@
 a vector of coefficients
 }
 \description{
-Extracts model coefficients from a [`QuadrupenFit`] object
+Extracts model coefficients from a \link{QuadrupenFit} object
 }

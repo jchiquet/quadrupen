@@ -10,7 +10,7 @@
 #'
 #' @inheritParams elastic.net
 #' 
-#' @return an object with class [`QuadrupenFit`].
+#' @return an object with class [QuadrupenFit].
 #'
 #' @note The optimized criterion is  \if{latex}{\deqn{%
 #' \hat{\beta}_{\lambda_1,\lambda_1} = \arg \min_{\beta} \frac{1}{2}
@@ -49,7 +49,7 @@
 #' "not-too-small" \eqn{\ell_\infty}{l-infinity} regularization, via
 #' a larger \code{'minratio'} argument.
 #'
-#' @seealso See also [`QuadrupenFit`].
+#' @seealso See also [QuadrupenFit].
 #' 
 #' @keywords models, regression
 #'

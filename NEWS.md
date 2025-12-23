@@ -1,12 +1,15 @@
 NEWS/Changelog
 
-# quadrupen 0.4-0	(2026-01-xx)
+# quadrupen dev version	(2026-01-xx)
 
 - major updates
   - complete rewriting of R code using R6 classes
-  - changing many parameters (badly) named, not backward compatibility
-- Integration of changes from CRAN versinons from 0.2-4 to 0.2-13
-
+  - changing many parameters (badly) named, do not expect backward compatibility
+- minor updates
+  - Integration of changes from CRAN versions from 0.2-4 to 0.2-13  
+  - Various fixes in C++ code
+  - set up github workflows for pkgdown page
+  
 # quadrupen 0.3-0	(2013-11)
 
 - major updates

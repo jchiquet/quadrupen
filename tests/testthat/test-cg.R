@@ -1,8 +1,6 @@
-context("Testing consistency and timings of conjugate gradient algorithm - VERY PRELIMINARY")
+testthat::context("Testing consistency and timings of conjugate gradient algorithm - VERY PRELIMINARY")
 
 test_that("dev_conjugate_gradient", {
-
-  require(quadrupen)
 
   get.coef <- function(x,y) {
     lambda1 <- .25
@@ -11,17 +9,18 @@ test_that("dev_conjugate_gradient", {
     enet.ref.bot <- elastic.net(x,y,lambda1=lambda1*2)
 
     enet.cg  <- elastic.net(x,y,lambda1=lambda1, control=list(timer=TRUE,usechol=FALSE,threshold=1e-3))
-    enet.cg.warm <- elastic.net(x,y,lambda1=lambda1, beta0 = enet.ref.bot@coefficients, control=list(timer=TRUE,usechol=FALSE,threshold=1e-3))
+    enet.cg.warm <- elastic.net(x,y,lambda1=lambda1, beta0 = as.numeric(enet.ref.bot$coefficients),
+                                control=list(timer=TRUE,usechol=FALSE,threshold=1e-3))
 
     cat("\n\tTimings with warm-restart along the path")
-    cat("\n\t\tfrom stratch (cholesky): ",enet.ref@monitoring$internal.timer)
-    cat("\n\t\tfrom stratch (conjugate-gradient): ",enet.cg@monitoring$internal.timer)
-    cat("\n\t\tCG starting from sparser solution: ",enet.cg.warm@monitoring$internal.timer)
+    cat("\n\t\tfrom stratch (cholesky): ",enet.ref$optim_monitoring$timer)
+    cat("\n\t\tfrom stratch (conjugate-gradient): ",enet.cg$optim_monitoring$timer)
+    cat("\n\t\tCG starting from sparser solution: ",enet.cg.warm$optim_monitoring$timer)
 
     return(list(
-      coef.ref=as.matrix(enet.ref@coefficients),
-      coef.cg.warm=as.matrix(enet.cg.warm@coefficients),
-      coef.cg =as.matrix(enet.cg@coefficients)))
+      coef.ref=as.matrix(enet.ref$coefficients),
+      coef.cg.warm=as.matrix(enet.cg.warm$coefficients),
+      coef.cg =as.matrix(enet.cg$coefficients)))
   }
 
   ## PROSTATE DATA SET
@@ -30,7 +29,7 @@ test_that("dev_conjugate_gradient", {
 
   ## Run the tests...
   cat("\n  * tiny-size problem...")
-  out <-get.coef(x,y)
+  out <- get.coef(x,y)
   expect_equal(out$coef.cg.warm,out$coef.ref,tolerance=1e-3)
   expect_equal(out$coef.cg ,out$coef.ref    ,tolerance=1e-3)
 

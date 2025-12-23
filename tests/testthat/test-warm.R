@@ -11,19 +11,20 @@ test_that("warm_restart", {
 
     enet.ref.bot <- elastic.net(x,y,lambda1=lambda1*2)
     enet.ref.up  <- elastic.net(x,y,lambda1=lambda1/2)
-
-    enet.bot <- elastic.net(x,y,lambda1=lambda1, beta0 = enet.ref.bot@coefficients, control=list(timer=TRUE))
-    enet.up  <- elastic.net(x,y,lambda1=lambda1, beta0 = enet.ref.up@coefficients , control=list(timer=TRUE))
+    beta0_bt <- as.numeric(enet.ref.bot$coefficients)
+    beta0_up <- as.numeric(enet.ref.up$coefficients)
+    enet.bot <- elastic.net(x,y,lambda1=lambda1, beta0 = beta0_bt, control=list(timer=TRUE))
+    enet.up  <- elastic.net(x,y,lambda1=lambda1, beta0 = beta0_up, control=list(timer=TRUE))
 
     cat("\n\tTimings with warm-restart along the path")
-    cat("\n\t\tfrom stratch: ",enet.ref@monitoring$external.timer)
-    cat("\n\t\tstarting from sparser solution: ",enet.bot@monitoring$external.timer)
-    cat("\n\t\tstarting from more dense solution: ",enet.up@monitoring$external.timer)
+    cat("\n\t\tfrom stratch: ",enet.ref$optim_monitoring$timer)
+    cat("\n\t\tstarting from sparser solution: ",enet.bot$optim_monitoring$timer)
+    cat("\n\t\tstarting from more dense solution: ",enet.up$optim_monitoring$timer)
 
     return(list(
-      coef.ref=as.matrix(enet.ref@coefficients),
-      coef.bot=as.matrix(enet.bot@coefficients),
-      coef.up =as.matrix(enet.up@coefficients)))
+      coef.ref=as.matrix(enet.ref$coefficients),
+      coef.bot=as.matrix(enet.bot$coefficients),
+      coef.up =as.matrix(enet.up$coefficients)))
   }
 
   ## PROSTATE DATA SET
@@ -32,7 +33,7 @@ test_that("warm_restart", {
 
   ## Run the tests...
   cat("\n  * tiny-size problem...")
-  out <-get.coef(x,y)
+  out <- get.coef(x,y)
   expect_that(out$coef.bot,is_equivalent_to(out$coef.ref))
   expect_that(out$coef.up ,is_equivalent_to(out$coef.ref))
 
@@ -55,7 +56,7 @@ test_that("warm_restart", {
 
   ## Run the tests...
   cat("\n  * small-size problem, with correlation...")
-  out <-get.coef(x,y)
+  out <- get.coef(x,y)
   expect_that(out$coef.bot,is_equivalent_to(out$coef.ref))
   expect_that(out$coef.up ,is_equivalent_to(out$coef.ref))
 

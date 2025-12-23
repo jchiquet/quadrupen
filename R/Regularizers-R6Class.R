@@ -1,9 +1,9 @@
 #' Class "ElasticNet"
 #' 
 #' Class of object returned by the fitting function [elastic.net()]. Inherits fields
-#' and methods of [`QuadrupenFit`]
+#' and methods of [QuadrupenFit]
 #' 
-#' @seealso [`QuadrupenFit`, elastic.net()]
+#' @seealso [QuadrupenFit], [elastic.net()]
 #' 
 #' @export
 #' 
@@ -36,9 +36,9 @@ ElasticNet <- R6::R6Class(
 #' Class "BoundedRegression"
 #' 
 #' Class of object returned by the fitting function [bounded.reg()]. Inherits fields
-#' and methods of [`QuadrupenFit`].
+#' and methods of [QuadrupenFit].
 #' 
-#' @seealso [`QuadrupenFit`, bounded.reg()]
+#' @seealso [QuadrupenFit], [bounded.reg()]
 #' 
 #' @export
 BoundedRegression <- R6::R6Class(
@@ -70,9 +70,9 @@ BoundedRegression <- R6::R6Class(
 #' Class "RidgeRegression"
 #' 
 #' Class of object returned by the fitting function [ridge()]. Inherits fields
-#' and methods of [`QuadrupenFit`].
+#' and methods of [QuadrupenFit].
 #' 
-#' @seealso [`QuadrupenFit`, ridge()]
+#' @seealso [QuadrupenFit], [ridge()]
 #' 
 #' @export
 RidgeRegression <- R6::R6Class(

@@ -9,11 +9,11 @@ Class "RidgeRegression"
 Class "RidgeRegression"
 }
 \details{
-Class of object returned by the fitting function [ridge()]. Inherits fields
-and methods of [`QuadrupenFit`].
+Class of object returned by the fitting function \code{\link[=ridge]{ridge()}}. Inherits fields
+and methods of \link{QuadrupenFit}.
 }
 \seealso{
-[`QuadrupenFit`, ridge()]
+\link{QuadrupenFit}, \code{\link[=ridge]{ridge()}}
 }
 \section{Super class}{
 \code{\link[quadrupen:QuadrupenFit]{quadrupen::QuadrupenFit}} -> \code{RidgeRegression}
@@ -53,7 +53,7 @@ and methods of [`QuadrupenFit`].
 \if{html}{\out{<a id="method-RidgeRegression-new"></a>}}
 \if{latex}{\out{\hypertarget{method-RidgeRegression-new}{}}}
 \subsection{Method \code{new()}}{
-Initialize a [`RidgeRegression`] model
+Initialize a \code{\link{RidgeRegression}} model
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{RidgeRegression$new(data, intercept, regParam)}\if{html}{\out{</div>}}
 }
@@ -61,7 +61,7 @@ Initialize a [`RidgeRegression`] model
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{data}}{a [`DataModel`] object}
+\item{\code{data}}{a \code{\link{DataModel}} object}
 
 \item{\code{intercept}}{a logical; should an intercept be included in the mode?}
 

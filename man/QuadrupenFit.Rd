@@ -13,29 +13,28 @@ Class of object returned by any fitting function of the
 \pkg{quadrupen} package (\code{elastic.net} or
 \code{bounded.reg}).
 
-This class comes with the usual [predict()], [fitted()], [coef()],
-[residuals()], [show()], [print()] and [deviance()] S3 methods.
+This class comes with the usual \code{\link[=predict]{predict()}}, \code{\link[=fitted]{fitted()}}, \code{\link[=coef]{coef()}},
+\code{\link[=residuals]{residuals()}}, \code{\link[=show]{show()}}, \code{\link[=print]{print()}} and \code{\link[=deviance]{deviance()}} S3 methods.
 
-Specific R6 methods are available for model extraction [QuadrupenFit$get_model()], 
-cross validation [QuadrupenFit$cross_validate()], stability selection [QuadrupenFit$stability_path()], criteria derivation [QuadrupenFit$criteria()] 
-and plotting [QuadrupenFit$plot()]. They come with equivalent S3 methods : [cross_validate()], 
-[stability()] and [plot()].
-
+Specific R6 methods are available for model extraction \code{\link[=QuadrupenFit]{QuadrupenFit$get_model()}},
+cross validation \code{\link[=QuadrupenFit]{QuadrupenFit$cross_validate()}}, stability selection
+\code{\link[=QuadrupenFit]{QuadrupenFit$stability_path()}}, criteria derivation \link[=QuadrupenFit]{QuadrupenFit$criteria()}
+and plotting \code{\link[=QuadrupenFit]{QuadrupenFit$plot()}}. They come with equivalent S3 methods : \code{\link[=cross_validate]{cross_validate()}},
+\code{\link[=stability]{stability()}} and \code{\link[=plot]{plot()}}.
 
 the 'rescaled' debaising is as defined in Zou and Hastie (2006): the vector of
-parameters is rescaled by a coefficient \code{(1+lambda2)}. 'Original' reset to 
+parameters is rescaled by a coefficient \code{(1+lambda2)}. 'Original' reset to
 the original scaling
 
-
- The `"path"`plot is available as soon as a fit has been performed.
+The \code{"path"}plot is available as soon as a fit has been performed.
 For the others, the appropriate post-treatments must have been made via the
-methods [`QuadrupenFit$criteria()`], [`QuadrupenFit$cross_validate()`] or
-[`QuadrupenFit$stability()`]
+methods \code{\link[=QuadrupenFit]{QuadrupenFit$criteria()}}, \code{\link[=QuadrupenFit]{QuadrupenFit$cross_validate()}} or
+\code{\link[=QuadrupenFit]{QuadrupenFit$stability()}}
 
-All plots functions are given with the default arguments, except for `labels` and `log_scale`.
-If you need more control, please use the dedicated methods: [`QuadrupenFit$plot_path()`], 
-[`InformationCriteria$plot()`], [`CrossValidation$plot()`], [`StabilityPath$plot()`] or
-the corresponding S3 methods.
+All plots functions are given with the default arguments, except for \code{labels} and \code{log_scale}.
+If you need more control, please use the dedicated methods: \code{\link[=QuadrupenFit]{QuadrupenFit$plot_path()}},
+\code{\link[=InformationCriteria]{InformationCriteria$plot()}}, \code{\link[=CrossValidation]{CrossValidation$plot()}},
+\code{\link[=StabilityPath]{StabilityPath$plot()}} or the corresponding S3 methods.
 
 Plot method for regularization path
 }
@@ -70,16 +69,16 @@ plot(bounded.reg(x,y, lambda2=10), xvar="fraction")
 
 }
 \seealso{
-See also [`InformationCriteria`], [`CrossValidation`] and
-[`StabilityPath`]
+See also \code{\link{InformationCriteria}}, \code{\link{CrossValidation}} and
+\code{\link{StabilityPath}}
 
-[cross_validate()]
+\code{\link[=cross_validate]{cross_validate()}}
 Stability selection for Quadrupen object
 
-[stability()]
+\code{\link[=stability]{stability()}}
 Penalized criteria based on estimation of degrees of freedom
 
-[criteria()]
+\code{\link[=criteria]{criteria()}}
 }
 \section{Active bindings}{
 \if{html}{\out{<div class="r6-active-bindings">}}
@@ -88,7 +87,7 @@ Penalized criteria based on estimation of degrees of freedom
 
 \item{\code{nobs}}{sample size}
 
-\item{\code{dataModel}}{an object with class [`DataModel`] storing the data}
+\item{\code{dataModel}}{an object with class \code{\link{DataModel}} storing the data}
 
 \item{\code{has_intercept}}{boolean indicating wether an intercept is included in the model}
 
@@ -102,29 +101,29 @@ Penalized criteria based on estimation of degrees of freedom
 
 \item{\code{fitted}}{Matrix of fitted values, each column corresponding to a value of \code{lambda1}.}
 
-\item{\code{coefficients}}{Matrix (class `"dgCMatrix"`) of
+\item{\code{coefficients}}{Matrix (class \code{"dgCMatrix"}) of
 coefficients with respect to the original input. The number of
 rows corresponds the length of \code{lambda1}.}
 
-\item{\code{interceptTerm}}{A vector containing the successive values of the 
+\item{\code{interceptTerm}}{A vector containing the successive values of the
 (unpenalized) intercept.
-Equals to zero if \code{intercept} has been set to `FALSE`.}
+Equals to zero if \code{intercept} has been set to \code{FALSE}.}
 
-\item{\code{residuals}}{Matrix of residuals, each column corresponding to a value of `lambda1`.}
+\item{\code{residuals}}{Matrix of residuals, each column corresponding to a value of \code{lambda1}.}
 
 \item{\code{deviance}}{the model deviance}
 
-\item{\code{degrees_freedom}}{Estimated degree of freedoms for the successive `lambda1`.}
+\item{\code{degrees_freedom}}{Estimated degree of freedoms for the successive \code{lambda1}.}
 
 \item{\code{r_squared}}{vector giving the coefficient of determination as a function of lambda1.}
 
-\item{\code{information_criteria}}{object with class [`InformationCriteria`] storing various information criteria 
+\item{\code{information_criteria}}{object with class \code{\link{InformationCriteria}} storing various information criteria
 (AIC, BIC, GCV, etc) for the current fit.}
 
-\item{\code{cross_validation}}{object with class [`CrossValidation`] storing output of CV job. 
+\item{\code{cross_validation}}{object with class \code{\link{CrossValidation}} storing output of CV job.
 Only available once method cross_validate has been called.}
 
-\item{\code{stability_path}}{object with class [`StabilityPath`] storing output of stability selection. 
+\item{\code{stability_path}}{object with class \code{\link{StabilityPath}} storing output of stability selection.
 Only available once method $stability has been called.}
 }
 \if{html}{\out{</div>}}
@@ -151,7 +150,7 @@ Only available once method $stability has been called.}
 \if{html}{\out{<a id="method-QuadrupenFit-new"></a>}}
 \if{latex}{\out{\hypertarget{method-QuadrupenFit-new}{}}}
 \subsection{Method \code{new()}}{
-Initialize a [`QuadrupenFit`] model
+Initialize a \link{QuadrupenFit} model
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{QuadrupenFit$new(data, intercept, regParam)}\if{html}{\out{</div>}}
 }
@@ -159,7 +158,7 @@ Initialize a [`QuadrupenFit`] model
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{data}}{a [`DataModel`] object}
+\item{\code{data}}{a \link{DataModel} object}
 
 \item{\code{intercept}}{a logical; should an intercept be included in the mode?}
 
@@ -254,7 +253,7 @@ Debias model coefficients
 \if{html}{\out{<a id="method-QuadrupenFit-debias"></a>}}
 \if{latex}{\out{\hypertarget{method-QuadrupenFit-debias}{}}}
 \subsection{Method \code{debias()}}{
-Apply various debiasing schemes to correct effect of shrinkage 
+Apply various debiasing schemes to correct effect of shrinkage
 on the estimation of the coefficients
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{QuadrupenFit$debias(type = c("none", "standard"))}\if{html}{\out{</div>}}
@@ -278,7 +277,7 @@ Cross-validation for Quadrupen object
 \if{latex}{\out{\hypertarget{method-QuadrupenFit-cross_validate}{}}}
 \subsection{Method \code{cross_validate()}}{
 Function that computes K-fold cross-validated error of a
-\code{quadrupen} fit, possibly on a grid of `lambda1`, `lambda2`.
+\code{quadrupen} fit, possibly on a grid of \code{lambda1}, \code{lambda2}.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{QuadrupenFit$cross_validate(
   K = 10,
@@ -294,18 +293,18 @@ Function that computes K-fold cross-validated error of a
 \describe{
 \item{\code{K}}{integer indicating the number of folds. Default is 10.}
 
-\item{\code{folds}}{list of `K` vectors that describes the folds to
+\item{\code{folds}}{list of \code{K} vectors that describes the folds to
 use for the cross-validation. By default, the folds are randomly
 sampled with the specified K. The same folds are used for each
-values of `lambda2`.}
+values of \code{lambda2}.}
 
 \item{\code{lambda2}}{tunes the \eqn{\ell_2}{l2}-penalty (ridge-like) of
 the fit. If none is provided, a vector of values is generated and
-a CV is performed on a grid of `lambda2` and `lambda1`,
-using the same folds for each `lambda2`.}
+a CV is performed on a grid of \code{lambda2} and \code{lambda1},
+using the same folds for each \code{lambda2}.}
 
 \item{\code{verbose}}{logical; indicates if the progression (the current
-`lambda2` should be displayed. Default is `TRUE.`}
+\code{lambda2} should be displayed. Default is \code{TRUE.}}
 
 \item{\code{cores}}{the number of cores to use. The default uses all
 the cores available.}
@@ -313,8 +312,8 @@ the cores available.}
 \if{html}{\out{</div>}}
 }
 \subsection{Returns}{
-an object with class [`CrossValidation`] is sent back and stored as a 
-field of the original [`QuadrupenFit`] object.
+an object with class \link{CrossValidation} is sent back and stored as a
+field of the original \link{QuadrupenFit} object.
 }
 }
 \if{html}{\out{<hr>}}
@@ -342,18 +341,18 @@ procedure as introduced by Meinshausen and Buhlmann (2010).
 used to estimate the selection probabilities. Default is 100.}
 
 \item{\code{subsample_size}}{integer indicating the size of each subsamples.
-Default is `floor(n/2)`.}
+Default is \code{floor(n/2)}.}
 
-\item{\code{subsamples}}{list with `subsamples` entries with vectors
+\item{\code{subsamples}}{list with \code{subsamples} entries with vectors
 describing the folds to use for the stability procedure. By
 default, the folds are randomly sampled with the specified
-\code{n_subsamples} and `subsample_size` argument.}
+\code{n_subsamples} and \code{subsample_size} argument.}
 
 \item{\code{weakness}}{Coefficient used for randomizing the weights of each features.
 Default is 1` for no randomization. See details below.}
 
 \item{\code{verbose}}{logical; indicates if the progression should be
-displayed. Default is `TRUE`.}
+displayed. Default is \code{TRUE}.}
 
 \item{\code{cores}}{the number of cores to use. The default uses all
 the cores available.}
@@ -361,8 +360,8 @@ the cores available.}
 \if{html}{\out{</div>}}
 }
 \subsection{Returns}{
-an object with class [`StabilityPath`] is sent back and stored as a 
-field of the original [`QuadrupenFit`] object.
+an object with class \link{StabilityPath} is sent back and stored as a
+field of the original \link{QuadrupenFit} object.
 }
 }
 \if{html}{\out{<hr>}}
@@ -393,14 +392,14 @@ which are easier to read.}
 
 \item{\code{sigma}}{scalar: an estimate of the residual variance. When
 available, it is plugged-in the criteria, which may be more
-relevant. If `NULL` (the default), it is estimated as usual
+relevant. If \code{NULL} (the default), it is estimated as usual
 (see details).}
 }
 \if{html}{\out{</div>}}
 }
 \subsection{Returns}{
-an object with class [`InformationCriteria`] is sent back and stored as a 
-field of the original [`QuadrupenFit`] object.
+an object with class \link{InformationCriteria} is sent back and stored as a
+field of the original \link{QuadrupenFit} object.
 }
 }
 \if{html}{\out{<hr>}}
@@ -419,12 +418,12 @@ Plot method for QuadrupenFit
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{type}}{the type of plot, either `"path"` for regularization path; 
-`"criteria"` for BIC-like  information criteria ; `"crossval"` for 
-cross-validation plot ; and `"stability"` for stability path.}
+\item{\code{type}}{the type of plot, either \code{"path"} for regularization path;
+\code{"criteria"} for BIC-like  information criteria ; \code{"crossval"} for
+cross-validation plot ; and \code{"stability"} for stability path.}
 
 \item{\code{log_scale}}{logical; indicates if a log-scale should be used
-when `xvar="lambda"`. Default is `TRUE`.}
+when \code{xvar="lambda"}. Default is \code{TRUE}.}
 
 \item{\code{labels}}{vector indicating the names associated to the plotted
 variables. When specified, a legend is drawn in order to identify
@@ -439,7 +438,7 @@ small. Remind that the intercept does not count. Default is
 \if{html}{\out{<a id="method-QuadrupenFit-plot_path"></a>}}
 \if{latex}{\out{\hypertarget{method-QuadrupenFit-plot_path}{}}}
 \subsection{Method \code{plot_path()}}{
-Produce a plot of the solution path of a [`QuadrupenFit`] object.
+Produce a plot of the solution path of a \link{QuadrupenFit} object.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{QuadrupenFit$plot_path(
   xvar = c("lambda", "fraction", "df"),
@@ -453,21 +452,21 @@ Produce a plot of the solution path of a [`QuadrupenFit`] object.
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{xvar}}{variable to plot on the X-axis: either `"lambda"`
+\item{\code{xvar}}{variable to plot on the X-axis: either \code{"lambda"}
 (\eqn{\ell_1}{l1} penalty level, or
 \eqn{\ell_2}{l2} for ridge  and \eqn{\ell_\infty}{l_inf}) or
-`"fraction"` (\eqn{\ell_1}{l1}-norm
-of the coefficients) or `df` for estimated degrees of freedom. 
-Default is set to `"lambda"`.}
+\code{"fraction"} (\eqn{\ell_1}{l1}-norm
+of the coefficients) or \code{df} for estimated degrees of freedom.
+Default is set to \code{"lambda"}.}
 
 \item{\code{log_scale}}{logical; indicates if a log-scale should be used
-when `xvar="lambda"`. Default is `TRUE`.}
+when \code{xvar="lambda"}. Default is \code{TRUE}.}
 
 \item{\code{title}}{the title. Default is set to the model name followed
 by what is on the Y-axis.}
 
 \item{\code{standardize}}{logical; standardize the coefficients before
-plotting (with the norm of the predictor). Default is `TRUE`.}
+plotting (with the norm of the predictor). Default is \code{TRUE}.}
 
 \item{\code{labels}}{vector indicating the names associated to the plotted
 variables. When specified, a legend is drawn in order to identify

@@ -24,37 +24,37 @@ cross_validate(
 )
 }
 \arguments{
-\item{object}{an R6 object with class [`QuadrupenFit`]}
+\item{object}{an R6 object with class \link{QuadrupenFit}}
 
 \item{K}{integer indicating the number of folds. Default is 10.}
 
-\item{folds}{list of `K` vectors that describes the folds to
+\item{folds}{list of \code{K} vectors that describes the folds to
 use for the cross-validation. By default, the folds are randomly
 sampled with the specified K. The same folds are used for each
-values of `lambda2`.}
+values of \code{lambda2}.}
 
 \item{lambda2}{tunes the \eqn{\ell_2}{l2}-penalty (ridge-like) of
 the fit. If none is provided, a vector of values is generated and
-a CV is performed on a grid of `lambda2` and `lambda1`,
-using the same folds for each `lambda2`.}
+a CV is performed on a grid of \code{lambda2} and \code{lambda1},
+using the same folds for each \code{lambda2}.}
 
 \item{verbose}{logical; indicates if the progression (the current
-`lambda2` should be displayed. Default is `TRUE.`}
+\code{lambda2} should be displayed. Default is \code{TRUE.}}
 
 \item{cores}{the number of cores to use. The default uses all
 the cores available.}
 }
 \value{
-an object with class [`CrossValidation`] is sent back and stored as a 
-field of the original [`QuadrupenFit`] object.
+an object with class \code{\link{CrossValidation}} is sent back and stored as a
+field of the original \link{QuadrupenFit} object.
 }
 \description{
 Function that computes K-fold cross-validated error of a
-\code{quadrupen} fit, possibly on a grid of `lambda1`, `lambda2`.
+\code{quadrupen} fit, possibly on a grid of \code{lambda1}, \code{lambda2}.
 }
 \section{Methods (by class)}{
 \itemize{
-\item \code{cross_validate(QuadrupenFit)}: S3 method for cross-validation  of a [`QuadrupenFit`]
+\item \code{cross_validate(QuadrupenFit)}: S3 method for cross-validation  of a \link{QuadrupenFit}
 
 }}
 \note{

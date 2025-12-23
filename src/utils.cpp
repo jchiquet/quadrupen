@@ -130,14 +130,14 @@ void choldowndate(mat &R, int j) {
   R.shed_row(p);
 }
 
-double get_df_enet(const double &lambda2, mat &R, mat &xAtxA, const sp_mat &S, uvec &A, const uword &fun) {
+double get_df_enet(const double &lambda2, mat &R, mat &xAtxA, const sp_mat &S, uvec &A, const bool &usechol, const uword &fun) {
 
   mat SAA(A.n_elem,A.n_elem) ;
   double df ;
   mat B ;
   
   if (lambda2 > 0) {
-    if (fun == 0) {
+    if ((fun == 0) & (usechol)) {
       B = solve(trimatu(R), eye(R.n_cols, R.n_cols));
       B = B * B.t();
     } else {
@@ -145,7 +145,7 @@ double get_df_enet(const double &lambda2, mat &R, mat &xAtxA, const sp_mat &S, u
     }
     // have to do this due to sparse encoding
     // either wait for Armadillo's guy to develop non contiguous
-    // subview for sparse matrice or iterate over the n_zeros only...
+    // subview for sparse matrix or iterate over the n_zeros only...
     for (uword i=0;i<A.n_elem;i++){
       for (uword j=i;j<A.n_elem;j++){
 	      SAA(i,j) = S.at(A(i),A(j));

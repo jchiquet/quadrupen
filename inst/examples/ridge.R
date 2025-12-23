@@ -22,21 +22,27 @@ Iww <- matrix(1,10,10)
 A <- bdiag(Ioo,Iww,Ioo,Iww,Ioo)
 diag(A) <- 0
 L2 <- -A
-diag(L2) <- colSums(A)+1e-2
+diag(L2) <- colSums(A) + 1e-2
 
 ridge.classical <- ridge(x,y,intercept=F)
 plot(ridge.classical)
-ridge.neighborhood <- ridge(x,y, struct=L1, lambda.max=1000)
+ridge.neighborhood <- ridge(x,y, struct=L1, lambda_max=1000)
 plot(ridge.neighborhood)
-ridge.block <- ridge(x,y, struct=L2, lambda.max=1000)
+ridge.block <- ridge(x,y, struct=L2, lambda_max=1000)
 plot(ridge.block)
 
+
+beta_ridge <- as.numeric(ridge(x,y,lambda=1)$coefficients)
+beta_ridge_neighbor <- as.numeric(ridge(x,y,lambda=10,struct=L1)$coefficients)
+beta_ridge_block <- as.numeric(ridge(x,y,lambda=10,struct=L2)$coefficients)
+beta_enet_block  <- as.numeric(elastic.net(x,y,lambda2=5,lambda1=20,struct=L2)$coefficients)
+
 par(mfrow=c(2,2))
-plot(ridge(x,y,lambda2=1)@coefficients, type="b", ylim=c(-1,1))
+plot(beta_ridge, type="b", ylim=c(-1,1))
 points(beta, pch="+",col="red")
-plot(ridge(x,y,lambda2=10,struct=L1)@coefficients, type="b", ylim=c(-1,1))
+plot(beta_ridge_neighbor, type="b", ylim=c(-1,1))
 points(beta, pch="+",col="red")
-plot(ridge(x,y,lambda2=10,struct=L2)@coefficients, type="b", ylim=c(-1,1))
+plot(beta_ridge_block, type="b", ylim=c(-1,1))
 points(beta, pch="+",col="red")
-plot(elastic.net(x,y,lambda2=5,lambda1=20,struct=L2,naive=TRUE)@coefficients, type="b", ylim=c(-1,1))
+plot(beta_enet_block, type="b", ylim=c(-1,1))
 points(beta, pch="+",col="red")

@@ -21,7 +21,7 @@ criteria(
 }
 \arguments{
 \item{object}{output of a fitting procedure of the \pkg{quadrupen}
-package (e.g. [elastic.net()]).}
+package (e.g. \code{\link[=elastic.net]{elastic.net()}}).}
 
 \item{penalty}{a vector with as many penalties a desired. The
 default contains the penalty corresponding to the AIC and the BIC
@@ -31,12 +31,12 @@ which are easier to read.}
 
 \item{sigma}{scalar: an estimate of the residual variance. When
 available, it is plugged-in the criteria, which may be more
-relevant. If `NULL` (the default), it is estimated as usual
+relevant. If \code{NULL} (the default), it is estimated as usual
 (see details).}
 }
 \value{
-an object with class [`Criteria`] is sent back and stored as a 
-field of the original [`QuadrupenFit`] object.
+an object with class \link{InformationCriteria} is sent back and stored as a
+field of the original \link{QuadrupenFit} object.
 }
 \description{
 Produce a plot or send back the values of some penalized criteria
@@ -47,11 +47,11 @@ penalty.
 }
 \section{Methods (by class)}{
 \itemize{
-\item \code{criteria(QuadrupenFit)}: S3 method for information criteria  of a [`QuadrupenFit`]
+\item \code{criteria(QuadrupenFit)}: S3 method for information criteria  of a \link{QuadrupenFit}
 
 }}
 \note{
-When `sigma` is provided, the criterion takes the form
+When \code{sigma} is provided, the criterion takes the form
 
 \if{latex}{\deqn{\left\|\mathbf{y} - \mathbf{X} \hat{\beta} \right\|^2 +
 \mathrm{penalty} \times \frac{\hat{\mathrm{df}}}{n} \ \sigma^2.}}

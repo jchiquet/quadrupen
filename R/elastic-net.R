@@ -93,7 +93,7 @@
 #' when `'1'`, the bound derived in Grandvalet et al. is computed; when 
 #' `'>1'`, the Fenchel duality gap is computed along the algorithm.
 #'
-#' @return an object with class [`QuadrupenFit`].
+#' @return an object with class [QuadrupenFit].
 #'
 #' @details The optimized criterion is the following: \if{latex}{\deqn{%
 #' \hat{\beta}_{\lambda_1,\lambda_2} = \arg \min_{\beta} \frac{1}{2}
@@ -112,7 +112,7 @@
 #' argument, a positive semidefinite matrix (possibly of class
 #' `Matrix`).
 #'
-#' @seealso See also [`QuadrupenFit`]
+#' @seealso See also [QuadrupenFit]
 #' 
 #' @keywords models, regression
 #'
@@ -152,10 +152,22 @@ elastic.net <- function(x,
                         maxfeat   = ifelse(lambda2 < 1e-2, min(nrow(x),ncol(x)), min(4*nrow(x),ncol(x))),
                         beta0     = numeric(ncol(x)),
                         control   = list()) {
+
+  ## ============================================
+  ## RECOVER LOW LEVEL CONFIGURATION
+  ##
+  ctrl <- ctrl_default(ncol(x))
+  ctrl$maxfeat <- maxfeat
+  if (!is.null(control$method)) if (control$method != "quadra") ctrl$threshold <- 1e-2
+  ctrl[names(control)] <- control # default overwritten by user specifications
+  ctrl$method <- switch(ctrl$method, quadra = 0, pathwise = 1, fista = 2, 0)
+  ctrl$beta0  <- beta0
+  ctrl$rescaling <- match.arg(debiasing)
   
   ## ============================================
   ## INSTANTIATE THE DATA MODEL
   ##
+  if (ctrl$verbose > 0) cat ("\nData pretreatment")
   myData <- GaussianModel$new(
     covariates  = x,
     outcome     = y,
@@ -168,6 +180,7 @@ elastic.net <- function(x,
   ## ============================================
   ## INSTANTIATE THE PENALIZED MODEL
   ##
+  if (ctrl$verbose > 0) cat ("\nPath calibration")
   if (is.null(lambda1)) {
     stopifnot("minratio must be non negative." = minratio > 0)
     lmax <- max(abs(myData$xty))
@@ -178,26 +191,17 @@ elastic.net <- function(x,
     intercept = intercept,
     regParam  = list(l1 = lambda1, l2 = lambda2)
   )
-  
-  ## ============================================
-  ## RECOVER OPTIMIZATION CONFIGURATION
-  ##
-  ctrl <- ctrl_default(ncol(x))
-  ctrl$maxfeat <- maxfeat
-  if (!is.null(control$method)) if (control$method != "quadra") ctrl$threshold <- 1e-2
-  ctrl[names(control)] <- control # default overwritten by user specifications
-  ctrl$method <- switch(ctrl$method, quadra = 0, pathwise = 1, fista = 2, 0)
-  ctrl$beta0  <- beta0
-  ctrl$rescaling <- match.arg(debiasing)
-  
+
   ## ============================================
   ## FIT THE MODEL WITH ACTIVE SET ALGORITHM
   ##
+  if (ctrl$verbose > 0) cat ("\nModel fitting and optimization")
   myModel$fit(ctrl)
   
   ## ============================================
   ## POSTREATMENT + SEND BACK THE RESULTING MODEL
   ##
+  if (ctrl$verbose > 0) cat ("\nPost-treatment")
   myModel$debias(ctrl$rescaling)
   myModel$criteria()
   myModel

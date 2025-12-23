@@ -9,8 +9,8 @@ Class CrossValidation
 Class CrossValidation
 }
 \details{
-Class of object returned by the [`QuadrupenFit$cross_validate()`] method or the
-[`cross_validate()`] function.  Owns [print()] and [plot()] methods.
+Class of object returned by the \code{\link[=QuadrupenFit]{QuadrupenFit$cross_validate()}} method or the
+\code{\link[=cross_validate]{cross_validate()}} function.  Owns \code{\link[=print]{print()}} and \code{\link[=plot]{plot()}} methods.
 }
 \section{Active bindings}{
 \if{html}{\out{<div class="r6-active-bindings">}}
@@ -61,8 +61,8 @@ minimum (only relevant for ridge regression).}
 \if{html}{\out{<a id="method-CrossValidation-new"></a>}}
 \if{latex}{\out{\hypertarget{method-CrossValidation-new}{}}}
 \subsection{Method \code{new()}}{
-Constructor for a [`CrossValidation`] object
-Should be called internally by an object [`QuadrupenFit$cross_validate()`]
+Constructor for a \link{CrossValidation} object
+Should be called internally by an object \code{\link[=QuadrupenFit]{QuadrupenFit$cross_validate()}}
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{CrossValidation$new(cv_error, folds)}\if{html}{\out{</div>}}
 }

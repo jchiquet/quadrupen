@@ -9,13 +9,16 @@ test_that("enet_quad2elasticnet", {
     enet.larsen <- enet(x,y,lambda=lambda2,intercept=intercept,normalize=normalize)
     iols <- length(enet.larsen$penalty)
     lambda1 <- enet.larsen$penalty[-iols]/2
+    
     enet.quadru <- elastic.net(x,y,intercept=intercept,normalize=normalize,
-                               lambda1=lambda1, lambda2=lambda2, naive=naive)
+                               lambda1=lambda1, lambda2=lambda2, debiasing = ifelse(naive, "none", "standard"))
 
     quad <- list(coef   = as.matrix(enet.quadru$coefficients),
+                 meanx  = enet.quadru$dataModel$mean_X * enet.quadru$dataModel$norm_X,
                  normx  = enet.quadru$dataModel$norm_X)
 
     enet <- list(coef   = predict(enet.larsen, type="coefficients",naive=naive)$coefficients[-iols,],
+                 meanx  = enet.larsen$meanx,
                  normx  = enet.larsen$normx)
 
     return(list(quad=quad, enet = enet))
@@ -26,7 +29,7 @@ test_that("enet_quad2elasticnet", {
   x <- as.matrix(x)
 
   ## Run the tests...
-  with.intercept <- get.enet(x,y,intercept=TRUE,naive=TRUE)
+  with.intercept <-get.enet(x,y,intercept=TRUE,naive=TRUE)
   expect_that(with.intercept$quad,
               is_equivalent_to(with.intercept$enet))
 

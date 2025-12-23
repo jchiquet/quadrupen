@@ -33,15 +33,15 @@ test_that("Consistency of the structured elastic-net", {
     lambda1 <- senet1$penalty[-iols]/2
 
     ## our approach: direct optimization
-    senet2 <- elastic.net(x,y,intercept=intercept,normalize=normalize,naive=TRUE,
+    senet2 <- elastic.net(x,y,intercept=intercept,normalize=normalize,
                           struct=t(C) %*% C, lambda1=lambda1, lambda2=lambda2)
 
     res <- list(
       coef.ref = scale(predict(senet1,
         type="coefficients",naive=TRUE)$coefficients,FALSE,normx)[-iols,],
-        coef.our = as.matrix(senet2@coefficients))
+        coef.our = as.matrix(senet2$coefficients))
 
-    return(res)
+    res
 
   }
 

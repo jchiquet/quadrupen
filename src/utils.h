@@ -25,7 +25,7 @@ inline vec get_lambda1(SEXP LAMBDA1, uword n_lambda, double min_ratio, double lm
 vec grp_norm(vec x, uvec pk, int norm, int rep) ;
 vec grp_sign(vec x, uvec pk) ;
 
-double get_df_enet(const double &lambda2, mat &R, mat &xAtxA, const sp_mat &S, uvec &A, const uword &fun) ;
+double get_df_enet(const double &lambda2, mat &R, mat &xAtxA, const sp_mat &S, uvec &A, const bool &usechol, const uword &fun) ;
 double get_df_breg(const double &lambda2, mat &xtx, const sp_mat &S, uvec &A) ;
 
 vec  cg(mat A, vec b, vec x, double tol) ;

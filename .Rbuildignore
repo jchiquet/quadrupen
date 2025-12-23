@@ -3,3 +3,7 @@
 ^LICENSE\.md$
 README.qmd
 ^README_files
+^\.github$
+^_pkgdown\.yml$
+^docs$
+^pkgdown$

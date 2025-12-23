@@ -21,7 +21,7 @@ Class for storing data and various fixed quantity
 
 \item{\code{wy}}{vector of observation weights}
 
-\item{\code{mean_X}}{vector of regressor means}
+\item{\code{mean_X}}{vector of (normalized) regressor means}
 
 \item{\code{norm_X}}{vector of regressor norms}
 
@@ -95,7 +95,7 @@ constructor for DataModel
 \if{html}{\out{<a id="method-DataModel-standardize"></a>}}
 \if{latex}{\out{\hypertarget{method-DataModel-standardize}{}}}
 \subsection{Method \code{standardize()}}{
-Perform standardization of the data an store the auxiliaries 
+Perform standardization of the data an store the auxiliaries
 quantities
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{DataModel$standardize(intercept, normalize)}\if{html}{\out{</div>}}

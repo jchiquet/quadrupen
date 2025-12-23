@@ -22,7 +22,7 @@ int quadra_enet(vec &x0,
   // Solving the quadratic problem
   vec x1 ;
   if (usechol) {
-    x1 = solve(trimatu(R), solve( trimatl(strans(R)), xty - pen * theta));
+    x1 = solve(trimatu(R), solve(trimatl(strans(R)), xty - pen * theta));
   } else {
     x1 = cg(xAtxA, xty - pen*theta, x0, tol) ;
   }
@@ -179,20 +179,20 @@ uvec setdiff(uvec x, uvec y) {
   uword end_x = x.n_elem;
   uword end_y = y.n_elem;
   uvec z = zeros<uvec>(x.n_elem-y.n_elem);
-
+  
   if (y.is_empty()) {
     z = x;
   } else {
     while (ind_y != end_y) {
       if ( x(ind_x) < y(ind_y) ) {
-	z(ind_z) = x(ind_x);
-	ind_z++;
-	ind_x++;
+        z(ind_z) = x(ind_x);
+        ind_z++;
+        ind_x++;
       } else if ( y(ind_y) < x(ind_x) ) {
-	ind_y++;
+        ind_y++;
       } else {
-	ind_x++;
-	ind_y++;
+        ind_x++;
+        ind_y++;
       }
       R_CheckUserInterrupt();
     }

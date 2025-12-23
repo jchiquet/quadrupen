@@ -7,9 +7,10 @@
 #' This class comes with the usual [predict()], [fitted()], [coef()],
 #' [residuals()], [show()], [print()] and [deviance()] S3 methods.
 #'
-#' Specific R6 methods are available for model extraction [QuadrupenFit$get_model()], 
-#' cross validation [QuadrupenFit$cross_validate()], stability selection [QuadrupenFit$stability_path()], criteria derivation [QuadrupenFit$criteria()] 
-#' and plotting [QuadrupenFit$plot()]. They come with equivalent S3 methods : [cross_validate()], 
+#' Specific R6 methods are available for model extraction [`QuadrupenFit$get_model()`][QuadrupenFit], 
+#' cross validation [`QuadrupenFit$cross_validate()`][QuadrupenFit], stability selection 
+#' [`QuadrupenFit$stability_path()`][QuadrupenFit], criteria derivation [QuadrupenFit$criteria()][QuadrupenFit] 
+#' and plotting [`QuadrupenFit$plot()`][QuadrupenFit]. They come with equivalent S3 methods : [cross_validate()], 
 #' [stability()] and [plot()].
 #'
 #' @param log_scale logical; indicates if a log-scale should be used
@@ -125,8 +126,8 @@ QuadrupenFit <- R6::R6Class(
   ## ____________________________________________________
   public  = list(
     
-    #' @description Initialize a [`QuadrupenFit`] model
-    #' @param data a [`DataModel`] object
+    #' @description Initialize a [QuadrupenFit] model
+    #' @param data a [DataModel] object
     #' @param intercept a logical; should an intercept be included in the mode?
     #' @param regParam a list with two elements, a vector and a scalar, for the regularization
     initialize = function(data, intercept, regParam) {
@@ -286,8 +287,8 @@ QuadrupenFit <- R6::R6Class(
     #' @param cores the number of cores to use. The default uses all
     #' the cores available.
     #'
-    #' @return an object with class [`CrossValidation`] is sent back and stored as a 
-    #' field of the original [`QuadrupenFit`] object.
+    #' @return an object with class [CrossValidation] is sent back and stored as a 
+    #' field of the original [QuadrupenFit] object.
     #' 
     #' @seealso [cross_validate()]
     cross_validate = 
@@ -387,8 +388,8 @@ QuadrupenFit <- R6::R6Class(
     #' @param cores the number of cores to use. The default uses all
     #' the cores available.
     #'
-    #' @return an object with class [`StabilityPath`] is sent back and stored as a 
-    #' field of the original [`QuadrupenFit`] object.
+    #' @return an object with class [StabilityPath] is sent back and stored as a 
+    #' field of the original [QuadrupenFit] object.
     #' 
     #' @seealso [stability()]
     stability = function(
@@ -474,14 +475,13 @@ QuadrupenFit <- R6::R6Class(
     #' relevant. If `NULL` (the default), it is estimated as usual
     #' (see details).
     #' 
-    #' @return an object with class [`InformationCriteria`] is sent back and stored as a 
-    #' field of the original [`QuadrupenFit`] object.
+    #' @return an object with class [InformationCriteria] is sent back and stored as a 
+    #' field of the original [QuadrupenFit] object.
     #' 
     #' @seealso [criteria()]
     criteria = function(penalty=
                           setNames(c(2, log(self$nobs), log(self$nvar), log(self$nobs) + 2*log(self$nvar)),
                                    c("AIC","BIC", "mBIC", "eBIC")), sigma=NULL) {
-      
       betas <- private$beta
       lambda <- self$major_tuning
       
@@ -519,13 +519,13 @@ QuadrupenFit <- R6::R6Class(
     #' 
     #' @details  The `"path"`plot is available as soon as a fit has been performed.
     #' For the others, the appropriate post-treatments must have been made via the
-    #' methods [`QuadrupenFit$criteria()`], [`QuadrupenFit$cross_validate()`] or
-    #' [`QuadrupenFit$stability()`]
+    #' methods [`QuadrupenFit$criteria()`][QuadrupenFit], [`QuadrupenFit$cross_validate()`][QuadrupenFit] or
+    #' [`QuadrupenFit$stability()`][QuadrupenFit]
     #' 
     #' All plots functions are given with the default arguments, except for `labels` and `log_scale`.
-    #' If you need more control, please use the dedicated methods: [`QuadrupenFit$plot_path()`], 
-    #' [`InformationCriteria$plot()`], [`CrossValidation$plot()`], [`StabilityPath$plot()`] or
-    #' the corresponding S3 methods.
+    #' If you need more control, please use the dedicated methods: [`QuadrupenFit$plot_path()`][QuadrupenFit], 
+    #' [`InformationCriteria$plot()`][InformationCriteria], [`CrossValidation$plot()`][CrossValidation],
+    #'  [`StabilityPath$plot()`][StabilityPath] or the corresponding S3 methods.
     #' 
     plot = function(type = c("path", "criteria", "crossval", "stability"), 
                     log_scale = TRUE, labels = NULL) {
@@ -550,7 +550,7 @@ QuadrupenFit <- R6::R6Class(
     },
     #' Plot method for regularization path
     #' 
-    #' @description Produce a plot of the solution path of a [`QuadrupenFit`] object.
+    #' @description Produce a plot of the solution path of a [QuadrupenFit] object.
     #'
     #' @param xvar variable to plot on the X-axis: either `"lambda"`
     #' (\eqn{\ell_1}{l1} penalty level, or

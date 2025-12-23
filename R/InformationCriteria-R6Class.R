@@ -1,7 +1,7 @@
 #' Class InformationCriteria
 #' 
-#' Class of object returned by the [`QuadrupenFit$criteria()`] method or the
-#' [`criteria()`] function.  Owns [print()] and [plot()] methods.
+#' Class of object returned by the [`QuadrupenFit$criteria()`][QuadrupenFit] method or the
+#' [criteria()] function.  Owns [print()] and [plot()] methods.
 #' 
 #' @importFrom dplyr filter
 #' 
@@ -23,9 +23,9 @@ InformationCriteria <- R6::R6Class(
     names  = function(value) {colnames(private$value)[1:(ncol(private$value) - 3)]}
   ),
   public = list(
-    #' @description Constructor for a [`Criteria`] object
-    #' Should be called internally by an object [`QuadrupenFit$criteria()`]
-    #' @param value data frame storing output of [`QuadrupenFit$criteria()`]
+    #' @description Constructor for a [InformationCriteria] object
+    #' Should be called internally by an object [`QuadrupenFit$criteria()`][QuadrupenFit]
+    #' @param value data frame storing output of [`QuadrupenFit$criteria()`][QuadrupenFit]
     initialize = function(value) {
       private$value <- value
     },

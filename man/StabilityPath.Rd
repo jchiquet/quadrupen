@@ -9,8 +9,8 @@ Class StabilityPath
 Class StabilityPath
 }
 \details{
-Class of object returned by the [`QuadrupenFit$cross_validate()`] method or the
-[`cross_validate()`] function. Owns [print()] and [plot()] methods.
+Class of object returned by the \code{\link[=QuadrupenFit]{QuadrupenFit$cross_validate()}} method or the
+\code{\link[=cross_validate]{cross_validate()}} function. Owns \code{\link[=print]{print()}} and \code{\link[=plot]{plot()}} methods.
 }
 \examples{
 
@@ -46,7 +46,7 @@ plot(stab, xvar="fraction", labels=labels, sel_mode="PFER", cutoff=0.75, PFER=2)
 \section{Public fields}{
 \if{html}{\out{<div class="r6-fields">}}
 \describe{
-\item{\code{probabilities}}{a `Matrix` object containing the
+\item{\code{probabilities}}{a \code{Matrix} object containing the
 estimated probabilities of selection along the path of solutions.}
 
 \item{\code{regParam}}{a lsit with the levels of the regularizing parameters used}
@@ -83,8 +83,8 @@ estimated probabilities of selection along the path of solutions.}
 \if{html}{\out{<a id="method-StabilityPath-new"></a>}}
 \if{latex}{\out{\hypertarget{method-StabilityPath-new}{}}}
 \subsection{Method \code{new()}}{
-Constructor for a [`Stability_path`] object
-Should be called internally by an object [`QuadrupenFit$stability()`]
+Constructor for a \link{StabilityPath} object
+Should be called internally by an object \code{\link[=QuadrupenFit]{QuadrupenFit$stability()}}
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{StabilityPath$new(probabilities, regParam, subsamples)}\if{html}{\out{</div>}}
 }
@@ -92,7 +92,7 @@ Should be called internally by an object [`QuadrupenFit$stability()`]
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{probabilities}}{a `Matrix` object containing the
+\item{\code{probabilities}}{a \code{Matrix} object containing the
 estimated probabilities of selection along the path of solutions.}
 
 \item{\code{regParam}}{a lsit with the levels of the regularizing parameters used}
@@ -139,21 +139,21 @@ Perform variable selection based on the stability path
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{sel_mode}}{a character string, either `"rank"` or
-`"PFER"`. In the first case, the selection is based on the
+\item{\code{sel_mode}}{a character string, either \code{"rank"} or
+\code{"PFER"}. In the first case, the selection is based on the
 rank of total probabilties by variables along the path: the first
-`nvarsel` variables are selected (see below). In the second
+\code{nvarsel} variables are selected (see below). In the second
 case, the PFER control is used as described in Meinshausen and
-Buhlmannn's paper. Default is `"rank"`.}
+Buhlmannn's paper. Default is \code{"rank"}.}
 
 \item{\code{cutoff}}{value of the cutoff probability (only relevant when
-`sel_mode` equals `"PFER"`).}
+\code{sel_mode} equals \code{"PFER"}).}
 
 \item{\code{PFER}}{value of the per-family error rate to control (only
-relevant when `sel_mode` equals `"PFER"`).}
+relevant when \code{sel_mode} equals \code{"PFER"}).}
 
 \item{\code{nvarsel}}{number of variables selected (only relevant when
-`sel_mode` equals `"rank"`. Default is `floor(n/log(p))`.}
+\code{sel_mode} equals \code{"rank"}. Default is \code{floor(n/log(p))}.}
 }
 \if{html}{\out{</div>}}
 }
@@ -179,10 +179,10 @@ selection.
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{xvar}}{variable to plot on the X-axis: either `"lambda"`
-(first penalty level) or `"fraction"` (fraction of the
+\item{\code{xvar}}{variable to plot on the X-axis: either \code{"lambda"}
+(first penalty level) or \code{"fraction"} (fraction of the
 penalty level applied tune by \eqn{\lambda_1}{lambda1}). Default
-is `"lambda"`.}
+is \code{"lambda"}.}
 
 \item{\code{title}}{title title. If none given, a somewhat appropriate
 title is automatically generated.}
@@ -190,27 +190,27 @@ title is automatically generated.}
 \item{\code{labels}}{an optional vector of labels for each variable in
 the path (e.g., 'relevant'/'irrelevant'). See examples.}
 
-\item{\code{sel_mode}}{a character string, either `"rank"` or
-`"PFER"`. In the first case, the selection is based on the
+\item{\code{sel_mode}}{a character string, either \code{"rank"} or
+\code{"PFER"}. In the first case, the selection is based on the
 rank of total probabilties by variables along the path: the first
-`nvarsel` variables are selected (see below). In the second
+\code{nvarsel} variables are selected (see below). In the second
 case, the PFER control is used as described in Meinshausen and
-Buhlmannn's paper. Default is `"rank"`.}
+Buhlmannn's paper. Default is \code{"rank"}.}
 
 \item{\code{cutoff}}{value of the cutoff probability (only relevant when
-`sel_mode` equals `"PFER"`).}
+\code{sel_mode} equals \code{"PFER"}).}
 
 \item{\code{PFER}}{value of the per-family error rate to control (only
-relevant when `sel_mode` equals `"PFER"`).}
+relevant when \code{sel_mode} equals \code{"PFER"}).}
 
 \item{\code{nvarsel}}{number of variables selected (only relevant when
-`sel_mode` equals `"rank"`. Default is `floor(n/log(p))`.}
+\code{sel_mode} equals \code{"rank"}. Default is \code{floor(n/log(p))}.}
 
 \item{\code{log_scale}}{logical; indicates if a log-scale should be used
-when \code{xvar="lambda"}. Default is `TRUE`.}
+when \code{xvar="lambda"}. Default is \code{TRUE}.}
 
 \item{\code{plot}}{logical; indicates if the graph should be
-plotted. Default is `TRUE`. If `FALSE`, only the
+plotted. Default is \code{TRUE}. If \code{FALSE}, only the
 \pkg{ggplot2} object is sent back.}
 }
 \if{html}{\out{</div>}}
@@ -218,8 +218,8 @@ plotted. Default is `TRUE`. If `FALSE`, only the
 \subsection{Returns}{
 a list with a \pkg{ggplot2} object which can be plotted
 via the \code{print} method, and a vector of selected variables
-corresponding to method of choice (`"rank"` or
-`"PFER"`).
+corresponding to method of choice (\code{"rank"} or
+\code{"PFER"}).
 }
 \subsection{Examples}{
 \if{html}{\out{<div class="r example copy">}}

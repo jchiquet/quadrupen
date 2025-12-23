@@ -1,5 +1,6 @@
 /*
  * Author: Julien CHIQUET, INRAE
+ *         julien.chiquet@inrae.fr
  *         Statistique et Génome
  *         MIA Paris-Saclay
  */
@@ -58,7 +59,6 @@ Rcpp::List elastic_net_cpp(
     x = as<mat>(X) ;
     xt = x.t();
   }
-
   // Initializing "first level" variables (outside of the lambda_l1 loop)
   uword n_lambda = lambda_l1.n_elem        ; // # of penalty levels
   mat  R                                 ; // Cholesky decomposition of XAtXA
@@ -94,26 +94,27 @@ Rcpp::List elastic_net_cpp(
   // WARM START
   A = find(beta0 != 0) ;
   betaA = beta0.elem(A) ;
-  if (sparse) {
-    // WRONG - DO IT THE RIGHT WAY
-    xtxA = mat(sp_xt * sp_x.col(0)) ;
-  } else {
-    xtxA = mat(xt * x.cols(A)) ;
-  }
-  if (lambda_l2 > 0) {
-    for (uword i=0; i<A.n_elem;i++) {
-      xtxA.col(i) = xtxA.col(i) + S_lambda_l2.col(A(i));
-      are_in(A(i)) = 1;
+  if (A.n_elem > 0) {
+    if (sparse) {
+      xtxA = mat(sp_xt * sp_x.col(0)) - n * xbar * (xbar.elem(A)).t();
+    } else {
+      xtxA = mat(xt * x.cols(A)) - n * xbar * (xbar.elem(A)).t();
     }
-  }
-  grd += xtxA * betaA    ;
-  nbr_in = A.n_elem      ;
-  xAtxA = xtxA.rows(A)   ;
-  if ((fun == 0) & (usechol)) {
-    R = chol(xAtxA) ;
-  }
-  if (fun == 1) {
-    xtxw(nbr_in) = dot(xAtxA.col(nbr_in),betaA);
+    if (lambda_l2 > 0) {
+      for (uword i=0; i<A.n_elem;i++) {
+        xtxA.col(i) = xtxA.col(i) + S_lambda_l2.col(A(i));
+        are_in(A(i)) = 1;
+      }
+    }
+    grd += xtxA * betaA    ;
+    nbr_in = A.n_elem      ;
+    xAtxA = xtxA.rows(A)   ;
+    if ((fun == 0) & (usechol)) {
+      R = chol(xAtxA) ;
+    }
+    if (fun == 1) {
+      xtxw(nbr_in) = dot(xAtxA.col(nbr_in),betaA);
+    }
   }
   
   // Additional variables for convergence monitoring
@@ -234,7 +235,7 @@ Rcpp::List elastic_net_cpp(
     }
     
     // degrees of freedom
-    df[m] = get_df_enet(lambda_l2, R, xAtxA, S_lambda_l2, A, fun);
+    df[m] = get_df_enet(lambda_l2, R, xAtxA, S_lambda_l2, A, usechol, fun);
     
     // the reference parameter (obtained once optimum is met)
     if (monitor > 0) {
@@ -259,7 +260,7 @@ Rcpp::List elastic_net_cpp(
       max_grd   =   max_grd.subvec(0,m-1) ;
       it_active = it_active.subvec(0,m)   ;
       timing    =    timing.subvec(0,m)   ;
-      df        =    df.subvec(0,m)       ;
+      df        =    df.subvec(0,m-1)     ;
       break;
     } else {
       nonzeros = join_cols(nonzeros, betaA/(normx.elem(A) % penscale.elem(A)));
