@@ -7,7 +7,7 @@
 \method{deviance}{QuadrupenFit}(object, ...)
 }
 \arguments{
-\item{object}{a [`QuadrupenFit`] object}
+\item{object}{a \link{QuadrupenFit} object}
 
 \item{...}{not used, only here for S3 compatibility}
 }
@@ -15,5 +15,5 @@
 a scalar
 }
 \description{
-Extracts the deviance of a [`QuadrupenFit`] object
+Extracts the deviance of a \link{QuadrupenFit} object
 }

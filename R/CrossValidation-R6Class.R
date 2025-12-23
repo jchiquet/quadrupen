@@ -1,6 +1,6 @@
 #' Class CrossValidation
 #' 
-#' Class of object returned by the [`QuadrupenFit$cross_validate()`] method or the
+#' Class of object returned by the [`QuadrupenFit$cross_validate()`][QuadrupenFit] method or the
 #' [`cross_validate()`] function.  Owns [print()] and [plot()] methods.
 #' 
 #' @importFrom dplyr filter
@@ -45,8 +45,8 @@ CrossValidation <- R6::R6Class(
     lambda2_1se = function(value) max(private$cv_1se$lambda2)
   ),
   public = list(
-    #' @description Constructor for a [`CrossValidation`] object
-    #' Should be called internally by an object [`QuadrupenFit$cross_validate()`]
+    #' @description Constructor for a [CrossValidation] object
+    #' Should be called internally by an object [`QuadrupenFit$cross_validate()`][QuadrupenFit]
     #' @param cv_error data frame storing output of a cv job
     #' @param folds  list of K folds used for cross-validation
     initialize = 

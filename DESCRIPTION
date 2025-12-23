@@ -9,7 +9,7 @@ Description: This package fits classical sparse regression models with
     efficient active set algorithms by solving quadratic problems. Also
     provides a few methods for model selection purpose (cross-validation,
     stability selection).
-URL: https://github.com/jchiquet/quadrupen
+URL: https://github.com/jchiquet/quadrupen, https://jchiquet.github.io/quadrupen/
 BugReports: https://github.com/jchiquet/quadrupen/issues
 License: GPL (>= 3)
 Encoding: UTF-8
@@ -53,4 +53,5 @@ Collate:
     'ridge.R'
     'RcppExports.R'
 Packaged: 2013-03-25 19:41:00 UTC; jchiquet
+Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.3.3

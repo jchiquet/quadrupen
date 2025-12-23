@@ -9,11 +9,11 @@ Class "ElasticNet"
 Class "ElasticNet"
 }
 \details{
-Class of object returned by the fitting function [elastic.net()]. Inherits fields
-and methods of [`QuadrupenFit`]
+Class of object returned by the fitting function \code{\link[=elastic.net]{elastic.net()}}. Inherits fields
+and methods of \link{QuadrupenFit}
 }
 \seealso{
-[`QuadrupenFit`, elastic.net()]
+\link{QuadrupenFit}, \code{\link[=elastic.net]{elastic.net()}}
 }
 \section{Super class}{
 \code{\link[quadrupen:QuadrupenFit]{quadrupen::QuadrupenFit}} -> \code{ElasticNet}
@@ -53,7 +53,7 @@ and methods of [`QuadrupenFit`]
 \if{html}{\out{<a id="method-ElasticNet-new"></a>}}
 \if{latex}{\out{\hypertarget{method-ElasticNet-new}{}}}
 \subsection{Method \code{new()}}{
-Initialize a [`ElasticNet`] model
+Initialize a \code{\link{ElasticNet}} model
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{ElasticNet$new(data, intercept, regParam)}\if{html}{\out{</div>}}
 }
@@ -61,7 +61,7 @@ Initialize a [`ElasticNet`] model
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{data}}{a [`DataModel`] object}
+\item{\code{data}}{a \code{\link{DataModel}} object}
 
 \item{\code{intercept}}{a logical; should an intercept be included in the mode?}
 

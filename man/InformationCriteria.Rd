@@ -9,8 +9,8 @@ Class InformationCriteria
 Class InformationCriteria
 }
 \details{
-Class of object returned by the [`QuadrupenFit$criteria()`] method or the
-[`criteria()`] function.  Owns [print()] and [plot()] methods.
+Class of object returned by the \code{\link[=QuadrupenFit]{QuadrupenFit$criteria()}} method or the
+\code{\link[=criteria]{criteria()}} function.  Owns \code{\link[=print]{print()}} and \code{\link[=plot]{plot()}} methods.
 }
 \section{Active bindings}{
 \if{html}{\out{<div class="r6-active-bindings">}}
@@ -40,8 +40,8 @@ for which each cross-validation has been performed.}
 \if{html}{\out{<a id="method-InformationCriteria-new"></a>}}
 \if{latex}{\out{\hypertarget{method-InformationCriteria-new}{}}}
 \subsection{Method \code{new()}}{
-Constructor for a [`Criteria`] object
-Should be called internally by an object [`QuadrupenFit$criteria()`]
+Constructor for a \link{InformationCriteria} object
+Should be called internally by an object \code{\link[=QuadrupenFit]{QuadrupenFit$criteria()}}
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{InformationCriteria$new(value)}\if{html}{\out{</div>}}
 }
@@ -49,7 +49,7 @@ Should be called internally by an object [`QuadrupenFit$criteria()`]
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{value}}{data frame storing output of [`QuadrupenFit$criteria()`]}
+\item{\code{value}}{data frame storing output of \code{\link[=QuadrupenFit]{QuadrupenFit$criteria()}}}
 }
 \if{html}{\out{</div>}}
 }
@@ -91,17 +91,17 @@ Plot the the desired criteria
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{criteria}}{a vector of character with the criteria to plot. 
-The default plot all the criteria available (stored in the field `names`)}
+\item{\code{criteria}}{a vector of character with the criteria to plot.
+The default plot all the criteria available (stored in the field \code{names})}
 
 \item{\code{log_scale}}{logical; indicates if a log-scale should be used
-when `xvar="lambda"`. Default is `TRUE`.}
+when \code{xvar="lambda"}. Default is \code{TRUE}.}
 
-\item{\code{xvar}}{variable to plot on the X-axis: either `"df"`
-(the estimated degrees of freedom), `"lambda"`
-(\eqn{\lambda_1}{lambda1} penalty level) or `"fraction"`
+\item{\code{xvar}}{variable to plot on the X-axis: either \code{"df"}
+(the estimated degrees of freedom), \code{"lambda"}
+(\eqn{\lambda_1}{lambda1} penalty level) or \code{"fraction"}
 (\eqn{\ell_1}{l1}-norm of the coefficients). Default is set to
-`"lambda"`.}
+\code{"lambda"}.}
 
 \item{\code{title}}{graph title}
 }

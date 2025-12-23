@@ -95,7 +95,7 @@ constructor for DataModel
 \if{html}{\out{<a id="method-DataModel-standardize"></a>}}
 \if{latex}{\out{\hypertarget{method-DataModel-standardize}{}}}
 \subsection{Method \code{standardize()}}{
-Perform standardization of the data an store the auxiliaries 
+Perform standardization of the data an store the auxiliaries
 quantities
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{DataModel$standardize(intercept, normalize)}\if{html}{\out{</div>}}

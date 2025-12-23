@@ -1,6 +1,6 @@
 #' Class StabilityPath
 #'
-#' Class of object returned by the [`QuadrupenFit$cross_validate()`] method or the
+#' Class of object returned by the [`QuadrupenFit$cross_validate()`][QuadrupenFit] method or the
 #' [`cross_validate()`] function. Owns [print()] and [plot()] methods.
 #'
 #' @param sel_mode a character string, either `"rank"` or
@@ -28,8 +28,8 @@ StabilityPath <- R6::R6Class(
     #' @field subsamples a list that contains the folds used for each subsample.
     subsamples    = NA, 
     ## model-related fields
-    #' @description Constructor for a [`Stability_path`] object
-    #' Should be called internally by an object [`QuadrupenFit$stability()`]
+    #' @description Constructor for a [StabilityPath] object
+    #' Should be called internally by an object [`QuadrupenFit$stability()`][QuadrupenFit]
     #' @param probabilities a `Matrix` object containing the
     #' estimated probabilities of selection along the path of solutions.
     #' @param regParam a lsit with the levels of the regularizing parameters used

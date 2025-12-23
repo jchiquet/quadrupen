@@ -1,6 +1,11 @@
 # quadrupen: Sparsity by Worst-Case Quadratic Penalties
 
 
+<!-- badges: start -->
+
+[![R-CMD-check](https://github.com/jchiquet/quadrupen/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/jchiquet/quadrupen/actions/workflows/R-CMD-check.yaml)
+<!-- badges: end -->
+
 ## Description
 
 Fits classical sparse regression models with efficient active set

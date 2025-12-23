@@ -6,7 +6,7 @@ isQuadrupenFit <- function(Robject) {inherits(Robject, "QuadrupenFit")}
 
 #' Extracts model fitted values
 #'
-#' @param object a [`QuadrupenFit`] object
+#' @param object a [QuadrupenFit] object
 #' @param ... not used, only here for S3 compatibility
 #'
 #' @return A matrix of fitted values extracted from `object`.
@@ -35,8 +35,8 @@ predict.QuadrupenFit <- function(object, newx = NULL, selection = NULL, ...) {
 
 #' Extract model coefficients
 #'
-#' @description Extracts model coefficients from a [`QuadrupenFit`] object
-#' @param object a [`QuadrupenFit`] object
+#' @description Extracts model coefficients from a [QuadrupenFit] object
+#' @param object a [QuadrupenFit] object
 #' @param selection either a character (model selection criteria) of a scalar (lambda value)
 #' @param ... not used, only here for S3 compatibility
 #' @return a vector of coefficients
@@ -51,9 +51,9 @@ coef.QuadrupenFit <- function(object, selection = NULL, ...) {
 
 #' Extract model residuals 
 #' 
-#' @description Extracts model residuals from a [`QuadrupenFit`] object
+#' @description Extracts model residuals from a [QuadrupenFit] object
 #' 
-#' @param object a [`QuadrupenFit`] object
+#' @param object a [QuadrupenFit] object
 #' @param newx matrix of new values for the regressor with which to predict. If omitted, the fitted values are used.
 #' @param newy vector of new values for the response with which to compute the residuals. If omitted, the fitted values are used.
 #' @param ... not used, only here for S3 compatibility
@@ -72,9 +72,9 @@ residuals.QuadrupenFit <- function(object, newx=NULL, newy, ...) {
 
 #' Extract model deviance
 #' 
-#' @description Extracts the deviance of a [`QuadrupenFit`] object
+#' @description Extracts the deviance of a [QuadrupenFit] object
 #' 
-#' @param object a [`QuadrupenFit`] object
+#' @param object a [QuadrupenFit] object
 #' @param ... not used, only here for S3 compatibility
 #' @return a scalar
 #' @export
@@ -103,8 +103,8 @@ deviance.QuadrupenFit <- function(object, ...){
 #' relevant. If `NULL` (the default), it is estimated as usual
 #' (see details).
 #' 
-#' @return an object with class [`Criteria`] is sent back and stored as a 
-#' field of the original [`QuadrupenFit`] object.
+#' @return an object with class [InformationCriteria] is sent back and stored as a 
+#' field of the original [QuadrupenFit] object.
 #'
 #' @note When `sigma` is provided, the criterion takes the form
 #'
@@ -158,7 +158,7 @@ criteria <-
     UseMethod("criteria", object)
   }
 
-#' @describeIn criteria S3 method for information criteria  of a [`QuadrupenFit`]
+#' @describeIn criteria S3 method for information criteria  of a [QuadrupenFit]
 #' @export
 criteria.QuadrupenFit <- 
   function(object, 
@@ -175,7 +175,7 @@ criteria.QuadrupenFit <-
 #' @description Function that computes K-fold cross-validated error of a
 #' \code{quadrupen} fit, possibly on a grid of `lambda1`, `lambda2`.
 #'
-#' @param object an R6 object with class [`QuadrupenFit`]
+#' @param object an R6 object with class [QuadrupenFit]
 #'  
 #' @param K integer indicating the number of folds. Default is 10.
 #'
@@ -209,7 +209,7 @@ criteria.QuadrupenFit <-
 #' down when any switching to the proximal algorithm is required.
 #'
 #' @return an object with class [`CrossValidation`] is sent back and stored as a 
-#' field of the original [`QuadrupenFit`] object.
+#' field of the original [QuadrupenFit] object.
 #'
 #' @examples \dontrun{
 #' ## Simulating multivariate Gaussian with blockwise correlation
@@ -253,7 +253,7 @@ cross_validate <-
     UseMethod("cross_validate", object)
   }
 
-#' @describeIn cross_validate S3 method for cross-validation  of a [`QuadrupenFit`]
+#' @describeIn cross_validate S3 method for cross-validation  of a [QuadrupenFit]
 #' @export
 cross_validate.QuadrupenFit <- 
   function(object, 
@@ -271,7 +271,7 @@ cross_validate.QuadrupenFit <-
 #' @description Compute the stability path of a (possibly randomized) fitting
 #' procedure as introduced by Meinshausen and Buhlmann (2010).
 #'
-#' @param object an R6 object with class [`QuadrupenFit`]
+#' @param object an R6 object with class [QuadrupenFit]
 #' 
 #' @param n_subsamples integer indicating the number of subsamplings
 #' used to estimate the selection probabilities. Default is 100.
@@ -294,7 +294,7 @@ cross_validate.QuadrupenFit <-
 #' the cores available.
 #'
 #' @return an object with class [`StabilityPath`] is sent back and stored as a 
-#' field of the original [`QuadrupenFit`] object.
+#' field of the original [QuadrupenFit] object.
 #'
 #' @note When `weakness < 1`, the \code{penscale} argument
 #' that weights the penalty tuned by \eqn{\lambda_1}{lambda1} is
@@ -359,7 +359,7 @@ stability <-
     UseMethod("stability", object)
   }
 
-#' @describeIn stability S3 method for stability selection of a [`QuadrupenFit`]
+#' @describeIn stability S3 method for stability selection of a [QuadrupenFit]
 #' @export
 stability.QuadrupenFit <- 
   function(object, n_subsamples   = 50,

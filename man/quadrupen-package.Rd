@@ -15,9 +15,9 @@ problems with increasing size.
 
 
 At the moment, two \code{R} fitting functions are available:
-\enumerate{%
+\enumerate{\%
 
-\item the [elastic.net()] function, which solves a family of
+\item the \code{\link[=elastic.net]{elastic.net()}} function, which solves a family of
 linear regression problems penalized by a mixture of
 \eqn{\ell_1}{l1} and \eqn{\ell_2}{l2} norms. It notably includes
 the LASSO (Tibshirani, 1996), the adaptive-LASSO (Zou, 2006), the
@@ -25,7 +25,7 @@ Elastic-net (Zou and Hastie, 2006) or the Structured Elastic-net
 (Slawski et al., 2010). See examples as well as the available
 \code{demo(quad_enet)}.
 
-\item the [bounded.reg()] function, which fits a linear model
+\item the \code{\link[=bounded.reg]{bounded.reg()}} function, which fits a linear model
 penalized by a mixture of \eqn{\ell_\infty}{infinity} and
 \eqn{\ell_2}{l2} norms. It owns the same versatility as the
 \code{elastic.net} function regarding the \eqn{\ell_2}{l2} norm,
@@ -43,8 +43,8 @@ argmin<sub>&beta;</sub> 1/2 RSS(&beta) + &lambda;<sub>1</sub>
 &beta;<sup>T</sup> S &beta;, </center> }}
 \if{text}{\deqn{beta.hat(lambda1, lambda2) = argmin_beta 1/2
 RSS(beta) + lambda1 |D beta|_q + lambda2 beta' S beta,}} where
-\eqn{q=1}{q=1} for [elastic.net()] and
-\eqn{q=\infty}{q=infinity} for [bounded.reg()].  The diagonal
+\eqn{q=1}{q=1} for \code{\link[=elastic.net]{elastic.net()}} and
+\eqn{q=\infty}{q=infinity} for \code{\link[=bounded.reg]{bounded.reg()}}.  The diagonal
 matrix \eqn{D}{D} allows different weights for the first part of
 the penalty. The structuring matrix \eqn{S}{S} can be used to
 introduce some prior information regarding the predictors. It is
@@ -140,7 +140,7 @@ Yves Grandvalet, Julien Chiquet and Christophe Ambroise,
 \href{http://arxiv.org/abs/1210.2077}{Sparsity by Worst-case Quadratic
 Penalties}, arXiv preprint, 2012.
 
-\itemize{%
+\itemize{\%
 
 \item Nicolas Meinshausen and Peter Buhlmann. Stability Selection,
 JRSS(B), 2010.
@@ -162,6 +162,7 @@ via the Lasso, JRSS(B), 1996.
 Useful links:
 \itemize{
   \item \url{https://github.com/jchiquet/quadrupen}
+  \item \url{https://jchiquet.github.io/quadrupen/}
   \item Report bugs at \url{https://github.com/jchiquet/quadrupen/issues}
 }
 

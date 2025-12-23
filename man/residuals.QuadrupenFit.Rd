@@ -7,7 +7,7 @@
 \method{residuals}{QuadrupenFit}(object, newx = NULL, newy, ...)
 }
 \arguments{
-\item{object}{a [`QuadrupenFit`] object}
+\item{object}{a \link{QuadrupenFit} object}
 
 \item{newx}{matrix of new values for the regressor with which to predict. If omitted, the fitted values are used.}
 
@@ -19,5 +19,5 @@
 Matrix of residuals, each column corresponding to a value of \code{lambda1}.
 }
 \description{
-Extracts model residuals from a [`QuadrupenFit`] object
+Extracts model residuals from a \link{QuadrupenFit} object
 }

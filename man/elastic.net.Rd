@@ -24,16 +24,16 @@ elastic.net(
 \arguments{
 \item{x}{matrix of features, possibly sparsely encoded
 (experimental). Do NOT include intercept. When normalized os
-`TRUE`, coefficients will then be rescaled to the original
+\code{TRUE}, coefficients will then be rescaled to the original
 scale.}
 
 \item{y}{response vector.}
 
 \item{lambda1}{sequence of decreasing \eqn{\ell_1}{l1}-penalty
-levels. If `NULL` (the default), a vector is generated with
-`nlambda1` entries, starting from a guessed level
-`lambda1.max` where only the intercept is included, then
-shrunken to `minratio*lambda1.max`.}
+levels. If \code{NULL} (the default), a vector is generated with
+\code{nlambda1} entries, starting from a guessed level
+\code{lambda1.max} where only the intercept is included, then
+shrunken to \code{minratio*lambda1.max}.}
 
 \item{lambda2}{real scalar; tunes the \eqn{\ell_2}{l2} penalty in
 the Elastic-net. Default is 0.01. Set to 0 to recover the Lasso.}
@@ -44,72 +44,74 @@ to 1.}
 
 \item{struct}{matrix structuring the coefficients, possibly
 sparsely encoded. Must be at least positive semidefinite (this is
-checked internally). If `NULL` (the default), the identity matrix is
+checked internally). If \code{NULL} (the default), the identity matrix is
 used. See details below.}
 
 \item{intercept}{logical; indicates if an intercept should be
-included in the model. Default is `TRUE`.}
+included in the model. Default is \code{TRUE}.}
 
 \item{normalize}{logical; indicates if variables should be
 normalized to have unit L2 norm before fitting.  Default is
-`TRUE`.}
+\code{TRUE}.}
 
-\item{debiasing}{character picked in "none" or "standard": indicates if 
-coefficients should be rescaled to avoid excessive biais due to double 
+\item{debiasing}{character picked in "none" or "standard": indicates if
+coefficients should be rescaled to avoid excessive biais due to double
 shrinkage. "standard" is Zou and Hastie (2006)
-orginal proposa: : the vector of parameters is rescaled by a factor 
-`(1+lambda2)`. "none" is for no rescaling, the default.}
+orginal proposa: : the vector of parameters is rescaled by a factor
+\code{(1+lambda2)}. "none" is for no rescaling, the default.}
 
 \item{nlambda1}{integer that indicates the number of values to put
-in the `lambda1` vector.  Ignored if `lambda1` is
+in the \code{lambda1} vector.  Ignored if \code{lambda1} is
 provided.}
 
 \item{minratio}{minimal value of \eqn{\ell_1}{l1}-part of the
 penalty that will be tried, as a fraction of the maximal
-`lambda1` value. A too small value might lead to unstability
+\code{lambda1} value. A too small value might lead to unstability
 at the end of the solution path corresponding to small
-`lambda1` combined with \eqn{\lambda_2=0}{lambda2=0}.  The
+\code{lambda1} combined with \eqn{\lambda_2=0}{lambda2=0}.  The
 default value tries to avoid this, adapting to the
-'\eqn{n<p}{n<p}' context. Ignored if `lambda1` is provided.}
+'\eqn{n<p}{n<p}' context. Ignored if \code{lambda1} is provided.}
 
 \item{maxfeat}{integer; limits the number of features ever to
 enter the model; i.e., non-zero coefficients for the Elastic-net:
-the algorithm stops if this number is exceeded and `lambda1`
+the algorithm stops if this number is exceeded and \code{lambda1}
 is cut at the corresponding level. Default is
-`min(nrow(x),ncol(x))` for small `lambda2` (<0.01) and
-`min(4*nrow(x),ncol(x))` otherwise. Use with care, as it
+\code{min(nrow(x),ncol(x))} for small \code{lambda2} (<0.01) and
+\code{min(4*nrow(x),ncol(x))} otherwise. Use with care, as it
 considerably changes the computation time.}
 
 \item{beta0}{a starting point for the vector of parameter. When
-`NULL` (the default), will be initialized at zero. May save
+\code{NULL} (the default), will be initialized at zero. May save
 time in some situation.}
 
 \item{control}{list of argument controlling low level options of
 the algorithm --use with care and at your own risk-- :
-* `verbose`: integer; activate verbose mode --this one is not 
-too risky!-- set to `0` for no output; `1` for warnings only, 
-and `2` for tracing the whole progression. Default is `1`. 
-Automatically set to `0` when the method is embedded within 
+\itemize{
+\item \code{verbose}: integer; activate verbose mode --this one is not
+too risky!-- set to \code{0} for no output; \code{1} for warnings only,
+and \code{2} for tracing the whole progression. Default is \code{1}.
+Automatically set to \code{0} when the method is embedded within
 cross-validation or stability selection.
-* `timer`: logical; use to record the timing of the
-algorithm. Default is `FALSE`.
-* `maxiter` the maximal number of iteration used to solve the
- problem for a given value of lambda1. Default is 500.
-* `method` a string for the underlying solver used. Either 
-`"quadra"`, `"pathwise"` or `"fista"`. Default is `"quadra"`.
-* `threshold` a threshold for convergence. The algorithm stops 
+\item \code{timer}: logical; use to record the timing of the
+algorithm. Default is \code{FALSE}.
+\item \code{maxiter} the maximal number of iteration used to solve the
+problem for a given value of lambda1. Default is 500.
+\item \code{method} a string for the underlying solver used. Either
+\code{"quadra"}, \code{"pathwise"} or \code{"fista"}. Default is \code{"quadra"}.
+\item \code{threshold} a threshold for convergence. The algorithm stops
 when the optimality conditions are fulfill up to this threshold.
-Default is `1e-7` for `"quadra"` and `1e-2` for the first order methods.
-* `bulletproof` logical; indicates if the bulletproof mode should 
-be used while running the `"quadra"` method. Default is `TRUE`. 
-* `monitor` indicates if a monitoring of the convergence should be 
-recorded, by computing a lower bound between the current solution and 
-the optimum: when `'0'` (the default), no monitoring is provided; 
-when `'1'`, the bound derived in Grandvalet et al. is computed; when 
-`'>1'`, the Fenchel duality gap is computed along the algorithm.}
+Default is \code{1e-7} for \code{"quadra"} and \code{1e-2} for the first order methods.
+\item \code{bulletproof} logical; indicates if the bulletproof mode should
+be used while running the \code{"quadra"} method. Default is \code{TRUE}.
+\item \code{monitor} indicates if a monitoring of the convergence should be
+recorded, by computing a lower bound between the current solution and
+the optimum: when \code{'0'} (the default), no monitoring is provided;
+when \code{'1'}, the bound derived in Grandvalet et al. is computed; when
+\code{'>1'}, the Fenchel duality gap is computed along the algorithm.
+}}
 }
 \value{
-an object with class [`QuadrupenFit`].
+an object with class \link{QuadrupenFit}.
 }
 \description{
 Adjust a linear model with elastic-net regularization, mixing a
@@ -133,9 +135,9 @@ argmin<sub>&beta;</sub> 1/2 RSS(&beta) + &lambda;<sub>1</sub>
 RSS(beta) + lambda1 |D beta|1 + lambda2 beta' S beta,}} where
 \eqn{D}{D} is a diagonal matrix, whose diagonal terms are provided
 as a vector by the \code{penscale} argument. The \eqn{\ell_2}{l2}
-structuring matrix \eqn{S}{S} is provided via the `struct`
+structuring matrix \eqn{S}{S} is provided via the \code{struct}
 argument, a positive semidefinite matrix (possibly of class
-`Matrix`).
+\code{Matrix}).
 }
 \examples{
 ## Simulating multivariate Gaussian with blockwise correlation
@@ -160,7 +162,7 @@ plot(elastic.net(x,y,lambda2=10,struct=solve(Sigma)), label=labels) ## even bett
 
 }
 \seealso{
-See also [`QuadrupenFit`]
+See also \link{QuadrupenFit}
 }
 \keyword{models,}
 \keyword{regression}

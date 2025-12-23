@@ -28,31 +28,31 @@ stability(
 )
 }
 \arguments{
-\item{object}{an R6 object with class [`QuadrupenFit`]}
+\item{object}{an R6 object with class \link{QuadrupenFit}}
 
 \item{n_subsamples}{integer indicating the number of subsamplings
 used to estimate the selection probabilities. Default is 100.}
 
 \item{subsample_size}{integer indicating the size of each subsamples.
-Default is `floor(n/2)`.}
+Default is \code{floor(n/2)}.}
 
-\item{subsamples}{list with `subsamples` entries with vectors
+\item{subsamples}{list with \code{subsamples} entries with vectors
 describing the folds to use for the stability procedure. By
 default, the folds are randomly sampled with the specified
-\code{n_subsamples} and `subsample_size` argument.}
+\code{n_subsamples} and \code{subsample_size} argument.}
 
 \item{weakness}{Coefficient used for randomizing the weights of each features.
 Default is 1` for no randomization. See details below.}
 
 \item{verbose}{logical; indicates if the progression should be
-displayed. Default is `TRUE`.}
+displayed. Default is \code{TRUE}.}
 
 \item{cores}{the number of cores to use. The default uses all
 the cores available.}
 }
 \value{
-an object with class [`StabilityPath`] is sent back and stored as a 
-field of the original [`QuadrupenFit`] object.
+an object with class \code{\link{StabilityPath}} is sent back and stored as a
+field of the original \link{QuadrupenFit} object.
 }
 \description{
 Compute the stability path of a (possibly randomized) fitting
@@ -60,11 +60,11 @@ procedure as introduced by Meinshausen and Buhlmann (2010).
 }
 \section{Methods (by class)}{
 \itemize{
-\item \code{stability(QuadrupenFit)}: S3 method for stability selection of a [`QuadrupenFit`]
+\item \code{stability(QuadrupenFit)}: S3 method for stability selection of a \link{QuadrupenFit}
 
 }}
 \note{
-When `weakness < 1`, the \code{penscale} argument
+When \code{weakness < 1}, the \code{penscale} argument
 that weights the penalty tuned by \eqn{\lambda_1}{lambda1} is
 perturbed (divided) for each subsample by a random variable
 uniformly distributed on
@@ -74,14 +74,14 @@ where
 the weakness parameter.
 
 If the user runs the fitting method with option
-`'bulletproof'` set to `FALSE`, the algorithm may stop
+\code{'bulletproof'} set to \code{FALSE}, the algorithm may stop
 at an early stage of the path. Early stops of the underlying
 fitting function are handled internally, in the following way: we
 chose to simply skip the results associated with such runs, in
 order not to bias the stability selection procedure. If it occurs
 too often, a warning is sent to the user, in which case you should
-reconsider the grid of `lambda1` for stability selection. If
-`bulletproof` is `TRUE` (the default), there is nothing
+reconsider the grid of \code{lambda1} for stability selection. If
+\code{bulletproof} is \code{TRUE} (the default), there is nothing
 to worry about, except a possible slow down when any switching to
 the proximal algorithm is required.
 }

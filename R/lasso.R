@@ -7,7 +7,7 @@
 #'
 #' @inheritParams elastic.net
 #'
-#' @return an object with class [`QuadrupenFit`].
+#' @return an object with class [QuadrupenFit].
 #'
 #' @note The optimized criterion is the following: \if{latex}{\deqn{%
 #' \hat{\beta}_{\lambda_1} = \arg \min_{\beta} \frac{1}{2} (y - X
@@ -21,7 +21,7 @@
 #' \eqn{D}{D} is a diagonal matrix, whose diagonal terms are provided
 #' as a vector by the \code{penscale} argument.
 #'
-#' @seealso See also [`QuadrupenFit`],
+#' @seealso See also [QuadrupenFit],
 #' 
 #' @keywords models, regression
 #'
