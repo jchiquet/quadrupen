@@ -55,12 +55,26 @@ estimated probabilities of selection along the path of solutions.}
 }
 \if{html}{\out{</div>}}
 }
+\section{Active bindings}{
+\if{html}{\out{<div class="r6-active-bindings">}}
+\describe{
+\item{\code{nvar}}{number of variables (without intercept)}
+
+\item{\code{nobs}}{number of observation/sample size}
+
+\item{\code{nonzero}}{variables with a non-null probability of selection along the stability path}
+
+\item{\code{nonzeroprob}}{subset of the probabilityes stability path on the nonzero variables}
+}
+\if{html}{\out{</div>}}
+}
 \section{Methods}{
 \subsection{Public methods}{
 \itemize{
 \item \href{#method-StabilityPath-new}{\code{StabilityPath$new()}}
 \item \href{#method-StabilityPath-show}{\code{StabilityPath$show()}}
 \item \href{#method-StabilityPath-print}{\code{StabilityPath$print()}}
+\item \href{#method-StabilityPath-selection}{\code{StabilityPath$selection()}}
 \item \href{#method-StabilityPath-plot}{\code{StabilityPath$plot()}}
 \item \href{#method-StabilityPath-clone}{\code{StabilityPath$clone()}}
 }
@@ -109,6 +123,42 @@ User friendly print method
 
 }
 \if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-StabilityPath-selection"></a>}}
+\if{latex}{\out{\hypertarget{method-StabilityPath-selection}{}}}
+\subsection{Method \code{selection()}}{
+Perform variable selection based on the stability path
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{StabilityPath$selection(
+  sel_mode = c("rank", "PFER"),
+  cutoff = 0.75,
+  PFER = 2,
+  nvarsel = floor(self$nobs/log(self$nvar))
+)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{sel_mode}}{a character string, either `"rank"` or
+`"PFER"`. In the first case, the selection is based on the
+rank of total probabilties by variables along the path: the first
+`nvarsel` variables are selected (see below). In the second
+case, the PFER control is used as described in Meinshausen and
+Buhlmannn's paper. Default is `"rank"`.}
+
+\item{\code{cutoff}}{value of the cutoff probability (only relevant when
+`sel_mode` equals `"PFER"`).}
+
+\item{\code{PFER}}{value of the per-family error rate to control (only
+relevant when `sel_mode` equals `"PFER"`).}
+
+\item{\code{nvarsel}}{number of variables selected (only relevant when
+`sel_mode` equals `"rank"`. Default is `floor(n/log(p))`.}
+}
+\if{html}{\out{</div>}}
+}
+}
+\if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-StabilityPath-plot"></a>}}
 \if{latex}{\out{\hypertarget{method-StabilityPath-plot}{}}}
 \subsection{Method \code{plot()}}{
@@ -117,14 +167,12 @@ selection.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{StabilityPath$plot(
   xvar = "lambda",
-  log_scale = TRUE,
   title = "Stability path",
-  annot = TRUE,
   labels = rep("unknown status", p),
   sel_mode = c("rank", "PFER"),
   cutoff = 0.75,
   PFER = 2,
-  nvar = floor(n/log(p))
+  nvarsel = floor(self$nobs/log(self$nvar))
 )}\if{html}{\out{</div>}}
 }
 
@@ -136,15 +184,8 @@ selection.
 penalty level applied tune by \eqn{\lambda_1}{lambda1}). Default
 is `"lambda"`.}
 
-\item{\code{log_scale}}{logical; indicates if a log-scale should be used
-when \code{xvar="lambda"}. Default is `TRUE`.}
-
 \item{\code{title}}{title title. If none given, a somewhat appropriate
 title is automatically generated.}
-
-\item{\code{annot}}{logical; should annotation be made on the graph
-regarding controlled PFER (only relevant when `sel_mode`
-equals `"PFER"`)? Default is `TRUE`.}
 
 \item{\code{labels}}{an optional vector of labels for each variable in
 the path (e.g., 'relevant'/'irrelevant'). See examples.}
@@ -152,7 +193,7 @@ the path (e.g., 'relevant'/'irrelevant'). See examples.}
 \item{\code{sel_mode}}{a character string, either `"rank"` or
 `"PFER"`. In the first case, the selection is based on the
 rank of total probabilties by variables along the path: the first
-\code{nvar} variables are selected (see below). In the second
+`nvarsel` variables are selected (see below). In the second
 case, the PFER control is used as described in Meinshausen and
 Buhlmannn's paper. Default is `"rank"`.}
 
@@ -162,14 +203,15 @@ Buhlmannn's paper. Default is `"rank"`.}
 \item{\code{PFER}}{value of the per-family error rate to control (only
 relevant when `sel_mode` equals `"PFER"`).}
 
-\item{\code{nvar}}{number of variables selected (only relevant when
+\item{\code{nvarsel}}{number of variables selected (only relevant when
 `sel_mode` equals `"rank"`. Default is `floor(n/log(p))`.}
+
+\item{\code{log_scale}}{logical; indicates if a log-scale should be used
+when \code{xvar="lambda"}. Default is `TRUE`.}
 
 \item{\code{plot}}{logical; indicates if the graph should be
 plotted. Default is `TRUE`. If `FALSE`, only the
 \pkg{ggplot2} object is sent back.}
-
-\item{\code{...}}{used for S4 compatibility.}
 }
 \if{html}{\out{</div>}}
 }

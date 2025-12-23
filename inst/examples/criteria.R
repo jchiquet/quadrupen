@@ -9,9 +9,15 @@ diag(Sigma) <- 1
 n <- 50
 x <- as.matrix(matrix(rnorm(95*n),n,95) %*% chol(Sigma))
 y <- 10 + x %*% beta + rnorm(n,0,10)
+
 ## Plot penalized criteria for the Elastic-net path
 enet <- elastic.net(x,y, lambda2=1, debiasing = "standard")
 enet$information_criteria$plot()
+
 ## Plot penalized criteria for the Bounded regression
 breg <- bounded.reg(x,y, lambda2=1, debiasing = "standard")
 plot(breg, "criteria")
+
+## Plot penalized criteria for the Ridge regression
+ridge <- ridge(x,y)
+plot(ridge, "criteria")

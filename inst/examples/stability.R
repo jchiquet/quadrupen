@@ -9,7 +9,7 @@ Sigma <- Matrix::bdiag(Soo,Sww,Soo,Sww,Soo) + 0.2
 diag(Sigma) <- 1
 n <- 50
 x <- as.matrix(matrix(rnorm(95*n),n,95) %*% chol(Sigma))
-y <- 10 + x %*% beta + rnorm(n,0,10)
+y <- 10 + x %*% beta + rnorm(n,0,5)
 
 ## Build a vector of label for true nonzeros
 labels <- rep("irrelevant", length(beta))
@@ -22,13 +22,14 @@ stab <- stability(enet, n_subsamples = 200)
 
 ## Build the plot an recover the selected variable for a given cutoff
 ## and per-family error rate
-plot(stabout, labels=labels)
- 
-stabpath <- plot(stabout, labels=labels)
-stabpath <- plot(stab, labels=labels, nvar=10)
-stabpath <- plot(stab, xvar="fraction", annot=FALSE, labels=labels, cutoff=0.75, PFER=2)
+plot(stab, labels=labels)
+stab$plot(labels=labels)
+stab$plot(labels=labels, nvarsel=5)
+stab$plot(sel_mode = "PFER", labels=labels)
+stab$plot(xvar="fraction", sel_mode = "PFER", labels=labels, PFER = 2)
+plot(stab, xvar="fraction", sel_mode = "PFER", labels=labels, PFER = 4)
 
-cat("\nFalse positives for the randomized Elastic-net with stability selection: ",
-     sum(labels[stabpath$selected] != "relevant"))
+cat("\n\nFalse positives for the randomized Elastic-net with stability selection: ",
+     sum(labels[stab$selection()] != "relevant"))
 cat("\nDONE.\n")
 

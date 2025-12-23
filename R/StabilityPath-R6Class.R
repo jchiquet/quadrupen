@@ -3,6 +3,19 @@
 #' Class of object returned by the [`QuadrupenFit$cross_validate()`] method or the
 #' [`cross_validate()`] function. Owns [print()] and [plot()] methods.
 #'
+#' @param sel_mode a character string, either `"rank"` or
+#' `"PFER"`. In the first case, the selection is based on the
+#' rank of total probabilties by variables along the path: the first
+#' `nvarsel` variables are selected (see below). In the second
+#' case, the PFER control is used as described in Meinshausen and
+#' Buhlmannn's paper. Default is `"rank"`.
+#' @param nvarsel number of variables selected (only relevant when
+#' `sel_mode` equals `"rank"`. Default is `floor(n/log(p))`.
+#' @param cutoff value of the cutoff probability (only relevant when
+#' `sel_mode` equals `"PFER"`).
+#' @param PFER value of the per-family error rate to control (only
+#' relevant when `sel_mode` equals `"PFER"`).
+#' 
 #' @export
 StabilityPath <- R6::R6Class(
   classname = "StabilityPath",
@@ -39,6 +52,36 @@ StabilityPath <- R6::R6Class(
     },
     #' @description User friendly print method
     print = function() { self$show() },
+    #' @description Perform variable selection based on the stability path
+    selection = function(sel_mode = c("rank", "PFER"), cutoff=0.75, 
+                         PFER=2, nvarsel=floor(self$nobs/log(self$nvar))) {
+
+      n <- self$nobs
+      p <- self$nvar
+      
+      stopifnot("PFER should be at least equal to 1." = (PFER > 0))
+      stopifnot("The cutoff is supposed to be a probability in [.5,1] ..." = (cutoff >= 0.5 &  cutoff <= 1))
+      stopifnot("The rank is supposed to be less than p ..." = (nvarsel <= p))
+      
+      sel_mode  <- match.arg(sel_mode)
+      prob      <- self$nonzeroprob
+      
+      if (sel_mode == "PFER") {
+        ## estimate the average number of selected variables on the current path
+        ## and pick the one controlling the PFER at the desired level
+        q    <- rowSums(prob >= cutoff)
+        qLim <- sqrt(PFER * (2 * cutoff - 1) * p)
+        iq <- q <= qLim
+        iq <- ifelse(which.min(iq) != 1,which.min(iq) - 1,ifelse(sum(iq) == 0,1,length(iq)))
+        selected <- self$nonzero[which(prob[iq, ] > cutoff)]
+        attr(selected, "iq") <- iq
+        attr(selected, "q") <- q
+      } else {
+        id <- order(colSums(prob),decreasing = TRUE)[1:nvarsel]
+        selected <- self$nonzero[id]
+      }
+      selected
+    },
     #' @description Produce a plot of the stability path obtained by stability
     #' selection.
     #'
@@ -53,24 +96,8 @@ StabilityPath <- R6::R6Class(
     #' @param plot logical; indicates if the graph should be
     #' plotted. Default is `TRUE`. If `FALSE`, only the
     #' \pkg{ggplot2} object is sent back.
-    #' @param sel_mode a character string, either `"rank"` or
-    #' `"PFER"`. In the first case, the selection is based on the
-    #' rank of total probabilties by variables along the path: the first
-    #' \code{nvar} variables are selected (see below). In the second
-    #' case, the PFER control is used as described in Meinshausen and
-    #' Buhlmannn's paper. Default is `"rank"`.
-    #' @param nvar number of variables selected (only relevant when
-    #' `sel_mode` equals `"rank"`. Default is `floor(n/log(p))`.
-    #' @param cutoff value of the cutoff probability (only relevant when
-    #' `sel_mode` equals `"PFER"`).
-    #' @param PFER value of the per-family error rate to control (only
-    #' relevant when `sel_mode` equals `"PFER"`).
     #' @param labels an optional vector of labels for each variable in
     #' the path (e.g., 'relevant'/'irrelevant'). See examples.
-    #' @param annot logical; should annotation be made on the graph
-    #' regarding controlled PFER (only relevant when `sel_mode`
-    #' equals `"PFER"`)? Default is `TRUE`.
-    #' @param ... used for S4 compatibility.
     #' @return a list with a \pkg{ggplot2} object which can be plotted
     #' via the \code{print} method, and a vector of selected variables
     #' corresponding to method of choice (`"rank"` or
@@ -104,36 +131,18 @@ StabilityPath <- R6::R6Class(
     #' @import ggplot2 scales grid
     #' 
     plot = function(
-      xvar = "lambda", log_scale = TRUE, title = "Stability path",
-      annot = TRUE, labels = rep("unknown status",p), 
-      sel_mode = c("rank", "PFER"), cutoff=0.75, PFER=2, nvar=floor(n/log(p))) {
-      
-      p <- ncol(self$probabilities)
-      n <- max(unlist(self$subsamples))
+      xvar = "lambda", title = "Stability path", labels = rep("unknown status",p), 
+      sel_mode = c("rank", "PFER"), cutoff=0.75, PFER=2, nvarsel=floor(self$nobs/log(self$nvar))) {
+
       sel_mode <- match.arg(sel_mode)
-      nzeros <- which(colSums(self$probabilities) != 0)
-    
+      selection <- rep("unselected",self$nvar)
+      selected <- self$selection(sel_mode, cutoff, PFER, nvarsel)
+      selection[selected] <- "selected"
+      
       stopifnot("Not available when length(lambda1) == 1" = (length(self$regParam[[1]]) > 1))
-      stopifnot("PFER should be at least equal to 1." = (PFER > 0))
-      stopifnot("The cutoff is supposed to be a probability in [.5,1] ..." = (cutoff >= 0.5 &  cutoff <= 1))
-      stopifnot("The rank is supposed to be less than p ..." = (nvar <= p))
-      stopifnot("Nothing to plot: all probabilities are zero along the path." = (length(nzeros) > 0))
-      
-      prob  <- as.matrix(self$probabilities[, nzeros])
-      rownames(prob) <- NULL
-      
-      selection <- rep("unselected",ncol(prob))
-      if (sel_mode == "PFER") {
-        ## estimate the average number of selected variables on the current path
-        ## and pick the one controlling the PFER at the desired level
-        q    <- rowSums(prob >= cutoff)
-        qLim <- sqrt(PFER * (2 * cutoff-1) * p)
-        iq <- q <= qLim
-        iq <- ifelse(which.min(iq) != 1,which.min(iq)-1,ifelse(sum(iq) == 0,1,length(iq)))
-        selection[prob[iq, ] > cutoff] <- "selected"
-      } else {
-        selection[order(colSums(prob),decreasing=TRUE)[1:nvar]] <- "selected"
-      }
+      stopifnot("Nothing to plot: all probabilities are zero along the path." = (length(self$nonzero) > 0))
+
+      prob <- self$nonzeroprob
       
       ## the x-axis variable
       xv <- switch(xvar,"fraction" = self$regParam[[1]]/max(self$regParam[[1]]), self$regParam[[1]])
@@ -144,17 +153,16 @@ StabilityPath <- R6::R6Class(
         tidyr::pivot_longer(cols = -xvar, names_to = "var", values_to = "prob") |>
         mutate(selection = factor(rep(selection, length(xv))))
       
-      # data.coef <- melt(data.frame(xvar=xv, prob=prob),id="xvar")
-      # data.coef$selection <- factor(rep(selection, each=length(xv)))
+      # dplot$selection <- factor(rep(selection, length(xv)))
       if (is.null(labels)) {
         dplot$labels <- factor(rep(1:p, length(xv)))
       } else {
-        if (sum(is.na(labels[nzeros])) > 0 ) {
+        if (sum(is.na(labels[self$nonzero])) > 0 ) {
           labels <- NULL
           warning("The number of label is wrong, ignoring them.")
-          dplot$labels <- factor(rep(nzeros, length(xv)))
+          dplot$labels <- factor(rep(self$nonzero, length(xv)))
         } else {
-          dplot$labels <- factor(rep(labels[nzeros], length(xv)))
+          dplot$labels <- factor(rep(labels[self$nonzero], length(xv)))
         }
       }
 
@@ -163,20 +171,22 @@ StabilityPath <- R6::R6Class(
         aes(x=xvar,y=prob, linetype=labels, color=selection, group=var) + 
         geom_line() +
         labs(x=switch(xvar,
-                      "fraction" = expression(lambda[1]/max[lambda[1]]),
-                      ifelse(log_scale,expression(log[10](lambda[1])),expression(lambda[1]))),
+                      "fraction" = expression(lambda/max[lambda]),
+                      expression(log[10](lambda))),
              y="selection probabilities") + ggtitle(title) + theme_bw()
       d <- d + scale_x_reverse()
       if (is.null(labels)) {
         d <- d + theme(legend.position="none")
       } else {
-        if (length(labels[nzeros]) != length(nzeros)) {
+        if (length(labels[self$nonzero]) != length(self$nonzero)) {
           d <- d + theme(legend.position="none")
         }
       }
       
       ## Manage the annotation for the selected variables (PFER mode)
-      if (annot & sel_mode == "PFER") {
+      if (sel_mode == "PFER") {
+        iq <- attr(selected, "iq")
+        q  <- attr(selected, "q")
         d <- d + annotate("rect", xmin=xv[1], xmax=xv[iq], ymin=cutoff, ymax=1, alpha=0.15)
         d <- d + annotate("text", x=c(xv[length(xv)],xv[1],xv[iq]), y=c(cutoff,1,0), hjust=c(0,0,0.25), vjust=c(0,1.1,1.1),
                           label=c(paste("pi[thr]"),paste("PFER <=",PFER),paste("hat(q)==",round(q[iq],2))),
@@ -185,6 +195,20 @@ StabilityPath <- R6::R6Class(
         d <- d + geom_vline(xintercept=xv[iq], linetype="dashed", alpha=0.35, linewidth=.5)
       }
       d
+    }
+  ),
+  active =list(
+    #' @field nvar number of variables (without intercept)
+    nvar = function(value) {ncol(self$probabilities)},
+    #' @field nobs number of observation/sample size
+    nobs = function(value) {max(unlist(self$subsamples))},
+    #' @field nonzero variables with a non-null probability of selection along the stability path
+    nonzero = function(value) {which(colSums(self$probabilities) != 0)},
+    #' @field nonzeroprob subset of the probabilityes stability path on the nonzero variables
+    nonzeroprob = function(value) {
+      res  <- as.matrix(self$probabilities[, self$nonzero])
+      rownames(res) <- NULL
+      res      
     }
   )
 )
