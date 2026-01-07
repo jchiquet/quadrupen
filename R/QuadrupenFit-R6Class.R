@@ -166,7 +166,7 @@ QuadrupenFit <- R6::R6Class(
     #' @description User friendly print method
     print = function() { self$show() },
     #' @description function performing the optimization
-    #' @param control list contrlling the optimization process
+    #' @param control list controlling the optimization process
     fit = function(control) {
       ## ======================================================
       ## C++ CALL OPTIMIZER

@@ -65,9 +65,8 @@
 #' `min(4*nrow(x),ncol(x))` otherwise. Use with care, as it
 #' considerably changes the computation time.
 #' 
-#' @param beta0 a starting point for the vector of parameter. When
-#' `NULL` (the default), will be initialized at zero. May save
-#' time in some situation. 
+#' @param beta0 a starting point for the vector of parameter. By default,
+#' will initialized zero. May save time in some situation. 
 #'
 #' @param control list of argument controlling low level options of
 #' the algorithm --use with care and at your own risk-- :

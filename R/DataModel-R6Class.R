@@ -53,13 +53,11 @@ DataModel <- R6::R6Class(
           stopifnot("y has to be of type 'numeric'" = is.numeric(outcome))
           stopifnot("x and y have not correct dimensions" = 
                       (nrow(covariates) == length(outcome)))
-          if (!is.null(cov_struct)) {
+          stopifnot("cov_struct does not have the appropriate type" = 
+            any(c(inherits(x, "matrix"), inherits(x, "sparseMatrix"), inherits(x, "FusionGraph"))))
+          if (is.matrix(cov_struct) | inherits(cov_struct, "sparseMatrix")) {            cov_struct <- as(cov_struct, "CsparseMatrix")
             stopifnot("struct must be a (square) positive semidefinite matrix." = 
                         all(dim(cov_struct) == ncol(covariates)))
-            # stopifnot("struct must be a (square) positive semidefinite matrix." = 
-            #             all(eigen(cov_struct, only.values = TRUE)$values >= 0))
-            if (!inherits(cov_struct, "sparseMatrix")) 
-              cov_struct <- as(cov_struct, "CsparseMatrix")
           }
           stopifnot("penscale must have ncol(x) entries" = 
                       (length(cov_weights) == ncol(covariates)))
@@ -113,6 +111,7 @@ DataModel <- R6::R6Class(
     },
     #' @description Compute Cholesky factorization of the Structuring matrix 
     CholStruct = function() {
+      stopifnot(inherits(self$S, "sparseMatrix"))
       self$C <- as.matrix(Matrix::chol(self$S))
     }
   ), 

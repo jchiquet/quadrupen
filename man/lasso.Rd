@@ -63,9 +63,8 @@ is cut at the corresponding level. Default is
 \code{min(4*nrow(x),ncol(x))} otherwise. Use with care, as it
 considerably changes the computation time.}
 
-\item{beta0}{a starting point for the vector of parameter. When
-\code{NULL} (the default), will be initialized at zero. May save
-time in some situation.}
+\item{beta0}{a starting point for the vector of parameter. By default,
+will initialized zero. May save time in some situation.}
 
 \item{control}{list of argument controlling low level options of
 the algorithm --use with care and at your own risk-- :

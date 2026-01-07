@@ -48,8 +48,9 @@ Collate:
     'InformationCriteria-R6Class.R'
     'bounded-reg.R'
     'elastic-net.R'
-    'utils.R'
+    'fused-lasso.R'
     'lasso.R'
+    'utils.R'
     'ridge.R'
     'RcppExports.R'
 Packaged: 2013-03-25 19:41:00 UTC; jchiquet
