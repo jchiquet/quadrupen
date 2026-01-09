@@ -26,6 +26,7 @@ Rcpp::List FusedLasso_cpp(
 
   std::vector<double> lambda1Vec = tuningParam["l1"]   ; // vector of L1 penalties
   double lambda2                 = tuningParam["l2"]   ; // scalar for the amount L2 penalty
+  vector<double> lambda2Vec(lambda1Vec.size(), lambda2) ;
   
   std::vector<double>  beta0          = control["beta0"]         ;
   double mu0                          = control["mu0"]           ;
@@ -64,12 +65,6 @@ Rcpp::List FusedLasso_cpp(
     beta0.push_back(mu0) ;
   }
   
-  // Scale the penalties
-  for(unsigned int i = 0; i < lambda1Vec.size(); ++i) {
-    lambda1Vec[i] *= n;
-  }
-  vector<double> lambda2Vec(lambda1Vec.size(), n*lambda2) ;
-
   // Instantiate the main Fused-Lasso object
   FusedLasso fl(X, y, wObs, beta0, penscale,  graph,
                 maxIterInner, maxIterOuter, accuracy, 
@@ -111,15 +106,14 @@ Rcpp::List FusedLasso_cpp(
     beta = beta.cols(0, p-1) ;
   }
   beta = beta * arma::diagmat(1/normx) ;
-
   return List::create(
     Named("tuning_param") = List::create(
-      Named("l1") = NumericVector(lambda1Vec.begin(), lambda1Vec.end())/n,
-      Named("l2") = lambda2/n
+      Named("l1") = NumericVector(lambda1Vec.begin(), lambda1Vec.begin()+res.p),
+      Named("l2") = lambda2
     ),
     Named("beta")       = beta,
     Named("mu")         = mu,
-    Named("df")         = zeros(lambda1Vec.size()),
+    Named("df")         = zeros(res.p),
     Named("monitoring") = 
       List::create(
         Named("it_active")      = outerIterNum,

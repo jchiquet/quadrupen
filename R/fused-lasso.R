@@ -62,15 +62,15 @@
 fusedlasso <- function(x, 
                        y, 
                        lambda1   = NULL,                       
-                       lambda2   = 0.01,
+                       lambda2   = 1,
                        pen_fused  =  c("L1", "L2", "Huber"),
                        penscale  = rep(1,ncol(x)), ## doesnt work at the moment
                        struct    = NULL,
                        intercept = TRUE,
                        normalize = TRUE,
                        debiasing = c("none", "standard", "ridge"),
-                       nlambda1  = ifelse(is.null(lambda1),100,length(lambda1)),
-                       minratio  = ifelse(nrow(x) <= ncol(x), 1e-3, 1e-4),
+                       nlambda1  = ifelse(is.null(lambda1),50,length(lambda1)),
+                       minratio  = 1e-2,
                        maxfeat   = ifelse(lambda2 < 1e-2, min(nrow(x),ncol(x)), min(2*nrow(x),ncol(x))),
                        beta0     = rep(0, ncol(x)),
                        control   = list()) {
