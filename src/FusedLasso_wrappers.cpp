@@ -1,11 +1,13 @@
-#include <Rcpp.h>
-using namespace Rcpp;
+// [[Rcpp::depends(RcppArmadillo)]]
 
+// Include Armadillo / Rcpp / R to C/C++ basics
+#include "RcppArmadillo.h"
 #include "FusedLasso_class.h"
 #include "FusedLasso_data_struct.h"
 
-using namespace std;
 using namespace Rcpp;
+using namespace arma;
+using namespace std;
 
 // [[Rcpp::export]]
 Rcpp::List FusedLasso_cpp(
@@ -13,18 +15,19 @@ Rcpp::List FusedLasso_cpp(
     const List  &tuningParam    , // List of tuning parameters
     const List  &control          // config of the optimisation 
   ) {
-
+  const uword n                = dataModel["n"]  ; // sample size
+  const uword p                = dataModel["d"]  ; // number of features
   const SEXP &R_XMat           = dataModel["X"]  ; // design matrix
   std::vector<double> y        = dataModel["y"]  ; // response vector
   List R_graph                 = dataModel["S"]  ; // Structuring matrix
   std::vector<double> penscale = dataModel["wx"] ;  // penalty weights
   std::vector<double> wObs     = dataModel["wy"] ; // responses to predictors vector
-  // const arma::vec &normx    = dataModel["norm_X"] ; // norm of the predictors
+  const arma::vec &normx       = dataModel["norm_X"] ; // norm of the predictors
 
   std::vector<double> lambda1Vec = tuningParam["l1"]   ; // vector of L1 penalties
-  std::vector<double> lambda2Vec = tuningParam["l2"]   ; // scalar for the amount L2 penalty
+  double lambda2                 = tuningParam["l2"]   ; // scalar for the amount L2 penalty
   
-  std::vector<double>  beta           = control["beta0"]         ;
+  std::vector<double>  beta0          = control["beta0"]         ;
   double mu0                          = control["mu0"]           ;
   const bool intercept                = control["intercept"]     ; 
   std::string penalty                 = control["pen_fused"]     ; 
@@ -45,7 +48,7 @@ Rcpp::List FusedLasso_cpp(
   penEnum penType = L1;
   if (penalty == "Huber") {penType = Huber;}
   if (penalty == "L2")    {penType = L2;}
-  
+
   // Create the sparse matrix for X
   SparseMatrix X(R_XMat);
 
@@ -54,15 +57,21 @@ Rcpp::List FusedLasso_cpp(
   
   // Handle the intercept term
   if (intercept) {
-    std::vector<double> ones(X.n, 1.0); 
+    vector<double> ones(n, 1.0); 
     X.addColumn(ones) ;
     graph.addNode();
     penscale.push_back(1e-6) ;
-    beta.push_back(mu0) ;
+    beta0.push_back(mu0) ;
   }
+  
+  // Scale the penalties
+  for(unsigned int i = 0; i < lambda1Vec.size(); ++i) {
+    lambda1Vec[i] *= n;
+  }
+  vector<double> lambda2Vec(lambda1Vec.size(), n*lambda2) ;
 
   // Instantiate the main Fused-Lasso object
-  FusedLasso fl(X, y, wObs, beta, penscale,  graph,
+  FusedLasso fl(X, y, wObs, beta0, penscale,  graph,
                 maxIterInner, maxIterOuter, accuracy, 
                 maxActivateVars, 0, 0, regType);
 
@@ -92,14 +101,26 @@ Rcpp::List FusedLasso_cpp(
       lambda1Vec, lambda2Vec, maxNonZero, 
       success, outerIterNum, innerIterNum, verbose
   );
+  
+  // Preparing output R
+  arma::sp_mat beta = Rcpp::as<arma::sp_mat>(res.todgCMatrix()) ;
+  beta = beta.t() ;
+  vec mu = arma::zeros(lambda1Vec.size()) ;
+  if (intercept) {
+    mu = beta.col(p) ;
+    beta = beta.cols(0, p-1) ;
+  }
+  beta = beta * arma::diagmat(1/normx) ;
 
   return List::create(
     Named("tuning_param") = List::create(
-      Named("l1") = lambda1Vec,
-      Named("l2") = lambda2Vec 
+      Named("l1") = NumericVector(lambda1Vec.begin(), lambda1Vec.end())/n,
+      Named("l2") = lambda2/n
     ),
-    Named("beta")        = wrap(res.todgCMatrix()),
-    Named("monitoring")  = 
+    Named("beta")       = beta,
+    Named("mu")         = mu,
+    Named("df")         = zeros(lambda1Vec.size()),
+    Named("monitoring") = 
       List::create(
         Named("it_active")      = outerIterNum,
         Named("it_optim")       = innerIterNum ,

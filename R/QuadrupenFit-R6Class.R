@@ -173,7 +173,7 @@ QuadrupenFit <- R6::R6Class(
       ## 
       if (control$timer) {cpp.start <- proc.time()}
       out <- private$optimizer(private$data, private$tuning, control)
-      timer <- ifelse(control$timer, (proc.time() - cpp.start)[3], NA) 
+      timer <- ifelse(control$timer, (proc.time() - cpp.start)[3], NA)
       ## END OF CALL
       ## ======================================================
       private$tuning      <- out$tuning_param

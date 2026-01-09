@@ -182,6 +182,7 @@ elastic.net <- function(x,
   if (ctrl$verbose > 0) cat ("\nPath calibration")
   if (is.null(lambda1)) {
     stopifnot("minratio must be non negative." = minratio > 0)
+    stopifnot("nlambda1 must be non negative." = nlambda1 > 0)
     lmax <- max(abs(myData$xty))
     lambda1 <- 10^seq(from=log10(lmax), to=log10(lmax*minratio), len=nlambda1)  
   }

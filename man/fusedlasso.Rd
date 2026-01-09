@@ -9,10 +9,9 @@ fusedlasso(
   y,
   lambda1 = NULL,
   lambda2 = 0.01,
-  penfused = c("L1", "L2", "Huber"),
+  pen_fused = c("L1", "L2", "Huber"),
   penscale = rep(1, ncol(x)),
-  struct = Matrix::Diagonal(ncol(x), 1),
-  graph = NULL,
+  struct = NULL,
   intercept = TRUE,
   normalize = TRUE,
   debiasing = c("none", "standard", "ridge"),
@@ -40,19 +39,15 @@ shrunken to \code{minratio*lambda1.max}.}
 \item{lambda2}{real scalar; tunes the \eqn{\ell_2}{l2} penalty in
 the Elastic-net. Default is 0.01. Set to 0 to recover the Lasso.}
 
-\item{penfused}{penalty used for fusing the variables (either L1, L2 or Huber). Default is L1}
+\item{pen_fused}{penalty used for fusing the variables (either L1, L2 or Huber). Default is L1}
 
 \item{penscale}{vector with real positive values that weight the
 \eqn{\ell_1}{l1}-penalty of each feature. Default set all weights
 to 1.}
 
-\item{struct}{matrix structuring the coefficients, possibly
-sparsely encoded. Must be at least positive semidefinite (this is
-checked internally). If \code{NULL} (the default), the identity matrix is
-used. See details below.}
-
-\item{graph}{Description of the graph that corresponds to the \code{lambda2} penalty structure.
-If \code{NULL} (the default) a straight line is assumed. If a matrix is given, interpreted as
+\item{struct}{Description of the graph that corresponds to the \code{lambda2} penalty structure.
+If \code{NULL} (the default) a chain graph is assumed, like in the standard fused-lasso.
+If a matrix is given, interpreted as
 a symmetric adjacency matrix}
 
 \item{intercept}{logical; indicates if an intercept should be
@@ -137,16 +132,11 @@ y <- 10 + x \%*\% beta + rnorm(n,0,10)
 res1 <- fusedlasso(x, y, lambda2=0.1)
 G1 = quadrupen:::chain_graph(ncol(x))
 res2 <- fusedlasso(x, y, lambda2=1e-1, graph = G1)
-matplot(log10(res1$lambda1), t(as.matrix(res1$beta)), type="l")
-matplot(log10(res2$lambda1), t(as.matrix(res2$beta)), type="l")
-
-
-G <- igraph::make_lattice(c(10,10)) |> igraph::as_adjacency_matrix(sparse = FALSE)
-x <- scale(as.matrix(matrix(rnorm(100*n),n,100)))
-eta <- rep(c(0,1,0,-1,0), c(25,10,25,10,30))
-y <- x \%*\% eta + rnorm(n,0,10)
-res3 <- fusedlasso(x, y, lambda2=0.1, graph = G, intercept=FALSE)
-matplot(log10(res3$lambda1), t(as.matrix(res3$beta)), type="l")
+G2 <- igraph::make_ring(ncol(x)) |> igraph::as_adjacency_matrix(sparse = FALSE)
+res3 <- fusedlasso(x, y, lambda2=0.1, graph = G2)
+matplot(log10(res1$tuning_param$l1), t(as.matrix(res1$beta)), type="l")
+matplot(log10(res2$tuning_param$l1), t(as.matrix(res2$beta)), type="l")
+matplot(log10(res3$tuning_param$l1), t(as.matrix(res3$beta)), type="l")
 
 }
 \seealso{

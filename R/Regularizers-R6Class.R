@@ -115,27 +115,6 @@ FusedLasso <- R6::R6Class(
     initialize =  function(data, intercept, regParam) {
       super$initialize(data, intercept, regParam)
       private$optimizer <- FusedLasso_cpp
-    },
-    #' @description function performing the optimization
-    #' @param control list controlling the optimization process
-    fit = function(control) {
-      ## ======================================================
-      ## C++ CALL OPTIMIZER
-      ## 
-      if (control$timer) {cpp.start <- proc.time()}
-      out <- private$optimizer(private$data, private$tuning, control)
-      timer <- ifelse(control$timer, (proc.time() - cpp.start)[3], NA) 
-      ## END OF CALL
-      ## ======================================================
-      
-      private$tuning      <- out$tuning_param
-      private$mu          <- drop(out$mu)
-      private$beta        <- out$beta
-      private$df          <- drop(out$df)
-      
-      private$monitoring  <- out$monitoring
-      private$monitoring$timer <- timer
-      private$control     <- control
     }
   )
 )

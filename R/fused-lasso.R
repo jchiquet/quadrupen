@@ -105,35 +105,31 @@ fusedlasso <- function(x,
   myData$standardize(intercept, normalize)
   myData$getSufficientStat()
 
-  ## ===========================
-  ## Tuning parameters
+  ## ============================================
+  ## INSTANTIATE THE PENALIZED MODEL
+  ##
   if (is.null(lambda1)) {
+    stopifnot("minratio must be non negative." = minratio > 0)
+    stopifnot("nlambda1 must be non negative." = nlambda1 > 0)
     ctrl$adjust <- TRUE
-    lambda1 <- c(1, exp((1:(nlambda1-1)) * log(minratio)/(nlambda1-1)))
+    lambda1 <- c(1, exp((1:(nlambda1 - 1)) * log(minratio)/(nlambda1 - 1)))
   }
-  if (length(lambda2) != 1 & length(lambda1) != length(lambda2)) {
-    stop("Give either 1 value for lambda2 or same number as lambda2")
-  }
-  if (any(lambda2 <= 0)) stop("Lambda2 has to have only positive elements")
-  if (length(lambda2) == 1) lambda2 <- rep(lambda2, length(lambda1))
-  tuningParam <- list("l1" = nrow(x) * lambda1, "l2" = nrow(x) * lambda2)  
-
-  ## ===========================
-  ## Call to the main function
-  ## 
-  res <- FusedLasso_cpp(myData, tuningParam, ctrl)
+  myModel <- FusedLasso$new(
+    data      = myData,
+    intercept = intercept,
+    regParam  = list(l1 = lambda1, l2 = lambda2)
+  )
+  
+  ## ============================================
+  ## FIT THE MODEL WITH ACTIVE SET ALGORITHM
+  ##
+  if (ctrl$verbose > 0) cat ("\nModel fitting and optimization")
+  myModel$fit(ctrl)
   
   ## ===========================
   ## Post-Treatments
   ## 
-  if (intercept) {
-    res$mu   <- res$beta[nrow(res$beta)]
-    res$beta <- res$beta[1:(nrow(res$beta) - 1) , , drop = FALSE]
-  } else {
-    res$mu <- rep(0, length(lambda1))
-  }
-  res$beta <- res$beta / myData$norm_X
-  res$tuning_param <- lapply(res$tuning_param, function(param) param/nrow(x))
-
-  res
+  if (ctrl$verbose > 0) cat ("\nPost-treatment")
+  myModel$criteria()
+  myModel
 }

@@ -1,7 +1,7 @@
 #ifndef _FUSEDLASSO_UTILS_H_
 #define _FUSEDLASSO_UTILS_H_
 
-#include <Rcpp.h>
+#include "RcppArmadillo.h"
 #include <iostream>
 #include <fstream>
 #include <algorithm>
