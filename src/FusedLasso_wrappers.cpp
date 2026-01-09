@@ -105,15 +105,26 @@ Rcpp::List FusedLasso_cpp(
     mu = beta.col(p) ;
     beta = beta.cols(0, p-1) ;
   }
+  
+  // degrees of freedom : number of non-zero values
+  arma::vec df(beta.n_rows) ;
+  for (uword i; i<beta.n_rows; i++) {
+    rowvec row = beta.row(i).as_dense() ;
+    vec val = nonzeros(unique(row.t())) ;
+    df(i) = val.n_elem ;
+  }
+
+  // Normalizing Beta back to original scale
   beta = beta * arma::diagmat(1/normx) ;
+  
   return List::create(
     Named("tuning_param") = List::create(
-      Named("l1") = NumericVector(lambda1Vec.begin(), lambda1Vec.begin()+res.p),
+      Named("l1") = NumericVector(lambda1Vec.begin(), lambda1Vec.begin()+beta.n_rows),
       Named("l2") = lambda2
     ),
     Named("beta")       = beta,
     Named("mu")         = mu,
-    Named("df")         = zeros(res.p),
+    Named("df")         = df,
     Named("monitoring") = 
       List::create(
         Named("it_active")      = outerIterNum,

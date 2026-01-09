@@ -46,14 +46,14 @@
 #' x <- as.matrix(matrix(rnorm(95*n),n,95) %*% chol(Sigma))
 #' y <- 10 + x %*% beta + rnorm(n,0,10)
 #' 
-#' res1 <- fusedlasso(x, y, lambda2=0.1)
+#' res1 <- fusedlasso(x, y, lambda2=5)
 #' G1 = quadrupen:::chain_graph(ncol(x))
-#' res2 <- fusedlasso(x, y, lambda2=1e-1, graph = G1)
+#' res2 <- fusedlasso(x, y, lambda2=5, struct = G1)
 #' G2 <- igraph::make_ring(ncol(x)) |> igraph::as_adjacency_matrix(sparse = FALSE)
-#' res3 <- fusedlasso(x, y, lambda2=0.1, graph = G2)
-#' matplot(log10(res1$tuning_param$l1), t(as.matrix(res1$beta)), type="l")
-#' matplot(log10(res2$tuning_param$l1), t(as.matrix(res2$beta)), type="l")
-#' matplot(log10(res3$tuning_param$l1), t(as.matrix(res3$beta)), type="l")
+#' res3 <- fusedlasso(x, y, lambda2=5, struct = G2)
+#' plot(res1)
+#' plot(res2)
+#' plot(res3)
 #' 
 #' @keywords models regression multivariate
 #' 
