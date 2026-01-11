@@ -299,7 +299,7 @@ QuadrupenFit <- R6::R6Class(
 
         ## Some variables and copies useful for CV work
         K <- length(folds)
-        control  <- private$control; control$verbose <- 0
+        control  <- private$control; control$verbose <- 0 ; control$adjust <- FALSE
         regParam <- private$tuning # copy of the currently used tuning parameters
         nlambda1 <- length(regParam[[1]])
         nlambda2 <- length(lambda2)

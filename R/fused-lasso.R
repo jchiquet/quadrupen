@@ -32,7 +32,7 @@
 #' * success A logical vector inidicating if the algorithm converged.
 #' * Intercept The intercept of the model; 0 if no intercept was included
 #' 
-#' @author Holger Hoefling, refactoring by Julien C.
+#' @author Original code by Holger Hoefling, refactoring by Julien Chiquet
 #' @seealso \code{\link{testData}}
 #' 
 #' @examples 
@@ -68,10 +68,10 @@ fusedlasso <- function(x,
                        struct    = NULL,
                        intercept = TRUE,
                        normalize = TRUE,
-                       debiasing = c("none", "standard", "ridge"),
+                       debiasing = c("none"),
                        nlambda1  = ifelse(is.null(lambda1),50,length(lambda1)),
                        minratio  = 1e-2,
-                       maxfeat   = ifelse(lambda2 < 1e-2, min(nrow(x),ncol(x)), min(2*nrow(x),ncol(x))),
+                       maxfeat   = ifelse(lambda2 < 1, min(nrow(x),ncol(x)), min(2*nrow(x),ncol(x))),
                        beta0     = rep(0, ncol(x)),
                        control   = list()) {
 
