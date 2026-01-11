@@ -116,13 +116,14 @@ Rcpp::List FusedLasso_cpp(
 
   // Normalizing Beta back to original scale
   beta = beta * arma::diagmat(1/normx) ;
-  
+
   return List::create(
     Named("tuning_param") = List::create(
       Named("l1") = NumericVector(lambda1Vec.begin(), lambda1Vec.begin()+beta.n_rows),
       Named("l2") = lambda2
     ),
     Named("beta")       = beta,
+    Named("active")     = spones(beta),
     Named("mu")         = mu,
     Named("df")         = df,
     Named("monitoring") = 

@@ -408,7 +408,7 @@ QuadrupenFit <- R6::R6Class(
       }
       
       control  <- private$control; 
-      control$verbose <- 0
+      control$verbose <- 0 ; control$adjust <- FALSE
       control$maxfeat  <- self$nvar
       nlambda1 <- length(private$tuning[[1]])
 
