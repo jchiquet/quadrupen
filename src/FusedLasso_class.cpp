@@ -436,8 +436,6 @@ bool FusedLasso::runFusedGeneral(penEnum penType) {
     maxBetaChange = maxDiffDoubleVec(oldBeta, betaFused);
     outerIterNum++;
 
-    // cout << "runFusedGeneral: " << outerIterNum << " Change " << maxBetaChange << " Result: " << result  << "Acc: " << accuracy << endl;
-
   }
   
   beta = flc->getBetaOriginal(fusions);
