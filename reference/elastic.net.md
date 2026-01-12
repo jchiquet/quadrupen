@@ -105,9 +105,8 @@ elastic.net(
 
 - beta0:
 
-  a starting point for the vector of parameter. When `NULL` (the
-  default), will be initialized at zero. May save time in some
-  situation.
+  a starting point for the vector of parameter. By default, will
+  initialized zero. May save time in some situation.
 
 - control:
 
@@ -146,6 +145,8 @@ elastic.net(
 ## Value
 
 an object with class
+[FusedLassoFit](https://jchiquet.github.io/quadrupen/reference/FusedLassoFit.md),
+inheriting from
 [QuadrupenFit](https://jchiquet.github.io/quadrupen/reference/QuadrupenFit.md).
 
 ## Details

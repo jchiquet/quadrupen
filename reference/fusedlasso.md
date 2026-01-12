@@ -1,24 +1,27 @@
-# Fit a linear model with lasso regularization
+# A function for fitting generalized fused-Lasso problems
 
-Adjust a linear model with lasso regularization, that is a (possibly
-weighted) \\\ell_1\\-norm. The solution path is computed at a grid of
-values for the \\\ell_1\\-penalty. See details for the criterion
-optimized.
+This function fits the standard version of the fused lasso. It can take
+a general matrix x and provides for possible weights on the `lambda1`
+and `lambda2` penalties.
 
 ## Usage
 
 ``` r
-lasso(
+fusedlasso(
   x,
   y,
   lambda1 = NULL,
+  lambda2 = 1,
+  pen_fused = c("L1", "L2", "Huber"),
   penscale = rep(1, ncol(x)),
+  struct = NULL,
   intercept = TRUE,
   normalize = TRUE,
-  nlambda1 = ifelse(is.null(lambda1), 100, length(lambda1)),
-  minratio = ifelse(nrow(x) <= ncol(x), 0.01, 1e-04),
-  maxfeat = min(nrow(x), ncol(x)),
-  beta0 = numeric(ncol(x)),
+  debiasing = c("none"),
+  nlambda1 = ifelse(is.null(lambda1), 50, length(lambda1)),
+  minratio = 0.01,
+  maxfeat = ifelse(lambda2 < 1, min(nrow(x), ncol(x)), min(2 * nrow(x), ncol(x))),
+  beta0 = rep(0, ncol(x)),
   control = list()
 )
 ```
@@ -42,10 +45,27 @@ lasso(
   a guessed level `lambda1.max` where only the intercept is included,
   then shrunken to `minratio*lambda1.max`.
 
+- lambda2:
+
+  real scalar; tunes the \\\ell_2\\ penalty in the Elastic-net. Default
+  is 0.01. Set to 0 to recover the Lasso.
+
+- pen_fused:
+
+  penalty used for fusing the variables (either L1, L2 or Huber).
+  Default is L1
+
 - penscale:
 
   vector with real positive values that weight the \\\ell_1\\-penalty of
   each feature. Default set all weights to 1.
+
+- struct:
+
+  Description of the graph that corresponds to the `lambda2` penalty
+  structure. If `NULL` (the default) a chain graph is assumed, like in
+  the standard fused-lasso. If a matrix is given, interpreted as a
+  symmetric adjacency matrix
 
 - intercept:
 
@@ -56,6 +76,14 @@ lasso(
 
   logical; indicates if variables should be normalized to have unit L2
   norm before fitting. Default is `TRUE`.
+
+- debiasing:
+
+  character picked in "none" or "standard": indicates if coefficients
+  should be rescaled to avoid excessive biais due to double shrinkage.
+  "standard" is Zou and Hastie (2006) orginal proposa: : the vector of
+  parameters is rescaled by a factor `(1+lambda2)`. "none" is for no
+  rescaling, the default.
 
 - nlambda1:
 
@@ -87,62 +115,52 @@ lasso(
 
 - control:
 
-  list of argument controlling low level options of the algorithm –use
-  with care and at your own risk– :
+  list of argument controlling low level options of the algorithm:
 
-  - `verbose`: integer; activate verbose mode –this one is not too
-    risky!– set to `0` for no output; `1` for warnings only, and `2` for
-    tracing the whole progression. Default is `1`. Automatically set to
-    `0` when the method is embedded within cross-validation or stability
-    selection.
+  - `verbose`: logical; ener verbose mode
 
   - `timer`: logical; use to record the timing of the algorithm. Default
     is `FALSE`.
 
-  - `maxiter` the maximal number of iteration used to solve the problem
-    for a given value of lambda1. Default is 500.
+  - `maxiterin` Maximum number of iterations in the inner loop to run.
 
-  - `method` a string for the underlying solver used. Either `"quadra"`,
-    `"pathwise"` or `"fista"`. Default is `"quadra"`.
+  - `maxiterout` Maximum number of iterations in the outer loop to run.
 
-  - `threshold` a threshold for convergence. The algorithm stops when
-    the optimality conditions are fulfill up to this threshold. Default
-    is `1e-7` for `"quadra"` and `1e-2` for the first order methods.
+  - `maxactivation` Maximum number of previously inactive variables to
+    activate at the same time
 
-  - `bulletproof` logical; indicates if the bulletproof mode should be
-    used while running the `"quadra"` method. Default is `TRUE`.
+  - `accuracy` Accuracy at which the algorithm will stop.
 
-  - `monitor` indicates if a monitoring of the convergence should be
-    recorded, by computing a lower bound between the current solution
-    and the optimum: when `'0'` (the default), no monitoring is
-    provided; when `'1'`, the bound derived in Grandvalet et al. is
-    computed; when `'>1'`, the Fenchel duality gap is computed along the
-    algorithm.
+  - `fusioncheck` Should the fused sets be checked for breaking up?
+
+  - `verbose` Should the function give some output what it is doing?
 
 ## Value
 
 an object with class
-[QuadrupenFit](https://jchiquet.github.io/quadrupen/reference/QuadrupenFit.md).
-
-an object with class
-[ElasticNetFit](https://jchiquet.github.io/quadrupen/reference/ElasticNetFit.md),
+[FusedLassoFit](https://jchiquet.github.io/quadrupen/reference/FusedLassoFit.md),
 inheriting from
 [QuadrupenFit](https://jchiquet.github.io/quadrupen/reference/QuadrupenFit.md).
 
-## Note
+## Details
 
 The optimized criterion is the following:
 
-β^(hat)_(λ₁) = argmin_(β) 1/2 RSS(&beta) + λ₁ \| D β \|₁,
+β^(hat)_(λ₁,λ₂) = argmin_(β) 1/2 RSS(&beta) + λ₁ \| D β \|₁ + λ/2 ₂
+β^(T) S β,
 
 where \\D\\ is a diagonal matrix, whose diagonal terms are provided as a
-vector by the `penscale` argument.
+vector by the `penscale` argument. The \\\ell_1\\ fusion penalty is
+structured by a possibily weighted graph \\G\\ provided via the `struct`
+argument, as a symmetrix (undirected) adjacency matrix.
+
+## Author
+
+Original code by Holger Hoefling, refactoring by Julien Chiquet
 
 ## Examples
 
 ``` r
-## Simulating multivariate Gaussian with blockwise correlation
-## and piecewise constant vector of parameters
 beta <- rep(c(0,1,0,-1,0), c(25,10,25,10,25))
 cor <- 0.75
 Soo <- toeplitz(cor^(0:(25-1))) ## Toeplitz correlation for irrelevant variables
@@ -153,9 +171,11 @@ n <- 50
 x <- as.matrix(matrix(rnorm(95*n),n,95) %*% chol(Sigma))
 y <- 10 + x %*% beta + rnorm(n,0,10)
 
-labels <- rep("irrelevant", length(beta))
-labels[beta != 0] <- "relevant"
-## The solution path of the LASSO
-plot(lasso(x,y), label=labels)
+res <- fusedlasso(x, y, lambda2=5)
+G <- igraph::make_ring(ncol(x)) |> igraph::as_adjacency_matrix(sparse = FALSE)
+resG <- fusedlasso(x, y, lambda2=5, struct = G)
+plot(res)
+
+plot(resG)
 
 ```

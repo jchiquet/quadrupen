@@ -219,6 +219,8 @@ Functions for fitting various structured regularization models
   : Fit a linear model with infinity-norm plus ridge-like regularization
 - [`elastic.net()`](https://jchiquet.github.io/quadrupen/reference/elastic.net.md)
   : Fit a linear model with elastic-net regularization
+- [`fusedlasso()`](https://jchiquet.github.io/quadrupen/reference/fusedlasso.md)
+  : A function for fitting generalized fused-Lasso problems
 - [`lasso()`](https://jchiquet.github.io/quadrupen/reference/lasso.md) :
   Fit a linear model with lasso regularization
 - [`ridge()`](https://jchiquet.github.io/quadrupen/reference/ridge.md) :
@@ -230,12 +232,14 @@ R6 Classes for the user to manipulate the ouput of the main functions
 
 - [`QuadrupenFit`](https://jchiquet.github.io/quadrupen/reference/QuadrupenFit.md)
   : Class "QuadrupenFit"
-- [`ElasticNet`](https://jchiquet.github.io/quadrupen/reference/ElasticNet.md)
-  : Class "ElasticNet"
-- [`BoundedRegression`](https://jchiquet.github.io/quadrupen/reference/BoundedRegression.md)
+- [`ElasticNetFit`](https://jchiquet.github.io/quadrupen/reference/ElasticNetFit.md)
+  : Class "ElasticNetFit"
+- [`FusedLassoFit`](https://jchiquet.github.io/quadrupen/reference/FusedLassoFit.md)
+  : Class "FusedLassoFit"
+- [`BoundedRegressionFit`](https://jchiquet.github.io/quadrupen/reference/BoundedRegressionFit.md)
   : Class "BoundedRegression"
-- [`RidgeRegression`](https://jchiquet.github.io/quadrupen/reference/RidgeRegression.md)
-  : Class "RidgeRegression"
+- [`RidgeRegressionFit`](https://jchiquet.github.io/quadrupen/reference/RidgeRegressionFit.md)
+  : Class "RidgeRegressionFit"
 
 ## Auxiliaries Classes and methods
 

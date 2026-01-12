@@ -244,7 +244,7 @@ function performing the optimization
 
 - `control`:
 
-  list contrlling the optimization process
+  list controlling the optimization process
 
 ------------------------------------------------------------------------
 

@@ -117,6 +117,8 @@ ridge(
 ## Value
 
 an object with class
+[RidgeRegressionFit](https://jchiquet.github.io/quadrupen/reference/RidgeRegressionFit.md),
+inheriting from
 [QuadrupenFit](https://jchiquet.github.io/quadrupen/reference/QuadrupenFit.md).
 
 ## Note

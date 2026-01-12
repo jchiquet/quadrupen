@@ -141,6 +141,11 @@ bounded.reg(
 an object with class
 [QuadrupenFit](https://jchiquet.github.io/quadrupen/reference/QuadrupenFit.md).
 
+an object with class
+[BoundedRegressionFit](https://jchiquet.github.io/quadrupen/reference/BoundedRegressionFit.md),
+inheriting from
+[QuadrupenFit](https://jchiquet.github.io/quadrupen/reference/QuadrupenFit.md).
+
 ## Note
 
 The optimized criterion is
@@ -169,11 +174,6 @@ regarding the dimension of the `lambda1` argument.
 Singularity of the system can also be avoided with a larger
 \\\ell_2\\-regularization, via `lambda2`, or a "not-too-small"
 \\\ell\_\infty\\ regularization, via a larger `'minratio'` argument.
-
-## See also
-
-See also
-[QuadrupenFit](https://jchiquet.github.io/quadrupen/reference/QuadrupenFit.md).
 
 ## Examples
 
