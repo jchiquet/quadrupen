@@ -168,7 +168,7 @@ selection.
 \if{html}{\out{<div class="r">}}\preformatted{StabilityPath$plot(
   xvar = "lambda",
   title = "Stability path",
-  labels = rep("unknown status", p),
+  labels = rep("unknown status", self$nvar),
   sel_mode = c("rank", "PFER"),
   cutoff = 0.75,
   PFER = 2,

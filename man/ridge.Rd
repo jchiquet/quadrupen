@@ -88,7 +88,7 @@ when \code{'1'}, the bound derived in Grandvalet et al. is computed; when
 }}
 }
 \value{
-an object with class \link{QuadrupenFit}.
+an object with class \link{RidgeRegressionFit}, inheriting from \link{QuadrupenFit}.
 }
 \description{
 Adjust a linear model with ridge regularization (possibly

@@ -42,7 +42,7 @@ StabilityPath <- R6::R6Class(
       },
     #' @description User friendly print method
     show = function() {
-      cat("Stability path with", length(subsamples), "resamplings.\n")
+      cat("Stability path with", length(self$subsamples), "resamplings.\n")
       cat("- penalty parameter lambda1:", length(self$regParam[[1]]), "points from",
           format(max(self$regParam[[1]]), digits = 3),"to",
           format(min(self$regParam[[1]]), digits = 3),"\n")
@@ -131,7 +131,7 @@ StabilityPath <- R6::R6Class(
     #' @import ggplot2 scales grid
     #' 
     plot = function(
-      xvar = "lambda", title = "Stability path", labels = rep("unknown status",p), 
+      xvar = "lambda", title = "Stability path", labels = rep("unknown status",self$nvar), 
       sel_mode = c("rank", "PFER"), cutoff=0.75, PFER=2, nvarsel=floor(self$nobs/log(self$nvar))) {
 
       sel_mode <- match.arg(sel_mode)
@@ -155,7 +155,7 @@ StabilityPath <- R6::R6Class(
       
       # dplot$selection <- factor(rep(selection, length(xv)))
       if (is.null(labels)) {
-        dplot$labels <- factor(rep(1:p, length(xv)))
+        dplot$labels <- factor(rep(1:self$nvar, length(xv)))
       } else {
         if (sum(is.na(labels[self$nonzero])) > 0 ) {
           labels <- NULL

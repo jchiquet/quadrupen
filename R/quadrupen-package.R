@@ -155,6 +155,6 @@
 ## usethis namespace: start
 #' @import R6 Matrix parallel ggplot2 dplyr scales grid methods
 #' @importFrom Rcpp sourceCpp
-#' @useDynLib quadrupen
+#' @useDynLib quadrupen, .registration = TRUE
 ## usethis namespace: end
 NULL

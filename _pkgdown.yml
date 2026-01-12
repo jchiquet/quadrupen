@@ -9,15 +9,17 @@ reference:
   contents: 
   - bounded.reg
   - elastic.net
+  - fusedlasso
   - lasso
   - ridge
 - title: "Classes and methods for handling the Quadrupen fits"
   desc: "R6 Classes for the user to manipulate the ouput of the main functions"
   contents:
   - QuadrupenFit
-  - ElasticNet
-  - BoundedRegression
-  - RidgeRegression
+  - ElasticNetFit
+  - FusedLassoFit
+  - BoundedRegressionFit
+  - RidgeRegressionFit
 - title: "Auxiliaries Classes and methods"
   desc: "R6 Classes used as fields of the main Class Quadrupen fit"
   contents:

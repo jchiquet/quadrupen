@@ -166,14 +166,14 @@ QuadrupenFit <- R6::R6Class(
     #' @description User friendly print method
     print = function() { self$show() },
     #' @description function performing the optimization
-    #' @param control list contrlling the optimization process
+    #' @param control list controlling the optimization process
     fit = function(control) {
       ## ======================================================
       ## C++ CALL OPTIMIZER
       ## 
       if (control$timer) {cpp.start <- proc.time()}
       out <- private$optimizer(private$data, private$tuning, control)
-      timer <- ifelse(control$timer, (proc.time() - cpp.start)[3], NA) 
+      timer <- ifelse(control$timer, (proc.time() - cpp.start)[3], NA)
       ## END OF CALL
       ## ======================================================
       private$tuning      <- out$tuning_param
@@ -299,7 +299,7 @@ QuadrupenFit <- R6::R6Class(
 
         ## Some variables and copies useful for CV work
         K <- length(folds)
-        control  <- private$control; control$verbose <- 0
+        control  <- private$control; control$verbose <- 0 ; control$adjust <- FALSE
         regParam <- private$tuning # copy of the currently used tuning parameters
         nlambda1 <- length(regParam[[1]])
         nlambda2 <- length(lambda2)
@@ -408,7 +408,7 @@ QuadrupenFit <- R6::R6Class(
       }
       
       control  <- private$control; 
-      control$verbose <- 0
+      control$verbose <- 0 ; control$adjust <- FALSE
       control$maxfeat  <- self$nvar
       nlambda1 <- length(private$tuning[[1]])
 

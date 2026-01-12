@@ -63,9 +63,8 @@ is cut at the corresponding level. Default is
 \code{min(4*nrow(x),ncol(x))} otherwise. Use with care, as it
 considerably changes the computation time.}
 
-\item{beta0}{a starting point for the vector of parameter. When
-\code{NULL} (the default), will be initialized at zero. May save
-time in some situation.}
+\item{beta0}{a starting point for the vector of parameter. By default,
+will initialized zero. May save time in some situation.}
 
 \item{control}{list of argument controlling low level options of
 the algorithm --use with care and at your own risk-- :
@@ -95,6 +94,8 @@ when \code{'1'}, the bound derived in Grandvalet et al. is computed; when
 }
 \value{
 an object with class \link{QuadrupenFit}.
+
+an object with class \link{ElasticNetFit}, inheriting from \link{QuadrupenFit}.
 }
 \description{
 Adjust a linear model with lasso regularization, that is a
@@ -133,9 +134,6 @@ labels[beta != 0] <- "relevant"
 ## The solution path of the LASSO
 plot(lasso(x,y), label=labels)
 
-}
-\seealso{
-See also \link{QuadrupenFit},
 }
 \keyword{models,}
 \keyword{regression}

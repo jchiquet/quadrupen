@@ -18,7 +18,7 @@
 #'
 #' @param lambda_max the largest value of `lambda` considered
 #' 
-#' @return an object with class [QuadrupenFit].
+#' @return an object with class [RidgeRegressionFit], inheriting from [QuadrupenFit].
 #'
 #' @note The optimized criterion is the following: \if{latex}{\deqn{%
 #' \hat{\beta}_{\lambda_2} = \arg \min_{\beta} \frac{1}{2} (y - X
@@ -85,7 +85,7 @@ ridge <- function(x,
     stopifnot("minratio must be non negative." = minratio > 0)
     lambda <- 10^seq(from=log10(lambda_max), to=log10(lambda_max*minratio), len=nlambda)
   }
-  myModel <- RidgeRegression$new(myData, intercept, list(l2 = lambda, l1 = 0))
+  myModel <- RidgeRegressionFit$new(myData, intercept, list(l2 = lambda, l1 = 0))
   
   ## ============================================
   ## RECOVER LOW LEVEL OPTIONS

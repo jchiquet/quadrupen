@@ -199,7 +199,7 @@ function performing the optimization
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{control}}{list contrlling the optimization process}
+\item{\code{control}}{list controlling the optimization process}
 }
 \if{html}{\out{</div>}}
 }
