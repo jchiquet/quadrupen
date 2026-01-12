@@ -9,7 +9,7 @@ Class "FusedLasso"
 Class "FusedLasso"
 }
 \details{
-Class of object returned by the fitting function \code{\link[=fused.lasso]{fused.lasso()}}. Inherits fields
+Class of object returned by the fitting function \code{\link[=fusedlasso]{fusedlasso()}}. Inherits fields
 and methods of \link{QuadrupenFit}.
 }
 \seealso{

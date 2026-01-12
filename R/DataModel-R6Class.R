@@ -54,8 +54,10 @@ DataModel <- R6::R6Class(
           stopifnot("x and y have not correct dimensions" = 
                       (nrow(covariates) == length(outcome)))
           stopifnot("cov_struct does not have the appropriate type" = 
-            any(c(inherits(x, "matrix"), inherits(x, "sparseMatrix"), inherits(x, "FusionGraph"))))
-          if (is.matrix(cov_struct) | inherits(cov_struct, "sparseMatrix")) {            cov_struct <- as(cov_struct, "CsparseMatrix")
+            any(c(inherits(cov_struct, "matrix"), inherits(cov_struct, "sparseMatrix"), 
+                  inherits(cov_struct, "FusionGraph"))))
+          if (is.matrix(cov_struct) | inherits(cov_struct, "sparseMatrix")) {
+            cov_struct <- as(cov_struct, "CsparseMatrix")
             stopifnot("struct must be a (square) positive semidefinite matrix." = 
                         all(dim(cov_struct) == ncol(covariates)))
           }

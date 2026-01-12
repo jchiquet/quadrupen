@@ -96,7 +96,7 @@ RidgeRegression <- R6::R6Class(
 
 #' Class "FusedLasso"
 #' 
-#' Class of object returned by the fitting function [fused.lasso()]. Inherits fields
+#' Class of object returned by the fitting function [fusedlasso()]. Inherits fields
 #' and methods of [QuadrupenFit].
 #' 
 #' @seealso [QuadrupenFit], [bounded.reg()]

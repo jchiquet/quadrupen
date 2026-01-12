@@ -59,22 +59,23 @@
 #' 
 #' @importFrom methods as
 #' @export 
-fusedlasso <- function(x, 
-                       y, 
-                       lambda1   = NULL,                       
-                       lambda2   = 1,
-                       pen_fused  =  c("L1", "L2", "Huber"),
-                       penscale  = rep(1,ncol(x)), ## doesnt work at the moment
-                       struct    = NULL,
-                       intercept = TRUE,
-                       normalize = TRUE,
-                       debiasing = c("none"),
-                       nlambda1  = ifelse(is.null(lambda1),50,length(lambda1)),
-                       minratio  = 1e-2,
-                       maxfeat   = ifelse(lambda2 < 1, min(nrow(x),ncol(x)), min(2*nrow(x),ncol(x))),
-                       beta0     = rep(0, ncol(x)),
-                       control   = list()) {
-
+fusedlasso <- function(
+    x, 
+    y, 
+    lambda1   = NULL,                       
+    lambda2   = 1,
+    pen_fused  =  c("L1", "L2", "Huber"),
+    penscale  = rep(1,ncol(x)), ## doesnt work at the moment
+    struct    = NULL,
+    intercept = TRUE,
+    normalize = TRUE,
+    debiasing = c("none"),
+    nlambda1  = ifelse(is.null(lambda1),50,length(lambda1)),
+    minratio  = 1e-2,
+    maxfeat   = ifelse(lambda2 < 1, min(nrow(x),ncol(x)), min(2*nrow(x),ncol(x))),
+    beta0     = rep(0, ncol(x)),
+    control   = list()) {
+  
   ## ============================================
   ## RECOVER LOW LEVEL CONFIGURATION
   ##
