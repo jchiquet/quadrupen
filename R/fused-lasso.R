@@ -21,19 +21,28 @@
 #' * `maxiterout` Maximum number of iterations in the outer loop to run.
 #' * `maxactivation` Maximum number of previously inactive variables to activate at the same time
 #' * `accuracy` Accuracy at which the algorithm will stop.
-#' @param fusionCheck Should the fused sets be checked for breaking up? 
-#' @param verbose Should the function give some output what it is doing?
+#' * `fusioncheck` Should the fused sets be checked for breaking up? 
+#' * `verbose` Should the function give some output what it is doing?
 #' 
-#' @returns A list with the elements
-#' * beta A sparse matrix of type \code{dgCMatrix} that returns the solutions for each value 
-#' of \code{lambda1} and \code{lambda2}. Each column is a separate solution.
-#' * lambda1 The vector of the lambda1 values that were used.
-#' * lambda2 The vector of the lambda2 values that were used.
-#' * success A logical vector inidicating if the algorithm converged.
-#' * Intercept The intercept of the model; 0 if no intercept was included
+#' @return an object with class [FusedLassoFit], inheriting from [QuadrupenFit].
+#' 
+#' @details The optimized criterion is the following: \if{latex}{\deqn{%
+#' \hat{\beta}_{\lambda_1,\lambda_2} = \arg \min_{\beta} \frac{1}{2}
+#' (y - X \beta)^T (y - X \beta) + \lambda_1 \|w \circ \beta \|_{1} +
+#' \frac{\lambda_1}{2} \sum_{i \tilde j} w_{ij} |\beta_i - _beta_j|, }} \if{html}{\out{ <center>
+#' &beta;<sup>hat</sup>
+#' <sub>&lambda;<sub>1</sub>,&lambda;<sub>2</sub></sub> =
+#' argmin<sub>&beta;</sub> 1/2 RSS(&beta) + &lambda;<sub>1</sub>
+#' &#124; D &beta; &#124;<sub>1</sub> + &lambda;/2 <sub>2</sub>
+#' &beta;<sup>T</sup> S &beta;, </center> }}
+#' \if{text}{\deqn{beta.hat(lambda1, lambda2) = argmin_beta 1/2
+#' RSS(beta) + lambda1 |D beta|1 + lambda2 sum{(i,j) in G} w(ij) |beta_j -beta_i|,}} where
+#' \eqn{D}{D} is a diagonal matrix, whose diagonal terms are provided
+#' as a vector by the \code{penscale} argument. The \eqn{\ell_1}{l1} fusion penalty 
+#' is structured by a possibily weighted graph \eqn{G}{G} provided via the `struct`
+#' argument, as a symmetrix (undirected) adjacency matrix.
 #' 
 #' @author Original code by Holger Hoefling, refactoring by Julien Chiquet
-#' @seealso \code{\link{testData}}
 #' 
 #' @examples 
 #' beta <- rep(c(0,1,0,-1,0), c(25,10,25,10,25))
@@ -46,14 +55,11 @@
 #' x <- as.matrix(matrix(rnorm(95*n),n,95) %*% chol(Sigma))
 #' y <- 10 + x %*% beta + rnorm(n,0,10)
 #' 
-#' res1 <- fusedlasso(x, y, lambda2=5)
-#' G1 = quadrupen:::chain_graph(ncol(x))
-#' res2 <- fusedlasso(x, y, lambda2=5, struct = G1)
-#' G2 <- igraph::make_ring(ncol(x)) |> igraph::as_adjacency_matrix(sparse = FALSE)
-#' res3 <- fusedlasso(x, y, lambda2=5, struct = G2)
-#' plot(res1)
-#' plot(res2)
-#' plot(res3)
+#' res <- fusedlasso(x, y, lambda2=5)
+#' G <- igraph::make_ring(ncol(x)) |> igraph::as_adjacency_matrix(sparse = FALSE)
+#' resG <- fusedlasso(x, y, lambda2=5, struct = G)
+#' plot(res)
+#' plot(resG)
 #' 
 #' @keywords models regression multivariate
 #' 
@@ -115,7 +121,7 @@ fusedlasso <- function(
     ctrl$adjust <- TRUE
     lambda1 <- c(1, exp((1:(nlambda1 - 1)) * log(minratio)/(nlambda1 - 1)))
   }
-  myModel <- FusedLasso$new(
+  myModel <- FusedLassoFit$new(
     data      = myData,
     intercept = intercept,
     regParam  = list(l1 = lambda1, l2 = lambda2)

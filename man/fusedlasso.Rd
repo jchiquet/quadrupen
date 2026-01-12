@@ -96,27 +96,34 @@ algorithm. Default is \code{FALSE}.
 \item \code{maxiterout} Maximum number of iterations in the outer loop to run.
 \item \code{maxactivation} Maximum number of previously inactive variables to activate at the same time
 \item \code{accuracy} Accuracy at which the algorithm will stop.
+\item \code{fusioncheck} Should the fused sets be checked for breaking up?
+\item \code{verbose} Should the function give some output what it is doing?
 }}
-
-\item{fusionCheck}{Should the fused sets be checked for breaking up?}
-
-\item{verbose}{Should the function give some output what it is doing?}
 }
 \value{
-A list with the elements
-\itemize{
-\item beta A sparse matrix of type \code{dgCMatrix} that returns the solutions for each value
-of \code{lambda1} and \code{lambda2}. Each column is a separate solution.
-\item lambda1 The vector of the lambda1 values that were used.
-\item lambda2 The vector of the lambda2 values that were used.
-\item success A logical vector inidicating if the algorithm converged.
-\item Intercept The intercept of the model; 0 if no intercept was included
-}
+an object with class \link{FusedLassoFit}, inheriting from \link{QuadrupenFit}.
 }
 \description{
 This function fits the standard version of the fused lasso.
 It can take a general matrix x and provides for possible weights on the
 \code{lambda1} and \code{lambda2} penalties.
+}
+\details{
+The optimized criterion is the following: \if{latex}{\deqn{%
+\hat{\beta}_{\lambda_1,\lambda_2} = \arg \min_{\beta} \frac{1}{2}
+(y - X \beta)^T (y - X \beta) + \lambda_1 \|w \circ \beta \|_{1} +
+\frac{\lambda_1}{2} \sum_{i \tilde j} w_{ij} |\beta_i - _beta_j|, }} \if{html}{\out{ <center>
+&beta;<sup>hat</sup>
+<sub>&lambda;<sub>1</sub>,&lambda;<sub>2</sub></sub> =
+argmin<sub>&beta;</sub> 1/2 RSS(&beta) + &lambda;<sub>1</sub>
+&#124; D &beta; &#124;<sub>1</sub> + &lambda;/2 <sub>2</sub>
+&beta;<sup>T</sup> S &beta;, </center> }}
+\if{text}{\deqn{beta.hat(lambda1, lambda2) = argmin_beta 1/2
+RSS(beta) + lambda1 |D beta|1 + lambda2 sum{(i,j) in G} w(ij) |beta_j -beta_i|,}} where
+\eqn{D}{D} is a diagonal matrix, whose diagonal terms are provided
+as a vector by the \code{penscale} argument. The \eqn{\ell_1}{l1} fusion penalty
+is structured by a possibily weighted graph \eqn{G}{G} provided via the \code{struct}
+argument, as a symmetrix (undirected) adjacency matrix.
 }
 \examples{
 beta <- rep(c(0,1,0,-1,0), c(25,10,25,10,25))
@@ -129,18 +136,12 @@ n <- 50
 x <- as.matrix(matrix(rnorm(95*n),n,95) \%*\% chol(Sigma))
 y <- 10 + x \%*\% beta + rnorm(n,0,10)
 
-res1 <- fusedlasso(x, y, lambda2=5)
-G1 = quadrupen:::chain_graph(ncol(x))
-res2 <- fusedlasso(x, y, lambda2=5, struct = G1)
-G2 <- igraph::make_ring(ncol(x)) |> igraph::as_adjacency_matrix(sparse = FALSE)
-res3 <- fusedlasso(x, y, lambda2=5, struct = G2)
-plot(res1)
-plot(res2)
-plot(res3)
+res <- fusedlasso(x, y, lambda2=5)
+G <- igraph::make_ring(ncol(x)) |> igraph::as_adjacency_matrix(sparse = FALSE)
+resG <- fusedlasso(x, y, lambda2=5, struct = G)
+plot(res)
+plot(resG)
 
-}
-\seealso{
-\code{\link{testData}}
 }
 \author{
 Original code by Holger Hoefling, refactoring by Julien Chiquet

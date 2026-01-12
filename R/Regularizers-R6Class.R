@@ -1,4 +1,4 @@
-#' Class "ElasticNet"
+#' Class "ElasticNetFit"
 #' 
 #' Class of object returned by the fitting function [elastic.net()]. Inherits fields
 #' and methods of [QuadrupenFit]
@@ -7,13 +7,13 @@
 #' 
 #' @export
 #' 
-ElasticNet <- R6::R6Class(
-  classname = "ElasticNet",
+ElasticNetFit <- R6::R6Class(
+  classname = "ElasticNetFit",
   inherit = QuadrupenFit,
   #' @field penalty character describing the regularizer/penalty
   active  = list(penalty = function(value) "elastic.net"),
   public  = list(
-    #' @description Initialize a [`ElasticNet`] model
+    #' @description Initialize a [`ElasticNetFit`] model
     #' @param data a [`DataModel`] object
     #' @param intercept a logical; should an intercept be included in the mode?
     #' @param regParam a list with two elements, a vector and a scalar, for the regularization
@@ -41,12 +41,12 @@ ElasticNet <- R6::R6Class(
 #' @seealso [QuadrupenFit], [bounded.reg()]
 #' 
 #' @export
-BoundedRegression <- R6::R6Class(
-  classname = "BoundedRegression",
+BoundedRegressionFit <- R6::R6Class(
+  classname = "BoundedRegressionFit",
   inherit = QuadrupenFit,
   #' @field penalty character describing the regularizer/penalty
   active  = list(penalty = function(value) "bounded.reg"),
-  #' @description Initialize a [`BoundedRegression`] model
+  #' @description Initialize a [`BoundedRegressionFit`] model
   #' @param data a [`DataModel`] object
   #' @param intercept a logical; should an intercept be included in the mode?
   #' @param regParam a list with two elements, a vector and a scalar, for the regularization
@@ -67,7 +67,7 @@ BoundedRegression <- R6::R6Class(
   )
 )
 
-#' Class "RidgeRegression"
+#' Class "RidgeRegressionFit"
 #' 
 #' Class of object returned by the fitting function [ridge()]. Inherits fields
 #' and methods of [QuadrupenFit].
@@ -75,13 +75,13 @@ BoundedRegression <- R6::R6Class(
 #' @seealso [QuadrupenFit], [ridge()]
 #' 
 #' @export
-RidgeRegression <- R6::R6Class(
-  classname = "RidgeRegression",
+RidgeRegressionFit <- R6::R6Class(
+  classname = "RidgeRegressionFit",
   inherit = QuadrupenFit,
   #' @field penalty character describing the regularizer/penalty
   active  = list(penalty = function(value) "ridge"),
   public  = list(
-    #' @description Initialize a [`RidgeRegression`] model
+    #' @description Initialize a [`RidgeRegressionFit`] model
     #' @param data a [`DataModel`] object
     #' @param intercept a logical; should an intercept be included in the mode?
     #' @param regParam a list with two elements, a vector and a scalar, for the regularization
@@ -94,7 +94,7 @@ RidgeRegression <- R6::R6Class(
 
 
 
-#' Class "FusedLasso"
+#' Class "FusedLassoFit"
 #' 
 #' Class of object returned by the fitting function [fusedlasso()]. Inherits fields
 #' and methods of [QuadrupenFit].
@@ -102,12 +102,12 @@ RidgeRegression <- R6::R6Class(
 #' @seealso [QuadrupenFit], [bounded.reg()]
 #' 
 #' @export
-FusedLasso <- R6::R6Class(
-  classname = "BoundedRegression",
+FusedLassoFit <- R6::R6Class(
+  classname = "FusedLassoFit",
   inherit = QuadrupenFit,
   #' @field penalty character describing the regularizer/penalty
   active  = list(penalty = function(value) "fused.lasso"),
-  #' @description Initialize a [`FusedLasso`] model
+  #' @description Initialize a [`FusedLassoFit`] model
   #' @param data a [`DataModel`] object
   #' @param intercept a logical; should an intercept be included in the mode?
   #' @param regParam a list with two elements, a vector and a scalar, for the regularization

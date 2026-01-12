@@ -94,6 +94,8 @@ when \code{'1'}, the bound derived in Grandvalet et al. is computed; when
 }
 \value{
 an object with class \link{QuadrupenFit}.
+
+an object with class \link{ElasticNetFit}, inheriting from \link{QuadrupenFit}.
 }
 \description{
 Adjust a linear model with lasso regularization, that is a
@@ -132,9 +134,6 @@ labels[beta != 0] <- "relevant"
 ## The solution path of the LASSO
 plot(lasso(x,y), label=labels)
 
-}
-\seealso{
-See also \link{QuadrupenFit},
 }
 \keyword{models,}
 \keyword{regression}

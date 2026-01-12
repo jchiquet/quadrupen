@@ -58,7 +58,7 @@ ctrl_fused_default <- function(d)
        accuracy      = 1e-6,
        monitor       = 0,
        fusioncheck   = "all", ## c("all","active","none", "naive", "huber")
-       usechol     = TRUE
+       usechol       = TRUE
   )
 
 ## ====================================================================

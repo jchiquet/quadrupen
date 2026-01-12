@@ -49,7 +49,7 @@
 #' "not-too-small" \eqn{\ell_\infty}{l-infinity} regularization, via
 #' a larger \code{'minratio'} argument.
 #'
-#' @seealso See also [QuadrupenFit].
+#' @return an object with class [BoundedRegressionFit], inheriting from [QuadrupenFit].
 #' 
 #' @keywords models, regression
 #'
@@ -108,7 +108,7 @@ bounded.reg <- function(x,
 
   ## ============================================
   ## INSTANTIATE THE PENALTY MODEL
-  myModel <- BoundedRegression$new(
+  myModel <- BoundedRegressionFit$new(
     data      = myData,
     intercept = intercept,
     regParam  = list(linf = lambda_linf, l2 = lambda2)

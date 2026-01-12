@@ -107,6 +107,8 @@ when \code{'1'}, the bound derived in Grandvalet et al. is computed; when
 }
 \value{
 an object with class \link{QuadrupenFit}.
+
+an object with class \link{BoundedRegressionFit}, inheriting from \link{QuadrupenFit}.
 }
 \description{
 Adjust a linear model penalized by a mixture of a (possibly
@@ -176,9 +178,6 @@ plot(bounded.reg(x,y,lambda2=0) , label=labels) ## a mess
 plot(bounded.reg(x,y,lambda2=10), label=labels) ## good guys are at the boundaries
 plot(bounded.reg(x,y,lambda2=10,struct=solve(Sigma)), label=labels) ## even better
 
-}
-\seealso{
-See also \link{QuadrupenFit}.
 }
 \keyword{models,}
 \keyword{regression}

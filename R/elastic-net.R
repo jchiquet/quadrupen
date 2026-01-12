@@ -92,7 +92,7 @@
 #' when `'1'`, the bound derived in Grandvalet et al. is computed; when 
 #' `'>1'`, the Fenchel duality gap is computed along the algorithm.
 #'
-#' @return an object with class [QuadrupenFit].
+#' @return an object with class [FusedLassoFit], inheriting from [QuadrupenFit].
 #'
 #' @details The optimized criterion is the following: \if{latex}{\deqn{%
 #' \hat{\beta}_{\lambda_1,\lambda_2} = \arg \min_{\beta} \frac{1}{2}
@@ -186,7 +186,7 @@ elastic.net <- function(x,
     lmax <- max(abs(myData$xty))
     lambda1 <- 10^seq(from=log10(lmax), to=log10(lmax*minratio), len=nlambda1)  
   }
-  myModel <- ElasticNet$new(
+  myModel <- ElasticNetFit$new(
     data      = myData,
     intercept = intercept,
     regParam  = list(l1 = lambda1, l2 = lambda2)
