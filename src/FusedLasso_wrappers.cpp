@@ -108,7 +108,7 @@ Rcpp::List FusedLasso_cpp(
   
   // degrees of freedom : number of non-zero values
   arma::vec df(beta.n_rows) ;
-  for (uword i; i<beta.n_rows; i++) {
+  for (uword i=0; i<beta.n_rows; i++) {
     rowvec row = beta.row(i).as_dense() ;
     vec val = nonzeros(unique(row.t())) ;
     df(i) = val.n_elem ;

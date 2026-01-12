@@ -45,7 +45,7 @@ Rcpp::List ridge_cpp(
   beta.resize(lambda.n_elem, X.n_cols);
   df.resize(lambda.n_elem, 1);
   
-  for (uword i; i<lambda.n_elem; i++) {
+  for (uword i=0; i<lambda.n_elem; i++) {
     // computing the structured ridge estimate
     beta.row(i) = trans(cinvV * diagmat(eta/(square(eta) + lambda(i))) * Uty) / normx;
     // computing the estimated degrees of freedom
