@@ -85,7 +85,7 @@ fusedlasso <- function(
   ## ============================================
   ## RECOVER LOW LEVEL CONFIGURATION
   ##
-  ctrl <- ctrl_fused_default(ncol(x))
+  ctrl <- optim_fused_default(ncol(x))
   ctrl$maxfeat <- maxfeat
   ctrl[names(control)] <- control # default overwritten by user specifications
   ctrl$beta0  <- beta0

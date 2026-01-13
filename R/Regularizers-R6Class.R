@@ -25,9 +25,10 @@ ElasticNetFit <- R6::R6Class(
   private = list(
     rescaled = function() { # Zhou and Hastie Rescaling
       factor <- ( 1 + private$tuning[[2]] )
+      mean_y <- ifelse(self$has_intercept, mean(private$data$y), 0)
       list(
         beta = factor * private$beta,
-        mu   = factor * private$mu - private$tuning[[2]] * private$data$mean_y
+        mu   = factor * private$mu - private$tuning[[2]] * mean_y
       )
     }
   )
@@ -59,9 +60,10 @@ BoundedRegressionFit <- R6::R6Class(
   private = list(
     rescaled = function() { # Zhou and Hastie Rescaling
       factor <- ( 1 + private$tuning[[2]] )
+      mean_y <- ifelse(self$has_intercept, mean(private$data$y), 0)
       list(
         beta = factor * private$beta,
-        mu   = factor * private$mu - private$tuning[[2]] * private$data$mean_y
+        mu   = factor * private$mu - private$tuning[[2]] * mean_y
       )
     }
   )

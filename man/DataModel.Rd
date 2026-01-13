@@ -17,17 +17,7 @@ Class for storing data and various fixed quantity
 
 \item{\code{S}}{SDP structuring matrix}
 
-\item{\code{wx}}{vector of regressor weights}
-
 \item{\code{wy}}{vector of observation weights}
-
-\item{\code{mean_X}}{vector of (normalized) regressor means}
-
-\item{\code{norm_X}}{vector of regressor norms}
-
-\item{\code{mean_y}}{mean of the response vector}
-
-\item{\code{norm_y}}{norm of the response vector}
 }
 \if{html}{\out{</div>}}
 }
@@ -37,10 +27,6 @@ Class for storing data and various fixed quantity
 \item{\code{d}}{number of regressor}
 
 \item{\code{n}}{sample size}
-
-\item{\code{is_centered}}{logical indicating if the data has been centered}
-
-\item{\code{is_scaled}}{logical indicating if the data has been scaled}
 
 \item{\code{sparse_encoding}}{logical indicating if the matrix of regressor is sparsely encoded}
 
@@ -52,7 +38,6 @@ Class for storing data and various fixed quantity
 \subsection{Public methods}{
 \itemize{
 \item \href{#method-DataModel-new}{\code{DataModel$new()}}
-\item \href{#method-DataModel-standardize}{\code{DataModel$standardize()}}
 \item \href{#method-DataModel-CholStruct}{\code{DataModel$CholStruct()}}
 \item \href{#method-DataModel-clone}{\code{DataModel$clone()}}
 }
@@ -67,7 +52,6 @@ constructor for DataModel
   covariates,
   outcome,
   cov_struct,
-  cov_weights = rep(1, ncol(covariates)),
   obs_weights = rep(1, length(outcome)),
   check_args = TRUE
 )}\if{html}{\out{</div>}}
@@ -82,31 +66,11 @@ constructor for DataModel
 
 \item{\code{cov_struct}}{sdp matrix structuring the covariates/regressors}
 
-\item{\code{cov_weights}}{vector of covariates/regressors weights}
-
 \item{\code{obs_weights}}{vector of observations weights}
 
 \item{\code{check_args}}{logical, should args be check at initialization?}
-}
-\if{html}{\out{</div>}}
-}
-}
-\if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-DataModel-standardize"></a>}}
-\if{latex}{\out{\hypertarget{method-DataModel-standardize}{}}}
-\subsection{Method \code{standardize()}}{
-Perform standardization of the data an store the auxiliaries
-quantities
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{DataModel$standardize(intercept, normalize)}\if{html}{\out{</div>}}
-}
 
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{intercept}}{logical, is there an intercept in the model?}
-
-\item{\code{normalize}}{logical, shall the regressor be standardized?}
+\item{\code{cov_weights}}{vector of covariates/regressors weights}
 }
 \if{html}{\out{</div>}}
 }

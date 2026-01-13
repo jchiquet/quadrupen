@@ -20,7 +20,7 @@ Rcpp::List FusedLasso_cpp(
   const SEXP &R_XMat           = dataModel["X"]  ; // design matrix
   std::vector<double> y        = dataModel["y"]  ; // response vector
   List R_graph                 = dataModel["S"]  ; // Structuring matrix
-  std::vector<double> penscale = dataModel["wx"] ;  // penalty weights
+  std::vector<double> penscale = dataModel["wx"] ; // penalty weights
   std::vector<double> wObs     = dataModel["wy"] ; // responses to predictors vector
   const arma::vec &normx       = dataModel["norm_X"] ; // norm of the predictors
 

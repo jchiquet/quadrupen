@@ -13,15 +13,11 @@ test_that("enet_quad2elasticnet", {
     enet.quadru <- elastic.net(x,y,intercept=intercept,normalize=normalize,
                                lambda1=lambda1, lambda2=lambda2, debiasing = ifelse(naive, "none", "standard"))
 
-    quad <- list(coef   = as.matrix(enet.quadru$coefficients),
-                 meanx  = enet.quadru$dataModel$mean_X * enet.quadru$dataModel$norm_X,
-                 normx  = enet.quadru$dataModel$norm_X)
+    quad <- as.matrix(enet.quadru$coefficients)
 
-    enet <- list(coef   = predict(enet.larsen, type="coefficients",naive=naive)$coefficients[-iols,],
-                 meanx  = enet.larsen$meanx,
-                 normx  = enet.larsen$normx)
+    enet <- predict(enet.larsen, type="coefficients",naive=naive)$coefficients[-iols,]
 
-    return(list(quad=quad, enet = enet))
+    return(list(quad = quad, enet = enet))
   }
 
   ## PROSTATE DATA SET

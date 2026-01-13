@@ -85,8 +85,7 @@ QuadrupenFit <- R6::R6Class(
     optim_config = function(value) {private$control},
     #' @field fitted Matrix of fitted values, each column corresponding to a value of \code{lambda1}.
     fitted = function(value) {
-      Xs <- Matrix::colScale(private$data$X, private$data$norm_X)
-      res <- sweep(tcrossprod(Xs, private$beta),2L,-private$mu,check.margin=FALSE)
+      res <- sweep(tcrossprod(private$data$X, private$beta),2L,-private$mu,check.margin=FALSE)
       res
     },
     #' @field coefficients Matrix (class `"dgCMatrix"`) of
@@ -137,10 +136,10 @@ QuadrupenFit <- R6::R6Class(
       stopifnot("All regularization parameters must be positive." = all(unlist(regParam) >= 0))
       stopifnot("The first entry of regParam must be sorted in decreasing order." =
                   !is.unsorted(rev(regParam[[1]])))
-      if (length(regParam) > 1)
-        stopifnot("The second entry of regParam must be a scalar (cannot be a vector)." = 
+      stopifnot("The second entry of regParam must be a scalar (cannot be a vector)." = 
                   (length(regParam[[2]]) == 1 & inherits(regParam[[2]], "numeric")))
-
+      stopifnot("minratio must be non negative." = regParam$min_ratio > 0)
+      stopifnot("nlambda1 must be non negative." = regParam$n_lambda1 > 0)
       private$data      <- data
       private$intercept <- intercept
       private$tuning    <- regParam
@@ -159,7 +158,7 @@ QuadrupenFit <- R6::R6Class(
           format(max(self$major_tuning), digits = 3)," to ",
           format(min(self$major_tuning), digits = 3),"\n", 
           "- ", names(private$tuning)[[2]], " regularization: ",
-          self$minor_tuning, "\n", sep=""
+          self$minor_tuning, "\n", sep = ""
         )
       invisible(self)
     },
@@ -172,11 +171,11 @@ QuadrupenFit <- R6::R6Class(
       ## C++ CALL OPTIMIZER
       ## 
       if (control$timer) {cpp.start <- proc.time()}
-      out <- private$optimizer(private$data, private$tuning, control)
+      out <- private$optimizer(private$data, private$intercept, private$tuning, control)
       timer <- ifelse(control$timer, (proc.time() - cpp.start)[3], NA)
       ## END OF CALL
       ## ======================================================
-      private$tuning      <- out$tuning_param
+      private$tuning[[1]] <- out$tuning_param[[1]]
       private$mu          <- drop(out$mu)
       private$beta        <- out$beta
       private$df          <- drop(out$df)
@@ -239,7 +238,7 @@ QuadrupenFit <- R6::R6Class(
       if (is.null(newx)) {
         res <- self$fitted[ , index, drop = FALSE]
       } else {
-        res <- sweep(newx %*% t(private$beta[index, , drop = FALSE]), 2L, -private$mu[s])
+        res <- sweep(newx %*% t(private$beta[index, , drop = FALSE]), 2L, -private$mu[index])
       }
       res
     },
@@ -314,16 +313,12 @@ QuadrupenFit <- R6::R6Class(
 
         ## Same data splitting is kept for varying lambda2 values
         CVData <- self$dataModel$splitTrainTest(K, folds)
-        for (fold in 1:K) {
-          CVData[[fold]]$trainData$standardize(self$dataModel$is_centered, self$dataModel$is_scaled)
-          CVData[[fold]]$trainData$getSufficientStat()
-        }
 
         ## CV err for a fixed couple fold/lambda2
         one_fold <- function(fold, lambda2) {
           if (verbose & (fold == 1)) cat(round(lambda2, 3),"\t")
           regParam[[2]] <- lambda2
-          out <- private$optimizer(CVData[[fold]]$trainData, regParam, control)
+          out <- private$optimizer(CVData[[fold]]$trainData, private$intercept, regParam, control)
           if (control$rescaling != "none"){
             res <- private$rescaled()
             out$mu   <- res$mu
@@ -337,7 +332,6 @@ QuadrupenFit <- R6::R6Class(
           }
           err
         }
-
         err <- do.call(rbind, 
           parallel::mcmapply(FUN = one_fold, fold = fold_id, lambda2 = lambda2_vec, 
                    mc.cores = cores,
@@ -429,7 +423,7 @@ QuadrupenFit <- R6::R6Class(
         select <- Matrix(0, nlambda1, self$nvar)
         subsamples_ok <- 0
         for (s in 1:length(subsets)) {
-          active <- private$optimizer(SubsampledData[[subsets[s]]], private$tuning, control)$active
+          active <- private$optimizer(SubsampledData[[subsets[s]]], private$intercept, private$tuning, control)$active
           if (nrow(active) == nlambda1) {
             subsamples_ok <- subsamples_ok + 1
             select <- select + active
@@ -603,7 +597,10 @@ QuadrupenFit <- R6::R6Class(
       beta  <- as.matrix(private$beta[, nzeros, drop = FALSE])
       rownames(beta) <- NULL ## avoid warning message in ggplot2
       
-      if (standardize) beta <- scale(beta, FALSE, 1/private$data$norm_X[nzeros])
+      if (standardize) {
+        normx <- sqrt(drop(colSums(x^2)) - nrow(x) * colMeans(x)^2)
+        beta <- scale(beta, FALSE, 1/normx[nzeros])
+      }
 
       xv <- switch(xvar,
         "fraction" = apply(abs(beta),1,sum)/max(apply(abs(beta),1,sum)),

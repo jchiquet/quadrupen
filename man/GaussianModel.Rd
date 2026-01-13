@@ -41,7 +41,6 @@ Class for storing data and various fixed quantity
 <ul>
 <li><span class="pkg-link" data-pkg="quadrupen" data-topic="DataModel" data-id="CholStruct"><a href='../../quadrupen/html/DataModel.html#method-DataModel-CholStruct'><code>quadrupen::DataModel$CholStruct()</code></a></span></li>
 <li><span class="pkg-link" data-pkg="quadrupen" data-topic="DataModel" data-id="initialize"><a href='../../quadrupen/html/DataModel.html#method-DataModel-initialize'><code>quadrupen::DataModel$initialize()</code></a></span></li>
-<li><span class="pkg-link" data-pkg="quadrupen" data-topic="DataModel" data-id="standardize"><a href='../../quadrupen/html/DataModel.html#method-DataModel-standardize'><code>quadrupen::DataModel$standardize()</code></a></span></li>
 </ul>
 </details>
 }}
@@ -124,7 +123,7 @@ a function splitting data into subsamples
 
 \item{\code{subsamples}}{list with vector of subsamples (optional)}
 
-\item{\code{weakness}}{coefficient for randmonly reweighting the regressor, default to 1}
+\item{\code{weakness}}{coefficient for randonly reweighting the regressor, default to 1}
 }
 \if{html}{\out{</div>}}
 }
