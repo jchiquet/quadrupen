@@ -247,8 +247,6 @@ R6 Classes used as fields of the main Class Quadrupen fit
 
 - [`DataModel`](https://jchiquet.github.io/quadrupen/reference/DataModel.md)
   : Data Class
-- [`GaussianModel`](https://jchiquet.github.io/quadrupen/reference/GaussianModel.md)
-  : Gaussian Data Class
 - [`CrossValidation`](https://jchiquet.github.io/quadrupen/reference/CrossValidation.md)
   : Class CrossValidation
 - [`StabilityPath`](https://jchiquet.github.io/quadrupen/reference/StabilityPath.md)

@@ -157,5 +157,5 @@ labels <- rep("irrelevant", length(beta))
 labels[beta != 0] <- "relevant"
 ## The solution path of the LASSO
 plot(lasso(x,y), label=labels)
-
+#> Error in h(simpleError(msg, call)): error in evaluating the argument 'x' in selecting a method for function 'drop': error in evaluating the argument 'x' in selecting a method for function 'colSums': object 'x' not found
 ```

@@ -56,28 +56,8 @@
 <dd><p>SDP structuring matrix</p></dd>
 
 
-<dt><code>wx</code></dt>
-<dd><p>vector of regressor weights</p></dd>
-
-
 <dt><code>wy</code></dt>
 <dd><p>vector of observation weights</p></dd>
-
-
-<dt><code>mean_X</code></dt>
-<dd><p>vector of (normalized) regressor means</p></dd>
-
-
-<dt><code>norm_X</code></dt>
-<dd><p>vector of regressor norms</p></dd>
-
-
-<dt><code>mean_y</code></dt>
-<dd><p>mean of the response vector</p></dd>
-
-
-<dt><code>norm_y</code></dt>
-<dd><p>norm of the response vector</p></dd>
 
 
 </dl><p></p></div>
@@ -90,14 +70,6 @@
 
 <dt><code>n</code></dt>
 <dd><p>sample size</p></dd>
-
-
-<dt><code>is_centered</code></dt>
-<dd><p>logical indicating if the data has been centered</p></dd>
-
-
-<dt><code>is_scaled</code></dt>
-<dd><p>logical indicating if the data has been scaled</p></dd>
 
 
 <dt><code>sparse_encoding</code></dt>
@@ -117,8 +89,9 @@
 <h3 id="public-methods">Public methods<a class="anchor" aria-label="anchor" href="#public-methods"></a></h3>
 
 <ul><li><p><a href="#method-DataModel-new"><code>DataModel$new()</code></a></p></li>
-<li><p><a href="#method-DataModel-standardize"><code>DataModel$standardize()</code></a></p></li>
 <li><p><a href="#method-DataModel-CholStruct"><code>DataModel$CholStruct()</code></a></p></li>
+<li><p><a href="#method-DataModel-splitTrainTest"><code>DataModel$splitTrainTest()</code></a></p></li>
+<li><p><a href="#method-DataModel-splitSubSamples"><code>DataModel$splitSubSamples()</code></a></p></li>
 <li><p><a href="#method-DataModel-clone"><code>DataModel$clone()</code></a></p></li>
 </ul></div><p></p><hr><a id="method-DataModel-new"></a><div class="section">
 <h3 id="method-new-">Method <code>new()</code><a class="anchor" aria-label="anchor" href="#method-new-"></a></h3>
@@ -128,7 +101,6 @@
 <span>  <span class="va">covariates</span>,</span>
 <span>  <span class="va">outcome</span>,</span>
 <span>  <span class="va">cov_struct</span>,</span>
-<span>  cov_weights <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">ncol</a></span><span class="op">(</span><span class="va">covariates</span><span class="op">)</span><span class="op">)</span>,</span>
 <span>  obs_weights <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">outcome</span><span class="op">)</span><span class="op">)</span>,</span>
 <span>  check_args <span class="op">=</span> <span class="cn">TRUE</span></span>
 <span><span class="op">)</span></span></code></pre></div><p></p></div>
@@ -148,10 +120,6 @@
 <dd><p>sdp matrix structuring the covariates/regressors</p></dd>
 
 
-<dt><code>cov_weights</code></dt>
-<dd><p>vector of covariates/regressors weights</p></dd>
-
-
 <dt><code>obs_weights</code></dt>
 <dd><p>vector of observations weights</p></dd>
 
@@ -160,25 +128,8 @@
 <dd><p>logical, should args be check at initialization?</p></dd>
 
 
-</dl><p></p></div>
-</div>
-
-</div><p></p><hr><a id="method-DataModel-standardize"></a><div class="section">
-<h3 id="method-standardize-">Method <code>standardize()</code><a class="anchor" aria-label="anchor" href="#method-standardize-"></a></h3>
-<p>Perform standardization of the data an store the auxiliaries
-quantities</p><div class="section">
-<h4 id="usage-1">Usage<a class="anchor" aria-label="anchor" href="#usage-1"></a></h4>
-<p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">DataModel</span><span class="op">$</span><span class="fu">standardize</span><span class="op">(</span><span class="va">intercept</span>, <span class="va">normalize</span><span class="op">)</span></span></code></pre></div><p></p></div>
-</div>
-
-<div class="section">
-<h4 id="arguments-1">Arguments<a class="anchor" aria-label="anchor" href="#arguments-1"></a></h4>
-<p></p><div class="arguments"><dl><dt><code>intercept</code></dt>
-<dd><p>logical, is there an intercept in the model?</p></dd>
-
-
-<dt><code>normalize</code></dt>
-<dd><p>logical, shall the regressor be standardized?</p></dd>
+<dt><code>cov_weights</code></dt>
+<dd><p>vector of covariates/regressors weights</p></dd>
 
 
 </dl><p></p></div>
@@ -187,20 +138,85 @@ quantities</p><div class="section">
 </div><p></p><hr><a id="method-DataModel-CholStruct"></a><div class="section">
 <h3 id="method-cholstruct-">Method <code>CholStruct()</code><a class="anchor" aria-label="anchor" href="#method-cholstruct-"></a></h3>
 <p>Compute Cholesky factorization of the Structuring matrix</p><div class="section">
-<h4 id="usage-2">Usage<a class="anchor" aria-label="anchor" href="#usage-2"></a></h4>
+<h4 id="usage-1">Usage<a class="anchor" aria-label="anchor" href="#usage-1"></a></h4>
 <p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">DataModel</span><span class="op">$</span><span class="fu">CholStruct</span><span class="op">(</span><span class="op">)</span></span></code></pre></div><p></p></div>
 </div>
 
 
-</div><p></p><hr><a id="method-DataModel-clone"></a><div class="section">
-<h3 id="method-clone-">Method <code>clone()</code><a class="anchor" aria-label="anchor" href="#method-clone-"></a></h3>
-<p>The objects of this class are cloneable with this method.</p><div class="section">
+</div><p></p><hr><a id="method-DataModel-splitTrainTest"></a><div class="section">
+<h3 id="method-splittraintest-">Method <code>splitTrainTest()</code><a class="anchor" aria-label="anchor" href="#method-splittraintest-"></a></h3>
+<p>a function splitting the data into train and test folds</p><div class="section">
+<h4 id="usage-2">Usage<a class="anchor" aria-label="anchor" href="#usage-2"></a></h4>
+<p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">DataModel</span><span class="op">$</span><span class="fu">splitTrainTest</span><span class="op">(</span></span>
+<span>  nfolds <span class="op">=</span> <span class="fl">10</span>,</span>
+<span>  folds <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/split.html" class="external-link">split</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/sample.html" class="external-link">sample</a></span><span class="op">(</span><span class="fl">1</span><span class="op">:</span><span class="va">self</span><span class="op">$</span><span class="va">n</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fl">1</span><span class="op">:</span><span class="va">nfolds</span>, length <span class="op">=</span> <span class="va">self</span><span class="op">$</span><span class="va">n</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="op">)</span></span></code></pre></div><p></p></div>
+</div>
+
+<div class="section">
+<h4 id="arguments-1">Arguments<a class="anchor" aria-label="anchor" href="#arguments-1"></a></h4>
+<p></p><div class="arguments"><dl><dt><code>nfolds</code></dt>
+<dd><p>the number of folds</p></dd>
+
+
+<dt><code>folds</code></dt>
+<dd><p>a list of vectors describing the folds (optional)</p></dd>
+
+
+</dl><p></p></div>
+</div>
+<div class="section">
+<h4 id="returns">Returns<a class="anchor" aria-label="anchor" href="#returns"></a></h4>
+<p>a list with train and test data and id.</p>
+</div>
+
+</div><p></p><hr><a id="method-DataModel-splitSubSamples"></a><div class="section">
+<h3 id="method-splitsubsamples-">Method <code>splitSubSamples()</code><a class="anchor" aria-label="anchor" href="#method-splitsubsamples-"></a></h3>
+<p>a function splitting data into subsamples</p><div class="section">
 <h4 id="usage-3">Usage<a class="anchor" aria-label="anchor" href="#usage-3"></a></h4>
-<p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">DataModel</span><span class="op">$</span><span class="fu">clone</span><span class="op">(</span>deep <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></code></pre></div><p></p></div>
+<p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">DataModel</span><span class="op">$</span><span class="fu">splitSubSamples</span><span class="op">(</span></span>
+<span>  n_subsamples <span class="op">=</span> <span class="fl">50</span>,</span>
+<span>  subsample_size <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">floor</a></span><span class="op">(</span><span class="va">self</span><span class="op">$</span><span class="va">n</span><span class="op">/</span><span class="fl">2</span><span class="op">)</span>,</span>
+<span>  subsamples <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/lapply.html" class="external-link">replicate</a></span><span class="op">(</span><span class="va">n_subsamples</span>, <span class="fu"><a href="https://rdrr.io/r/base/sample.html" class="external-link">sample</a></span><span class="op">(</span><span class="fl">1</span><span class="op">:</span><span class="va">self</span><span class="op">$</span><span class="va">n</span>, <span class="va">subsample_size</span><span class="op">)</span>, simplify <span class="op">=</span></span>
+<span>    <span class="cn">FALSE</span><span class="op">)</span>,</span>
+<span>  weakness <span class="op">=</span> <span class="fl">1</span></span>
+<span><span class="op">)</span></span></code></pre></div><p></p></div>
 </div>
 
 <div class="section">
 <h4 id="arguments-2">Arguments<a class="anchor" aria-label="anchor" href="#arguments-2"></a></h4>
+<p></p><div class="arguments"><dl><dt><code>n_subsamples</code></dt>
+<dd><p>the number of subsamples</p></dd>
+
+
+<dt><code>subsample_size</code></dt>
+<dd><p>the subsample size</p></dd>
+
+
+<dt><code>subsamples</code></dt>
+<dd><p>list with vector of subsamples (optional)</p></dd>
+
+
+<dt><code>weakness</code></dt>
+<dd><p>coefficient for randonly reweighting the regressor, default to 1</p></dd>
+
+
+</dl><p></p></div>
+</div>
+<div class="section">
+<h4 id="returns-1">Returns<a class="anchor" aria-label="anchor" href="#returns-1"></a></h4>
+<p>a list of DataModel, resampling of the original</p>
+</div>
+
+</div><p></p><hr><a id="method-DataModel-clone"></a><div class="section">
+<h3 id="method-clone-">Method <code>clone()</code><a class="anchor" aria-label="anchor" href="#method-clone-"></a></h3>
+<p>The objects of this class are cloneable with this method.</p><div class="section">
+<h4 id="usage-4">Usage<a class="anchor" aria-label="anchor" href="#usage-4"></a></h4>
+<p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">DataModel</span><span class="op">$</span><span class="fu">clone</span><span class="op">(</span>deep <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></code></pre></div><p></p></div>
+</div>
+
+<div class="section">
+<h4 id="arguments-3">Arguments<a class="anchor" aria-label="anchor" href="#arguments-3"></a></h4>
 <p></p><div class="arguments"><dl><dt><code>deep</code></dt>
 <dd><p>Whether to make a deep clone.</p></dd>
 

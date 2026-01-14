@@ -20,29 +20,9 @@ Class for storing data and various fixed quantity
 
   SDP structuring matrix
 
-- `wx`:
-
-  vector of regressor weights
-
 - `wy`:
 
   vector of observation weights
-
-- `mean_X`:
-
-  vector of (normalized) regressor means
-
-- `norm_X`:
-
-  vector of regressor norms
-
-- `mean_y`:
-
-  mean of the response vector
-
-- `norm_y`:
-
-  norm of the response vector
 
 ## Active bindings
 
@@ -53,14 +33,6 @@ Class for storing data and various fixed quantity
 - `n`:
 
   sample size
-
-- `is_centered`:
-
-  logical indicating if the data has been centered
-
-- `is_scaled`:
-
-  logical indicating if the data has been scaled
 
 - `sparse_encoding`:
 
@@ -76,9 +48,11 @@ Class for storing data and various fixed quantity
 
 - [`DataModel$new()`](#method-DataModel-new)
 
-- [`DataModel$standardize()`](#method-DataModel-standardize)
-
 - [`DataModel$CholStruct()`](#method-DataModel-CholStruct)
+
+- [`DataModel$splitTrainTest()`](#method-DataModel-splitTrainTest)
+
+- [`DataModel$splitSubSamples()`](#method-DataModel-splitSubSamples)
 
 - [`DataModel$clone()`](#method-DataModel-clone)
 
@@ -94,7 +68,6 @@ constructor for DataModel
       covariates,
       outcome,
       cov_struct,
-      cov_weights = rep(1, ncol(covariates)),
       obs_weights = rep(1, length(outcome)),
       check_args = TRUE
     )
@@ -113,10 +86,6 @@ constructor for DataModel
 
   sdp matrix structuring the covariates/regressors
 
-- `cov_weights`:
-
-  vector of covariates/regressors weights
-
 - `obs_weights`:
 
   vector of observations weights
@@ -125,25 +94,9 @@ constructor for DataModel
 
   logical, should args be check at initialization?
 
-------------------------------------------------------------------------
+- `cov_weights`:
 
-### Method `standardize()`
-
-Perform standardization of the data an store the auxiliaries quantities
-
-#### Usage
-
-    DataModel$standardize(intercept, normalize)
-
-#### Arguments
-
-- `intercept`:
-
-  logical, is there an intercept in the model?
-
-- `normalize`:
-
-  logical, shall the regressor be standardized?
+  vector of covariates/regressors weights
 
 ------------------------------------------------------------------------
 
@@ -154,6 +107,71 @@ Compute Cholesky factorization of the Structuring matrix
 #### Usage
 
     DataModel$CholStruct()
+
+------------------------------------------------------------------------
+
+### Method `splitTrainTest()`
+
+a function splitting the data into train and test folds
+
+#### Usage
+
+    DataModel$splitTrainTest(
+      nfolds = 10,
+      folds = split(sample(1:self$n), rep(1:nfolds, length = self$n))
+    )
+
+#### Arguments
+
+- `nfolds`:
+
+  the number of folds
+
+- `folds`:
+
+  a list of vectors describing the folds (optional)
+
+#### Returns
+
+a list with train and test data and id.
+
+------------------------------------------------------------------------
+
+### Method `splitSubSamples()`
+
+a function splitting data into subsamples
+
+#### Usage
+
+    DataModel$splitSubSamples(
+      n_subsamples = 50,
+      subsample_size = floor(self$n/2),
+      subsamples = replicate(n_subsamples, sample(1:self$n, subsample_size), simplify =
+        FALSE),
+      weakness = 1
+    )
+
+#### Arguments
+
+- `n_subsamples`:
+
+  the number of subsamples
+
+- `subsample_size`:
+
+  the subsample size
+
+- `subsamples`:
+
+  list with vector of subsamples (optional)
+
+- `weakness`:
+
+  coefficient for randonly reweighting the regressor, default to 1
+
+#### Returns
+
+a list of DataModel, resampling of the original
 
 ------------------------------------------------------------------------
 

@@ -153,7 +153,7 @@ y <- 10 + x %*% beta + rnorm(n,0,10)
 labels <- rep("irrelevant", length(beta))
 labels[beta != 0] <- "relevant"
 plot(ridge(x,y) , label=labels) ## a mess
-
+#> Error in h(simpleError(msg, call)): error in evaluating the argument 'x' in selecting a method for function 'drop': error in evaluating the argument 'x' in selecting a method for function 'colSums': object 'x' not found
 plot(ridge(x,y, struct=solve(Sigma)), label=labels) ## even better
-
+#> Error in h(simpleError(msg, call)): error in evaluating the argument 'x' in selecting a method for function 'drop': error in evaluating the argument 'x' in selecting a method for function 'colSums': object 'x' not found
 ```
