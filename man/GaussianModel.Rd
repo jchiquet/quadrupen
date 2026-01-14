@@ -9,13 +9,6 @@ Class for storing data and various fixed quantity
 \section{Super class}{
 \code{\link[quadrupen:DataModel]{quadrupen::DataModel}} -> \code{GaussianModel}
 }
-\section{Public fields}{
-\if{html}{\out{<div class="r6-fields">}}
-\describe{
-\item{\code{xty}}{sufficient statistics for the Gaussian Data}
-}
-\if{html}{\out{</div>}}
-}
 \section{Active bindings}{
 \if{html}{\out{<div class="r6-active-bindings">}}
 \describe{
@@ -28,9 +21,6 @@ Class for storing data and various fixed quantity
 \section{Methods}{
 \subsection{Public methods}{
 \itemize{
-\item \href{#method-GaussianModel-getSufficientStat}{\code{GaussianModel$getSufficientStat()}}
-\item \href{#method-GaussianModel-show}{\code{GaussianModel$show()}}
-\item \href{#method-GaussianModel-print}{\code{GaussianModel$print()}}
 \item \href{#method-GaussianModel-splitTrainTest}{\code{GaussianModel$splitTrainTest()}}
 \item \href{#method-GaussianModel-splitSubSamples}{\code{GaussianModel$splitSubSamples()}}
 \item \href{#method-GaussianModel-clone}{\code{GaussianModel$clone()}}
@@ -44,36 +34,6 @@ Class for storing data and various fixed quantity
 </ul>
 </details>
 }}
-\if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-GaussianModel-getSufficientStat"></a>}}
-\if{latex}{\out{\hypertarget{method-GaussianModel-getSufficientStat}{}}}
-\subsection{Method \code{getSufficientStat()}}{
-compute sufficient statistics for the Gaussian Data
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{GaussianModel$getSufficientStat()}\if{html}{\out{</div>}}
-}
-
-}
-\if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-GaussianModel-show"></a>}}
-\if{latex}{\out{\hypertarget{method-GaussianModel-show}{}}}
-\subsection{Method \code{show()}}{
-a print method
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{GaussianModel$show()}\if{html}{\out{</div>}}
-}
-
-}
-\if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-GaussianModel-print"></a>}}
-\if{latex}{\out{\hypertarget{method-GaussianModel-print}{}}}
-\subsection{Method \code{print()}}{
-User friendly print method
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{GaussianModel$print()}\if{html}{\out{</div>}}
-}
-
-}
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-GaussianModel-splitTrainTest"></a>}}
 \if{latex}{\out{\hypertarget{method-GaussianModel-splitTrainTest}{}}}

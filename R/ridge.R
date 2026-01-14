@@ -68,31 +68,34 @@ ridge <- function(x,
                   control    = list()) {
 
   ## ============================================
-  ## INSTANTIATE THE DATA MODEL
-  myData <- GaussianModel$new(
-    covariates  = x,
-    outcome     = y,
-    cov_struct  = struct,
-    cov_weights = penscale
-  )
-  myData$CholStruct()
-  myData$standardize(intercept, normalize)
-  myData$getSufficientStat()
-
-  ## ============================================
-  ## INSTANTIATE THE PENALTY MODEL
-  if (is.null(lambda)) {
-    stopifnot("minratio must be non negative." = minratio > 0)
-    lambda <- 10^seq(from=log10(lambda_max), to=log10(lambda_max*minratio), len=nlambda)
-  }
-  myModel <- RidgeRegressionFit$new(myData, intercept, list(l2 = lambda, l1 = 0))
-  
-  ## ============================================
   ## RECOVER LOW LEVEL OPTIONS
+  ## 
   ctrl <- list(verbose = 1, # default control options
                timer   =  FALSE)
   ctrl[names(control)] <- control # overwritten by user specifications
-  if (ctrl$timer) {r.start <- proc.time()}
+  ctrl$normalize <- normalize
+  
+  ## ============================================
+  ## INSTANTIATE THE DATA MODEL
+  ## 
+  myData <- GaussianModel$new(
+    covariates  = as.matrix(x),
+    outcome     = y,
+    cov_struct  = struct
+  )
+  myData$CholStruct()
+
+  ## ============================================
+  ## INSTANTIATE THE PENALTY MODEL
+  ## 
+  myModel <- RidgeRegressionFit$new(
+    data      = myData,
+    intercept = intercept,
+    regParam  = list(l2 = lambda, l1 = 0, 
+                     l2_weights = penscale, 
+                     min_ratio = minratio, n_lambda = nlambda,
+                     lambda_max = lambda_max)
+  )
 
   ## ============================================
   ## FIT THE MODEL WITH ACTIVE SET ALGORITHM

@@ -25,15 +25,16 @@ BEGIN_RCPP
 END_RCPP
 }
 // bounded_reg_cpp
-Rcpp::List bounded_reg_cpp(const Environment& dataModel, const List& tuningParam, const List& control);
-RcppExport SEXP _quadrupen_bounded_reg_cpp(SEXP dataModelSEXP, SEXP tuningParamSEXP, SEXP controlSEXP) {
+Rcpp::List bounded_reg_cpp(const Environment& dataModel, const bool& intercept, const List& regParam, const List& controlFit);
+RcppExport SEXP _quadrupen_bounded_reg_cpp(SEXP dataModelSEXP, SEXP interceptSEXP, SEXP regParamSEXP, SEXP controlFitSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< const Environment& >::type dataModel(dataModelSEXP);
-    Rcpp::traits::input_parameter< const List& >::type tuningParam(tuningParamSEXP);
-    Rcpp::traits::input_parameter< const List& >::type control(controlSEXP);
-    rcpp_result_gen = Rcpp::wrap(bounded_reg_cpp(dataModel, tuningParam, control));
+    Rcpp::traits::input_parameter< const bool& >::type intercept(interceptSEXP);
+    Rcpp::traits::input_parameter< const List& >::type regParam(regParamSEXP);
+    Rcpp::traits::input_parameter< const List& >::type controlFit(controlFitSEXP);
+    rcpp_result_gen = Rcpp::wrap(bounded_reg_cpp(dataModel, intercept, regParam, controlFit));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -52,24 +53,25 @@ BEGIN_RCPP
 END_RCPP
 }
 // ridge_cpp
-Rcpp::List ridge_cpp(const Environment& dataModel, const List& tuningParam, const List& control);
-RcppExport SEXP _quadrupen_ridge_cpp(SEXP dataModelSEXP, SEXP tuningParamSEXP, SEXP controlSEXP) {
+Rcpp::List ridge_cpp(const Environment& dataModel, const bool& intercept, const List& regParam, const List& controlFit);
+RcppExport SEXP _quadrupen_ridge_cpp(SEXP dataModelSEXP, SEXP interceptSEXP, SEXP regParamSEXP, SEXP controlFitSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< const Environment& >::type dataModel(dataModelSEXP);
-    Rcpp::traits::input_parameter< const List& >::type tuningParam(tuningParamSEXP);
-    Rcpp::traits::input_parameter< const List& >::type control(controlSEXP);
-    rcpp_result_gen = Rcpp::wrap(ridge_cpp(dataModel, tuningParam, control));
+    Rcpp::traits::input_parameter< const bool& >::type intercept(interceptSEXP);
+    Rcpp::traits::input_parameter< const List& >::type regParam(regParamSEXP);
+    Rcpp::traits::input_parameter< const List& >::type controlFit(controlFitSEXP);
+    rcpp_result_gen = Rcpp::wrap(ridge_cpp(dataModel, intercept, regParam, controlFit));
     return rcpp_result_gen;
 END_RCPP
 }
 
 static const R_CallMethodDef CallEntries[] = {
     {"_quadrupen_FusedLasso_cpp", (DL_FUNC) &_quadrupen_FusedLasso_cpp, 3},
-    {"_quadrupen_bounded_reg_cpp", (DL_FUNC) &_quadrupen_bounded_reg_cpp, 3},
+    {"_quadrupen_bounded_reg_cpp", (DL_FUNC) &_quadrupen_bounded_reg_cpp, 4},
     {"_quadrupen_elastic_net_cpp", (DL_FUNC) &_quadrupen_elastic_net_cpp, 4},
-    {"_quadrupen_ridge_cpp", (DL_FUNC) &_quadrupen_ridge_cpp, 3},
+    {"_quadrupen_ridge_cpp", (DL_FUNC) &_quadrupen_ridge_cpp, 4},
     {NULL, NULL, 0}
 };
 

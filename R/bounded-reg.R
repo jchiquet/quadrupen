@@ -88,48 +88,47 @@ bounded.reg <- function(x,
                         minratio  = ifelse(nrow(x) <= ncol(x), 1e-2, 1e-4),
                         maxfeat   = ifelse(lambda2 < 1e-2, min(nrow(x),ncol(x)), min(4*nrow(x),ncol(x))),
                         control   = list()) {
+
+  ## ============================================
+  ## RECOVER LOW LEVEL OPTIONS
+  ## 
+  ctrl <- optim_breg_default(ncol(x))
+  ctrl$maxfeat <- maxfeat
+  if (!is.null(control$method)) if (control$method != "quadra") ctrl$threshold <- 1e-2
+  ctrl[names(control)] <- control # default overwritten by user specifications
+  ctrl$method <- switch(ctrl$method, quadra = 0, pathwise = 1, fista = 2, 0)
+  ctrl$rescaling <- match.arg(debiasing)
+  ctrl$normalize <- normalize
   
   ## ============================================
   ## INSTANTIATE THE DATA MODEL
+  ## 
   myData <- GaussianModel$new(
     covariates  = x,
     outcome     = y,
-    cov_struct  = struct,
-    cov_weights = penscale
+    cov_struct  = struct
   )
-  myData$standardize(intercept, normalize)
-  myData$getSufficientStat()
-  
-  if (is.null(lambda1)) {
-    stopifnot("minratio must be non negative." = minratio > 0)
-    lmax <- sum(abs(myData$xty))
-    lambda_linf <- 10^seq(from=log10(lmax), to=log10(lmax*minratio), len=nlambda1)  
-  }
 
   ## ============================================
   ## INSTANTIATE THE PENALTY MODEL
   myModel <- BoundedRegressionFit$new(
     data      = myData,
     intercept = intercept,
-    regParam  = list(linf = lambda_linf, l2 = lambda2)
+    regParam  = list(linf = lambda1, l2 = lambda2, 
+                     linf_weights = penscale, 
+                     min_ratio = minratio, n_lambda1 = nlambda1)
   )
 
   ## ============================================
-  ## RECOVER LOW LEVEL OPTIONS
-  ctrl <- ctrl_default(ncol(x))
-  ctrl$maxfeat <- maxfeat
-  if (!is.null(control$method)) if (control$method != "quadra") ctrl$threshold <- 1e-2
-  ctrl[names(control)] <- control # default overwritten by user specifications
-  ctrl$method <- switch(ctrl$method, quadra = 0, pathwise = 1, fista = 2, 0)
-  ctrl$rescaling <- match.arg(debiasing)
-  
-  ## ============================================
   ## FIT THE MODEL WITH ACTIVE SET ALGORITHM
+  ##
+  if (ctrl$verbose > 0) cat("\nModel fitting and optimization")
   myModel$fit(ctrl)
   
   ## ============================================
   ## POSTREATMENT + SEND BACK THE RESULTING MODEL
   ##
+  if (ctrl$verbose > 0) cat("\nPost-treatment")
   myModel$debias(ctrl$rescaling)
   myModel$criteria()
   myModel

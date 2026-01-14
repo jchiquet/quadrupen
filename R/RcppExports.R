@@ -5,15 +5,15 @@ FusedLasso_cpp <- function(dataModel, tuningParam, control) {
     .Call(`_quadrupen_FusedLasso_cpp`, dataModel, tuningParam, control)
 }
 
-bounded_reg_cpp <- function(dataModel, tuningParam, control) {
-    .Call(`_quadrupen_bounded_reg_cpp`, dataModel, tuningParam, control)
+bounded_reg_cpp <- function(dataModel, intercept, regParam, controlFit) {
+    .Call(`_quadrupen_bounded_reg_cpp`, dataModel, intercept, regParam, controlFit)
 }
 
 elastic_net_cpp <- function(dataModel, intercept, regParam, controlFit) {
     .Call(`_quadrupen_elastic_net_cpp`, dataModel, intercept, regParam, controlFit)
 }
 
-ridge_cpp <- function(dataModel, tuningParam, control) {
-    .Call(`_quadrupen_ridge_cpp`, dataModel, tuningParam, control)
+ridge_cpp <- function(dataModel, intercept, regParam, controlFit) {
+    .Call(`_quadrupen_ridge_cpp`, dataModel, intercept, regParam, controlFit)
 }
 

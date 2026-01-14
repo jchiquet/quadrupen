@@ -20,7 +20,7 @@ Rcpp::List elastic_net_cpp(
 
   const uword n             = dataModel["n"]  ; // sample size
   const uword p             = dataModel["d"]  ; // problem size
-  const SEXP &X             = dataModel["X"]  ; // design matrix
+  const SEXP &R_X           = dataModel["X"]  ; // design matrix
   const arma::vec &y        = dataModel["y"]  ; // response vector
   const arma::sp_mat& S     = dataModel["S"]  ; // Structuring matrix
   const arma::vec &wobs     = dataModel["wy"] ; // observation weights (not use at the moment)
@@ -59,11 +59,11 @@ Rcpp::List elastic_net_cpp(
   sp_mat sp_x  ;
   sp_mat sp_xt ;
   if (sparse) { // Check how x is encoded for reading
-    sp_x = as<sp_mat>(X) ;
+    sp_x = as<sp_mat>(R_X) ;
     standardize(sp_x, y, intercept, normalize, wlambda1, xty, normx, normy, xbar, ybar) ;
     sp_xt = sp_x.t() ;
   } else {
-    x = as<mat>(X) ;
+    x = as<mat>(R_X) ;
     standardize(x, y, intercept, normalize, wlambda1, xty, normx, normy, xbar, ybar) ;
     xt = x.t();
   }

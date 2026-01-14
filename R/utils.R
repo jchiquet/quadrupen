@@ -54,7 +54,6 @@ optim_enet_default <- function(d)
        method      = "quadra",
        threshold   = 1e-7,
        monitor     = 0,
-       bulletproof = TRUE,
        usechol     = TRUE
   )
 
@@ -65,8 +64,7 @@ optim_breg_default <- function(d)
        method      = "quadra",
        threshold   = 1e-7,
        monitor     = 0,
-       bulletproof = TRUE,
-       usechol     = TRUE
+       bulletproof = TRUE
   )
 
 optim_fused_default <- function(d)

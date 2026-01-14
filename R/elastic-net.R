@@ -160,9 +160,9 @@ elastic.net <- function(x,
   if (!is.null(control$method)) if (control$method != "quadra") ctrl$threshold <- 1e-2
   ctrl[names(control)] <- control # default overwritten by user specifications
   ctrl$method <- switch(ctrl$method, quadra = 0, pathwise = 1, fista = 2, 0)
-  ctrl$beta0  <- beta0
   ctrl$rescaling <- match.arg(debiasing)
   ctrl$normalize <- normalize
+  ctrl$beta0  <- beta0
   
   ## ============================================
   ## INSTANTIATE THE DATA MODEL
@@ -187,13 +187,13 @@ elastic.net <- function(x,
   ## ============================================
   ## FIT THE MODEL WITH ACTIVE SET ALGORITHM
   ##
-  if (ctrl$verbose > 0) cat ("\nModel fitting and optimization")
+  if (ctrl$verbose > 0) cat("\nModel fitting and optimization")
   myModel$fit(ctrl)
   
   ## ============================================
   ## POSTREATMENT + SEND BACK THE RESULTING MODEL
   ##
-  if (ctrl$verbose > 0) cat ("\nPost-treatment")
+  if (ctrl$verbose > 0) cat("\nPost-treatment")
   myModel$debias(ctrl$rescaling)
   myModel$criteria()
   myModel
