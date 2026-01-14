@@ -12,7 +12,7 @@ using namespace arma;
 
 #define ZERO 2e-16 // practical zero
 
-inline vec get_lambda1(SEXP LAMBDA1, uword n_lambda, double min_ratio, double lmax) {
+inline vec get_lambda1(SEXP LAMBDA1, uword n_lambda, const double min_ratio, double lmax) {
   vec lambda1 ;
   if (LAMBDA1 != R_NilValue) {
     lambda1  = as<vec>(LAMBDA1)  ;
@@ -70,17 +70,16 @@ void add_var_enet(const uword &n, uword &nbr_in, uword &var_in, vec &betaA, uvec
   }
 }
 
-
 void remove_var_enet(uword &nbr_in, uvec &are_in, vec &betaA, uvec &A, mat &xtxAS, mat &xAtxA, mat &xtxw, mat &R, uvec &null, const bool &usechol, const uword &fun) ;
 
 template <typename any_mat>
-void standardize(any_mat &x, const vec &y, const bool &intercept, const bool &normalize, const vec &penscale,
+void standardize(any_mat &x, const vec &y, const bool &intercept, const bool &normalize, const vec &wlambda1,
 		 vec &xty, vec &normx, double &normy, vec &xbar, double &ybar) {
   
   uword n = x.n_rows;
   uword p = x.n_cols;
   
-  if (intercept == 1) {
+  if (intercept) {
     xbar = trans(rowvec(mean(x, 0)));
     ybar = mean(y) ;
   } else {
@@ -88,7 +87,7 @@ void standardize(any_mat &x, const vec &y, const bool &intercept, const bool &no
     ybar = 0;
   }
 
-  if (normalize == 1) {
+  if (normalize) {
     normx = sqrt(trans(sum(square(x),0)) - n * square(xbar));
     for (uword i=0; i<p; i++) {
       x.col(i) /= normx(i);
@@ -99,14 +98,14 @@ void standardize(any_mat &x, const vec &y, const bool &intercept, const bool &no
   }
   normy = sqrt(sum(square(y))) ;
 
-  if (any(penscale != 1)) {
+  if (any(wlambda1 != 1)) {
     for (uword i=0; i<n; i++) {
-       x.row(i) /= trans(penscale) ;
+       x.row(i) /= trans(wlambda1) ;
     }
-    xbar /= penscale;
+    xbar /= wlambda1;
   }
 
-  if (intercept == 1) {
+  if (intercept) {
     xty = trans(trans(y-ybar) * x) ;
     for (uword i=0; i<p; i++) {
        xty(i) -=  sum(y-ybar) * xbar(i);

@@ -37,28 +37,45 @@ get.lambda1.li <- function(xty,nlambda1,minratio) {
   return(10^seq(log10(lmax), log10(minratio*lmax), len=nlambda1))
 }
 
-ctrl_default <- function(d)
+
+model_default <- function()
+  list(verbose     = 0, # default control options
+       intercept   = TRUE,
+       normalize   = TRUE,
+       nlambda1    = 100,
+       min_ratio   = 1e-2
+  )
+
+
+optim_enet_default <- function(d)
   list(verbose     = 0, # default control options
        timer       = FALSE,
        maxiter     = max(500, d),
        method      = "quadra",
        threshold   = 1e-7,
        monitor     = 0,
-       bulletproof = TRUE,
        usechol     = TRUE
   )
 
-ctrl_fused_default <- function(d)
+optim_breg_default <- function(d)
+  list(verbose     = 0, # default control options
+       timer       = FALSE,
+       maxiter     = max(500, d),
+       method      = "quadra",
+       threshold   = 1e-7,
+       monitor     = 0,
+       bulletproof = TRUE
+  )
+
+optim_fused_default <- function(d)
   list(verbose       = 0, # default control options
-       adjust        = FALSE,
        timer         = FALSE,
        maxiterout    = 100,
        maxiterin     = 10000,
        maxactivation = 10, 
        accuracy      = 1e-6,
        monitor       = 0,
-       fusioncheck   = "all", ## c("all","active","none", "naive", "huber")
-       usechol       = TRUE
+       fusioncheck   = "all" ## c("all","active","none", "naive", "huber")
   )
 
 ## ====================================================================

@@ -17,17 +17,7 @@ Class for storing data and various fixed quantity
 
 \item{\code{S}}{SDP structuring matrix}
 
-\item{\code{wx}}{vector of regressor weights}
-
 \item{\code{wy}}{vector of observation weights}
-
-\item{\code{mean_X}}{vector of (normalized) regressor means}
-
-\item{\code{norm_X}}{vector of regressor norms}
-
-\item{\code{mean_y}}{mean of the response vector}
-
-\item{\code{norm_y}}{norm of the response vector}
 }
 \if{html}{\out{</div>}}
 }
@@ -37,10 +27,6 @@ Class for storing data and various fixed quantity
 \item{\code{d}}{number of regressor}
 
 \item{\code{n}}{sample size}
-
-\item{\code{is_centered}}{logical indicating if the data has been centered}
-
-\item{\code{is_scaled}}{logical indicating if the data has been scaled}
 
 \item{\code{sparse_encoding}}{logical indicating if the matrix of regressor is sparsely encoded}
 
@@ -52,8 +38,9 @@ Class for storing data and various fixed quantity
 \subsection{Public methods}{
 \itemize{
 \item \href{#method-DataModel-new}{\code{DataModel$new()}}
-\item \href{#method-DataModel-standardize}{\code{DataModel$standardize()}}
 \item \href{#method-DataModel-CholStruct}{\code{DataModel$CholStruct()}}
+\item \href{#method-DataModel-splitTrainTest}{\code{DataModel$splitTrainTest()}}
+\item \href{#method-DataModel-splitSubSamples}{\code{DataModel$splitSubSamples()}}
 \item \href{#method-DataModel-clone}{\code{DataModel$clone()}}
 }
 }
@@ -67,7 +54,6 @@ constructor for DataModel
   covariates,
   outcome,
   cov_struct,
-  cov_weights = rep(1, ncol(covariates)),
   obs_weights = rep(1, length(outcome)),
   check_args = TRUE
 )}\if{html}{\out{</div>}}
@@ -82,31 +68,11 @@ constructor for DataModel
 
 \item{\code{cov_struct}}{sdp matrix structuring the covariates/regressors}
 
-\item{\code{cov_weights}}{vector of covariates/regressors weights}
-
 \item{\code{obs_weights}}{vector of observations weights}
 
 \item{\code{check_args}}{logical, should args be check at initialization?}
-}
-\if{html}{\out{</div>}}
-}
-}
-\if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-DataModel-standardize"></a>}}
-\if{latex}{\out{\hypertarget{method-DataModel-standardize}{}}}
-\subsection{Method \code{standardize()}}{
-Perform standardization of the data an store the auxiliaries
-quantities
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{DataModel$standardize(intercept, normalize)}\if{html}{\out{</div>}}
-}
 
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{intercept}}{logical, is there an intercept in the model?}
-
-\item{\code{normalize}}{logical, shall the regressor be standardized?}
+\item{\code{cov_weights}}{vector of covariates/regressors weights}
 }
 \if{html}{\out{</div>}}
 }
@@ -120,6 +86,63 @@ Compute Cholesky factorization of the Structuring matrix
 \if{html}{\out{<div class="r">}}\preformatted{DataModel$CholStruct()}\if{html}{\out{</div>}}
 }
 
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-DataModel-splitTrainTest"></a>}}
+\if{latex}{\out{\hypertarget{method-DataModel-splitTrainTest}{}}}
+\subsection{Method \code{splitTrainTest()}}{
+a function splitting the data into train and test folds
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{DataModel$splitTrainTest(
+  nfolds = 10,
+  folds = split(sample(1:self$n), rep(1:nfolds, length = self$n))
+)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{nfolds}}{the number of folds}
+
+\item{\code{folds}}{a list of vectors describing the folds (optional)}
+}
+\if{html}{\out{</div>}}
+}
+\subsection{Returns}{
+a list with train and test data and id.
+}
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-DataModel-splitSubSamples"></a>}}
+\if{latex}{\out{\hypertarget{method-DataModel-splitSubSamples}{}}}
+\subsection{Method \code{splitSubSamples()}}{
+a function splitting data into subsamples
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{DataModel$splitSubSamples(
+  n_subsamples = 50,
+  subsample_size = floor(self$n/2),
+  subsamples = replicate(n_subsamples, sample(1:self$n, subsample_size), simplify =
+    FALSE),
+  weakness = 1
+)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{n_subsamples}}{the number of subsamples}
+
+\item{\code{subsample_size}}{the subsample size}
+
+\item{\code{subsamples}}{list with vector of subsamples (optional)}
+
+\item{\code{weakness}}{coefficient for randonly reweighting the regressor, default to 1}
+}
+\if{html}{\out{</div>}}
+}
+\subsection{Returns}{
+a list of DataModel, resampling of the original
+}
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-DataModel-clone"></a>}}

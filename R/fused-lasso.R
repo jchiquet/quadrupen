@@ -71,7 +71,7 @@ fusedlasso <- function(
     lambda1   = NULL,                       
     lambda2   = 1,
     pen_fused  =  c("L1", "L2", "Huber"),
-    penscale  = rep(1,ncol(x)), ## doesnt work at the moment
+    penscale  = rep(1,ncol(x)),
     struct    = NULL,
     intercept = TRUE,
     normalize = TRUE,
@@ -85,14 +85,14 @@ fusedlasso <- function(
   ## ============================================
   ## RECOVER LOW LEVEL CONFIGURATION
   ##
-  ctrl <- ctrl_fused_default(ncol(x))
+  ctrl <- optim_fused_default(ncol(x))
   ctrl$maxfeat <- maxfeat
   ctrl[names(control)] <- control # default overwritten by user specifications
   ctrl$beta0  <- beta0
   ctrl$mu0    <- 0.001
-  ctrl$intercept <- intercept
   ctrl$pen_fused  <- match.arg(pen_fused)
   ctrl$rescaling <- match.arg(debiasing)
+  ctrl$normalize <- normalize
   ctrl$fusioncheck <- 
     switch(ctrl$fusioncheck, "all" = 2L, "active" = 1L, "none" = 0L, "naive" = -1L, -2L)
   if (ctrl$pen_fused == "L2")  ctrl$fusioncheck <- 0
@@ -103,40 +103,34 @@ fusedlasso <- function(
   ## INSTANTIATE THE DATA MODEL
   ##
   if (ctrl$verbose > 0) cat ("\nData pretreatment")
-  myData <- GaussianModel$new(
+  myData <- DataModel$new(
     covariates  = as(x, "dgCMatrix"),
     outcome     = y,
-    cov_struct  = struct,
-    cov_weights = penscale
+    cov_struct  = struct
   )
-  myData$standardize(intercept, normalize)
-  myData$getSufficientStat()
 
   ## ============================================
   ## INSTANTIATE THE PENALIZED MODEL
   ##
-  if (is.null(lambda1)) {
-    stopifnot("minratio must be non negative." = minratio > 0)
-    stopifnot("nlambda1 must be non negative." = nlambda1 > 0)
-    ctrl$adjust <- TRUE
-    lambda1 <- c(1, exp((1:(nlambda1 - 1)) * log(minratio)/(nlambda1 - 1)))
-  }
   myModel <- FusedLassoFit$new(
     data      = myData,
     intercept = intercept,
-    regParam  = list(l1 = lambda1, l2 = lambda2)
+    regParam  = list(l1 = lambda1, l2 = lambda2, 
+                     l1_weights = penscale, 
+                     min_ratio = minratio, n_lambda1 = nlambda1)
+    
   )
   
   ## ============================================
   ## FIT THE MODEL WITH ACTIVE SET ALGORITHM
   ##
-  if (ctrl$verbose > 0) cat ("\nModel fitting and optimization")
+  if (ctrl$verbose > 0) cat("\nModel fitting and optimization")
   myModel$fit(ctrl)
   
   ## ===========================
   ## Post-Treatments
   ## 
-  if (ctrl$verbose > 0) cat ("\nPost-treatment")
+  if (ctrl$verbose > 0) cat("\nPost-treatment")
   myModel$criteria()
   myModel
 }

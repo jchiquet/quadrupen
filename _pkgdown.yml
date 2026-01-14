@@ -24,7 +24,6 @@ reference:
   desc: "R6 Classes used as fields of the main Class Quadrupen fit"
   contents:
   - DataModel
-  - GaussianModel
   - CrossValidation
   - StabilityPath
   - InformationCriteria

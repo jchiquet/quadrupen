@@ -13,57 +13,69 @@ using namespace arma;
 // [[Rcpp::export]]
 Rcpp::List bounded_reg_cpp(
     const Environment &dataModel   , // data structure
-    const List        &tuningParam , // List of tuning parameters
-    const List        &control       // config of the optimisation 
-  ) {
+    const bool        &intercept   , // boolean for intercept
+    const List        &regParam    , // config of the optimisation 
+    const List        &controlFit  // config of the optimisation 
+) {
   
   // Reading input variables
   const uword n             = dataModel["n"]  ; // sample size
   const uword p             = dataModel["d"]  ; // problem size
-  const SEXP &X             = dataModel["X"]  ; // design matrix
+  const SEXP &R_X           = dataModel["X"]  ; // design matrix
   const arma::vec &y        = dataModel["y"]  ; // response vector
+  const arma::vec &wobs     = dataModel["wy"] ; // observation weights (not use at the moment)
   const arma::sp_mat& S     = dataModel["S"]  ; // Structuring matrix
-  const arma::vec &penscale = dataModel["wx"] ;  // penalty weights
-  const arma::vec &xty      = dataModel["xty"]    ; // responses to predictors vector
-  const arma::vec xbar      = dataModel["mean_X"] ; // mean of the predictors
-  const arma::vec &normx    = dataModel["norm_X"] ; // norm of the predictors
-  const double ybar         = dataModel["mean_y"] ; // mean of the predictors
-  const arma::vec& weights  = dataModel["wy"]     ; // observation weights (not use at the moment)
   const bool sparse         = dataModel["sparse_encoding"] ; // boolean for sparse mode
 
-  arma::vec lambda_linf      = tuningParam["linf"] ; // vector of LInf penalties
-  const double lambda_l2     = tuningParam["l2"]   ; // scalar for the amount L2 penalty
-  const double eps           = control["threshold"] ; // precision required
-  const double eps2 = pow(eps, 2) ;
-  const arma::uword maxiter  = control["maxiter"]   ; // max # of iterates of the active set
-  const arma::uword maxfeat  = control["maxfeat"]   ; // max # of variables activated
-        arma::uword fun      = control["method"]    ; // solver (0=quadra, 1=pathwise, 2=fista)
-  const arma::uword verbose  = control["verbose"]   ; // int for verbose mode (0/1/2)
-  const bool bullet          = control["bulletproof"];// use Cholesky decomposition or not
-
-  // STRUCTURATING MATRIX (embed lambda_l2)
-  sp_mat diag_S = spdiags(sqrt(lambda_l2)*pow(penscale,-1/2), ivec({0}), p, p) ;
-  const sp_mat S_lambda_l2 = diag_S * S * diag_S  ; // sparsely encoded structuring matrix
+  const SEXP R_LAMBDAINF    = regParam["linf"]         ; // vector of L1 penalties ; if NULL, automatically set
+  const arma::vec &wlambda1 = regParam["linf_weights"] ; // l1-penalty weights
+  const double lambda_l2    = regParam["l2"]         ; // scalar for the amount L2 penalty
+  uword n_lambda            = regParam["n_lambda1"]  ; // # of l1-penalty levels
+  const double min_ratio    = regParam["min_ratio"]  ; // minimum penlaty value as a ratio of lambda1 max
   
-  // Managing the data matrix in both cases of sparse or dense coding
+  const bool normalize       = controlFit["normalize"] ; // boolean for standardizing the predictor
+  const double eps           = controlFit["threshold"] ; // precision required
+  const double eps2          = pow(eps, 2) ;
+  const arma::uword maxiter  = controlFit["maxiter"]   ; // max # of iterates of the active set
+  const arma::uword maxfeat  = controlFit["maxfeat"]   ; // max # of variables activated
+  arma::uword fun            = controlFit["method"]    ; // solver (0=quadra, 1=pathwise, 2=fista)
+  const arma::uword verbose  = controlFit["verbose"]   ; // int for verbose mode (0/1/2)
+  const bool bullet          = controlFit["bulletproof"];// use Cholesky decomposition or not
+
+  vec    xty   ; // responses to predictors vector
+  mat    xtx   ; // gram matrix
+  vec    xbar  ; // mean of the predictors
+  vec    normx ; // norm of the predictors
+  double normy ; // norm of the response
+  double ybar  ; // mean of the response
+  
+  // STRUCTURATING MATRIX (embed lambda_l2)
+  sp_mat diag_S = spdiags(sqrt(lambda_l2)*pow(wlambda1,-1/2), ivec({0}), p, p) ;
+  const sp_mat S_lambda_l2 = diag_S * S * diag_S  ; // sparsely encoded structuring matrix
+
+  // DESIGN MATRIX (either sparsely encoded or not)
   mat x        ;
   mat xt       ;
-  mat xtx      ;
   sp_mat sp_x  ;
   sp_mat sp_xt ;
   if (sparse) { // Check how x is encoded for reading
-    sp_x = as<sp_mat>(X) ;
+    sp_x = as<sp_mat>(R_X) ;
+    standardize(sp_x, y, intercept, normalize, wlambda1, xty, normx, normy, xbar, ybar) ;
     sp_xt = sp_x.t() ;
     xtx = sp_xt * sp_x - n * xbar * xbar.t() ;
   } else {
-    x = as<mat>(X) ;
+    x = as<mat>(R_X) ;
+    standardize(x, y, intercept, normalize, wlambda1, xty, normx, normy, xbar, ybar) ;
     xt = x.t();
     xtx = xt * x - n * xbar * xbar.t() ;
   }
   xtx += S_lambda_l2 ;
-  
+
+  // Sparsifying penalty
+  vec lambda_linf = get_lambda1(R_LAMBDAINF, n_lambda, min_ratio, sum(abs(xty))) ;
+  n_lambda = lambda_linf.n_elem ; // # of penalty levels
+
   // Initializing "first level" variables (outside of the lambda_linf loop)
-  uword n_lambda = lambda_linf.n_elem        ; // # of penalty levels
   colvec beta     = zeros<vec>(p)          ; // vector of current parameters
   uvec all(p);
   for (uword i=0;i<p;i++){all(i) = i;}
@@ -205,7 +217,7 @@ Rcpp::List bounded_reg_cpp(
       df          = df.subvec(0,m-1)          ;
       break;
     } else {
-      coef = join_rows(coef, beta/(normx % penscale));
+      coef = join_rows(coef, beta/(normx % wlambda1));
       mu[m] = dot(beta, xbar) ;
       iB = join_rows(iB, m*ones<urowvec>(B.n_elem) );
       jB = join_rows(jB, B.t()) ;

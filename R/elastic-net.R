@@ -155,53 +155,45 @@ elastic.net <- function(x,
   ## ============================================
   ## RECOVER LOW LEVEL CONFIGURATION
   ##
-  ctrl <- ctrl_default(ncol(x))
+  ctrl <- optim_enet_default(ncol(x))
   ctrl$maxfeat <- maxfeat
   if (!is.null(control$method)) if (control$method != "quadra") ctrl$threshold <- 1e-2
   ctrl[names(control)] <- control # default overwritten by user specifications
   ctrl$method <- switch(ctrl$method, quadra = 0, pathwise = 1, fista = 2, 0)
-  ctrl$beta0  <- beta0
   ctrl$rescaling <- match.arg(debiasing)
+  ctrl$normalize <- normalize
+  ctrl$beta0  <- beta0
   
   ## ============================================
   ## INSTANTIATE THE DATA MODEL
   ##
-  if (ctrl$verbose > 0) cat ("\nData pretreatment")
-  myData <- GaussianModel$new(
+  myData <- DataModel$new(
     covariates  = x,
     outcome     = y,
-    cov_struct  = struct,
-    cov_weights = penscale
+    cov_struct  = struct
   )
-  myData$standardize(intercept, normalize)
-  myData$getSufficientStat()
 
   ## ============================================
   ## INSTANTIATE THE PENALIZED MODEL
   ##
-  if (ctrl$verbose > 0) cat ("\nPath calibration")
-  if (is.null(lambda1)) {
-    stopifnot("minratio must be non negative." = minratio > 0)
-    stopifnot("nlambda1 must be non negative." = nlambda1 > 0)
-    lmax <- max(abs(myData$xty))
-    lambda1 <- 10^seq(from=log10(lmax), to=log10(lmax*minratio), len=nlambda1)  
-  }
   myModel <- ElasticNetFit$new(
     data      = myData,
     intercept = intercept,
-    regParam  = list(l1 = lambda1, l2 = lambda2)
+    regParam  = list(l1 = lambda1, l2 = lambda2, 
+                     l1_weights = penscale, 
+                     min_ratio = minratio, n_lambda1 = nlambda1)
   )
 
   ## ============================================
   ## FIT THE MODEL WITH ACTIVE SET ALGORITHM
   ##
-  if (ctrl$verbose > 0) cat ("\nModel fitting and optimization")
+  if (ctrl$verbose > 0) cat("\nModel fitting and optimization")
   myModel$fit(ctrl)
   
   ## ============================================
   ## POSTREATMENT + SEND BACK THE RESULTING MODEL
   ##
-  if (ctrl$verbose > 0) cat ("\nPost-treatment")
+  if (ctrl$verbose > 0) cat("\nPost-treatment")
   myModel$debias(ctrl$rescaling)
   myModel$criteria()
   myModel
