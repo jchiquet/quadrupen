@@ -69,15 +69,13 @@ optim_breg_default <- function(d)
 
 optim_fused_default <- function(d)
   list(verbose       = 0, # default control options
-       adjust        = FALSE,
        timer         = FALSE,
        maxiterout    = 100,
        maxiterin     = 10000,
        maxactivation = 10, 
        accuracy      = 1e-6,
        monitor       = 0,
-       fusioncheck   = "all", ## c("all","active","none", "naive", "huber")
-       usechol       = TRUE
+       fusioncheck   = "all" ## c("all","active","none", "naive", "huber")
   )
 
 ## ====================================================================

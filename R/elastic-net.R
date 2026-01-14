@@ -167,7 +167,7 @@ elastic.net <- function(x,
   ## ============================================
   ## INSTANTIATE THE DATA MODEL
   ##
-  myData <- GaussianModel$new(
+  myData <- DataModel$new(
     covariates  = x,
     outcome     = y,
     cov_struct  = struct

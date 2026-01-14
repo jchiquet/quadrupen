@@ -2,6 +2,7 @@
 #' 
 #' @description Class for storing data and various fixed quantity
 #' 
+#' @export
 DataModel <- R6::R6Class(
   classname = "DataModel",
   private = list(
@@ -62,40 +63,18 @@ DataModel <- R6::R6Class(
     CholStruct = function() {
       stopifnot(inherits(self$S, "sparseMatrix"))
       self$C <- as.matrix(Matrix::chol(self$S))
-    }
-  ), 
-  active = list(
-    #' @field d number of regressor
-    d = function() ncol(self$X),
-    #' @field n sample size
-    n = function() nrow(self$X),
-    #' @field sparse_encoding logical indicating if the matrix of regressor is sparsely encoded
-    sparse_encoding = function() {inherits(self$X, "sparseMatrix")},
-    #' @field varnames character, the names of the covariates/regressors
-    varnames = function() {private$names}
-  )
-)
-
-#' Gaussian Data Class
-#' 
-#' @description Class for storing data and various fixed quantity
-#' 
-#' @export
-GaussianModel <- R6::R6Class(
-  classname = "GaussianModel",
-  inherit = DataModel,
-  public = list(
+    },
     #' @description a function splitting the data into train and test folds
     #' @param nfolds the number of folds
     #' @param folds a list of vectors describing the folds (optional)
     #' @return a list with train and test data and id.
     splitTrainTest = function(
-      nfolds = 10, folds  = split(sample(1:self$n), rep(1:nfolds, length = self$n))
+    nfolds = 10, folds  = split(sample(1:self$n), rep(1:nfolds, length = self$n))
     ) {
       ## create the list of split each compose with couple of Train/Test
       lapply(folds, function(omit) {
-        trainData <- GaussianModel$new(self$X[-omit, , drop = FALSE], self$y[-omit], self$S, self$wy[-omit])
-        testData  <- GaussianModel$new(self$X[ omit, , drop = FALSE], self$y[omit], self$S, self$wy[omit])
+        trainData <- DataModel$new(self$X[-omit, , drop = FALSE], self$y[-omit], self$S, self$wy[-omit])
+        testData  <- DataModel$new(self$X[ omit, , drop = FALSE], self$y[omit], self$S, self$wy[omit])
         trainData$C <- self$C # Cholesky factorization remain the same
         testData$C  <- self$C # 
         list(trainData = trainData, testData = testData,
@@ -109,23 +88,27 @@ GaussianModel <- R6::R6Class(
     #' @param weakness coefficient for randonly reweighting the regressor, default to 1
     #' @return  a list of DataModel, resampling of the original
     splitSubSamples = function(
-      n_subsamples = 50,
-      subsample_size = floor(self$n/2),
-      subsamples = replicate(n_subsamples, sample(1:self$n, subsample_size), simplify=FALSE),
-      weakness = 1
+    n_subsamples = 50,
+    subsample_size = floor(self$n/2),
+    subsamples = replicate(n_subsamples, sample(1:self$n, subsample_size), simplify = FALSE),
+    weakness = 1
     ) {
       ## create the list of split each compose with couple of Train/Test
       lapply(subsamples, function(keep) {
         Xs <- Matrix::colScale(self$X[keep, ], runif(self$d, weakness, 1))
         if (!inherits(self$X, "sparseMatrix")) Xs <- as.matrix(Xs)
-        GaussianModel$new(Xs, self$y[keep], self$S, self$wy[keep])
+        DataModel$new(Xs, self$y[keep], self$S, self$wy[keep])
       })
     }
-  ),
+  ), 
   active = list(
-    #' @field name Type of data
-    name = function() "Gaussian response (Linear Regression)",
-    #' @field rss residuals sum of squares of the responses sum((y - mean(y))^2)
-    rss  = function(value) {sum((self$y - self$mean_y)^2)}
+    #' @field d number of regressor
+    d = function() ncol(self$X),
+    #' @field n sample size
+    n = function() nrow(self$X),
+    #' @field sparse_encoding logical indicating if the matrix of regressor is sparsely encoded
+    sparse_encoding = function() {inherits(self$X, "sparseMatrix")},
+    #' @field varnames character, the names of the covariates/regressors
+    varnames = function() {private$names}
   )
 )

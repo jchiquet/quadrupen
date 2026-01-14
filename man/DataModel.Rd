@@ -39,6 +39,8 @@ Class for storing data and various fixed quantity
 \itemize{
 \item \href{#method-DataModel-new}{\code{DataModel$new()}}
 \item \href{#method-DataModel-CholStruct}{\code{DataModel$CholStruct()}}
+\item \href{#method-DataModel-splitTrainTest}{\code{DataModel$splitTrainTest()}}
+\item \href{#method-DataModel-splitSubSamples}{\code{DataModel$splitSubSamples()}}
 \item \href{#method-DataModel-clone}{\code{DataModel$clone()}}
 }
 }
@@ -84,6 +86,63 @@ Compute Cholesky factorization of the Structuring matrix
 \if{html}{\out{<div class="r">}}\preformatted{DataModel$CholStruct()}\if{html}{\out{</div>}}
 }
 
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-DataModel-splitTrainTest"></a>}}
+\if{latex}{\out{\hypertarget{method-DataModel-splitTrainTest}{}}}
+\subsection{Method \code{splitTrainTest()}}{
+a function splitting the data into train and test folds
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{DataModel$splitTrainTest(
+  nfolds = 10,
+  folds = split(sample(1:self$n), rep(1:nfolds, length = self$n))
+)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{nfolds}}{the number of folds}
+
+\item{\code{folds}}{a list of vectors describing the folds (optional)}
+}
+\if{html}{\out{</div>}}
+}
+\subsection{Returns}{
+a list with train and test data and id.
+}
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-DataModel-splitSubSamples"></a>}}
+\if{latex}{\out{\hypertarget{method-DataModel-splitSubSamples}{}}}
+\subsection{Method \code{splitSubSamples()}}{
+a function splitting data into subsamples
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{DataModel$splitSubSamples(
+  n_subsamples = 50,
+  subsample_size = floor(self$n/2),
+  subsamples = replicate(n_subsamples, sample(1:self$n, subsample_size), simplify =
+    FALSE),
+  weakness = 1
+)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{n_subsamples}}{the number of subsamples}
+
+\item{\code{subsample_size}}{the subsample size}
+
+\item{\code{subsamples}}{list with vector of subsamples (optional)}
+
+\item{\code{weakness}}{coefficient for randonly reweighting the regressor, default to 1}
+}
+\if{html}{\out{</div>}}
+}
+\subsection{Returns}{
+a list of DataModel, resampling of the original
+}
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-DataModel-clone"></a>}}

@@ -46,7 +46,7 @@ test_that("Consistency of quadrupen between sparse/non-sparse encoding of the pr
   cat("\n\tsparse coding...")
   out.enet.sp <- elastic.net(x.sp, y, lambda2=lambda2, maxfeat=max.feat, minratio=1e-3, control=list(timer=TRUE))
   cat(" took", out.enet.sp$optim_monitoring$timer, "seconds to activate",
-      rowSums(out.enet.sp$coefficients!=0)[length(out.enet.sp$major_tuning)],"variables.")
+      rowSums(out.enet.sp$coefficients!=0)[length(out.enet.sp$major_tuning)],"variables.\n")
   
   ## remove monitoring for fair comparison!!!
   out.enet.sp$optim_monitoring <- list()

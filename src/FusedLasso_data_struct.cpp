@@ -86,6 +86,20 @@ SparseMatrix::SparseMatrix(const vector<double>& x, const vector<int>& indexCol,
 }
 
 // assumes that it is the right class; does not check
+SparseMatrix::SparseMatrix(const arma::sp_mat& sm) {
+
+  sm.sync();
+
+  indexCol = std::vector<int>(sm.col_ptrs, sm.col_ptrs + sm.n_cols+1 ) ;
+  rowPos = std::vector<int>(sm.row_indices, sm.row_indices + sm.n_nonzero);
+  nzVec  = std::vector<double>(sm.values, sm.values + sm.n_nonzero ) ;
+  
+  n = sm.n_rows;
+  p = sm.n_cols;
+  nnz = nzVec.size();
+}
+
+// assumes that it is the right class; does not check
 SparseMatrix::SparseMatrix(Rcpp::S4 x) {
   
   indexCol = Rcpp::as<std::vector<int> >(x.slot("p")) ;

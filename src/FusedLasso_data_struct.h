@@ -29,6 +29,8 @@ public:
   SparseMatrix(const double*x, int n, int p);
   //From a vector
   SparseMatrix(const vector<double>& x, int n, int p);
+  // From armadillo sparse format
+  SparseMatrix(const arma::sp_mat& x);
   // From an already sparse format
   SparseMatrix(const vector<double>& x, const vector<int>& indexCol, const vector<int>& rowPos, int n, int p);
   // create from a dgCMatrix; assumes that it is the right class and does not check

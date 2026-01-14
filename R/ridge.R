@@ -78,7 +78,7 @@ ridge <- function(x,
   ## ============================================
   ## INSTANTIATE THE DATA MODEL
   ## 
-  myData <- GaussianModel$new(
+  myData <- DataModel$new(
     covariates  = as.matrix(x),
     outcome     = y,
     cov_struct  = struct
