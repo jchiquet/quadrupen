@@ -22,17 +22,17 @@ private:
   // DATA VARIABLES FOR REGRESSION PURPOSE
   uword  n_        ; // sample size
   uword  p_        ; // # of features
+  mat    X_        ; // matrix of predictors
+  vec    y_        ; // vector of response
+  sp_mat S_        ; // Structuring matrix
+  vec    weights_  ; // observation weights
   bool   centered_ ; // should intercept be considered?
   bool   scaled_   ; // should predictors be standardized?
-  vec    weights_  ; // observation weights
-  mat    X_        ; // matrix of predictors
   vec    XTy_      ; // responses to predictors vector
   vec    X_bar_    ; // mean of the predictors
   vec    norm_X_   ; // norm of the predictors
-  vec    y_        ; // vector of response
   double y_bar_    ; // mean of the response
   double norm_y_   ; // norm of the response
-  sp_mat S_        ; // Structuring matrix
   
 public:
   
