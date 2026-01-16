@@ -93,14 +93,15 @@ ridge <- function(x,
     intercept = intercept,
     regParam  = list(l2 = lambda, l1 = 0, 
                      l2_weights = penscale, 
-                     min_ratio = minratio, n_lambda = nlambda,
+                     min_ratio = minratio,
+                     n_lambda = nlambda,
                      lambda_max = lambda_max)
   )
 
   ## ============================================
   ## FIT THE MODEL WITH ACTIVE SET ALGORITHM
   myModel$fit(ctrl)
-  
+
   ## ============================================
   ## POSTREATMENT + SEND BACK THE RESULTING MODEL
   ##
