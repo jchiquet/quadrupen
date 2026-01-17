@@ -20,10 +20,6 @@
 #include "utils.h"
 #include "quadratic.h"
 #include "first_order.h"
-// #include "data_reg.h"
-// #include "path.h"
-// #include "active_set.h"
-// #include "penalties.h"
 
 #endif
 

@@ -90,6 +90,12 @@ RidgeRegressionFit <- R6::R6Class(
     initialize =  function(data, intercept, regParam) {
       super$initialize(data, intercept, regParam)
       private$optimizer <- ridge_cpp
+    },
+    #' @description function performing the optimization
+    #' @param control list controlling the optimization process
+    fit = function(control) {
+      super$fit(control)
+      private$beta <-  do.call(rbind, private$beta)
     }
   )
 )

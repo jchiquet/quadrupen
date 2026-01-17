@@ -14,8 +14,8 @@ DataModel <- R6::R6Class(
     X = Matrix(),
     #' @field y vector of response
     y = numeric(),
-    #' @field C Cholesky decomposition of the structring matrix S
-    C = matrix(),
+    #' @field C^{-1} Inverse of the Cholesky decomposition of S
+    C_inv = matrix(),
     #' @field S SDP structuring matrix 
     S = Matrix(),
     #' @field wy vector of observation weights
@@ -62,7 +62,7 @@ DataModel <- R6::R6Class(
     #' @description Compute Cholesky factorization of the Structuring matrix 
     CholStruct = function() {
       stopifnot(inherits(self$S, "sparseMatrix"))
-      self$C <- as.matrix(Matrix::chol(self$S))
+      self$C_inv <- as.matrix(solve(Matrix::chol(self$S)))
     },
     #' @description a function splitting the data into train and test folds
     #' @param nfolds the number of folds
@@ -75,8 +75,8 @@ DataModel <- R6::R6Class(
       lapply(folds, function(omit) {
         trainData <- DataModel$new(self$X[-omit, , drop = FALSE], self$y[-omit], self$S, self$wy[-omit])
         testData  <- DataModel$new(self$X[ omit, , drop = FALSE], self$y[omit], self$S, self$wy[omit])
-        trainData$C <- self$C # Cholesky factorization remain the same
-        testData$C  <- self$C # 
+        trainData$C <- self$C_inv # Cholesky factorization remain the same
+        testData$C  <- self$C_inv # 
         list(trainData = trainData, testData = testData,
              trainID = setdiff(1:self$n, omit), testID = omit)
       })
