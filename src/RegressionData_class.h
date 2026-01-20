@@ -15,7 +15,8 @@ using namespace arma;
 
 // TODO: use template to handle dense or sparse encoding (mat/sp_mat in armadillo)
 class RegressionData {
-  friend class RidgeRegression;
+  friend class RidgeRegression ;
+  friend class BoundedRegression ;
   // friend class ACTIVE_DATA; // NEED ACCES TO x, xt, y, xty, n, p
 
 private:

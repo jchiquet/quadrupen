@@ -319,8 +319,10 @@ QuadrupenFit <- R6::R6Class(
           if (verbose & (fold == 1)) cat(round(lambda2, 3),"\t")
           regParam[[2]] <- lambda2
           out <- private$optimizer(CVData[[fold]]$trainData, private$intercept, regParam, control)
+### Temporary fix          
+          if (is.list(out$beta)) out$beta <- do.call(rbind, out$beta)
           if (control$rescaling != "none"){
-            res <- private$rescaled()
+            res <- private$rescaled(out$beta, out$mu)
             out$mu   <- res$mu
             out$beta <- res$beta
           }

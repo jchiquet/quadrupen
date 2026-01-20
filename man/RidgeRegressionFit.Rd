@@ -29,6 +29,7 @@ and methods of \link{QuadrupenFit}.
 \subsection{Public methods}{
 \itemize{
 \item \href{#method-RidgeRegressionFit-new}{\code{RidgeRegressionFit$new()}}
+\item \href{#method-RidgeRegressionFit-fit}{\code{RidgeRegressionFit$fit()}}
 \item \href{#method-RidgeRegressionFit-clone}{\code{RidgeRegressionFit$clone()}}
 }
 }
@@ -38,7 +39,6 @@ and methods of \link{QuadrupenFit}.
 <li><span class="pkg-link" data-pkg="quadrupen" data-topic="QuadrupenFit" data-id="criteria"><a href='../../quadrupen/html/QuadrupenFit.html#method-QuadrupenFit-criteria'><code>quadrupen::QuadrupenFit$criteria()</code></a></span></li>
 <li><span class="pkg-link" data-pkg="quadrupen" data-topic="QuadrupenFit" data-id="cross_validate"><a href='../../quadrupen/html/QuadrupenFit.html#method-QuadrupenFit-cross_validate'><code>quadrupen::QuadrupenFit$cross_validate()</code></a></span></li>
 <li><span class="pkg-link" data-pkg="quadrupen" data-topic="QuadrupenFit" data-id="debias"><a href='../../quadrupen/html/QuadrupenFit.html#method-QuadrupenFit-debias'><code>quadrupen::QuadrupenFit$debias()</code></a></span></li>
-<li><span class="pkg-link" data-pkg="quadrupen" data-topic="QuadrupenFit" data-id="fit"><a href='../../quadrupen/html/QuadrupenFit.html#method-QuadrupenFit-fit'><code>quadrupen::QuadrupenFit$fit()</code></a></span></li>
 <li><span class="pkg-link" data-pkg="quadrupen" data-topic="QuadrupenFit" data-id="get_model"><a href='../../quadrupen/html/QuadrupenFit.html#method-QuadrupenFit-get_model'><code>quadrupen::QuadrupenFit$get_model()</code></a></span></li>
 <li><span class="pkg-link" data-pkg="quadrupen" data-topic="QuadrupenFit" data-id="plot"><a href='../../quadrupen/html/QuadrupenFit.html#method-QuadrupenFit-plot'><code>quadrupen::QuadrupenFit$plot()</code></a></span></li>
 <li><span class="pkg-link" data-pkg="quadrupen" data-topic="QuadrupenFit" data-id="plot_path"><a href='../../quadrupen/html/QuadrupenFit.html#method-QuadrupenFit-plot_path'><code>quadrupen::QuadrupenFit$plot_path()</code></a></span></li>
@@ -66,6 +66,23 @@ Initialize a \code{\link{RidgeRegressionFit}} model
 \item{\code{intercept}}{a logical; should an intercept be included in the mode?}
 
 \item{\code{regParam}}{a list with two elements, a vector and a scalar, for the regularization}
+}
+\if{html}{\out{</div>}}
+}
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-RidgeRegressionFit-fit"></a>}}
+\if{latex}{\out{\hypertarget{method-RidgeRegressionFit-fit}{}}}
+\subsection{Method \code{fit()}}{
+function performing the optimization
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{RidgeRegressionFit$fit(control)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{control}}{list controlling the optimization process}
 }
 \if{html}{\out{</div>}}
 }

@@ -12,9 +12,9 @@ using namespace std;
 
 class SparseMatrix {
 public:
-  int nnz;
-  int n;
-  int p;
+  unsigned int nnz;
+  unsigned int n;
+  unsigned int p;
   vector<double> nzVec; // vector of non-zero elements
   vector<int> indexCol; // index of the first element of x of column; length p+1
   vector<int> rowPos; // row position of the ith element of x; length size(x)

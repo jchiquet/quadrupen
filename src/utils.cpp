@@ -160,31 +160,6 @@ double get_df_enet(const double &lambda2, mat &R, mat &xAtxA, const sp_mat &S, u
   return(df);
 }
 
-double get_df_breg(const double &lambda2, mat &xtx, const sp_mat &S, uvec &A) {
-
-  double df ;
-  mat C     ;
-  mat SAA(A.n_elem,A.n_elem) ;
-
-  if (lambda2 > 0) {
-    C = inv_sympd(xtx.submat(A,A));
-    // have to do this due to sparse encoding
-    // either wait for Armadillo's guy to develop non contiguous
-    // subview for sparse matrices or iterate over the n_zeros only...
-    for (uword i=0;i<A.n_elem;i++){
-      for (uword j=i;j<A.n_elem;j++){
-	      SAA(i,j) = S.at(A(i),A(j));
-	      SAA(j,i) = SAA(i,j);
-      }
-    }
-    df = A.n_elem - sum(mat(SAA * C).diag()); // trace does not work, don't know why
-  } else {
-    df = A.n_elem;
-  }
-
-  return(df);
-}
-
 void remove_var_enet(uword &nbr_in, uvec &are_in, vec &betaA, uvec &A, mat &xtxA, mat &xAtxA, mat &xtxw, mat &R, uvec &null, const bool &usechol, const uword &fun) {
 
   for (uword j=0; j<null.n_elem; j++) {

@@ -23,7 +23,7 @@ ElasticNetFit <- R6::R6Class(
     }
   ),
   private = list(
-    rescaled = function() { # Zhou and Hastie Rescaling
+    rescaled = function(beta = private$beta, mu = private$mu) { # Zhou and Hastie Rescaling
       factor <- ( 1 + private$tuning[[2]] )
       mean_y <- ifelse(self$has_intercept, mean(private$data$y), 0)
       list(
@@ -54,11 +54,17 @@ BoundedRegressionFit <- R6::R6Class(
   public  = list(
     initialize =  function(data, intercept, regParam) {
       super$initialize(data, intercept, regParam)
-      private$optimizer <- bounded_reg_cpp
+      private$optimizer <- bounded_regression_cpp
+    },
+    #' @description function performing the optimization
+    #' @param control list controlling the optimization process
+    fit = function(control) {
+      super$fit(control)
+      private$beta <-  do.call(rbind, private$beta)
     }
   ),
   private = list(
-    rescaled = function() { # Zhou and Hastie Rescaling
+    rescaled = function(beta = private$beta, mu = private$mu) { # Zhou and Hastie Rescaling
       factor <- ( 1 + private$tuning[[2]] )
       mean_y <- ifelse(self$has_intercept, mean(private$data$y), 0)
       list(
@@ -68,6 +74,7 @@ BoundedRegressionFit <- R6::R6Class(
     }
   )
 )
+
 
 #' Class "RidgeRegressionFit"
 #' 

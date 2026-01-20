@@ -13,7 +13,7 @@ Class for storing data and various fixed quantity
 
 \item{\code{y}}{vector of response}
 
-\item{\code{C}}{Cholesky decomposition of the structring matrix S}
+\item{\code{C_inv}}{Inverse of the Cholesky decomposition of S}
 
 \item{\code{S}}{SDP structuring matrix}
 

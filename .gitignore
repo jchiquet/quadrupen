@@ -58,3 +58,6 @@ pkgdown
 
 tests/testthat/_snaps/
 docs
+
+.vscode/
+tools/

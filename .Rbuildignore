@@ -7,3 +7,5 @@ README.qmd
 ^_pkgdown\.yml$
 ^docs$
 ^pkgdown$
+^\.vscode$
+^tools$

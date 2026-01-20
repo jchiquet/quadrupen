@@ -143,7 +143,7 @@ void FusedLasso::getSplitFusionsActive(vector<int>& newFusions, vector<int>& new
       }
       
       // now mark all the sets in here
-      for(int j = 0; j < groups.size(); ++j) {
+      for(unsigned int j = 0; j < groups.size(); ++j) {
         
         // setting this here is not completely correct 
         newFusedGroupSize.push_back(groups[j].size());
@@ -234,7 +234,7 @@ void FusedLasso::addComplementaryGroups(vector<list<int> >& groups, list<int>& n
   }
   
   groupsMerged.sort(); 
-  int groupsMergedSize = groupsMerged.size();
+  unsigned int groupsMergedSize = groupsMerged.size();
   groupsMerged.unique();
   if(groupsMergedSize > groupsMerged.size()) {
     throw std::out_of_range("A node was grouped twice..."); 
@@ -276,10 +276,10 @@ bool FusedLasso::identifyNewFusionsHuber() {
   
   // now first run Huber, then normal
   FusedLassoCoordinate flcHuber(quadratic, wLambda1, connectionsSingle, wLambda2Single, 100, accuracy, 100000, lambda1, lambda2, Huber, huberParam);
-  bool resultHuber = flcHuber.runAlgorithm();
+  flcHuber.runAlgorithm();
   
   FusedLassoCoordinate flc(quadratic, wLambda1, connectionsSingle, wLambda2Single, maxIterInner, accuracy, maxActivateVars, lambda1, lambda2, L1);
-  bool result = flc.runAlgorithm();
+  flc.runAlgorithm();
   beta = flc.getBetaOriginal(singleFusions);
   
   getEqualFusions(newFusions, newFusedGroupSize);
@@ -362,7 +362,7 @@ bool FusedLasso::runFused(penEnum penType) {
   vector<double> wLambda1Coordinate(fusedGroupSize.size());
   for(unsigned int i = 0; i < wLambda1Coordinate.size(); ++i) {
     wLambda1Coordinate[i] = 0;
-    for(int j = 0; j < fusedGroups[i].size(); ++j) {
+    for(unsigned int j = 0; j < fusedGroups[i].size(); ++j) {
       wLambda1Coordinate[i] += wLambda1[fusedGroups[i][j]];
     }
   }
@@ -496,7 +496,7 @@ bool FusedLasso::runAlgorithmHuber() {
   //    while(outerIterNum < maxIterOuter && lastRunOK) {
   oldBeta = beta;
   
-  bool newFusionDifferent = identifyNewFusionsHuber();
+  identifyNewFusionsHuber();
   
   vector<int> newFusions = fusions;
   vector<int> newFusedGroupSize = fusedGroupSize;
@@ -628,7 +628,7 @@ double FusedLasso::findMaxLambda1(const list<int>& exemptVars) {
   
   FusedLassoCoordinate flc(quadratic, wLambda1Extreme, connectionsEmpty, wLambda2Empty, maxIterInner, accuracy, maxActivateVars, 1, 1, L1);
   
-  bool result = flc.runAlgorithm();
+  flc.runAlgorithm();
   
   this->beta = flc.getBeta();
   
@@ -756,7 +756,7 @@ void FusedLasso::checkSolution(ostream& outStream) {
   getEqualFusions(newFusions, newFusedGroupSize);
   
   // first adjust those for lambda1
-  int curPos = 0;
+  unsigned int curPos = 0;
   int curGroup = newFusions[curPos];
   double adjustment;
   

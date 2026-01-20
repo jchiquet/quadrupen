@@ -142,10 +142,10 @@ SparseMatrix SparseMatrix::createFusedX(const vector<vector<int> > fusedGroups) 
   vector<int> pos, endPos;
   pos.reserve(maxGroupSize);
   endPos.reserve(maxGroupSize);
-  int curRow;
+  unsigned int curRow;
   double curVal;
   
-  for(int group = 0; group < fusedGroups.size(); ++group) {
+  for(unsigned int group = 0; group < fusedGroups.size(); ++group) {
     curRow = 0;
     // Reuse pre-allocated capacity without memory reallocation
     pos.clear(); 
@@ -165,7 +165,7 @@ SparseMatrix SparseMatrix::createFusedX(const vector<vector<int> > fusedGroups) 
     while(curRow < n) {
       curRow = n;
       // find the smallest row available
-      for(int i = 0; i < pos.size(); ++i) {
+      for(unsigned int i = 0; i < pos.size(); ++i) {
         if(pos[i] <= endPos[i] && rowPos[pos[i]] < curRow) {
           curRow = rowPos[pos[i]];
         }
@@ -177,7 +177,7 @@ SparseMatrix SparseMatrix::createFusedX(const vector<vector<int> > fusedGroups) 
       
       curVal = 0;
       fusedX.rowPos.push_back(curRow); 
-      for(int i = 0; i < pos.size(); ++i) {
+      for(unsigned int i = 0; i < pos.size(); ++i) {
         if(pos[i] <= endPos[i] && rowPos[pos[i]] == curRow) {
           curVal += nzVec[pos[i]];
           pos[i]++;

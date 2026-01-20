@@ -88,7 +88,7 @@ bounded.reg <- function(x,
                         minratio  = ifelse(nrow(x) <= ncol(x), 1e-2, 1e-4),
                         maxfeat   = ifelse(lambda2 < 1e-2, min(nrow(x),ncol(x)), min(4*nrow(x),ncol(x))),
                         control   = list()) {
-
+  
   ## ============================================
   ## RECOVER LOW LEVEL OPTIONS
   ## 
@@ -96,7 +96,7 @@ bounded.reg <- function(x,
   ctrl$maxfeat <- maxfeat
   if (!is.null(control$method)) if (control$method != "quadra") ctrl$threshold <- 1e-2
   ctrl[names(control)] <- control # default overwritten by user specifications
-  ctrl$method <- switch(ctrl$method, quadra = 0, pathwise = 1, fista = 2, 0)
+  ctrl$method <- switch(ctrl$method, quadra = "QUADRA", pathwise = "PATHWISE", fista = "FISTA", 0)
   ctrl$rescaling <- match.arg(debiasing)
   ctrl$normalize <- normalize
   
@@ -108,7 +108,7 @@ bounded.reg <- function(x,
     outcome     = y,
     cov_struct  = struct
   )
-
+  
   ## ============================================
   ## INSTANTIATE THE PENALTY MODEL
   myModel <- BoundedRegressionFit$new(
@@ -116,9 +116,9 @@ bounded.reg <- function(x,
     intercept = intercept,
     regParam  = list(linf = lambda1, l2 = lambda2, 
                      linf_weights = penscale, 
-                     min_ratio = minratio, n_lambda1 = nlambda1)
+                     min_ratio = minratio, n_lambda = nlambda1)
   )
-
+  
   ## ============================================
   ## FIT THE MODEL WITH ACTIVE SET ALGORITHM
   ##
