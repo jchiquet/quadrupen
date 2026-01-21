@@ -33,7 +33,7 @@ public:
   
   List solution_path(const List&);
   
-  // getter functions to access private members
+  // Getter functions to access private members
   const RegressionData& data()            const { return data_      ; }
   const bool& intercept()                 const { return intercept_ ; }
   const vector<vec>& coefficients()       const { return beta_      ; }
@@ -43,6 +43,7 @@ public:
   
 private:
 
+  // Variables common to all regularizers
   RegressionData data_    ; // data structure
   Penalty penalty_        ; // Penalty object 
   vector<double> lambda_  ; // vector of penalty tuning parameters
@@ -52,14 +53,14 @@ private:
   vector<double> mu_      ; // vector of intercept term
   
   // Specific to Bounded regression
-  uvec all ; // remains constant
-  mat    XTX   ; // Gram matrix
-  vec linf_weights  ; // linf penalty factors
+  uvec all          ; // remains constant
+  mat    XTX        ; // Gram matrix
+  vec linf_weights  ; // l_inf penalty factors
   double l2_penalty ; // overall amount of l2 penalty
   sp_mat S_scaled   ; // structuring matrix scaled according to l_inf weights
-  uvec B ; // guys reaching the boundary
-  urowvec iB_ ; // contains row indices of the bounded variables
-  urowvec jB_ ; // contains column indices of the bounded variables
+  uvec B            ; // guys reaching the boundary
+  urowvec iB_       ; // contains row indices of the bounded variables
+  urowvec jB_       ; // contains column indices of the bounded variables
   
   // Compute degrees of freedom for the current estimate
   double get_df() ; 

@@ -22,9 +22,8 @@ BoundedRegression::BoundedRegression(
   // In the future, should be a method of penalty to account for the weigths
   lambda_seq(regParam) ;
   
-  // Initialize the set of variables: either on or within the l_infty boundaries
-  all = regspace<uvec>(0, data_.p_-1) ;
-  B = all ; // guys reaching the boundaries
+  // Initialize the set of variables living on the boundaries (all)
+  B = regspace<uvec>(0, data_.p_-1) ;
   
   // Scale the structuring matrix according to the l_inf weights and the amount of l2 penalty 
   l2_penalty   = as<double>(regParam["l2"]) ;
@@ -50,7 +49,8 @@ void BoundedRegression::lambda_seq(const List& regParam) {
 double BoundedRegression::get_df() {
   double df ;
   mat C     ;
-  uvec I = setdiff(all,B);
+  all = regspace<uvec>(0, data_.p_-1) ;
+  uvec I = setdiff(all, B);
   mat SII(I.n_elem,I.n_elem) ;
   
   df = I.n_elem;
@@ -74,24 +74,22 @@ List BoundedRegression::solution_path(const List& control) {
   // Parameters controlling the optimization
   const bool verbose(as<bool>(control["verbose"]))        ; // verbosity level
   const double accuracy(as<double>(control["threshold"])) ; // precision required
-  const uword maxiter(as<uword>(control["maxiter"]))      ; // max # of iterates of the active set
+  const uword maxiter(as<uword>(control["maxiter"]))      ; // max # of passes in the active set
   const uword maxfeat(as<uword>(control["maxfeat"]))      ; // max # of variables activated
-  const bool bullet(as<bool>(control["bulletproof"]))     ; // use Cholesky decomposition or not
-  
+
   SolverType algorithm = QUADRA; // Optimizer (default to QUADRA)
   if (as<std::string>(control["method"]) == "FISTA") {algorithm = FISTA;}
 
   // Variables monitoring the algorithm
-  vector<double> dual_gap ; // a vector with the successively reach duality gap
-  vector<uword> converge  ; // a vector indicating if convergence occurred (0/1/2)
-  vector<uword> it_active ; // # of loop in the active set for each lambda
-  vector<uword> it_optim  ; // # of loop in the optimization process for each loop of the active set
-  vector<double> timing   ; // successive timing for solving for each lambda value
+  vector<double> gap    ; // a vector with the successively reach duality gap
+  vector<uword> status  ; // a vector indicating if convergence occurred (0/1/2)
+  vector<uword> iactive ; // # of loop in the active set for each lambda
+  vector<uword> ioptim  ; // # of loop in the optimization process for each loop of the active set
+  vector<double> timing ; // successive timing for solving for each lambda value
    
   // LAMBDA LOOP
   vec current_beta = zeros<vec>(data_.p_) ; // vector of current parameters
-  wall_clock timer ; // clock
-  timer.tic();
+  wall_clock timer ; timer.tic(); // clock
   for(auto current_lambda : lambda_) {
      if (verbose) {Rprintf("\n lambda_linf = %f",current_lambda) ;}
 
@@ -101,47 +99,32 @@ List BoundedRegression::solution_path(const List& control) {
     vec current_grad ;
     double current_gap = datum::inf ;
     
-    do { // KKT/SYSTEM RESOLUTION
-      
+    do {
       R_CheckUserInterrupt();
-      
       current_it++;
       
       if (algorithm == FISTA) {
         Optimizer solver(data_, penalty_, algorithm) ;
-        it_optim.push_back(
+        ioptim.push_back(
           solver.run(current_beta, B, current_grad, XTX, current_lambda, 1e-3, 10000)
         );
-        // Evaluating the set of variable reaching the boundary
-        B = find(abs(penalty_.elt_norm(current_beta) - penalty_.pen_norm(current_beta)) < ZERO );
         break;
-      } else { // quadratic solver
+      } else { // QUADRA solver
         try {
-          // If no convergence up to now...
           if (current_it == maxiter) {
             throw std::runtime_error("Fail to converge...");
           } else {
             Optimizer solver(data_, penalty_, algorithm) ;
-            it_optim.push_back(
+            ioptim.push_back(
               solver.run(current_beta, B, current_grad, XTX, current_lambda, 1e-10, 50)
             );
           }
         } catch (std::runtime_error& error) {
           if (verbose) {
-            Rprintf("\nWarning: experiencing numerical instability... ");
+            Rprintf("\nNumerical instability: switching to proximal algorithm (slower but safer).");
           }
-          if (bullet) {
-            if (verbose) {
-              Rprintf("\nEntering 'bulletproof' mode: switching to proximal algorithm (slower but safer).");
-            }
-            current_it = 0; // start this lambda all the way back, with FISTA algorithm
-            algorithm = FISTA ;
-          } else {
-            if (verbose) {
-              Rprintf("\nCutting the solution path to this point, as you specified bulletproof=FALSE.");
-            }
-            success = false ;
-          }
+          current_it = 0; // start this lambda all the way back, with FISTA algorithm
+          algorithm = FISTA ;
         }
       }
 
@@ -150,15 +133,15 @@ List BoundedRegression::solution_path(const List& control) {
     } while ((current_gap > accuracy) && (current_it <= maxiter) && (success));
 
     // Checking convergence status
-    dual_gap.push_back(std::max(0.0, penalty_.dual_norm(current_grad) - current_lambda)) ;
-    it_active.push_back(current_it) ;
-    converge.push_back(0) ;
-    if (current_it >= maxiter)         { converge.back() = 1 ; }
-    if (data_.p_ - B.n_elem > maxfeat) { converge.back() = 2 ; }
-    if (!success)                      { converge.back() = 3 ; }
+    gap.push_back(std::max(0.0, penalty_.dual_norm(current_grad) - current_lambda)) ;
+    iactive.push_back(current_it) ;
+    status.push_back(0) ;
+    if (current_it >= maxiter)         { status.back() = 1 ; }
+    if (data_.p_ - B.n_elem > maxfeat) { status.back() = 2 ; }
+    if (!success)                      { status.back() = 3 ; }
 
     // Preparing next value of the penalty
-    if (converge.back() >= 2) {
+    if (status.back() >= 2) {
       break;
     } else {
       beta_.push_back(current_beta/(data_.norm_X() % linf_weights)) ;
@@ -168,7 +151,6 @@ List BoundedRegression::solution_path(const List& control) {
       jB_ = join_rows(jB_, B.t()) ;
     }
 
-    // Record the time elapsed
     timing.push_back(timer.toc()) ;
   } // END OF THE LOOP OVER LAMBDA
 
@@ -176,10 +158,10 @@ List BoundedRegression::solution_path(const List& control) {
   
   return(
     List::create(
-      Named("it_active")      = it_active,
-      Named("it_optim")       = it_optim ,
-      Named("max_grd")        = dual_gap ,
-      Named("convergence")    = converge ,
+      Named("it_active")      = iactive,
+      Named("it_optim")       = ioptim ,
+      Named("max_grd")        = gap    ,
+      Named("convergence")    = status ,
       Named("pensteps_timer") = timing 
     )
   );

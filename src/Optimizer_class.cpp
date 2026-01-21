@@ -105,7 +105,7 @@ int Optimizer::quadratic_breg(
 }
 
 int Optimizer::fista_breg(
-    vec& beta0,
+    vec& beta,
     uvec& B,
     vec& grad,
     mat& XTX,
@@ -113,8 +113,8 @@ int Optimizer::fista_breg(
     const double& accuracy,
     const uword& max_iter) {
   
-  colvec betak = beta0  ; // output vector
-  colvec betal = beta0     ;
+  colvec betak = beta  ; // output vector
+  colvec betal = beta     ;
   uword iter = 0          ; // current iterate
   double delta = 2*accuracy  ; // change in beta
   double L0 = max( XTX.diag()) ; // Lipchitz constant
@@ -124,7 +124,7 @@ int Optimizer::fista_breg(
   double f0, fk ;
   double l_num, l_den ;
   
-  while ((delta > accuracy*accuracy) && (iter < max_iter)) {
+  while ((delta > pow(accuracy,2)) && (iter < max_iter)) {
     
     f0 = as_scalar(.5 * strans(betal) * XTX * betal - strans(data_.XTy_) * betal) ;
     grad = -data_.XTy_ + XTX * betal ;
@@ -150,18 +150,20 @@ int Optimizer::fista_breg(
     tk = 0.5 * (1+sqrt(1+4*t0*t0));
     
     // updating s
-    betal = betak + (t0-1)/tk * ( betak - beta0 );
+    betal = betak + (t0-1)/tk * ( betak - beta );
     
     // preparing next iterate
     delta = sqrt(l_num);
-    beta0 = betak;
+    beta = betak;
     t0 = tk;
     found = false;
     iter++;
     
     R_CheckUserInterrupt();
   }
-  grad = -data_.XTy_ + XTX * beta0 ;
+
+  // Evaluating the set of variable reaching the boundary
+  B = find(abs(penalty_.elt_norm(beta) - penalty_.pen_norm(beta)) < ZERO );
   
   return(iter) ;
   
