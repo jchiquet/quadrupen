@@ -8,18 +8,6 @@
 using namespace Rcpp;
 using namespace arma;
 
-arma::uvec setdiff_bounded(arma::uvec& x, arma::uvec& y) {
-  
-  std::vector<int> a = arma::conv_to< std::vector<int> >::from(arma::sort(x));
-  std::vector<int> b = arma::conv_to< std::vector<int> >::from(arma::sort(y));
-  std::vector<int> out;
-  
-  std::set_difference(a.begin(), a.end(), b.begin(), b.end(),
-                      std::inserter(out, out.end()));
-  
-  return arma::conv_to<arma::uvec>::from(out);
-}
-
 BoundedRegression::BoundedRegression(
   RegressionData& data, const bool& intercept, const List& regParam) :
   data_ (data), intercept_ (intercept)
@@ -62,6 +50,7 @@ void BoundedRegression::lambda_seq(const List& regParam) {
 double BoundedRegression::get_df() {
   double df ;
   mat C     ;
+  uvec I = setdiff(all,B);
   mat SII(I.n_elem,I.n_elem) ;
   
   df = I.n_elem;
@@ -89,14 +78,15 @@ List BoundedRegression::solution_path(const List& control) {
   const uword maxfeat(as<uword>(control["maxfeat"]))      ; // max # of variables activated
   const bool bullet(as<bool>(control["bulletproof"]))     ; // use Cholesky decomposition or not
   
-  available_optimizer optimizer = QUADRA; // Optimizer (default to QUADRA)
-  if (as<std::string>(control["method"]) == "FISTA") {optimizer = FISTA;}
+  SolverType algorithm = QUADRA; // Optimizer (default to QUADRA)
+  if (as<std::string>(control["method"]) == "FISTA") {algorithm = FISTA;}
 
-  vector<double> max_grd  ; // a vector with the successively reach duality gap
+  // Variables monitoring the algorithm
+  vector<double> dual_gap ; // a vector with the successively reach duality gap
   vector<uword> converge  ; // a vector indicating if convergence occurred (0/1/2)
   vector<uword> it_active ; // # of loop in the active set for each lambda
   vector<uword> it_optim  ; // # of loop in the optimization process for each loop of the active set
-  vector<double> timing ; // successive timing for solving for each lambda value
+  vector<double> timing   ; // successive timing for solving for each lambda value
    
   // LAMBDA LOOP
   vec current_beta = zeros<vec>(data_.p_) ; // vector of current parameters
@@ -104,38 +94,36 @@ List BoundedRegression::solution_path(const List& control) {
   timer.tic();
   for(auto current_lambda : lambda_) {
      if (verbose) {Rprintf("\n lambda_linf = %f",current_lambda) ;}
-  
-    // smooth part of the gradient
-    vec current_grad = -data_.XTy_ + XTX * current_beta ;
-    // dual norm of the gradient
-    // double current_max_grd = std::max(0.0, as_scalar(sum(abs(current_grad)) - current_lambda)) ;
-    double current_max_grd = std::max(0.0, penalty_.dual_norm(current_grad) - current_lambda) ;
-    
-    // FIX-LAMBDA LOOP: IDENTIFY THE ACTIVE SET AND SOLVE
+
+    // OPTIMIZER LOOP (FIX-LAMBDA VALUE): IDENTIFY THE ACTIVE SET AND SOLVE
     uword current_it = 0 ;
     bool  success = true ;
-    while ((current_max_grd > accuracy) && (current_it <= maxiter)) {
-      // _____________________________________________________________
-      //
-      // (1) KKT/SYSTEM RESOLUTION
-      // _____________________________________________________________
-  
-      switch (optimizer) {
-      case FISTA :
+    vec current_grad ;
+    double current_gap = datum::inf ;
+    
+    do { // KKT/SYSTEM RESOLUTION
+      
+      R_CheckUserInterrupt();
+      
+      current_it++;
+      
+      if (algorithm == FISTA) {
+        Optimizer solver(data_, penalty_, algorithm) ;
         it_optim.push_back(
-          solve_fista(current_beta, current_grad, current_lambda)
+          solver.run(current_beta, B, current_grad, XTX, current_lambda, 1e-3, 10000)
         );
         // Evaluating the set of variable reaching the boundary
         B = find(abs(penalty_.elt_norm(current_beta) - penalty_.pen_norm(current_beta)) < ZERO );
         break;
-      default: // quadratic solver
+      } else { // quadratic solver
         try {
           // If no convergence up to now...
           if (current_it == maxiter) {
             throw std::runtime_error("Fail to converge...");
           } else {
+            Optimizer solver(data_, penalty_, algorithm) ;
             it_optim.push_back(
-              solve_quadratic(current_beta, current_grad, current_lambda)
+              solver.run(current_beta, B, current_grad, XTX, current_lambda, 1e-10, 50)
             );
           }
         } catch (std::runtime_error& error) {
@@ -146,13 +134,8 @@ List BoundedRegression::solution_path(const List& control) {
             if (verbose) {
               Rprintf("\nEntering 'bulletproof' mode: switching to proximal algorithm (slower but safer).");
             }
-            current_it = 0; // start this lambda all the way back
-            optimizer = FISTA ;
-            it_optim.push_back(
-              solve_fista(current_beta, current_grad, current_lambda)
-            );
-            // reformatting the output
-            B = find(abs(penalty_.elt_norm(current_beta) - penalty_.pen_norm(current_beta)) < ZERO );
+            current_it = 0; // start this lambda all the way back, with FISTA algorithm
+            algorithm = FISTA ;
           } else {
             if (verbose) {
               Rprintf("\nCutting the solution path to this point, as you specified bulletproof=FALSE.");
@@ -162,26 +145,12 @@ List BoundedRegression::solution_path(const List& control) {
         }
       }
 
-      // _____________________________________________________________
-      //
-      // (2) OPTIMALITY TESTING
-      // _____________________________________________________________
-
-      // dual norm of gradient for inactive variable
-      current_max_grd = std::max(0.0, penalty_.dual_norm(current_grad) - current_lambda) ;
-      // current_max_grd = std::max(0.0, as_scalar(sum(abs(current_grad)) - current_lambda)) ;
-
-      // Moving to the next iterate
-      current_it++;
-
-      // Cutting the path here if fail to converge or
-      if (!success) { break; }
-
-      R_CheckUserInterrupt();
-    } // END OF THE SOLVER LOOP
+      // OPTIMALITY TESTING
+      current_gap = std::max(0.0, penalty_.dual_norm(current_grad) - current_lambda) ;
+    } while ((current_gap > accuracy) && (current_it <= maxiter) && (success));
 
     // Checking convergence status
-    max_grd.push_back(current_max_grd) ;
+    dual_gap.push_back(std::max(0.0, penalty_.dual_norm(current_grad) - current_lambda)) ;
     it_active.push_back(current_it) ;
     converge.push_back(0) ;
     if (current_it >= maxiter)         { converge.back() = 1 ; }
@@ -209,162 +178,9 @@ List BoundedRegression::solution_path(const List& control) {
     List::create(
       Named("it_active")      = it_active,
       Named("it_optim")       = it_optim ,
-      Named("max_grd")        = max_grd  ,
+      Named("max_grd")        = dual_gap ,
       Named("convergence")    = converge ,
       Named("pensteps_timer") = timing 
     )
   );
 }
-
-int BoundedRegression::solve_quadratic(
-    vec& beta,
-    vec& grad, 
-    double& lambda, 
-    const uword& max_iter) {
-  
-  static const double zero = 2e-16     ;
-  uword p        = beta.n_elem    ; // size of the problem
-  uword iter     = 0              ; // count the number of systems solved
-  double bound ; //
-  uvec all = regspace<uvec>(0,p-1) ;
-  uvec toB           ; // guys reaching the boundary after optimization
-  uvec toI           ; // guys leaving the boundary after optimization
-  vec  theta = -sign(grad.elem(B)) ;
-  
-  vec XX_B   ;
-  mat XX     ;
-  mat XX_II  ;
-  mat R      ;
-  vec b      ;
-  vec tmp    ;
-  
-  toB = B;
-  
-  while ((toB.n_elem > 0) & (iter < max_iter)) {
-    
-    iter++;
-    //
-    // SOLVE THE QUADRATIC PROBLEM
-    //
-    
-    // Constructing the system (KKT)
-    XX_B = XTX.cols(B) * theta;
-    
-    if (I.is_empty()) {
-      XX = sum(theta % XX_B.elem(B),0);
-      b  = (dot(theta, data_.XTy_.elem(B)) - lambda);
-      beta.elem(B) = theta * (b/XX) ;
-      // keep a trace of the current boundary
-    } else {
-      if (I.n_elem > 1) {
-        XX_II = XTX.submat(I,I) ;
-      } else {
-        XX_II = XTX(I,I) ;
-      }
-      XX   = join_rows(
-        join_cols(sum(theta % XX_B.elem(B),0),XX_B.elem(I)),
-        join_cols(strans(XX_B.elem(I)), XX_II));
-      
-      vec b = zeros<vec>(I.n_elem + 1) ;
-      b[0] = dot(theta, data_.XTy_.elem(B)) - lambda;
-      b.subvec(1,b.n_elem-1) = data_.XTy_.elem(I) ;
-      
-      // Solving with Cholesky factorization...
-      R = chol(XX) ;
-      tmp = solve(trimatu(R), solve(trimatl(strans(R)),b)) ;
-      beta.elem(B) = theta * tmp[0] ;
-      beta.elem(I) = tmp.subvec(1,tmp.n_elem-1) ;
-    }
-    // keep a trace of the current boundary
-    bound = max(abs(beta.elem(B)));
-    //
-    // VARIABLES REACHING THE BOUNDARY
-    //
-    toB = find(abs(beta) > bound);
-    beta.elem(toB) = bound * sign(beta.elem(toB));
-    B = unique(join_cols(B,toB));
-    I = setdiff_bounded(all,B);
-    theta = sign(beta.elem(B)); // sign of the guys reaching the supremum
-  }
-  
-  grad = -data_.XTy_ + XTX * beta ;
-  
-  //
-  // VARIABLE LEAVING THE BOUDARY
-  //
-  toI = find(abs(theta + sign(grad.elem(B))) > zero);
-  if (!toI.is_empty()) {
-    toI = B.elem(toI);
-  }
-  if (!toI.is_empty()) {
-    B = setdiff_bounded(B,toI);
-    I = setdiff_bounded(all,B);
-  }
-  // If everyone is leaving the boundary, that's an issue...
-  if (B.is_empty()) {
-    throw std::runtime_error("Too much unstability");
-  }
-  
-  return(iter) ;
-}
-
-int BoundedRegression::solve_fista(
-    vec& beta0,
-    vec& grad,
-    double& lambda,
-    const double& eps, 
-    const uword& max_iter) {
-
-  colvec betak = beta0  ; // output vector
-  colvec betal = beta0     ;
-  uword iter = 0          ; // current iterate
-  double delta = 2*eps  ; // change in beta
-  double L0 = max( XTX.diag()) ; // Lipchitz constant
-  
-  double t0 = 1.0, tk;
-  bool found=false;
-  double f0, fk ;
-  double l_num, l_den ;
-  
-  while ((delta > eps*eps) && (iter < max_iter)) {
-    
-    f0 = as_scalar(.5 * strans(betal) * XTX * betal - strans(data_.XTy_) * betal) ;
-    grad = -data_.XTy_ + XTX * betal ;
-    
-    // Line search over L
-    while(!found) {
-      betak = penalty_.proximal(betal - grad/L0, lambda /L0);
-      
-      fk = as_scalar(.5 * strans(betak) * XTX * betak - strans(data_.XTy_) * betak) ;
-      l_num = as_scalar(2 * (fk - f0 - dot(grad, betak-betal) ));
-      l_den = as_scalar(pow(norm(betak-betal,2),2));
-      
-      if ((L0 * l_den >= l_num) || (sqrt(l_den) < eps)) {
-        found = true;
-      } else {
-        L0 = fmax(2*L0, l_num/l_den);
-      }
-      
-      R_CheckUserInterrupt();
-    }
-    
-    // updating t
-    tk = 0.5 * (1+sqrt(1+4*t0*t0));
-    
-    // updating s
-    betal = betak + (t0-1)/tk * ( betak - beta0 );
-    
-    // preparing next iterate
-    delta = sqrt(l_num);
-    beta0 = betak;
-    t0 = tk;
-    found = false;
-    iter++;
-    
-    R_CheckUserInterrupt();
-  }
-  
-  return(iter) ;
-  
-}
-

@@ -12,6 +12,8 @@ using namespace arma;
 
 #define ZERO 2e-16 // practical zero
 
+arma::uvec setdiff(arma::uvec& x, arma::uvec& y) ;
+
 inline vec get_lambda1(SEXP LAMBDA1, uword n_lambda, const double min_ratio, double lmax) {
   vec lambda1 ;
   if (LAMBDA1 != R_NilValue) {

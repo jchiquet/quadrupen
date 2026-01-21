@@ -17,6 +17,7 @@ using namespace arma;
 class RegressionData {
   friend class RidgeRegression ;
   friend class BoundedRegression ;
+  friend class Optimizer ;
   // friend class ACTIVE_DATA; // NEED ACCES TO x, xt, y, xty, n, p
 
 private:

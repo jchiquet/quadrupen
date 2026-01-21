@@ -16,10 +16,10 @@
 
 #include "RegressionData_class.h"
 #include "Penalty_class.h"
+#include "Optimizer_class.h"
+#include "utils.h"
 
 #define ZERO 2e-16 // practical zero
-
-enum available_optimizer {FISTA, QUADRA};
 
 using namespace Rcpp;
 using namespace arma;
@@ -57,19 +57,12 @@ private:
   vec linf_weights  ; // linf penalty factors
   double l2_penalty ; // overall amount of l2 penalty
   sp_mat S_scaled   ; // structuring matrix scaled according to l_inf weights
-  uvec B ; // guys reaching the boundary - can be viewed as the "inactive" variables
-  uvec I ; // guys living in between the supremum - can be viewed as the "active" variables
+  uvec B ; // guys reaching the boundary
   urowvec iB_ ; // contains row indices of the bounded variables
   urowvec jB_ ; // contains column indices of the bounded variables
   
   // Compute degrees of freedom for the current estimate
   double get_df() ; 
-
-  // Solve with quadratic solver
-  int solve_quadratic(vec& beta, vec& grad, double& lambda, const uword& max_iter=50) ;
-
-  int solve_fista(vec& beta0, vec& grad, double& lambda, const double& eps=1e-2, 
-    const uword& max_iter=10000) ;
 };
 
 #endif

@@ -3,6 +3,18 @@
 using namespace Rcpp;
 using namespace arma;
 
+arma::uvec setdiff(arma::uvec& x, arma::uvec& y) {
+  
+  std::vector<int> a = arma::conv_to< std::vector<int> >::from(arma::sort(x));
+  std::vector<int> b = arma::conv_to< std::vector<int> >::from(arma::sort(y));
+  std::vector<int> out;
+  
+  std::set_difference(a.begin(), a.end(), b.begin(), b.end(),
+                      std::inserter(out, out.end()));
+  
+  return arma::conv_to<arma::uvec>::from(out);
+}
+
 vec grp_norm(vec x, uvec pk, int norm, int rep)  {
 
   vec res ;
