@@ -3,8 +3,8 @@
  *         MIA Paris-Saclay
  */
 
-#ifndef _quadrupen_RIDGE_H
-#define _quadrupen_RIDGE_H
+#ifndef _BoundedRegression_H
+#define _BoundedRegression_H
 
 #define ARMA_NO_DEBUG
 #define ARMA_USE_LAPACK
@@ -15,6 +15,7 @@
 #endif
 
 #include "RegressionData_class.h"
+#include "Penalty_class.h"
 
 #define ZERO 2e-16 // practical zero
 
@@ -43,8 +44,9 @@ public:
 private:
 
   RegressionData data_    ; // data structure
+  Penalty penalty_        ; // Penalty object 
+  vector<double> lambda_  ; // vector of penalty tuning parameters
   bool intercept_         ; // does the model include intercept
-  vector<double> lambda_  ; // vector of ridge tuning parameters
   vector<vec> beta_       ; // matrix of coefficients
   vector<double> df_      ; // degrees of freedom along the path
   vector<double> mu_      ; // vector of intercept term

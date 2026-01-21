@@ -8,39 +8,6 @@
 using namespace Rcpp;
 using namespace arma;
 
-vec proximal_inf_bounded(vec v, vec lambda) {
-  
-  uword p = v.n_elem;
-  vec u, proj;
-  vec out = zeros<vec>(p);
-
-  if ( as_scalar(sum(abs(v) / lambda)) >= 1) {
-    
-    // Reordonnons les valeurs absolues
-    u = sort(abs(v), "descend");
-    
-    // valeurs des coordonnées projetees si non nulles (problème dual)
-    proj = (cumsum(u) - lambda)/linspace<vec>(1,p,p);
-    
-    // selection des coordonnees non nulles (problème dual)
-    uvec maxs = sort(find(u-proj>ZERO), "descend") ;
-    double thresh = proj[maxs[0]];
-    
-    // solution du programme primal
-    // On garde les valeurs les plus petites, et on seuille le reste à une valeur commune +- thresh
-    for (uword k=0; k < p;k++) {
-      if (fabs(v(k)) > ZERO) {
-        if (v(k) > 0) {
-          out(k) = fmin(fabs(v(k)),thresh);
-        } else {
-          out(k) = -fmin(fabs(v(k)),thresh);
-        }
-      }
-    }
-  }
-  return(out);
-}
-
 arma::uvec setdiff_bounded(arma::uvec& x, arma::uvec& y) {
   
   std::vector<int> a = arma::conv_to< std::vector<int> >::from(arma::sort(x));
@@ -53,36 +20,38 @@ arma::uvec setdiff_bounded(arma::uvec& x, arma::uvec& y) {
   return arma::conv_to<arma::uvec>::from(out);
 }
 
-
 BoundedRegression::BoundedRegression(
   RegressionData& data, const bool& intercept, const List& regParam) :
   data_ (data), intercept_ (intercept)
 {
 
+  // Initialize the penalty function
+  penalty_ = Penalty() ;
+  penalty_.setPenalty("linf") ;
+  // TODO: include the weights in the penalty function
+  linf_weights = as<vec>(regParam["linf_weights"]) ;
+  // Generate the sequence of lambda (amount of linfty penalty)
+  // In the future, should be a method of penalty to account for the weigths
+  lambda_seq(regParam) ;
+  
   // Initialize the set of variables: either on or within the l_infty boundaries
   all = regspace<uvec>(0, data_.p_-1) ;
-  B = all              ; // guys reaching the boundaries
-  I = setdiff_bounded(all, B)  ; // guys living in between the supremum
-
+  B = all ; // guys reaching the boundaries
+  
   // Scale the structuring matrix according to the l_inf weights and the amount of l2 penalty 
-  l2_penalty = as<double>(regParam["l2"]) ;
-  linf_weights = as<vec>(regParam["linf_weights"]) ;
+  l2_penalty   = as<double>(regParam["l2"]) ;
   sp_mat diag_S = spdiags(sqrt(l2_penalty)*pow(linf_weights,-1/2), ivec({0}), data_.p_, data_.p_) ;
   S_scaled = diag_S * data_.S_ * diag_S  ; // sparsely encoded structuring matrix
 
   // Compute the Gram matrix (+ S_scaled)  
   XTX = data_.X_.t() * data_.X_ - data_.n_ * data_.X_bar_ * data_.X_bar_.t() + S_scaled;
-  
-  // Generate the sequence of lambda (amount of l_infty penalty)
-  lambda_seq(regParam) ;
-  
 }
 
 void BoundedRegression::lambda_seq(const List& regParam) {
   if (regParam["linf"] != R_NilValue) {
     lambda_  = as<vector<double>>(regParam["linf"]) ;
   } else {
-    double lambda_max = sum(abs(data_.XTy()));
+    double lambda_max = penalty_.dual_norm(data_.XTy_) ;
     lambda_ = conv_to<vector<double>>::from(logspace(log10(lambda_max),
                  log10(as<double>(regParam["min_ratio"])*lambda_max),
                  as<uword>(regParam["n_lambda"])
@@ -95,20 +64,17 @@ double BoundedRegression::get_df() {
   mat C     ;
   mat SII(I.n_elem,I.n_elem) ;
   
+  df = I.n_elem;
   if (l2_penalty > 0) {
     C = inv_sympd(XTX.submat(I,I));
-    // have to do this due to sparse encoding
-    // either wait for Armadillo's guy to develop non contiguous
-    // subview for sparse matrices or iterate over the n_zeros only...
+    // loop due to sparse encoding.. should iterate over the n_zeros only...
     for (uword i=0;i<I.n_elem;i++){
       for (uword j=i;j<I.n_elem;j++){
         SII(i,j) = S_scaled.at(I(i),I(j));
         SII(j,i) = SII(i,j);
       }
     }
-    df = I.n_elem - sum(mat(SII * C).diag()); // trace does not work, don't know why
-  } else {
-    df = I.n_elem;
+    df -= trace(SII * C);
   }
   
   return(df);
@@ -142,7 +108,8 @@ List BoundedRegression::solution_path(const List& control) {
     // smooth part of the gradient
     vec current_grad = -data_.XTy_ + XTX * current_beta ;
     // dual norm of the gradient
-    double current_max_grd = std::max(0.0, as_scalar(sum(abs(current_grad)) - current_lambda)) ;
+    // double current_max_grd = std::max(0.0, as_scalar(sum(abs(current_grad)) - current_lambda)) ;
+    double current_max_grd = std::max(0.0, penalty_.dual_norm(current_grad) - current_lambda) ;
     
     // FIX-LAMBDA LOOP: IDENTIFY THE ACTIVE SET AND SOLVE
     uword current_it = 0 ;
@@ -159,8 +126,7 @@ List BoundedRegression::solution_path(const List& control) {
           solve_fista(current_beta, current_grad, current_lambda)
         );
         // Evaluating the set of variable reaching the boundary
-        B = find(abs(abs(current_beta) - max(abs(current_beta))) < ZERO );
-        I = setdiff_bounded(all, B) ;
+        B = find(abs(penalty_.elt_norm(current_beta) - penalty_.pen_norm(current_beta)) < ZERO );
         break;
       default: // quadratic solver
         try {
@@ -186,8 +152,7 @@ List BoundedRegression::solution_path(const List& control) {
               solve_fista(current_beta, current_grad, current_lambda)
             );
             // reformatting the output
-            B = find(abs(abs(current_beta) - max(abs(current_beta))) < ZERO );
-            I = setdiff_bounded(all, B) ;
+            B = find(abs(penalty_.elt_norm(current_beta) - penalty_.pen_norm(current_beta)) < ZERO );
           } else {
             if (verbose) {
               Rprintf("\nCutting the solution path to this point, as you specified bulletproof=FALSE.");
@@ -202,8 +167,9 @@ List BoundedRegression::solution_path(const List& control) {
       // (2) OPTIMALITY TESTING
       // _____________________________________________________________
 
-      // dual norm of gradient for unactive variable
-      current_max_grd = std::max(0.0, as_scalar(sum(abs(current_grad)) - current_lambda)) ;
+      // dual norm of gradient for inactive variable
+      current_max_grd = std::max(0.0, penalty_.dual_norm(current_grad) - current_lambda) ;
+      // current_max_grd = std::max(0.0, as_scalar(sum(abs(current_grad)) - current_lambda)) ;
 
       // Moving to the next iterate
       current_it++;
@@ -272,7 +238,6 @@ int BoundedRegression::solve_quadratic(
   vec b      ;
   vec tmp    ;
   
-  I = setdiff_bounded(all,B); // useless?
   toB = B;
   
   while ((toB.n_elem > 0) & (iter < max_iter)) {
@@ -359,9 +324,6 @@ int BoundedRegression::solve_fista(
   double t0 = 1.0, tk;
   bool found=false;
   double f0, fk ;
-  colvec lbd (beta0.n_elem) ;
-  lbd.fill(lambda);
-  
   double l_num, l_den ;
   
   while ((delta > eps*eps) && (iter < max_iter)) {
@@ -371,7 +333,7 @@ int BoundedRegression::solve_fista(
     
     // Line search over L
     while(!found) {
-      betak = proximal_inf_bounded(betal - grad/L0, lbd /L0);
+      betak = penalty_.proximal(betal - grad/L0, lambda /L0);
       
       fk = as_scalar(.5 * strans(betak) * XTX * betak - strans(data_.XTy_) * betak) ;
       l_num = as_scalar(2 * (fk - f0 - dot(grad, betak-betal) ));
