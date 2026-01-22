@@ -16,7 +16,6 @@
 
 #include "RegressionData_class.h"
 #include "Penalty_class.h"
-#include "utils.h"
 
 #define ZERO 2e-16 // practical zero
 

@@ -17,7 +17,6 @@
 #include "RegressionData_class.h"
 #include "Penalty_class.h"
 #include "Optimizer_class.h"
-#include "utils.h"
 
 #define ZERO 2e-16 // practical zero
 
@@ -45,15 +44,14 @@ private:
 
   // Variables common to all regularizers
   RegressionData data_    ; // data structure
-  Penalty penalty_        ; // Penalty object 
-  vector<double> lambda_  ; // vector of penalty tuning parameters
   bool intercept_         ; // does the model include intercept
+  vector<double> lambda_  ; // vector of penalty tuning parameters
+  Penalty penalty_        ; // Penalty object 
   vector<vec> beta_       ; // matrix of coefficients
   vector<double> df_      ; // degrees of freedom along the path
   vector<double> mu_      ; // vector of intercept term
   
   // Specific to Bounded regression
-  uvec all          ; // remains constant
   mat    XTX        ; // Gram matrix
   vec linf_weights  ; // l_inf penalty factors
   double l2_penalty ; // overall amount of l2 penalty

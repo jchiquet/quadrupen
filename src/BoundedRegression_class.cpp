@@ -14,16 +14,14 @@ BoundedRegression::BoundedRegression(
 {
 
   // Initialize the penalty function
+  // TODO: include the weights in the penalty function
   penalty_ = Penalty() ;
   penalty_.setPenalty("linf") ;
-  // TODO: include the weights in the penalty function
   linf_weights = as<vec>(regParam["linf_weights"]) ;
-  // Generate the sequence of lambda (amount of linfty penalty)
-  // In the future, should be a method of penalty to account for the weigths
-  lambda_seq(regParam) ;
   
-  // Initialize the set of variables living on the boundaries (all)
-  B = regspace<uvec>(0, data_.p_-1) ;
+  // Generate the sequence of lambda (amount of linfty penalty)
+  // In the future, should be a method of penalty to account for the weights
+  lambda_seq(regParam) ;
   
   // Scale the structuring matrix according to the l_inf weights and the amount of l2 penalty 
   l2_penalty   = as<double>(regParam["l2"]) ;
@@ -32,6 +30,9 @@ BoundedRegression::BoundedRegression(
 
   // Compute the Gram matrix (+ S_scaled)  
   XTX = data_.X_.t() * data_.X_ - data_.n_ * data_.X_bar_ * data_.X_bar_.t() + S_scaled;
+  
+  // Initialize the set of variables living on the boundaries (all)
+  B = regspace<uvec>(0, data_.p_-1) ;
 }
 
 void BoundedRegression::lambda_seq(const List& regParam) {
@@ -49,8 +50,8 @@ void BoundedRegression::lambda_seq(const List& regParam) {
 double BoundedRegression::get_df() {
   double df ;
   mat C     ;
-  all = regspace<uvec>(0, data_.p_-1) ;
-  uvec I = setdiff(all, B);
+  uvec I = regspace<uvec>(0, data_.p_-1) ;
+  I.shed_rows(B) ;
   mat SII(I.n_elem,I.n_elem) ;
   
   df = I.n_elem;

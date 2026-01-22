@@ -54,8 +54,9 @@ int Optimizer::quadratic_breg(
     // Constructing the system (KKT)
     mat XX, XX_II ;
     vec XX_B = XTX.cols(B) * theta;
-    uvec I = setdiff(all,B);
-    
+    uvec I = regspace<uvec>(0, data_.p_-1) ;
+    I.shed_rows(B) ;
+
     if (I.is_empty()) {
       XX = sum(theta % XX_B.elem(B),0);
       double b  = (dot(theta, data_.XTy_.elem(B)) - lambda);
@@ -92,10 +93,8 @@ int Optimizer::quadratic_breg(
   
   // Handling guys leaving the boundary after optimization
   uvec toI  = find(abs(theta + sign(grad.elem(B))) > ZERO);
-  if (!toI.is_empty()) {
-    toI = B.elem(toI);
-    B = setdiff(B,toI);
-  }
+  B.shed_rows(toI) ;
+  
   // If everyone is leaving the boundary, that's an issue...
   if (B.is_empty()) {
     throw std::runtime_error("Too much unstability");
