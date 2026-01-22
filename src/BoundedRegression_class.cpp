@@ -96,7 +96,6 @@ List BoundedRegression::solution_path(const List& control) {
 
     // OPTIMIZER LOOP (FIX-LAMBDA VALUE): IDENTIFY THE ACTIVE SET AND SOLVE
     uword current_it = 0 ;
-    bool  success = true ;
     vec current_grad ;
     double current_gap = datum::inf ;
     
@@ -126,12 +125,13 @@ List BoundedRegression::solution_path(const List& control) {
           }
           current_it = 0; // start this lambda all the way back, with FISTA algorithm
           algorithm = FISTA ;
+          B = regspace<uvec>(0, data_.p_-1) ;
         }
       }
 
       // OPTIMALITY TESTING
       current_gap = std::max(0.0, penalty_.dual_norm(current_grad) - current_lambda) ;
-    } while ((current_gap > accuracy) && (current_it <= maxiter) && (success));
+    } while ((current_gap > accuracy) && (current_it <= maxiter));
 
     // Checking convergence status
     gap.push_back(std::max(0.0, penalty_.dual_norm(current_grad) - current_lambda)) ;
@@ -139,7 +139,6 @@ List BoundedRegression::solution_path(const List& control) {
     status.push_back(0) ;
     if (current_it >= maxiter)         { status.back() = 1 ; }
     if (data_.p_ - B.n_elem > maxfeat) { status.back() = 2 ; }
-    if (!success)                      { status.back() = 3 ; }
 
     // Preparing next value of the penalty
     if (status.back() >= 2) {
