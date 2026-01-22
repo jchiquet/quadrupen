@@ -73,69 +73,6 @@ int fista_lasso(vec  &x0   ,
   return(iter);
 }
 
-int fista_breg(vec    &x0,
-	       const mat &xtx,
-	       const vec &xty,
-	       vec    &grd,
-	       double &pen,
-	       double &L0 ,
-	       double eps) {
-
-  colvec xk = x0        ; // output vector
-  colvec  s = x0        ;
-  int iter = 0          ; // current iterate
-  double delta = 2*eps  ; // change in beta
-  int max_iter  = 10000 ; // max. number of iteration
-
-  double t0 = 1.0, tk;
-  bool found=false;
-  double f0, fk ;
-  colvec lbd (x0.n_elem) ;
-  lbd.fill(pen);
-
-  double l_num, l_den ;
-
-  while ((delta > eps*eps) && (iter < max_iter)) {
-
-    f0 = as_scalar(.5 * strans(s) * xtx * s - strans(xty) * s) ;
-    grd = - xty + xtx * s ;
-
-    // Line search over L
-    while(!found) {
-      xk = proximal_inf(s - grd/L0, lbd /L0);
-
-      fk = as_scalar(.5 * strans(xk) * xtx * xk - strans(xty) * xk) ;
-      l_num = as_scalar(2 * (fk - f0 - dot(grd, xk-s) ));
-      l_den = as_scalar(pow(norm(xk-s,2),2));
-
-      if ((L0 * l_den >= l_num) || (sqrt(l_den) < eps)) {
-	      found = true;
-      } else {
-	      L0 = fmax(2*L0, l_num/l_den);
-      }
-
-      R_CheckUserInterrupt();
-    }
-
-    // updating t
-    tk = 0.5 * (1+sqrt(1+4*t0*t0));
-
-    // updating s
-    s = xk + (t0-1)/tk * ( xk - x0 );
-
-    // preparing next iterate
-    delta = sqrt(l_num);
-    x0 = xk;
-    t0 = tk;
-    found = false;
-    iter++;
-
-    R_CheckUserInterrupt();
-  }
-
-  return(iter) ;
-}
-
 int fista_grp(vec   &x0,
 	      uvec  &pk,
 	      mat   &xtx,
@@ -235,7 +172,6 @@ vec proximal_grpinf(vec u,
   }
   return(u);
 }
-
 
 vec proximal_inf(vec v,
 		 vec lambda) {

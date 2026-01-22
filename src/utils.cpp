@@ -3,6 +3,18 @@
 using namespace Rcpp;
 using namespace arma;
 
+// arma::uvec setdiff(arma::uvec& x, arma::uvec& y) {
+//   
+//   std::vector<int> a = arma::conv_to< std::vector<int> >::from(arma::sort(x));
+//   std::vector<int> b = arma::conv_to< std::vector<int> >::from(arma::sort(y));
+//   std::vector<int> out;
+//   
+//   std::set_difference(a.begin(), a.end(), b.begin(), b.end(),
+//                       std::inserter(out, out.end()));
+//   
+//   return arma::conv_to<arma::uvec>::from(out);
+// }
+
 vec grp_norm(vec x, uvec pk, int norm, int rep)  {
 
   vec res ;
@@ -153,31 +165,6 @@ double get_df_enet(const double &lambda2, mat &R, mat &xAtxA, const sp_mat &S, u
       }
     }
     df = A.n_elem - sum(mat(SAA * B).diag()); // trace does not work, don't know why
-  } else {
-    df = A.n_elem;
-  }
-
-  return(df);
-}
-
-double get_df_breg(const double &lambda2, mat &xtx, const sp_mat &S, uvec &A) {
-
-  double df ;
-  mat C     ;
-  mat SAA(A.n_elem,A.n_elem) ;
-
-  if (lambda2 > 0) {
-    C = inv_sympd(xtx.submat(A,A));
-    // have to do this due to sparse encoding
-    // either wait for Armadillo's guy to develop non contiguous
-    // subview for sparse matrices or iterate over the n_zeros only...
-    for (uword i=0;i<A.n_elem;i++){
-      for (uword j=i;j<A.n_elem;j++){
-	      SAA(i,j) = S.at(A(i),A(j));
-	      SAA(j,i) = SAA(i,j);
-      }
-    }
-    df = A.n_elem - sum(mat(SAA * C).diag()); // trace does not work, don't know why
   } else {
     df = A.n_elem;
   }

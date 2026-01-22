@@ -26,7 +26,7 @@ class RidgeRegression {
 
   void lambda_seq(const List&);
 
-  void solution_path(const mat&);
+  List solution_path(const mat&);
 
   // getter functions to access private members
   const RegressionData& data()            const { return data_      ; }

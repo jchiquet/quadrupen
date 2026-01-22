@@ -35,14 +35,9 @@
 #' when the size of the problem is close to or smaller than the
 #' sample size. In such cases, it might be a good idea to switch to
 #' the proximal solver, slower yet more robust. This is the strategy
-#' adopted by the \code{'bulletproof'} mode, that will send a warning
+#' automatically adopted in code, that will send a warning in verbose mode
 #' while switching the method to \code{'fista'} and keep on
-#' optimizing on the remainder of the path. When \code{bulletproof}
-#' is set to \code{FALSE}, the algorithm stops at an early stage of
-#' the path of solutions. Hence, users should be careful when
-#' manipulating the resulting \code{'quadrupen'} object, as it will
-#' not have the size expected regarding the dimension of the
-#' \code{lambda1} argument.
+#' optimizing on the remainder of the path.
 #'
 #' Singularity of the system can also be avoided with a larger
 #' \eqn{\ell_2}{l2}-regularization, via \code{lambda2}, or a
@@ -88,7 +83,7 @@ bounded.reg <- function(x,
                         minratio  = ifelse(nrow(x) <= ncol(x), 1e-2, 1e-4),
                         maxfeat   = ifelse(lambda2 < 1e-2, min(nrow(x),ncol(x)), min(4*nrow(x),ncol(x))),
                         control   = list()) {
-
+  
   ## ============================================
   ## RECOVER LOW LEVEL OPTIONS
   ## 
@@ -96,7 +91,7 @@ bounded.reg <- function(x,
   ctrl$maxfeat <- maxfeat
   if (!is.null(control$method)) if (control$method != "quadra") ctrl$threshold <- 1e-2
   ctrl[names(control)] <- control # default overwritten by user specifications
-  ctrl$method <- switch(ctrl$method, quadra = 0, pathwise = 1, fista = 2, 0)
+  ctrl$method <- switch(ctrl$method, quadra = "QUADRA", pathwise = "PATHWISE", fista = "FISTA", 0)
   ctrl$rescaling <- match.arg(debiasing)
   ctrl$normalize <- normalize
   
@@ -108,7 +103,7 @@ bounded.reg <- function(x,
     outcome     = y,
     cov_struct  = struct
   )
-
+  
   ## ============================================
   ## INSTANTIATE THE PENALTY MODEL
   myModel <- BoundedRegressionFit$new(
@@ -116,19 +111,19 @@ bounded.reg <- function(x,
     intercept = intercept,
     regParam  = list(linf = lambda1, l2 = lambda2, 
                      linf_weights = penscale, 
-                     min_ratio = minratio, n_lambda1 = nlambda1)
+                     min_ratio = minratio, n_lambda = nlambda1)
   )
-
+  
   ## ============================================
   ## FIT THE MODEL WITH ACTIVE SET ALGORITHM
   ##
-  if (ctrl$verbose > 0) cat("\nModel fitting and optimization")
+  if (ctrl$verbose) cat("\nModel fitting and optimization")
   myModel$fit(ctrl)
   
   ## ============================================
   ## POSTREATMENT + SEND BACK THE RESULTING MODEL
   ##
-  if (ctrl$verbose > 0) cat("\nPost-treatment")
+  if (ctrl$verbose) cat("\nPost-treatment")
   myModel$debias(ctrl$rescaling)
   myModel$criteria()
   myModel

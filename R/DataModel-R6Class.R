@@ -14,7 +14,7 @@ DataModel <- R6::R6Class(
     X = Matrix(),
     #' @field y vector of response
     y = numeric(),
-    #' @field C^{-1} Inverse of the Cholesky decomposition of S
+    #' @field C_inv Inverse of the Cholesky decomposition of S
     C_inv = matrix(),
     #' @field S SDP structuring matrix 
     S = Matrix(),
@@ -75,8 +75,8 @@ DataModel <- R6::R6Class(
       lapply(folds, function(omit) {
         trainData <- DataModel$new(self$X[-omit, , drop = FALSE], self$y[-omit], self$S, self$wy[-omit])
         testData  <- DataModel$new(self$X[ omit, , drop = FALSE], self$y[omit], self$S, self$wy[omit])
-        trainData$C <- self$C_inv # Cholesky factorization remain the same
-        testData$C  <- self$C_inv # 
+        trainData$C_inv <- self$C_inv # Cholesky factorization remain the same
+        testData$C_inv  <- self$C_inv # 
         list(trainData = trainData, testData = testData,
              trainID = setdiff(1:self$n, omit), testID = omit)
       })

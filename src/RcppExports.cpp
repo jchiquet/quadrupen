@@ -11,6 +11,20 @@ Rcpp::Rostream<true>&  Rcpp::Rcout = Rcpp::Rcpp_cout_get();
 Rcpp::Rostream<false>& Rcpp::Rcerr = Rcpp::Rcpp_cerr_get();
 #endif
 
+// bounded_regression_cpp
+Rcpp::List bounded_regression_cpp(const Environment& dataModel, const bool& intercept, const List& regParam, const List& control);
+RcppExport SEXP _quadrupen_bounded_regression_cpp(SEXP dataModelSEXP, SEXP interceptSEXP, SEXP regParamSEXP, SEXP controlSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const Environment& >::type dataModel(dataModelSEXP);
+    Rcpp::traits::input_parameter< const bool& >::type intercept(interceptSEXP);
+    Rcpp::traits::input_parameter< const List& >::type regParam(regParamSEXP);
+    Rcpp::traits::input_parameter< const List& >::type control(controlSEXP);
+    rcpp_result_gen = Rcpp::wrap(bounded_regression_cpp(dataModel, intercept, regParam, control));
+    return rcpp_result_gen;
+END_RCPP
+}
 // FusedLasso_cpp
 Rcpp::List FusedLasso_cpp(const Environment& dataModel, const bool& intercept, const List& regParam, const List& controlFit);
 RcppExport SEXP _quadrupen_FusedLasso_cpp(SEXP dataModelSEXP, SEXP interceptSEXP, SEXP regParamSEXP, SEXP controlFitSEXP) {
@@ -39,20 +53,6 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
-// bounded_reg_cpp
-Rcpp::List bounded_reg_cpp(const Environment& dataModel, const bool& intercept, const List& regParam, const List& controlFit);
-RcppExport SEXP _quadrupen_bounded_reg_cpp(SEXP dataModelSEXP, SEXP interceptSEXP, SEXP regParamSEXP, SEXP controlFitSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< const Environment& >::type dataModel(dataModelSEXP);
-    Rcpp::traits::input_parameter< const bool& >::type intercept(interceptSEXP);
-    Rcpp::traits::input_parameter< const List& >::type regParam(regParamSEXP);
-    Rcpp::traits::input_parameter< const List& >::type controlFit(controlFitSEXP);
-    rcpp_result_gen = Rcpp::wrap(bounded_reg_cpp(dataModel, intercept, regParam, controlFit));
-    return rcpp_result_gen;
-END_RCPP
-}
 // elastic_net_cpp
 Rcpp::List elastic_net_cpp(const Environment& dataModel, const bool& intercept, const List& regParam, const List& controlFit);
 RcppExport SEXP _quadrupen_elastic_net_cpp(SEXP dataModelSEXP, SEXP interceptSEXP, SEXP regParamSEXP, SEXP controlFitSEXP) {
@@ -69,9 +69,9 @@ END_RCPP
 }
 
 static const R_CallMethodDef CallEntries[] = {
+    {"_quadrupen_bounded_regression_cpp", (DL_FUNC) &_quadrupen_bounded_regression_cpp, 4},
     {"_quadrupen_FusedLasso_cpp", (DL_FUNC) &_quadrupen_FusedLasso_cpp, 4},
     {"_quadrupen_ridge_cpp", (DL_FUNC) &_quadrupen_ridge_cpp, 4},
-    {"_quadrupen_bounded_reg_cpp", (DL_FUNC) &_quadrupen_bounded_reg_cpp, 4},
     {"_quadrupen_elastic_net_cpp", (DL_FUNC) &_quadrupen_elastic_net_cpp, 4},
     {NULL, NULL, 0}
 };

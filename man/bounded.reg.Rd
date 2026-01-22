@@ -92,12 +92,10 @@ algorithm. Default is \code{FALSE}.
 \item \code{maxiter} the maximal number of iteration used to solve the
 problem for a given value of lambda1. Default is 500.
 \item \code{method} a string for the underlying solver used. Either
-\code{"quadra"}, \code{"pathwise"} or \code{"fista"}. Default is \code{"quadra"}.
+\code{"quadra"} or \code{"fista"}. Default is \code{"quadra"}.
 \item \code{threshold} a threshold for convergence. The algorithm stops
 when the optimality conditions are fulfill up to this threshold.
 Default is \code{1e-7} for \code{"quadra"} and \code{1e-2} for the first order methods.
-\item \code{bulletproof} logical; indicates if the bulletproof mode should
-be used while running the \code{"quadra"} method. Default is \code{TRUE}.
 \item \code{monitor} indicates if a monitoring of the convergence should be
 recorded, by computing a lower bound between the current solution and
 the optimum: when \code{'0'} (the default), no monitoring is provided;
@@ -143,14 +141,9 @@ underlying problem, e.g. when there are too much correlation or
 when the size of the problem is close to or smaller than the
 sample size. In such cases, it might be a good idea to switch to
 the proximal solver, slower yet more robust. This is the strategy
-adopted by the \code{'bulletproof'} mode, that will send a warning
+automatically adopted in code, that will send a warning in verbose mode
 while switching the method to \code{'fista'} and keep on
-optimizing on the remainder of the path. When \code{bulletproof}
-is set to \code{FALSE}, the algorithm stops at an early stage of
-the path of solutions. Hence, users should be careful when
-manipulating the resulting \code{'quadrupen'} object, as it will
-not have the size expected regarding the dimension of the
-\code{lambda1} argument.
+optimizing on the remainder of the path.
 
 Singularity of the system can also be avoided with a larger
 \eqn{\ell_2}{l2}-regularization, via \code{lambda2}, or a

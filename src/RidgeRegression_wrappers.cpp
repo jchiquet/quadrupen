@@ -20,7 +20,7 @@ Rcpp::List ridge_cpp(
 
   RidgeRegression ridge(data, intercept, regParam);
 
-  ridge.solution_path(trimatu(as<mat>(dataModel["C_inv"])));
+  List results = ridge.solution_path(trimatu(as<mat>(dataModel["C_inv"])));
   
   return List::create(
     Named("tuning_param") = List::create(
@@ -31,7 +31,7 @@ Rcpp::List ridge_cpp(
     Named("mu")          = ridge.interceptTerm(),
     Named("normx")       = ridge.data().norm_X(),
     Named("df")          = ridge.degrees_freedom(),
-    Named("monitoring")  = List::create()
+    Named("monitoring")  = results
   );
   
 }

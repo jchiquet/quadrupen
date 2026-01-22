@@ -12,6 +12,8 @@ using namespace arma;
 
 #define ZERO 2e-16 // practical zero
 
+// arma::uvec setdiff(arma::uvec& x, arma::uvec& y) ;
+
 inline vec get_lambda1(SEXP LAMBDA1, uword n_lambda, const double min_ratio, double lmax) {
   vec lambda1 ;
   if (LAMBDA1 != R_NilValue) {
@@ -26,7 +28,6 @@ vec grp_norm(vec x, uvec pk, int norm, int rep) ;
 vec grp_sign(vec x, uvec pk) ;
 
 double get_df_enet(const double &lambda2, mat &R, mat &xAtxA, const sp_mat &S, uvec &A, const bool &usechol, const uword &fun) ;
-double get_df_breg(const double &lambda2, mat &xtx, const sp_mat &S, uvec &A) ;
 
 vec  cg(mat A, vec b, vec x, double tol) ;
 vec pcg(mat A, mat P, vec b, vec x, double tol) ;

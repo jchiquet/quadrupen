@@ -337,7 +337,7 @@ void Graph::breadthFirstSearch(const int startNode, vector<int>&parentTable, vec
   vector<int> nodesToSearch;
   
   // clear the parent table
-  for(int i = 0; i < nodeWithParent.size(); ++i) {
+  for(unsigned int i = 0; i < nodeWithParent.size(); ++i) {
     parentTable[nodeWithParent[i]] = -1;
   }
   nodeWithParent.clear();
@@ -446,7 +446,7 @@ void Graph::printGraph(ostream& outStream) const
         sinkFlow[*listIt] << endl;
     }    }
   
-  for(int node = 0; node < nodes.size(); ++node)
+  for(unsigned int node = 0; node < nodes.size(); ++node)
   {
     outStream << "Node Number: " << node << endl;
     outStream << "Dist: " << dist[node] << endl;
@@ -464,11 +464,11 @@ void Graph::printGraph(ostream& outStream) const
 
 
 void Graph::constructorWorker(const vector<list<int> >& conn, const vector<list<double> >& weights) {
-  int numberOfNodes = conn.size();
+  unsigned int numberOfNodes = conn.size();
   list<int> connOneNode;
   list<double> weightsOneNode;
-  int numOfConn;
-  int node1,node2;
+  unsigned int numOfConn;
+  unsigned int node1, node2;
   double weight;
   
   nodes.clear(); nodes.resize(numberOfNodes);
@@ -487,13 +487,13 @@ void Graph::constructorWorker(const vector<list<int> >& conn, const vector<list<
   maxFlowNodeList.clear();
   
   // go through all the nodes
-  for(int i=0; i<numberOfNodes; ++i)
+  for(unsigned int i=0; i<numberOfNodes; ++i)
   {
     connOneNode = conn[i]; // get the connection of the current node
     weightsOneNode = weights[i]; // and with the weights
     numOfConn = connOneNode.size(); // how many are there
     node1 = i; // number of node currently working on
-    for(int j=0; j<numOfConn; ++j) // go through all connections of this node
+    for(unsigned int j=0; j<numOfConn; ++j) // go through all connections of this node
     {
       node2 = connOneNode.front();
       connOneNode.pop_front();
