@@ -59,7 +59,7 @@ private:
       const uword& max_iter=50) ;
   
   int fista_breg(
-      vec& beta0,
+      vec& beta,
       uvec& B,
       vec& grad,
       mat& XTX, 

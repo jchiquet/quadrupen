@@ -35,14 +35,9 @@
 #' when the size of the problem is close to or smaller than the
 #' sample size. In such cases, it might be a good idea to switch to
 #' the proximal solver, slower yet more robust. This is the strategy
-#' adopted by the \code{'bulletproof'} mode, that will send a warning
+#' automatically adopted in code, that will send a warning in verbose mode
 #' while switching the method to \code{'fista'} and keep on
-#' optimizing on the remainder of the path. When \code{bulletproof}
-#' is set to \code{FALSE}, the algorithm stops at an early stage of
-#' the path of solutions. Hence, users should be careful when
-#' manipulating the resulting \code{'quadrupen'} object, as it will
-#' not have the size expected regarding the dimension of the
-#' \code{lambda1} argument.
+#' optimizing on the remainder of the path.
 #'
 #' Singularity of the system can also be avoided with a larger
 #' \eqn{\ell_2}{l2}-regularization, via \code{lambda2}, or a
@@ -122,13 +117,13 @@ bounded.reg <- function(x,
   ## ============================================
   ## FIT THE MODEL WITH ACTIVE SET ALGORITHM
   ##
-  if (ctrl$verbose > 0) cat("\nModel fitting and optimization")
+  if (ctrl$verbose) cat("\nModel fitting and optimization")
   myModel$fit(ctrl)
   
   ## ============================================
   ## POSTREATMENT + SEND BACK THE RESULTING MODEL
   ##
-  if (ctrl$verbose > 0) cat("\nPost-treatment")
+  if (ctrl$verbose) cat("\nPost-treatment")
   myModel$debias(ctrl$rescaling)
   myModel$criteria()
   myModel

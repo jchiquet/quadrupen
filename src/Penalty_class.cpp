@@ -91,7 +91,7 @@ double Penalty::dual_norm_LINF(vec x) {
 }
 
 vec Penalty::proximal_LINF(vec x, double lambda) {
-  int p = x.n_elem;
+  uword p = x.n_elem;
   vec u, proj;
   vec res = zeros<vec>(p);
   
@@ -109,7 +109,7 @@ vec Penalty::proximal_LINF(vec x, double lambda) {
 
     // solving primal problem
     // We keep the smallest values and threshold the common values to +- thresh
-    for (int k=0; k < p;k++) {
+    for (uword k=0; k < p;k++) {
       if (fabs(x(k)) > ZERO) {
         if (x(k) > 0) {
           res(k) = fmin(fabs(x(k)),thresh);
@@ -127,9 +127,9 @@ vec Penalty::proximal_LINF(vec x, double lambda) {
 vec Penalty::elt_norm_L1L2(vec x) {
 
   vec  res = zeros<vec> (pk.n_elem) ; // output with group norms
-  int ind = 0 ; // index to go through the groups
+  uword ind = 0 ; // index to go through the groups
 
-  for (int k=0; k<pk.n_elem; k++) {
+  for (uword k=0; k<pk.n_elem; k++) {
     res(k) = norm(x.subvec(ind, ind + pk(k) - 1), 2);
     ind += pk(k);
   }
@@ -148,11 +148,11 @@ double Penalty::dual_norm_L1L2(vec x) {
 vec Penalty::proximal_L1L2(vec x, double lambda) {
 
   vec res = zeros<vec>(x.n_elem);
-  int k,ind = 0 ;
+  uword ind = 0 ;
   
   vec tmp = max(zeros(pk.n_elem), 1-lambda/elt_norm(x)) ;
 
-  for (k=0; k<pk.n_elem; k++) {
+  for (uword k=0; k<pk.n_elem; k++) {
     res.subvec(ind, ind + pk(k) - 1) = tmp(k) * x.subvec(ind, ind + pk(k) - 1);
     ind += pk(k);
   }
@@ -165,9 +165,9 @@ vec Penalty::proximal_L1L2(vec x, double lambda) {
 vec Penalty::elt_norm_L1LINF(vec x) {
 
   vec  res = zeros<vec> (pk.n_elem) ; // output with group norms
-  int ind = 0 ; // index to go through the groups
+  uword ind = 0 ; // index to go through the groups
 
-  for (int k=0; k<pk.n_elem; k++) {
+  for (uword k=0; k<pk.n_elem; k++) {
     res(k) = norm(x.subvec(ind, ind + pk(k) - 1), "inf");
     ind += pk(k);
   }
@@ -182,9 +182,9 @@ double Penalty::pen_norm_L1LINF(vec x) {
 double Penalty::dual_norm_L1LINF(vec x) {
 
   vec  res = zeros<vec> (pk.n_elem) ; // output with group norms
-  int ind = 0 ; // index to go through the groups
+  uword ind = 0 ; // index to go through the groups
 
-  for (int k=0; k<pk.n_elem; k++) {
+  for (uword k=0; k<pk.n_elem; k++) {
     res(k) = norm(x.subvec(ind, ind + pk(k) - 1), 1);
     ind += pk(k);
   }
@@ -194,13 +194,13 @@ double Penalty::dual_norm_L1LINF(vec x) {
 
 vec Penalty::proximal_L1LINF(vec x, double lambda) {
 
-  uword ind = 0, p ;
+  uword ind = 0 ;
   vec u, v, proj;
   vec res = zeros<vec>(sum(pk));
 
-  for (int k=0; k<pk.n_elem; k++) {
+  for (uword k=0; k<pk.n_elem; k++) {
     v = x.subvec(ind,ind+pk(k)-1) ;
-    p = v.n_elem ;
+    uword p = v.n_elem ;
     
     // proximal l-inf
     if ( as_scalar(sum(abs(v) / lambda)) >= 1) {
@@ -216,15 +216,15 @@ vec Penalty::proximal_L1LINF(vec x, double lambda) {
       
       // solving primal problem
       // We keep the smallest values and threshold the common values to +- thresh
-      for (int j=0; j<p ;j++) {
-	if (fabs(v(j)) > ZERO) {
-	  v(j) = fmin(fabs(v(j)),thresh);
-	} else {
-	  v(j) = -fmin(fabs(v(j)),thresh);
-	}
+      for (uword j=0; j<p ;j++) {
+        if (fabs(v(j)) > ZERO) {
+          v(j) = fmin(fabs(v(j)),thresh);
+        } else {
+          v(j) = -fmin(fabs(v(j)),thresh);
+        }
       }
     }
-        
+    
     res.subvec(ind,ind+pk(k)-1) =  v ;
     ind += pk(k);
   }
@@ -236,9 +236,9 @@ vec Penalty::proximal_L1LINF(vec x, double lambda) {
 vec Penalty::elt_norm_COOP(vec x) {
 
   vec  res = zeros<vec> (pk.n_elem) ; // output with group norms
-  int ind = 0 ; // index to go through the groups
+  uword ind = 0 ; // index to go through the groups
 
-  for (int k=0; k<pk.n_elem; k++) {
+  for (uword k=0; k<pk.n_elem; k++) {
     res(k) = norm(max(zeros(pk(k)),x.subvec(ind, ind + pk(k) - 1)), 2) + norm(min(zeros(pk(k)),x.subvec(ind, ind + pk(k) - 1)),2);
     ind += pk(k);
   }
@@ -257,11 +257,11 @@ double Penalty::dual_norm_COOP(vec x) {
 vec Penalty::proximal_COOP(vec x, double lambda) {
 
   vec res = zeros<vec>(x.n_elem);
-  int k,ind = 0 ;
+  uword ind = 0 ;
   
   vec tmp = max(zeros(pk.n_elem), 1-lambda/elt_norm(x)) ;
 
-  for (k=0; k<pk.n_elem; k++) {
+  for (uword k=0; k<pk.n_elem; k++) {
     res.subvec(ind, ind + pk(k) - 1) = tmp(k) * x.subvec(ind, ind + pk(k) - 1);
     ind += pk(k);
   }

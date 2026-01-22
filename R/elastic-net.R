@@ -80,12 +80,10 @@
 #' * `maxiter` the maximal number of iteration used to solve the
 #'  problem for a given value of lambda1. Default is 500.
 #' * `method` a string for the underlying solver used. Either 
-#' `"quadra"`, `"pathwise"` or `"fista"`. Default is `"quadra"`.
+#' `"quadra"` or `"fista"`. Default is `"quadra"`.
 #' * `threshold` a threshold for convergence. The algorithm stops 
 #' when the optimality conditions are fulfill up to this threshold.
 #' Default is `1e-7` for `"quadra"` and `1e-2` for the first order methods.
-#' * `bulletproof` logical; indicates if the bulletproof mode should 
-#' be used while running the `"quadra"` method. Default is `TRUE`. 
 #' * `monitor` indicates if a monitoring of the convergence should be 
 #' recorded, by computing a lower bound between the current solution and 
 #' the optimum: when `'0'` (the default), no monitoring is provided; 
