@@ -119,15 +119,12 @@ bounded.reg(
   - `maxiter` the maximal number of iteration used to solve the problem
     for a given value of lambda1. Default is 500.
 
-  - `method` a string for the underlying solver used. Either `"quadra"`,
-    `"pathwise"` or `"fista"`. Default is `"quadra"`.
+  - `method` a string for the underlying solver used. Either `"quadra"`
+    or `"fista"`. Default is `"quadra"`.
 
   - `threshold` a threshold for convergence. The algorithm stops when
     the optimality conditions are fulfill up to this threshold. Default
     is `1e-7` for `"quadra"` and `1e-2` for the first order methods.
-
-  - `bulletproof` logical; indicates if the bulletproof mode should be
-    used while running the `"quadra"` method. Default is `TRUE`.
 
   - `monitor` indicates if a monitoring of the convergence should be
     recorded, by computing a lower bound between the current solution
@@ -163,13 +160,9 @@ unstable along the path because of singularity of the underlying
 problem, e.g. when there are too much correlation or when the size of
 the problem is close to or smaller than the sample size. In such cases,
 it might be a good idea to switch to the proximal solver, slower yet
-more robust. This is the strategy adopted by the `'bulletproof'` mode,
-that will send a warning while switching the method to `'fista'` and
-keep on optimizing on the remainder of the path. When `bulletproof` is
-set to `FALSE`, the algorithm stops at an early stage of the path of
-solutions. Hence, users should be careful when manipulating the
-resulting `'quadrupen'` object, as it will not have the size expected
-regarding the dimension of the `lambda1` argument.
+more robust. This is the strategy automatically adopted in code, that
+will send a warning in verbose mode while switching the method to
+`'fista'` and keep on optimizing on the remainder of the path.
 
 Singularity of the system can also be avoided with a larger
 \\\ell_2\\-regularization, via `lambda2`, or a "not-too-small"

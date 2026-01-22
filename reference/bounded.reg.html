@@ -172,12 +172,10 @@ algorithm. Default is <code>FALSE</code>.</p></li>
 <li><p><code>maxiter</code> the maximal number of iteration used to solve the
 problem for a given value of lambda1. Default is 500.</p></li>
 <li><p><code>method</code> a string for the underlying solver used. Either
-<code>"quadra"</code>, <code>"pathwise"</code> or <code>"fista"</code>. Default is <code>"quadra"</code>.</p></li>
+<code>"quadra"</code> or <code>"fista"</code>. Default is <code>"quadra"</code>.</p></li>
 <li><p><code>threshold</code> a threshold for convergence. The algorithm stops
 when the optimality conditions are fulfill up to this threshold.
 Default is <code>1e-7</code> for <code>"quadra"</code> and <code>1e-2</code> for the first order methods.</p></li>
-<li><p><code>bulletproof</code> logical; indicates if the bulletproof mode should
-be used while running the <code>"quadra"</code> method. Default is <code>TRUE</code>.</p></li>
 <li><p><code>monitor</code> indicates if a monitoring of the convergence should be
 recorded, by computing a lower bound between the current solution and
 the optimum: when <code>'0'</code> (the default), no monitoring is provided;
@@ -210,14 +208,9 @@ underlying problem, e.g. when there are too much correlation or
 when the size of the problem is close to or smaller than the
 sample size. In such cases, it might be a good idea to switch to
 the proximal solver, slower yet more robust. This is the strategy
-adopted by the <code>'bulletproof'</code> mode, that will send a warning
+automatically adopted in code, that will send a warning in verbose mode
 while switching the method to <code>'fista'</code> and keep on
-optimizing on the remainder of the path. When <code>bulletproof</code>
-is set to <code>FALSE</code>, the algorithm stops at an early stage of
-the path of solutions. Hence, users should be careful when
-manipulating the resulting <code>'quadrupen'</code> object, as it will
-not have the size expected regarding the dimension of the
-<code>lambda1</code> argument.</p>
+optimizing on the remainder of the path.</p>
 <p>Singularity of the system can also be avoided with a larger
 \(\ell_2\)-regularization, via <code>lambda2</code>, or a
 "not-too-small" \(\ell_\infty\) regularization, via

@@ -12,9 +12,9 @@ Class for storing data and various fixed quantity
 
   vector of response
 
-- `C`:
+- `C_inv`:
 
-  Cholesky decomposition of the structring matrix S
+  Inverse of the Cholesky decomposition of S
 
 - `S`:
 

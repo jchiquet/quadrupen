@@ -141,12 +141,10 @@ algorithm. Default is <code>FALSE</code>.</p></li>
 <li><p><code>maxiter</code> the maximal number of iteration used to solve the
 problem for a given value of lambda1. Default is 500.</p></li>
 <li><p><code>method</code> a string for the underlying solver used. Either
-<code>"quadra"</code>, <code>"pathwise"</code> or <code>"fista"</code>. Default is <code>"quadra"</code>.</p></li>
+<code>"quadra"</code> or <code>"fista"</code>. Default is <code>"quadra"</code>.</p></li>
 <li><p><code>threshold</code> a threshold for convergence. The algorithm stops
 when the optimality conditions are fulfill up to this threshold.
 Default is <code>1e-7</code> for <code>"quadra"</code> and <code>1e-2</code> for the first order methods.</p></li>
-<li><p><code>bulletproof</code> logical; indicates if the bulletproof mode should
-be used while running the <code>"quadra"</code> method. Default is <code>TRUE</code>.</p></li>
 <li><p><code>monitor</code> indicates if a monitoring of the convergence should be
 recorded, by computing a lower bound between the current solution and
 the optimum: when <code>'0'</code> (the default), no monitoring is provided;
