@@ -11,12 +11,12 @@ ridge(
   x,
   y,
   lambda = NULL,
-  struct = Diagonal(ncol(x), 1),
+  struct = Matrix::Diagonal(ncol(x), 1),
   penscale = rep(1, ncol(x)),
   intercept = TRUE,
   normalize = TRUE,
   nlambda = 100,
-  minratio = 1e-04,
+  minratio = 1e-05,
   lambda_max = 100,
   control = list()
 )
