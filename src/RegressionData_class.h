@@ -15,6 +15,7 @@ using namespace arma;
 
 // TODO: use template to handle dense or sparse encoding (mat/sp_mat in armadillo)
 class RegressionData {
+  friend class GenericRegularizer ;
   friend class RidgeRegression ;
   friend class BoundedRegression ;
   friend class Optimizer ;
@@ -37,7 +38,7 @@ private:
   double norm_y_   ; // norm of the response
   
 public:
-  
+
   RegressionData(const Environment& dataModel, const bool& center, const bool& scale);
   
   // DATA NORMALIZATION

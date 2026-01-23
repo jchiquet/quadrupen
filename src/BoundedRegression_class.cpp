@@ -10,22 +10,16 @@ using namespace arma;
 
 BoundedRegression::BoundedRegression(
   RegressionData& data, const bool& intercept, const List& regParam) :
-  data_ (data), intercept_ (intercept)
-{
+  GenericRegularizer::GenericRegularizer(data, intercept, regParam) {
 
-  // Initialize the penalty function
-  // TODO: include the weights in the penalty function
-  penalty_ = Penalty() ;
+  // set the penalty to l infinity
   penalty_.setPenalty("linf") ;
-  linf_weights = as<vec>(regParam["linf_weights"]) ;
-  
-  // Generate the sequence of lambda (amount of linfty penalty)
-  // In the future, should be a method of penalty to account for the weights
+  lambda_factor_ = as<vec>(regParam["lambda_factor"]) ;
   lambda_seq(regParam) ;
   
-  // Scale the structuring matrix according to the l_inf weights and the amount of l2 penalty 
-  l2_penalty   = as<double>(regParam["l2"]) ;
-  sp_mat diag_S = spdiags(sqrt(l2_penalty)*pow(linf_weights,-1/2), ivec({0}), data_.p_, data_.p_) ;
+  // Scale the structuring matrix according to main penalty factor and the amount of l2 penalty 
+  gamma_   = as<double>(regParam["gamma"]) ;
+  sp_mat diag_S = spdiags(sqrt(gamma_)*pow(lambda_factor_,-1/2), ivec({0}), data_.p_, data_.p_) ;
   S_scaled = diag_S * data_.S_ * diag_S  ; // sparsely encoded structuring matrix
 
   // Compute the Gram matrix (+ S_scaled)  
@@ -33,18 +27,6 @@ BoundedRegression::BoundedRegression(
   
   // Initialize the set of variables living on the boundaries (all)
   B = regspace<uvec>(0, data_.p_-1) ;
-}
-
-void BoundedRegression::lambda_seq(const List& regParam) {
-  if (regParam["linf"] != R_NilValue) {
-    lambda_  = as<vector<double>>(regParam["linf"]) ;
-  } else {
-    double lambda_max = penalty_.dual_norm(data_.XTy_) ;
-    lambda_ = conv_to<vector<double>>::from(logspace(log10(lambda_max),
-                 log10(as<double>(regParam["min_ratio"])*lambda_max),
-                 as<uword>(regParam["n_lambda"])
-    ));
-  }
 }
 
 double BoundedRegression::get_df() {
@@ -55,7 +37,7 @@ double BoundedRegression::get_df() {
   mat SII(I.n_elem,I.n_elem) ;
   
   df = I.n_elem;
-  if (l2_penalty > 0) {
+  if (gamma_ > 0) {
     C = inv_sympd(XTX.submat(I,I));
     // loop due to sparse encoding.. should iterate over the n_zeros only...
     for (uword i=0;i<I.n_elem;i++){
@@ -144,7 +126,7 @@ List BoundedRegression::solution_path(const List& control) {
     if (status.back() >= 2) {
       break;
     } else {
-      beta_.push_back(current_beta/(data_.norm_X() % linf_weights)) ;
+      beta_.push_back(current_beta/(data_.norm_X() % lambda_factor_)) ;
       mu_.push_back(as_scalar(data_.y_bar_ - dot(current_beta, data_.X_bar_)));
       df_.push_back(get_df()) ;
       iB_ = join_rows(iB_, df_.size()*ones<urowvec>(B.n_elem) );
