@@ -25,7 +25,7 @@ Rcpp::List bounded_regression_cpp(
   return List::create(
     Named("tuning_param") = List::create(
       Named("linf") = bounded.tuning_param(),
-      Named("l2")   = regParam["l2"]
+      Named("l2")   = regParam["lambda_factor"]
     ),
     Named("beta")        = bounded.coefficients(),
     Named("mu")          = bounded.interceptTerm(),

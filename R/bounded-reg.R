@@ -109,8 +109,9 @@ bounded.reg <- function(x,
   myModel <- BoundedRegressionFit$new(
     data      = myData,
     intercept = intercept,
-    regParam  = list(linf = lambda1, l2 = lambda2, 
-                     linf_weights = penscale, 
+    regParam  = list(lambda = lambda1,
+                     gamma  = lambda2, 
+                     lambda_factor = penscale,
                      min_ratio = minratio, n_lambda = nlambda1)
   )
   

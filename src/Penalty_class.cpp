@@ -24,6 +24,13 @@ void Penalty::setPenalty(std::string penName){
     _current_proximal_ptr  = &Penalty::proximal_L1;
 
   // link public member functions to linf norm functions
+  } else if (penName == "ridge") {
+    _current_elt_norm_ptr  = &Penalty::elt_norm_L2_square;
+    _current_pen_norm_ptr  = &Penalty::pen_norm_L2_square;
+    _current_dual_norm_ptr = &Penalty::dual_norm_L2_square;
+    _current_proximal_ptr  = &Penalty::proximal_L2_square;
+    
+  // link public member functions to linf norm functions
   } else if (penName == "linf") {
     _current_elt_norm_ptr  = &Penalty::elt_norm_LINF;
     _current_pen_norm_ptr  = &Penalty::pen_norm_LINF;
@@ -74,6 +81,25 @@ double Penalty::dual_norm_L1(vec x) {
 
 vec Penalty::proximal_L1(vec x, double lambda) {
   return(max(zeros(x.n_elem), 1-lambda/elt_norm(x)) % x);
+}
+
+// ______________________________________________________
+// L2 NORM SQUARED A.K.A RIDGE
+vec Penalty::elt_norm_L2_square(vec x) {
+  return(arma::pow(x, 2));
+}
+
+double Penalty::pen_norm_L2_square(vec x) {
+  return(sum(elt_norm(x)));
+}
+
+// Slight abuse: take the Fenchel conjuguate of L2^2
+double Penalty::dual_norm_L2_square(vec x) {
+  return(.25*sum(elt_norm(x))) ;
+}
+
+vec Penalty::proximal_L2_square(vec x, double lambda) {
+  return(x / (1+2*lambda));
 }
 
 // ______________________________________________________

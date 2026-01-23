@@ -58,12 +58,12 @@
 ridge <- function(x,
                   y,
                   lambda     = NULL,
-                  struct     = Diagonal(ncol(x),1),
+                  struct     = Matrix::Diagonal(ncol(x),1),
                   penscale   = rep(1,ncol(x)),
                   intercept  = TRUE,
                   normalize  = TRUE,
                   nlambda    = 100 ,
-                  minratio   = 1e-4,
+                  minratio   = 1e-5,
                   lambda_max = 100,
                   control    = list()) {
 
@@ -91,11 +91,11 @@ ridge <- function(x,
   myModel <- RidgeRegressionFit$new(
     data      = myData,
     intercept = intercept,
-    regParam  = list(l2 = lambda, l1 = 0, 
-                     l2_weights = penscale, 
+    regParam  = list(lambda = lambda, 
+                     gamma  = 0,
+                     lambda_factor = penscale, 
                      min_ratio = minratio,
-                     n_lambda = nlambda,
-                     lambda_max = lambda_max)
+                     n_lambda = nlambda)
   )
 
   ## ============================================

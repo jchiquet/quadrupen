@@ -10,23 +10,11 @@ using namespace arma;
 
 RidgeRegression::RidgeRegression(
   RegressionData& data, const bool& intercept, const List& regParam) :
-  data_ (data), intercept_ (intercept)
+  GenericRegularizer::GenericRegularizer(data, intercept, regParam) 
 {
+  penalty_.setPenalty("ridge") ;
+  lambda_factor_ = as<vec>(regParam["lambda_factor"]) ;
   lambda_seq(regParam) ;
-}
-
-
-void RidgeRegression::lambda_seq(const List& regParam) {
-  if (regParam["l2"] != R_NilValue) {
-    lambda_  = as<vector<double>>(regParam["l2"]) ;
-  } else {
-    double lambda_max = as<double>(regParam["lambda_max"]);
-    lambda_ = conv_to<vector<double>>::from(
-      logspace(log10(lambda_max),
-      log10(as<double>(regParam["min_ratio"])*lambda_max),
-      as<uword>(regParam["n_lambda"])
-    ));
-  }
 }
 
 List RidgeRegression::solution_path(const mat& C_inv) {

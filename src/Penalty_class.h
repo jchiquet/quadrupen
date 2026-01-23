@@ -40,6 +40,11 @@ private:
   double dual_norm_L1 (vec x) ;
   vec    proximal_L1  (vec x, double lambda) ;
 
+  vec    elt_norm_L2_square  (vec x) ;
+  double pen_norm_L2_square  (vec x) ;
+  double dual_norm_L2_square (vec x) ;
+  vec    proximal_L2_square  (vec x, double lambda) ;
+  
   vec    elt_norm_LINF  (vec x) ;
   double pen_norm_LINF  (vec x) ;
   double dual_norm_LINF (vec x) ;
