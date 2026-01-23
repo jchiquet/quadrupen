@@ -8,7 +8,7 @@ ridge(
   x,
   y,
   lambda = NULL,
-  struct = Diagonal(ncol(x), 1),
+  struct = Matrix::Diagonal(ncol(x), 1),
   penscale = rep(1, ncol(x)),
   intercept = TRUE,
   normalize = TRUE,
