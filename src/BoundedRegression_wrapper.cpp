@@ -16,7 +16,7 @@ Rcpp::List bounded_regression_cpp(
     const List        &control    // config of the optimization 
     ) {
 
-  RegressionData data(dataModel, intercept, as<bool>(control["normalize"])) ;
+  RegressionData<mat> data(dataModel, intercept, as<bool>(control["normalize"])) ;
 
   BoundedRegression bounded(data, intercept, regParam);
 

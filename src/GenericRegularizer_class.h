@@ -23,11 +23,11 @@ using namespace Rcpp;
 using namespace arma;
 using namespace std;
 
+template <typename matrix>
 class GenericRegularizer {
 public:
-  GenericRegularizer(RegressionData&, const bool&, const List&);
-  virtual ~GenericRegularizer() = 0 ;
-  
+  GenericRegularizer(RegressionData<matrix>&, const bool&, const List&);
+
   double get_lambda_max() {
     return(penalty_.dual_norm(data_.XTy_));
   } ;
@@ -35,7 +35,7 @@ public:
   void lambda_seq(const List&);
   
   // Getter functions to access private members
-  const RegressionData& data()            const { return data_      ; }
+  const RegressionData<matrix>& data()    const { return data_      ; }
   const bool& intercept()                 const { return intercept_ ; }
   const vector<vec>& coefficients()       const { return beta_      ; }
   const vector<double>& interceptTerm()   const { return mu_        ; }
@@ -45,7 +45,7 @@ public:
 protected:
   
   // Variables common to all regularizers
-  RegressionData data_    ; // data structure
+  RegressionData<matrix> data_ ; // data structure
   bool intercept_         ; // does the model include intercept
   Penalty penalty_        ; // main penalty object 
   vector<double> lambda_  ; // vector of parameters tuning the man penalty
@@ -55,6 +55,30 @@ protected:
   vector<double> mu_      ; // vector of intercept term
 
 };
+
+template <typename matrix>
+GenericRegularizer<matrix>::GenericRegularizer(
+  RegressionData<matrix>& data, const bool& intercept, const List& regParam) :
+  data_ (data), intercept_ (intercept)
+{
+  penalty_ = Penalty() ;
+}
+
+template <typename matrix>
+void GenericRegularizer<matrix>::lambda_seq(const List& regParam) {
+  if (regParam[0] != R_NilValue) {
+    lambda_  = as<vector<double>>(regParam["lambda"]) ;
+  } else {
+    double lambda_max = this->get_lambda_max() ;
+    lambda_ = conv_to<vector<double>>::from(
+      logspace(
+        log10(lambda_max),
+        log10(as<double>(regParam["min_ratio"])*lambda_max),
+        as<uword>(regParam["n_lambda"])
+      )
+    );
+  }
+}
 
 #endif
 

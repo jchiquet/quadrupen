@@ -9,7 +9,7 @@ using namespace Rcpp;
 using namespace arma;
 
 RidgeRegression::RidgeRegression(
-  RegressionData& data, const bool& intercept, const List& regParam) :
+  RegressionData<mat>& data, const bool& intercept, const List& regParam) :
   GenericRegularizer::GenericRegularizer(data, intercept, regParam) 
 {
   penalty_.setPenalty("ridge") ;

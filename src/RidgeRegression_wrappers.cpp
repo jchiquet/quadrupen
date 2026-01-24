@@ -16,7 +16,7 @@ Rcpp::List ridge_cpp(
     const List        &controlFit    // config of the optimization 
     ) {
 
-  RegressionData data(dataModel, intercept, as<bool>(controlFit["normalize"])) ;
+  RegressionData<mat> data(dataModel, intercept, as<bool>(controlFit["normalize"])) ;
 
   RidgeRegression ridge(data, intercept, regParam);
 

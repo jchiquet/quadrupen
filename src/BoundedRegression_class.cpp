@@ -9,8 +9,8 @@ using namespace Rcpp;
 using namespace arma;
 
 BoundedRegression::BoundedRegression(
-  RegressionData& data, const bool& intercept, const List& regParam) :
-  GenericRegularizer::GenericRegularizer(data, intercept, regParam) {
+  RegressionData<mat>& data, const bool& intercept, const List& regParam) :
+  GenericRegularizer<mat>::GenericRegularizer(data, intercept, regParam) {
 
   // set the penalty to l infinity
   penalty_.setPenalty("linf") ;
@@ -19,11 +19,10 @@ BoundedRegression::BoundedRegression(
   
   // Scale the structuring matrix according to main penalty factor and the amount of l2 penalty 
   gamma_   = as<double>(regParam["gamma"]) ;
-  sp_mat diag_S = spdiags(sqrt(gamma_)*pow(lambda_factor_,-1/2), ivec({0}), data_.p_, data_.p_) ;
-  S_scaled = diag_S * data_.S_ * diag_S  ; // sparsely encoded structuring matrix
+  data_.scale_struct(sqrt(gamma_)*pow(lambda_factor_,-1/2)) ;
 
-  // Compute the Gram matrix (+ S_scaled)  
-  XTX = data_.X_.t() * data_.X_ - data_.n_ * data_.X_bar_ * data_.X_bar_.t() + S_scaled;
+  // Compute the Gram matrix (+ S scaled)  
+  XTX = data_.X_.t() * data_.X_ - data_.n_ * data_.X_bar_ * data_.X_bar_.t() + data_.S_;
   
   // Initialize the set of variables living on the boundaries (all)
   B = regspace<uvec>(0, data_.p_-1) ;
@@ -42,7 +41,7 @@ double BoundedRegression::get_df() {
     // loop due to sparse encoding.. should iterate over the n_zeros only...
     for (uword i=0;i<I.n_elem;i++){
       for (uword j=i;j<I.n_elem;j++){
-        SII(i,j) = S_scaled.at(I(i),I(j));
+        SII(i,j) = data_.S_.at(I(i),I(j));
         SII(j,i) = SII(i,j);
       }
     }

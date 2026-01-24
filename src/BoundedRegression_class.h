@@ -23,9 +23,9 @@ using namespace Rcpp;
 using namespace arma;
 using namespace std;
 
-class BoundedRegression : public GenericRegularizer {
+class BoundedRegression : public GenericRegularizer<mat> {
 public:
-  BoundedRegression(RegressionData&, const bool&, const List&);
+  BoundedRegression(RegressionData<mat>&, const bool&, const List&);
   
   List solution_path(const List&);
 
@@ -34,7 +34,6 @@ private:
   // Specific to Bounded regression
   mat    XTX        ; // Gram matrix
   double gamma_     ; // overall amount of l2 penalty
-  sp_mat S_scaled   ; // structuring matrix scaled according to main penalty factors
   uvec B            ; // guys reaching the boundary
   urowvec iB_       ; // contains row indices of the bounded variables
   urowvec jB_       ; // contains column indices of the bounded variables
