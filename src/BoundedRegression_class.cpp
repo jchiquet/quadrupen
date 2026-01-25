@@ -13,7 +13,7 @@ BoundedRegression::BoundedRegression(
   GenericRegularizer<mat>::GenericRegularizer(data, intercept, regParam) {
 
   // set the penalty to l infinity
-  penalty_.setPenalty("linf") ;
+  penalty_ = Penalty(LINF) ;
   lambda_factor_ = as<vec>(regParam["lambda_factor"]) ;
   lambda_seq(regParam) ;
   

@@ -5,24 +5,31 @@
 
 #define ZERO 2e-16 // practical zero
 
+enum PenaltyType {L1, LINF, RIDGE, L1L2, L1LINF, COOP, FUSED};
+
 using namespace Rcpp;
 using namespace arma;
+using namespace std;
 
 class Penalty {
 public: 
-  Penalty()        ;
+  Penalty() ;
+  Penalty(PenaltyType) ;
   Penalty(SEXP PK) ;
-
-  void setPenalty(std::string penName) ;
-
+  Penalty(PenaltyType, SEXP PK) ;
+  
   vec    elt_norm  (vec x) ;
   double pen_norm  (vec x) ;
   double dual_norm (vec x) ;
   vec proximal(vec x, double lambda) ;
-
+  PenaltyType type() {return(type_);} ;
 private:
+  PenaltyType type_ ;
+  
   uvec pk ;
 
+  void setPenalty() ;
+  
   typedef vec (Penalty::*elt_norm_ptr)(vec x) ;
   elt_norm_ptr _current_elt_norm_ptr ;
 

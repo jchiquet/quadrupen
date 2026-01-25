@@ -76,7 +76,8 @@ Optimizer<matrix>::Optimizer(
   data_ (data), penalty_ (penalty), solver_(solver) {
   
   if (solver_ ==  QUADRA) {
-    _current_solver_ptr  = &Optimizer::quadratic_breg ;
+    if (penalty_.type() == LINF) _current_solver_ptr  = &Optimizer::quadratic_breg ;
+    // if (penalty_.type() == L1) _current_solver_ptr  = &Optimizer::quadratic_enet ;
   } else if (solver == FISTA) {
     _current_solver_ptr  = &Optimizer::fista_breg ;
   }  

@@ -59,10 +59,8 @@ protected:
 template <typename matrix>
 GenericRegularizer<matrix>::GenericRegularizer(
   RegressionData<matrix>& data, const bool& intercept, const List& regParam) :
-  data_ (data), intercept_ (intercept)
-{
-  penalty_ = Penalty() ;
-}
+  data_ (data), intercept_ (intercept) 
+  {}
 
 template <typename matrix>
 void GenericRegularizer<matrix>::lambda_seq(const List& regParam) {

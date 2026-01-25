@@ -8,51 +8,62 @@
 using namespace Rcpp;
 using namespace arma;
 
-// Empty constructor for basic penalties
+// Empty constructor
 Penalty::Penalty() {}
+
+// Empty constructor for basic penalties
+Penalty::Penalty(PenaltyType type) : type_(type) {
+  setPenalty() ;
+}
 
 // Constructor requiring group information
 Penalty::Penalty(SEXP PK) : pk (as<uvec>(PK)){}
 
-void Penalty::setPenalty(std::string penName){
+// Constructor requiring group information
+Penalty::Penalty(PenaltyType type, SEXP PK) : 
+  type_(type) , pk (as<uvec>(PK)){
+  setPenalty() ;
+}
+
+void Penalty::setPenalty(){
 
   // link public member functions to l1 norm functions
-  if (penName ==  "l1") {
+  if (type_ == L1) {
     _current_elt_norm_ptr  = &Penalty::elt_norm_L1;
     _current_pen_norm_ptr  = &Penalty::pen_norm_L1;
     _current_dual_norm_ptr = &Penalty::dual_norm_L1;
     _current_proximal_ptr  = &Penalty::proximal_L1;
 
   // link public member functions to linf norm functions
-  } else if (penName == "ridge") {
+  } else if (type_ == RIDGE) {
     _current_elt_norm_ptr  = &Penalty::elt_norm_L2_square;
     _current_pen_norm_ptr  = &Penalty::pen_norm_L2_square;
     _current_dual_norm_ptr = &Penalty::dual_norm_L2_square;
     _current_proximal_ptr  = &Penalty::proximal_L2_square;
     
   // link public member functions to linf norm functions
-  } else if (penName == "linf") {
+  } else if (type_ == LINF) {
     _current_elt_norm_ptr  = &Penalty::elt_norm_LINF;
     _current_pen_norm_ptr  = &Penalty::pen_norm_LINF;
     _current_dual_norm_ptr = &Penalty::dual_norm_LINF;
     _current_proximal_ptr  = &Penalty::proximal_LINF;
 
   // link public member functions to l1/l2 norm functions
-  } else if (penName ==  "l1l2") {
+  } else if (type_ == L1L2) {
     _current_elt_norm_ptr  = &Penalty::elt_norm_L1L2;
     _current_pen_norm_ptr  = &Penalty::pen_norm_L1L2;
     _current_dual_norm_ptr = &Penalty::dual_norm_L1L2;
     _current_proximal_ptr  = &Penalty::proximal_L1L2;
 
   // link public member functions to l1/linf norm functions
-  } else if (penName == "l1linf") {
+  } else if (type_ == L1LINF) {
     _current_elt_norm_ptr  = &Penalty::elt_norm_L1LINF;
     _current_pen_norm_ptr  = &Penalty::pen_norm_L1LINF;
     _current_dual_norm_ptr = &Penalty::dual_norm_L1LINF;
     _current_proximal_ptr  = &Penalty::proximal_L1LINF;
 
   // link public member functions to coop norm functions
-  } else if (penName == "coop") {
+  } else if (type_ == COOP) {
     _current_elt_norm_ptr  = &Penalty::elt_norm_COOP;
     _current_pen_norm_ptr  = &Penalty::pen_norm_COOP;
     _current_dual_norm_ptr = &Penalty::dual_norm_COOP;
