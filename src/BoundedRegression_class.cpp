@@ -29,16 +29,15 @@ BoundedRegression::BoundedRegression(
 }
 
 double BoundedRegression::get_df() {
-  double df ;
-  mat C     ;
+
   uvec I = regspace<uvec>(0, data_.p_-1) ;
   I.shed_rows(B) ;
   mat SII(I.n_elem,I.n_elem) ;
+  double df = I.n_elem ;
   
-  df = I.n_elem;
   if (gamma_ > 0) {
-    C = inv_sympd(XTX.submat(I,I));
-    // loop due to sparse encoding.. should iterate over the n_zeros only...
+    mat C = inv_sympd(XTX.submat(I,I));
+    // loop due to sparse encoding. should iterate over the n_zeros only...
     for (uword i=0;i<I.n_elem;i++){
       for (uword j=i;j<I.n_elem;j++){
         SII(i,j) = data_.S_.at(I(i),I(j));

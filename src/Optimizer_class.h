@@ -29,7 +29,7 @@ template <typename matrix>
 class Optimizer {
 public:
 
-  Optimizer() ;
+  Optimizer() {} ;
   Optimizer(RegressionData<matrix>&, Penalty&, SolverType&) ;
   
   int run(vec&, uvec&, vec&, mat&, double&, const double&, const uword&) ;

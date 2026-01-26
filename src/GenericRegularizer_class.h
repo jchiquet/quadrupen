@@ -15,6 +15,7 @@
 #endif
 
 #include "RegressionData_class.h"
+#include "ActiveSet_class.h"
 #include "Penalty_class.h"
 
 #define ZERO 2e-16
@@ -27,7 +28,8 @@ template <typename matrix>
 class GenericRegularizer {
 public:
   GenericRegularizer(RegressionData<matrix>&, const bool&, const List&);
-
+  GenericRegularizer(RegressionData<matrix>&, const bool&, const List&, SEXP);
+  
   double get_lambda_max() {
     return(penalty_.dual_norm(data_.XTy_));
   } ;
@@ -36,6 +38,7 @@ public:
   
   // Getter functions to access private members
   const RegressionData<matrix>& data()    const { return data_      ; }
+  const ActiveSet<matrix>& active_set()   const { return set_       ; }
   const bool& intercept()                 const { return intercept_ ; }
   const vector<vec>& coefficients()       const { return beta_      ; }
   const vector<double>& interceptTerm()   const { return mu_        ; }
@@ -44,15 +47,15 @@ public:
   
 protected:
   
-  // Variables common to all regularizers
   RegressionData<matrix> data_ ; // data structure
-  bool intercept_         ; // does the model include intercept
-  Penalty penalty_        ; // main penalty object 
-  vector<double> lambda_  ; // vector of parameters tuning the man penalty
-  vec lambda_factor_      ; // main penalty factors
-  vector<vec> beta_       ; // matrix of coefficients
-  vector<double> df_      ; // degrees of freedom along the path
-  vector<double> mu_      ; // vector of intercept term
+  bool intercept_              ; // does the model include intercept
+  Penalty penalty_             ; // main penalty object 
+  ActiveSet<matrix> set_       ; // Active set of variable and data
+  vector<double> lambda_       ; // vector of parameters tuning the man penalty
+  vec lambda_factor_           ; // main penalty factors
+  vector<vec> beta_            ; // matrix of coefficients
+  vector<double> df_           ; // degrees of freedom along the path
+  vector<double> mu_           ; // vector of intercept term
 
 };
 
@@ -61,6 +64,12 @@ GenericRegularizer<matrix>::GenericRegularizer(
   RegressionData<matrix>& data, const bool& intercept, const List& regParam) :
   data_ (data), intercept_ (intercept) 
   {}
+
+template <typename matrix>
+GenericRegularizer<matrix>::GenericRegularizer(
+  RegressionData<matrix>& data, const bool& intercept, const List& regParam, SEXP BETA0) :
+  data_ (data), intercept_ (intercept), set_ (BETA0, data) 
+{}
 
 template <typename matrix>
 void GenericRegularizer<matrix>::lambda_seq(const List& regParam) {

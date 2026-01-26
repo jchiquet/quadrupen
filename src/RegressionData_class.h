@@ -14,15 +14,18 @@ using namespace Rcpp;
 using namespace arma;
 
 template <typename matrix>  class GenericRegularizer ;
+template <typename matrix>  class ActiveSet ;
 template <typename matrix>  class Optimizer ;
 
 // Use template to handle dense or sparse encoding (mat/sp_mat in armadillo)
 template <typename matrix>
 class RegressionData {
   friend class GenericRegularizer<matrix> ;
-  friend class RidgeRegression ;
-  friend class BoundedRegression ;
-  friend class Optimizer<matrix> ;
+  friend class Optimizer<matrix>          ;
+  friend class ActiveSet<matrix>          ;
+  friend class ElasticNet                 ;
+  friend class RidgeRegression            ;
+  friend class BoundedRegression          ;
 
 private:
   // DATA VARIABLES FOR REGRESSION PURPOSE
@@ -42,6 +45,7 @@ private:
   
 public:
 
+  RegressionData() ;
   RegressionData(const Environment& dataModel, const bool& center, const bool& scale);
   
   // DATA NORMALIZATION
