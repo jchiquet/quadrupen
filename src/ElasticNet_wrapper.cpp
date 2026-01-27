@@ -18,7 +18,7 @@ Rcpp::List elastic_net_dense_cpp(
 
   RegressionData<mat> data(dataModel, intercept, as<bool>(control["normalize"])) ;
 
-  ElasticNet enet(data, intercept, regParam, control["beta0"]);
+  ElasticNet enet(data, intercept, regParam, control);
 
   List results;
   // List results = enet.solution_path(control);

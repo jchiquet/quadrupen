@@ -18,7 +18,7 @@ Rcpp::List bounded_regression_cpp(
 
   RegressionData<mat> data(dataModel, intercept, as<bool>(control["normalize"])) ;
 
-  BoundedRegression bounded(data, intercept, regParam);
+  BoundedRegression bounded(data, intercept, regParam, control);
 
   List results = bounded.solution_path(control);
   

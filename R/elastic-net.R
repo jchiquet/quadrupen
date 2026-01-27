@@ -262,9 +262,10 @@ elastic.net.test <- function(x,
   myModel <- ElasticNetFitOO$new(
     data      = myData,
     intercept = intercept,
-    regParam  = list(l1 = lambda1, l2 = lambda2, 
-                     l1_weights = penscale, 
-                     min_ratio = minratio, n_lambda1 = nlambda1)
+    regParam  = list(lambda = lambda1, 
+                     gamma  = lambda2, 
+                     lambda_factor = penscale, 
+                     min_ratio = minratio, n_lambda = nlambda1)
   )
   
   ## ============================================

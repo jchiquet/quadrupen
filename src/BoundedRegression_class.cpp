@@ -9,7 +9,7 @@ using namespace Rcpp;
 using namespace arma;
 
 BoundedRegression::BoundedRegression(
-  RegressionData<mat>& data, const bool& intercept, const List& regParam) :
+  RegressionData<mat>& data, const bool& intercept, const List& regParam, const List& control) :
   GenericRegularizer<mat>::GenericRegularizer(data, intercept, regParam) {
 
   // set the penalty to l infinity
@@ -86,7 +86,7 @@ List BoundedRegression::solution_path(const List& control) {
       if (algorithm == FISTA) {
         Optimizer solver(data_, penalty_, algorithm) ;
         ioptim.push_back(
-          solver.run(current_beta, B, current_grad, XTX, current_lambda, 1e-3, 10000)
+          solver.run(current_beta, A, current_grad, XTX, current_lambda, 1e-3, 10000)
         );
         break;
       } else { // QUADRA solver
@@ -96,7 +96,7 @@ List BoundedRegression::solution_path(const List& control) {
           } else {
             Optimizer solver(data_, penalty_, algorithm) ;
             ioptim.push_back(
-              solver.run(current_beta, B, current_grad, XTX, current_lambda, 1e-10, 50)
+              solver.run(current_beta, A, current_grad, XTX, current_lambda, 1e-10, 50)
             );
           }
         } catch (std::runtime_error& error) {
@@ -105,7 +105,7 @@ List BoundedRegression::solution_path(const List& control) {
           }
           current_it = 0; // start this lambda all the way back, with FISTA algorithm
           algorithm = FISTA ;
-          B = regspace<uvec>(0, data_.p_-1) ;
+          A.reset() ;
         }
       }
 
@@ -117,8 +117,8 @@ List BoundedRegression::solution_path(const List& control) {
     gap.push_back(std::max(0.0, penalty_.dual_norm(current_grad) - current_lambda)) ;
     iactive.push_back(current_it) ;
     status.push_back(0) ;
-    if (current_it >= maxiter)         { status.back() = 1 ; }
-    if (data_.p_ - B.n_elem > maxfeat) { status.back() = 2 ; }
+    if (current_it >= maxiter) { status.back() = 1 ; }
+    if (A.n_elem > maxfeat)    { status.back() = 2 ; }
 
     // Preparing next value of the penalty
     if (status.back() >= 2) {
@@ -127,8 +127,8 @@ List BoundedRegression::solution_path(const List& control) {
       beta_.push_back(current_beta/(data_.norm_X() % lambda_factor_)) ;
       mu_.push_back(as_scalar(data_.y_bar_ - dot(current_beta, data_.X_bar_)));
       df_.push_back(get_df()) ;
-      iB_ = join_rows(iB_, df_.size()*ones<urowvec>(B.n_elem) );
-      jB_ = join_rows(jB_, B.t()) ;
+      iA_ = join_rows(iA_, df_.size()*ones<urowvec>(A.n_elem) );
+      jA_ = join_rows(jA_, A.t()) ;
     }
 
     timing.push_back(timer.toc()) ;

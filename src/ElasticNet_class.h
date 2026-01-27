@@ -27,23 +27,23 @@ using namespace std;
 class ElasticNet : public GenericRegularizer<mat> {
 
   public:
-  ElasticNet(RegressionData<mat>&, const bool&, const List&, SEXP);
+  ElasticNet(RegressionData<mat>&, const bool&, const List&, const List&);
   
-  // List solution_path(const List&);
+  List solution_path(const List&);
 
 private:
 
   // Specific to Elastic-Net regularization
-  double gamma_     ; // overall amount of l2 penalty
+  double gamma_  ; // overall amount of l2 penalty
 
-  mat  R_       ; // Cholesky decomposition of XAtXA
-  vec  xtxw_    ; // t(x_A) * x_A * beta(A)
-  urowvec iA    ; // contains row indices of the non-zero values
-  urowvec jA    ; // contains column indices of the non-zero values
+  mat  R_     ; // Cholesky decomposition of XAtXA
+  vec  xtxw_  ; // t(x_A) * x_A * beta(A)
+  urowvec iA_ ; // contains row indices of the non-zero values
+  urowvec jA_ ; // contains column indices of the non-zero values
 
   // Compute degrees of freedom for the current estimate
   double get_df() ; 
-  
+
 };
 
 #endif

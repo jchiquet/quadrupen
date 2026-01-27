@@ -28,8 +28,7 @@ template <typename matrix>
 class GenericRegularizer {
 public:
   GenericRegularizer(RegressionData<matrix>&, const bool&, const List&);
-  GenericRegularizer(RegressionData<matrix>&, const bool&, const List&, SEXP);
-  
+
   double get_lambda_max() {
     return(penalty_.dual_norm(data_.XTy_));
   } ;
@@ -62,13 +61,7 @@ protected:
 template <typename matrix>
 GenericRegularizer<matrix>::GenericRegularizer(
   RegressionData<matrix>& data, const bool& intercept, const List& regParam) :
-  data_ (data), intercept_ (intercept) 
-  {}
-
-template <typename matrix>
-GenericRegularizer<matrix>::GenericRegularizer(
-  RegressionData<matrix>& data, const bool& intercept, const List& regParam, SEXP BETA0) :
-  data_ (data), intercept_ (intercept), set_ (BETA0, data) 
+  data_ (data), intercept_ (intercept), set_ (data) 
 {}
 
 template <typename matrix>
