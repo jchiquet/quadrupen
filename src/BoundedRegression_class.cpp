@@ -58,7 +58,9 @@ List BoundedRegression::solution_path(const List& control) {
   const uword maxfeat(as<uword>(control["maxfeat"]))      ; // max # of variables activated
 
   SolverType algorithm = QUADRA; // Optimizer (default to QUADRA)
-  if (as<std::string>(control["method"]) == "FISTA") {algorithm = FISTA;}
+  if (as<std::string>(control["method"]) == "FISTA") {
+    algorithm = FISTA;
+  }
 
   // Variables monitoring the algorithm
   vector<double> gap    ; // a vector with the successively reach duality gap
@@ -115,7 +117,7 @@ List BoundedRegression::solution_path(const List& control) {
     iactive.push_back(current_it) ;
     status.push_back(0) ;
     if (current_it >= maxiter) { status.back() = 1 ; }
-    if (set_.size() > maxfeat)    { status.back() = 2 ; }
+    if (set_.size() > maxfeat) { status.back() = 2 ; }
 
     // Preparing next value of the penalty
     if (status.back() >= 2) {

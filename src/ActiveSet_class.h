@@ -39,7 +39,8 @@ public:
   void add_vars(uvec, RegressionData<matrix> &) ; // add a list of variables in the active set
   void del_var(uword) ; // remove the variable activated in position ind_var_out
   void del_vars(uvec) ; // remove a set of non contiguous varables
-
+  void reset()        ; // empty the active set 
+  
   // Update Cholesky factorisation by inserting the last activated variables
   void update_Cholesky() ; 
   
@@ -82,6 +83,16 @@ ActiveSet<matrix>::ActiveSet(const RegressionData<matrix>& data, const uvec& A0,
       R_ = chol(XATXA_) ;
     }
   }
+}
+
+template <typename matrix>
+void ActiveSet<matrix>::reset() {
+  A_.reset()      ;
+  is_in_.zeros()  ;
+  XATXA_.reset()  ;
+  XTXA_.reset()   ; 
+  R_.reset()      ;
+  
 }
 
 template <typename matrix>

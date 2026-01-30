@@ -255,7 +255,7 @@ uword Optimizer<matrix>::fista(
   vec betal = beta  ;
   double delta = 2*accuracy  ; // change in beta
   double L = max( XTX.diag()) ; // Lipchitz constant
-  
+
   double t0 = 1.0, tk ; // auxiliary variables in FISTA 
   uword iter = 0      ; // current iterate
   while ((delta > accuracy/beta.n_elem ) && (iter < max_iter)) {
