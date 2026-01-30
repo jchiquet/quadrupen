@@ -21,7 +21,7 @@ Rcpp::List bounded_regression_cpp(
   BoundedRegression bounded(data, intercept, regParam, control);
 
   List results = bounded.solution_path(control);
-  
+
   return List::create(
     Named("tuning_param") = List::create(
       Named("linf") = bounded.tuning_param(),
@@ -33,5 +33,5 @@ Rcpp::List bounded_regression_cpp(
     Named("df")          = bounded.degrees_freedom(),
     Named("monitoring")  = results
   );
-  
+
 }

@@ -21,30 +21,29 @@ BoundedRegression::BoundedRegression(
   gamma_   = as<double>(regParam["gamma"]) ;
   data_.scale_struct(sqrt(gamma_)*pow(lambda_factor_,-1/2)) ;
 
+  // Initialize the active set with starting coefficient
+  set_= ActiveSet(data, as<bool>(control["usechol"])) ;
+  
   // Compute the Gram matrix (+ S scaled)  
   XTX = data_.X_.t() * data_.X_ - data_.n_ * data_.X_bar_ * data_.X_bar_.t() + data_.S_;
   
-  // Initialize the set of variables living on the boundaries (all)
-  B = regspace<uvec>(0, data_.p_-1) ;
 }
 
 double BoundedRegression::get_df() {
 
-  uvec I = regspace<uvec>(0, data_.p_-1) ;
-  I.shed_rows(B) ;
-  mat SII(I.n_elem,I.n_elem) ;
-  double df = I.n_elem ;
+  mat SAA(set_.size(),set_.size()) ;
+  double df = set_.size() ;
   
   if (gamma_ > 0) {
-    mat C = inv_sympd(XTX.submat(I,I));
+    mat C = inv_sympd(XTX(set_.A_,set_.A_));
     // loop due to sparse encoding. should iterate over the n_zeros only...
-    for (uword i=0;i<I.n_elem;i++){
-      for (uword j=i;j<I.n_elem;j++){
-        SII(i,j) = data_.S_.at(I(i),I(j));
-        SII(j,i) = SII(i,j);
+    for (uword i=0;i<set_.size();i++){
+      for (uword j=i;j<set_.size();j++){
+        SAA(i,j) = data_.S_.at(set_.A_(i),set_.A_(j));
+        SAA(j,i) = SAA(i,j);
       }
     }
-    df -= trace(SII * C);
+    df -= trace(SAA * C);
   }
   
   return(df);
@@ -70,23 +69,22 @@ List BoundedRegression::solution_path(const List& control) {
    
   // LAMBDA LOOP
   vec current_beta = zeros<vec>(data_.p_) ; // vector of current parameters
+  vec current_grad = -data_.XTy_          ; // vector of current gradient (smooth part)
   wall_clock timer ; timer.tic(); // clock
   for(auto current_lambda : lambda_) {
-     if (verbose) {Rprintf("\n lambda_linf = %f",current_lambda) ;}
+    if (verbose) {Rprintf("\n lambda_linf = %f",current_lambda) ;}
 
     // OPTIMIZER LOOP (FIX-LAMBDA VALUE): IDENTIFY THE ACTIVE SET AND SOLVE
     uword current_it = 0 ;
-    vec current_grad ;
     double current_gap = datum::inf ;
-    
     do {
       R_CheckUserInterrupt();
       current_it++;
-      
+
       if (algorithm == FISTA) {
         Optimizer solver(data_, penalty_, algorithm) ;
         ioptim.push_back(
-          solver.run(current_beta, A, current_grad, XTX, current_lambda, 1e-3, 10000)
+          solver.run(current_beta, current_lambda, set_, XTX, 1e-3, 10000)
         );
         break;
       } else { // QUADRA solver
@@ -96,7 +94,7 @@ List BoundedRegression::solution_path(const List& control) {
           } else {
             Optimizer solver(data_, penalty_, algorithm) ;
             ioptim.push_back(
-              solver.run(current_beta, A, current_grad, XTX, current_lambda, 1e-10, 50)
+              solver.run(current_beta, current_lambda, set_, XTX, 1e-10, 10)
             );
           }
         } catch (std::runtime_error& error) {
@@ -105,20 +103,21 @@ List BoundedRegression::solution_path(const List& control) {
           }
           current_it = 0; // start this lambda all the way back, with FISTA algorithm
           algorithm = FISTA ;
-          A.reset() ;
+          // A.reset() ;
         }
       }
 
       // OPTIMALITY TESTING
-      current_gap = std::max(0.0, penalty_.dual_norm(current_grad) - current_lambda) ;
+      current_grad = - data_.XTy_ + XTX * current_beta ;
+      current_gap = penalty_.dual_norm(current_grad) - current_lambda ;
     } while ((current_gap > accuracy) && (current_it <= maxiter));
 
     // Checking convergence status
-    gap.push_back(std::max(0.0, penalty_.dual_norm(current_grad) - current_lambda)) ;
+    gap.push_back(fmax(0.0, penalty_.dual_norm(current_grad) - current_lambda)) ;
     iactive.push_back(current_it) ;
     status.push_back(0) ;
     if (current_it >= maxiter) { status.back() = 1 ; }
-    if (A.n_elem > maxfeat)    { status.back() = 2 ; }
+    if (set_.size() > maxfeat)    { status.back() = 2 ; }
 
     // Preparing next value of the penalty
     if (status.back() >= 2) {
@@ -127,8 +126,8 @@ List BoundedRegression::solution_path(const List& control) {
       beta_.push_back(current_beta/(data_.norm_X() % lambda_factor_)) ;
       mu_.push_back(as_scalar(data_.y_bar_ - dot(current_beta, data_.X_bar_)));
       df_.push_back(get_df()) ;
-      iA_ = join_rows(iA_, df_.size()*ones<urowvec>(A.n_elem) );
-      jA_ = join_rows(jA_, A.t()) ;
+      iA_ = join_rows(iA_, df_.size()*ones<urowvec>(set_.size()) );
+      jA_ = join_rows(jA_, set_.A_.t()) ;
     }
 
     timing.push_back(timer.toc()) ;

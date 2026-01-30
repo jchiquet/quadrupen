@@ -22,7 +22,8 @@ ElasticNet::ElasticNet(
     data_.scale_struct(sqrt(gamma_)*pow(lambda_factor_,-1/2)) ;
 
     // Initialize the active set with starting coefficient
-    set_= ActiveSet(data, control["beta0"], control["usechol"]) ;
+    vec beta0 = control["beta0"] ;
+    set_= ActiveSet(data, find(abs(beta0)), control["usechol"]) ;
     
     // WARM START
     // A_ = find(beta0 != 0) ;
@@ -109,11 +110,11 @@ List ElasticNet::solution_path(const List& control) {
     // OPTIMIZER LOOP (FIX-LAMBDA VALUE): IDENTIFY THE ACTIVE SET AND SOLVE
 
     // smooth part of the gradient
-    vec current_grad = set_.current_grad(data_) ;
+    vec current_grad = -data_.XTy_ + set_.XTXA_ * current_beta.elem(set_.A_) ;
     // dual norm of gradient for inactive variables
     vec grd_norm = penalty_.elt_norm(current_grad) - current_lambda ;
     // gradient for active variables
-    grd_norm.elem(set_.A_) = abs(current_grad(set_.A_) + current_lambda * sign(set_.betaA_)) ;
+    grd_norm.elem(set_.A_) = abs(current_grad(set_.A_) + current_lambda * sign(current_beta.elem(set_.A_))) ;
     double current_gap = std::max(0.0, grd_norm.max()) ;
     
     uvec  null ; // stores the variables which go to zero during optimization
@@ -139,14 +140,14 @@ List ElasticNet::solution_path(const List& control) {
       if (algorithm == FISTA) {
         Optimizer solver(data_, penalty_, algorithm) ;
         ioptim.push_back(
-          solver.run(set_.betaA_, set_.A_, current_grad, set_.XATXA_, current_lambda, 1e-3, 10000)
+          solver.fista(current_beta, current_lambda, set_, set_.XATXA_, 1e-3, 10000)
         );
         break;
       } else { // QUADRA solver
         try {
           Optimizer solver(data_, penalty_, algorithm) ;
           ioptim.push_back(
-            solver.run(set_.betaA_, set_.A_, current_grad, set_.XATXA_, current_lambda, 1e-10, 50)
+            solver.fista(current_beta, current_lambda, set_, set_.XATXA_, 1e-10, 50)
           );
         } catch (std::runtime_error& error) {
           if (verbose > 0) {
@@ -156,7 +157,7 @@ List ElasticNet::solution_path(const List& control) {
         }
       }
       // update the smooth part of the gradient - WILL PROBABLY BE REMOVED
-      current_grad = - data_.XTy_ + set_.XTXA_ * set_.betaA_ ;
+      current_grad = - data_.XTy_ + set_.XTXA_ * current_beta.elem(set_.A_) ;
 
       // 
       // VARIABLE DELETION IF APPLICABLE
@@ -172,11 +173,11 @@ List ElasticNet::solution_path(const List& control) {
 
       // OPTIMALITY TESTING
       // smooth part of the gradient
-      current_grad = - data_.XTy_ + set_.XTXA_ * set_.betaA_ ;
+      current_grad = - data_.XTy_ + set_.XTXA_ * current_beta.elem(set_.A_) ;
       // dual norm of gradient for inactive variables
       grd_norm = penalty_.elt_norm(current_grad) - current_lambda ;
       // gradient for active variables
-      grd_norm.elem(set_.A_) = abs(current_grad(set_.A_) + current_lambda * sign(set_.betaA_)) ;
+      grd_norm.elem(set_.A_) = abs(current_grad(set_.A_) + current_lambda * sign(current_beta.elem(set_.A_))) ;
       current_gap = std::max(0.0, grd_norm.max()) ;
     }
 
@@ -192,8 +193,8 @@ List ElasticNet::solution_path(const List& control) {
     if (status.back() >= 2) {
       break;
     } else {
-      beta_.push_back(set_.betaA_/ (data_.norm_X_.elem(set_.A_) % lambda_factor_.elem(set_.A_)));
-      mu_.push_back(as_scalar(dot(set_.betaA_, data_.X_bar_.elem(set_.A_))));
+      beta_.push_back(current_beta.elem(set_.A_)/ (data_.norm_X_.elem(set_.A_) % lambda_factor_.elem(set_.A_)));
+      mu_.push_back(as_scalar(dot(current_beta.elem(set_.A_), data_.X_bar_.elem(set_.A_))));
       df_.push_back(get_df()) ;
       iA_ = join_rows(iA_, df_.size()*ones<urowvec>(set_.size()) );
       jA_ = join_rows(jA_, set_.A_.t()) ;

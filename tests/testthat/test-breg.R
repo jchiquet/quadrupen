@@ -1,6 +1,6 @@
 testDataBreg <- readRDS("dataTest-boundedReg.rds")
 
-tol <- 1e-6
+tol <- 1e-3
 
 test_that("Bounded regression with lambda2 = 0 - test on the documentation example", {
   

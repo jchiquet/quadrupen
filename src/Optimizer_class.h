@@ -32,33 +32,40 @@ public:
   Optimizer() {} ;
   Optimizer(RegressionData<matrix>&, Penalty&, SolverType&) ;
   
-  int run(vec&, uvec&, vec&, mat&, double&, const double&, const uword&) ;
+  uword run(vec&, const double&, ActiveSet<matrix>&, mat&, const double&, const uword&) ;
+
+  uword quadratic_breg(
+      vec& beta,
+      const double& lambda,
+      ActiveSet<matrix>& set,
+      mat& XTX,
+      const double& accuracy=1e-10,
+      const uword& max_iter=50) ;
+  
+  uword fista(
+      vec& beta,
+      const double& lambda, 
+      ActiveSet<matrix>& set,
+      mat& XTX, 
+      const double& accuracy=1e-2, 
+      const uword& max_iter=10000) ;
   
 private:
   RegressionData<matrix> data_ ;
   Penalty penalty_ ;
   SolverType solver_ ;
 
-  typedef int (Optimizer::*solver_ptr)(
+  typedef uword (Optimizer::*solver_ptr)(
       vec& beta,
-      uvec& A,
-      vec& grad,
+      const double& lambda,
+      ActiveSet<matrix>& set,
       mat& XTX,
-      double& lambda,
       const double& accuracy,
       const uword& max_iter) ;
-  
+
   solver_ptr _current_solver_ptr ;
 
-  int quadratic_breg(
-      vec& beta,
-      uvec& A,
-      vec& grad,
-      mat& XTX,
-      double& lambda,
-      const double& accuracy=1e-10,
-      const uword& max_iter=50) ;
-
+  
   // int quadra_enet(
   //     vec &beta,
   //     mat &R,
@@ -68,15 +75,7 @@ private:
   //     double &lambda,
   //     uvec   &null,
   //     const double& accuracy=1e-10) ;
-  
-  int fista(
-      vec& beta,
-      uvec& A,
-      vec& grad,
-      mat& XTX, 
-      double& lambda, 
-      const double& accuracy=1e-2, 
-      const uword& max_iter=10000) ;
+
   
 };
 
@@ -84,87 +83,90 @@ template <typename matrix>
 Optimizer<matrix>::Optimizer(
   RegressionData<matrix>& data, Penalty& penalty,  SolverType& solver) :
   data_ (data), penalty_ (penalty), solver_(solver) {
-  
+
   if (solver_ ==  QUADRA) {
     if (penalty_.type() == LINF) _current_solver_ptr  = &Optimizer::quadratic_breg ;
     // if (penalty_.type() == L1) _current_solver_ptr  = &Optimizer::quadratic_enet ;
   } else if (solver == FISTA) {
     _current_solver_ptr  = &Optimizer::fista ;
-  }  
-  
+  }
+
 }
 
 template <typename matrix>
-int Optimizer<matrix>::run(
+uword Optimizer<matrix>::run(
     vec& beta,
-    uvec& A,
-    vec& grad,
+    const double& lambda,
+    ActiveSet<matrix>& set,
     mat& XTX,
-    double& lambda,
     const double& accuracy,
-    const uword& max_iter) 
-{return((this->*_current_solver_ptr)(beta, A, grad, XTX, lambda, accuracy, max_iter));};
+    const uword& max_iter)
+{return((this->*_current_solver_ptr)(beta, lambda, set, XTX, accuracy, max_iter));};
 
 template <typename matrix>
-int Optimizer<matrix>::quadratic_breg(
+uword Optimizer<matrix>::quadratic_breg(
     vec& beta,
-    uvec& A,
-    vec& grad,
+    const double& lambda,
+    ActiveSet<matrix>& set,
     mat& XTX,
-    double& lambda,
     const double& accuracy,
     const uword& max_iter) {
-  
-  uvec all = regspace<uvec>(0,beta.n_elem-1) ;
-  uvec B = all ; B.shed_rows(A) ;
-  uvec toB = B ; // guys reaching the boundary after optimization
-  
-  grad = -data_.XTy_ + XTX * beta ;
+
+  uvec B = regspace<uvec>(0,beta.n_elem-1) ; B.shed_rows(set.A_) ;
+
+  vec grad = -data_.XTy_ + XTX * beta ;
   vec theta = -sign(grad.elem(B)) ; // sign of the guys on the boundary
-  
+
   uword iter = 0 ; // count the number of systems solved
-  while ((toB.n_elem > 0) & (iter < max_iter)) {
-    
+  bool success = false ;
+  
+  while ((!success > 0) && (iter < max_iter)) {
+
     iter++;
-    
+
     // SOLVE THE QUADRATIC PROBLEM
     vec XX_B = XTX.cols(B) * theta;
-    if (A.is_empty()) {
+    if (set.A_.is_empty()) {
       double b  = (dot(theta, data_.XTy_.elem(B)) - lambda);
       beta.elem(B) = theta * (b/sum(theta % XX_B.elem(B),0)) ;
     } else {
       // Constructing the system (KKT)
       mat XX = join_rows(
-        join_cols(sum(theta % XX_B.elem(B),0), XX_B.elem(A)),
-        join_cols(strans(XX_B.elem(A)), XTX(A,A)));
-      vec b = join_cols(theta.t()*data_.XTy_.elem(B)-lambda, data_.XTy_.elem(A)) ;
+        join_cols(sum(theta % XX_B.elem(B),0), XX_B.elem(set.A_)),
+        join_cols(strans(XX_B.elem(set.A_)), XTX(set.A_,set.A_)));
+      vec b = join_cols(theta.t()*data_.XTy_.elem(B)-lambda, data_.XTy_.elem(set.A_)) ;
       // Solving via Cholesky factorization...
       mat R = chol(XX) ;
-      vec tmp = solve(trimatu(R), solve(trimatl(strans(R)),b)) ;
+      vec tmp = solve(trimatu(R), solve(trimatl(strans(R)), b)) ;
       beta.elem(B) = theta * tmp[0] ;
-      beta.elem(A) = tmp.subvec(1,tmp.n_elem-1) ;
+      beta.elem(set.A_) = tmp.subvec(1,tmp.n_elem-1) ;
+    }
+
+    // Handling guys reaching the boundary (leaving the active set)
+    double bound = penalty_.pen_norm(beta.elem(B)) ; // current boundary
+    uvec ind_toB = find(abs(beta.elem(set.A_)) > bound) ;
+    if (!ind_toB.is_empty()) {
+      uvec toB = set.A_(ind_toB) ;
+      set.del_vars(ind_toB) ;
+      beta.elem(toB) = bound * sign(beta.elem(toB));
+      B = join_cols(B,toB);
+      theta = sign(beta.elem(B));
+    } else {
+      success = true ;
     }
     
-    // Handling guys reaching the boundary
-    double bound = penalty_.pen_norm(beta.elem(B)) ; // current boundary
-    toB = find(abs(beta) > bound) ;
-    beta.elem(toB) = bound * sign(beta.elem(toB));
-    B = unique(join_cols(B,toB));
-    theta = sign(beta.elem(B)); // sign of the guys on the boundary
   }
-  grad = -data_.XTy_ + XTX * beta ;
   
-  // Handling guys leaving the boundary after optimization
-  A = find(abs(penalty_.elt_norm(beta) - penalty_.pen_norm(beta)) >= ZERO );
-  
-  // uvec toA  = find(abs(theta + sign(grad.elem(B))) > ZERO);
-  // B.shed_rows(toA) ;
-  // A = all ; A.shed_rows(B) ;
-  // 
-  // 
-  // if (B.is_empty()) {
-  //   throw std::runtime_error("Every variable left the boudary. Try more regularization.");
-  // }
+  // Guys leaving the boundary after optimization (activation)
+  uvec ind_toA  = find(sign(beta.elem(B)) == sign(grad.elem(B)));
+  if (!ind_toA.is_empty()) {
+    uvec toA = B(ind_toA) ;
+    B.shed_rows(ind_toA) ;
+    set.add_vars(toA, data_) ;
+    if (B.is_empty()) {
+      throw std::runtime_error("Every variable left the boudary. Try more regularization.");
+    }
+  }
   
   return(iter) ;
 }
@@ -243,12 +245,11 @@ int Optimizer<matrix>::quadratic_breg(
 
 
 template <typename matrix>
-int Optimizer<matrix>::fista(
+uword Optimizer<matrix>::fista(
     vec& beta,
-    uvec& A,
-    vec& grad,
+    const double& lambda,
+    ActiveSet<matrix>& set,
     mat& XTX,
-    double& lambda,
     const double& accuracy,
     const uword& max_iter) {
 
@@ -264,7 +265,7 @@ int Optimizer<matrix>::fista(
     double l_num, l_den ;
     double f0, fk ;
     f0 = as_scalar(.5 * strans(betal) * XTX * betal - strans(data_.XTy_) * betal) ;
-    grad = - data_.XTy_ + XTX * betal ;
+    vec grad = - data_.XTy_ + XTX * betal ;
     
     // Line search over L
     bool found=false;
@@ -302,7 +303,7 @@ int Optimizer<matrix>::fista(
   }
 
   // Evaluating the set of active variables (between the boundary)
-  A = find(abs(penalty_.elt_norm(beta) - penalty_.pen_norm(beta)) >= ZERO );
+  // A = find(abs(penalty_.elt_norm(beta) - penalty_.pen_norm(beta)) >= ZERO );
 
   return(iter) ;
 

@@ -48,7 +48,8 @@ optim_breg_default <- function(d)
        maxiter     = max(500, d),
        method      = "quadra",
        threshold   = 1e-7,
-       monitor     = 0
+       monitor     = 0,
+       usechol     = FALSE
   )
 
 optim_fused_default <- function(d)

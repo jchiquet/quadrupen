@@ -10,37 +10,36 @@ using namespace arma;
 #include "RegressionData_class.h"
 
 template <typename matrix> class GenericRegularizer ;
+template <typename matrix> class Optimizer ;
 
 template <typename matrix> class ActiveSet {
   friend class GenericRegularizer<matrix> ;
+  friend class Optimizer<matrix>          ;
+  friend class BoundedRegression          ;
   friend class ElasticNet                 ;
+  friend class Optimizer<matrix>          ;
   
 protected:
   // VARIABLES FOR HANDLING THE ACTIVE SET
-  vec  betaA_    ; // vector of currently activated features
   uvec A_        ; // set of currently activated variables
   uvec is_in_    ; // indicator of active variables (0/1)
   mat XATXA_     ; // Gram matrix of currently activated variables
   mat XTXA_      ; 
-  bool use_chol_ ; // Maintained a Cholesky factorization along the active set algorithm
+  bool use_chol_ ; // Maintain a Cholesky factorization along the active set algorithm
   mat R_         ; // Cholesky decomposition of XATXA
-  vec  XTXw_     ; // Quantity useful for FISTA algorithm
-    
+
 public:
   ActiveSet() {} ;
   ActiveSet(const RegressionData<matrix> &data) ;
-  ActiveSet(const RegressionData<matrix> &data, const vec&, const bool use_chol=true) ;
+  ActiveSet(const RegressionData<matrix> &data, const bool use_chol) ;
+  ActiveSet(const RegressionData<matrix> &data, const uvec&, const bool use_chol) ;
   
   // ACTIVE SET HANDLING
   void add_var(uword, RegressionData<matrix> &) ; // add a variable in the active set
+  void add_vars(uvec, RegressionData<matrix> &) ; // add a list of variables in the active set
   void del_var(uword) ; // remove the variable activated in position ind_var_out
   void del_vars(uvec) ; // remove a set of non contiguous varables
-  // void del_vars(uword first_out, uword last_out) ; // of contiguous variables
-  // void add_vars(uword first_in, uword last_in, RegressionData<matrix> &)   ; // the same for a set 
 
-  // Update Cholesky factorisation by inserting the last activated variables
-  vec current_grad(RegressionData<matrix> &data) {return(- data.XTy_ + XTXA_* betaA_);}; 
-  
   // Update Cholesky factorisation by inserting the last activated variables
   void update_Cholesky() ; 
   
@@ -48,10 +47,8 @@ public:
   void downdate_Cholesky(uword j) ; 
   
   // Getter for private member
-  void update_beta_active(vec betaA_new) { betaA_ = betaA_new; }
-  const vec& beta_active() const { return betaA_ ; }
   const uvec& active() const { return A_  ; }
-  const uword& size() const { return A_.n_elem  ; }
+  const uword size() const { return accu(is_in_)  ; }
   bool is_active (uword i) { return (is_in_(i)) ; }
   const mat& Gram_active() const { return XATXA_ ; }
   
@@ -63,33 +60,34 @@ ActiveSet<matrix>::ActiveSet(const RegressionData<matrix>& data) {
 }
 
 template <typename matrix>
-ActiveSet<matrix>::ActiveSet(const RegressionData<matrix>& data, const vec& beta0, const bool use_chol) {
+ActiveSet<matrix>::ActiveSet(const RegressionData<matrix>& data, const bool use_chol) {
+  is_in_.zeros(data.p_) ;
+  use_chol_ = use_chol  ;
+}
+
+template <typename matrix>
+ActiveSet<matrix>::ActiveSet(const RegressionData<matrix>& data, const uvec& A0, const bool use_chol) {
+  A_        = A0           ;
+  is_in_.zeros(A0.n_elem)  ;
+  is_in_.elem(A_).fill(1)  ;
+  use_chol_ = use_chol     ;
   
-  A_        = find(beta0)    ;
-  betaA_    = beta0.elem(A_) ;
-  is_in_.zeros(beta0.n_elem) ;
-  is_in_.elem(A_).fill(1)    ;
-  use_chol_ = use_chol       ;
-  
-  if (!betaA_.is_empty()) {
+  if (!A_.is_empty()) {
     for (uword i=0; i<A_.n_elem;i++) {
     XTXA_.col(i) = data.X_.t() * data.X_.col(i) - 
       data.n_ * data.X_bar_ * as_scalar(data.X_bar_[i]) + data.S_.col(i) ;
     }
     XATXA_ = XTXA_.rows(A_) ;
+    if (use_chol_){
+      R_ = chol(XATXA_) ;
+    }
   }
-  if (use_chol_){
-    R_ = chol(XATXA_) ;
-  }
-  
 }
 
 template <typename matrix>
 void ActiveSet<matrix>::add_var(uword var_in, RegressionData<matrix>& data) {
-  betaA_.resize(A_.n_elem+1) ; // update the vector of active parameters
-  betaA_(A_.n_elem) = 0.0    ;
-  A_.resize(A_.n_elem)       ; // update the active set
-  A_[A_.n_elem] = var_in     ;
+  A_.resize(size() + 1) ;
+  A_.tail(1) = var_in ;
   is_in_[var_in] = 1         ;
   
   vec new_col = data.X_.t() * data.X_.col(var_in) - 
@@ -106,8 +104,29 @@ void ActiveSet<matrix>::add_var(uword var_in, RegressionData<matrix>& data) {
 }
 
 template <typename matrix>
+void ActiveSet<matrix>::add_vars(uvec vars, RegressionData<matrix>& data) {
+  A_.resize(size() + vars.n_elem) ;
+  A_.tail(vars.n_elem) = vars ;
+  is_in_.rows(vars).fill(1);
+
+  for (auto v : vars) {
+    
+    vec new_col = data.X_.t() * data.X_.col(v) - 
+      data.n_ * data.X_bar_ * as_scalar(data.X_bar_[v]) + data.S_.col(v) ;
+
+    // UPDATE THE xtxA AND xAtxA MATRICES
+    if (!XATXA_.is_empty()) {
+      XATXA_ = join_cols(XATXA_, XTXA_.row(v)) ;
+    }
+    XTXA_  = join_rows(XTXA_ , new_col) ;
+    XATXA_ = join_rows(XATXA_, trans(XTXA_.row(v))) ;
+    
+    if (use_chol_) update_Cholesky() ;
+  }
+}
+
+template <typename matrix>
 void ActiveSet<matrix>::del_var(uword ivar_out) {
-  betaA_.shed_row(ivar_out)  ; // update the vector of active parameters
   is_in_[A_[ivar_out]] = 0   ; // update the active set
   A_.shed_row(ivar_out)      ;
   XTXA_.shed_col(ivar_out)   ;
@@ -118,10 +137,9 @@ void ActiveSet<matrix>::del_var(uword ivar_out) {
 template <typename matrix>
 void ActiveSet<matrix>::del_vars(uvec ivars) {
   for (auto i : ivars) {
-    betaA_.shed_row(i)  ; // update the vector of active parameters
     is_in_[A_[i]] = 0 ; // update the active set
     A_.shed_row(i)      ;
-    if (use_chol_) downdate_Cholesky(ivars) ;
+    if (use_chol_) downdate_Cholesky(i) ;
     if (i == 0) break;
   }
   XTXA_.shed_cols(ivars)  ;
@@ -131,7 +149,7 @@ void ActiveSet<matrix>::del_vars(uvec ivars) {
 
 template <typename matrix>
 void ActiveSet<matrix>::update_Cholesky() {
-  uword p = size() ;
+  uword p = XATXA_.n_cols ;
   
   if (p == 1) {
     R_ = sqrt(XATXA_);
@@ -179,8 +197,6 @@ void ActiveSet<matrix>::downdate_Cholesky(uword j) {
 // void ActiveSet<matrix>::add_vars(uword first_in, uword last_in, RegressionData<matrix>& data) {
 //   
 //   for (uword k=first_in; k<=last_in; k++) {
-//     betaA_.resize(A_.n_elem+1); // update the vector of active parameters
-//     betaA_(A_.n_elem) = 0.0   ;
 //     A_.resize(A_.n_elem)      ; // update the active set
 //     A_[A_.n_elem] = k     ;
 //     is_in_[k] = 1       ;
@@ -205,7 +221,6 @@ void ActiveSet<matrix>::downdate_Cholesky(uword j) {
 // template <typename matrix>
 // void ActiveSet<matrix>::del_vars(uword first_indVarOut, uword last_indVarOut) {
 //   for (uword k=last_indVarOut; k>=first_indVarOut; k--) {
-//     betaA_.shed_row(k)  ; // update the vector of active parameters
 //     is_in_[A_[k]] = 0 ; // update the active set
 //     A_.shed_row(k)      ;
 //     if (k == 0) {break;}

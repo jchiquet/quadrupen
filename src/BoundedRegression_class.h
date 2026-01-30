@@ -34,10 +34,7 @@ private:
   // Specific to Bounded regression
   mat    XTX        ; // Gram matrix
   double gamma_     ; // overall amount of l2 penalty
-  uvec B            ; // guys reaching the boundary
-  uvec A            ; // guys in between the boundary (active)
-  urowvec iB_       ; // contains row indices of the bounded variables
-  urowvec jB_       ; // contains column indices of the bounded variables
+  uvec A           ; // guys in between the boundary (active)
   urowvec iA_       ; // contains row indices of the active variables
   urowvec jA_       ; // contains column indices of the active variables
   
