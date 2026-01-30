@@ -35,7 +35,7 @@ double BoundedRegression::get_df() {
   double df = set_.size() ;
   
   if (gamma_ > 0) {
-    mat C = inv_sympd(XTX(set_.A_,set_.A_));
+    mat C = inv_sympd(set_.XATXA_);
     // loop due to sparse encoding. should iterate over the n_zeros only...
     for (uword i=0;i<set_.size();i++){
       for (uword j=i;j<set_.size();j++){
@@ -80,7 +80,6 @@ List BoundedRegression::solution_path(const List& control) {
     do {
       R_CheckUserInterrupt();
       current_it++;
-
       if (algorithm == FISTA) {
         Optimizer solver(data_, penalty_, algorithm) ;
         ioptim.push_back(
@@ -103,7 +102,6 @@ List BoundedRegression::solution_path(const List& control) {
           }
           current_it = 0; // start this lambda all the way back, with FISTA algorithm
           algorithm = FISTA ;
-          // A.reset() ;
         }
       }
 

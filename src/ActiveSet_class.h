@@ -87,9 +87,9 @@ ActiveSet<matrix>::ActiveSet(const RegressionData<matrix>& data, const uvec& A0,
 template <typename matrix>
 void ActiveSet<matrix>::add_var(uword var_in, RegressionData<matrix>& data) {
   A_.resize(size() + 1) ;
-  A_.tail(1) = var_in ;
-  is_in_[var_in] = 1         ;
-  
+  A_.tail(1) = var_in   ;
+  is_in_[var_in] = 1    ;
+
   vec new_col = data.X_.t() * data.X_.col(var_in) - 
     data.n_ * data.X_bar_ * as_scalar(data.X_bar_[var_in]) + data.S_.col(var_in) ;
 
@@ -105,23 +105,8 @@ void ActiveSet<matrix>::add_var(uword var_in, RegressionData<matrix>& data) {
 
 template <typename matrix>
 void ActiveSet<matrix>::add_vars(uvec vars, RegressionData<matrix>& data) {
-  A_.resize(size() + vars.n_elem) ;
-  A_.tail(vars.n_elem) = vars ;
-  is_in_.rows(vars).fill(1);
-
-  for (auto v : vars) {
-    
-    vec new_col = data.X_.t() * data.X_.col(v) - 
-      data.n_ * data.X_bar_ * as_scalar(data.X_bar_[v]) + data.S_.col(v) ;
-
-    // UPDATE THE xtxA AND xAtxA MATRICES
-    if (!XATXA_.is_empty()) {
-      XATXA_ = join_cols(XATXA_, XTXA_.row(v)) ;
-    }
-    XTXA_  = join_rows(XTXA_ , new_col) ;
-    XATXA_ = join_rows(XATXA_, trans(XTXA_.row(v))) ;
-    
-    if (use_chol_) update_Cholesky() ;
+  for (uword v=0; v < vars.n_elem ; v++) {
+    add_var(vars[v], data) ;
   }
 }
 
@@ -136,15 +121,10 @@ void ActiveSet<matrix>::del_var(uword ivar_out) {
 
 template <typename matrix>
 void ActiveSet<matrix>::del_vars(uvec ivars) {
-  for (auto i : ivars) {
-    is_in_[A_[i]] = 0 ; // update the active set
-    A_.shed_row(i)      ;
-    if (use_chol_) downdate_Cholesky(i) ;
-    if (i == 0) break;
+  ivars = sort(ivars, "descend");
+  for (uword i=0 ; i <ivars.n_elem ; i++) {
+    del_var(ivars[i]) ;
   }
-  XTXA_.shed_cols(ivars)  ;
-  XATXA_.shed_cols(ivars) ;
-  XATXA_.shed_rows(ivars) ;
 }
 
 template <typename matrix>

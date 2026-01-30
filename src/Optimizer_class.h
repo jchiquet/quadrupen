@@ -113,13 +113,11 @@ uword Optimizer<matrix>::quadratic_breg(
     const uword& max_iter) {
 
   uvec B = regspace<uvec>(0,beta.n_elem-1) ; B.shed_rows(set.A_) ;
-
   vec grad = -data_.XTy_ + XTX * beta ;
   vec theta = -sign(grad.elem(B)) ; // sign of the guys on the boundary
 
   uword iter = 0 ; // count the number of systems solved
   bool success = false ;
-  
   while ((!success > 0) && (iter < max_iter)) {
 
     iter++;
@@ -133,7 +131,7 @@ uword Optimizer<matrix>::quadratic_breg(
       // Constructing the system (KKT)
       mat XX = join_rows(
         join_cols(sum(theta % XX_B.elem(B),0), XX_B.elem(set.A_)),
-        join_cols(strans(XX_B.elem(set.A_)), XTX(set.A_,set.A_)));
+        join_cols(strans(XX_B.elem(set.A_)), set.XATXA_));
       vec b = join_cols(theta.t()*data_.XTy_.elem(B)-lambda, data_.XTy_.elem(set.A_)) ;
       // Solving via Cholesky factorization...
       mat R = chol(XX) ;
@@ -148,21 +146,21 @@ uword Optimizer<matrix>::quadratic_breg(
     if (!ind_toB.is_empty()) {
       uvec toB = set.A_(ind_toB) ;
       set.del_vars(ind_toB) ;
-      beta.elem(toB) = bound * sign(beta.elem(toB));
       B = join_cols(B,toB);
+      beta.elem(B) = bound * sign(beta.elem(B));
       theta = sign(beta.elem(B));
     } else {
       success = true ;
     }
-    
   }
-  
+
   // Guys leaving the boundary after optimization (activation)
-  uvec ind_toA  = find(sign(beta.elem(B)) == sign(grad.elem(B)));
+  grad = -data_.XTy_ + XTX * beta ;
+  uvec ind_toA  = find(theta == sign(grad.elem(B)));
   if (!ind_toA.is_empty()) {
     uvec toA = B(ind_toA) ;
-    B.shed_rows(ind_toA) ;
     set.add_vars(toA, data_) ;
+    B.shed_rows(ind_toA) ;
     if (B.is_empty()) {
       throw std::runtime_error("Every variable left the boudary. Try more regularization.");
     }
