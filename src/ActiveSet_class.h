@@ -128,6 +128,9 @@ void ActiveSet<matrix>::del_var(uword ivar_out) {
   XTXA_.shed_col(ivar_out)   ;
   XATXA_.shed_col(ivar_out)  ;
   XATXA_.shed_row(ivar_out)  ;
+
+  if (use_chol_) downdate_Cholesky(ivar_out) ;
+  
 }
 
 template <typename matrix>

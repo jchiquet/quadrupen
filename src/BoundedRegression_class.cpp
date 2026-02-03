@@ -11,23 +11,26 @@ using namespace arma;
 BoundedRegression::BoundedRegression(
   RegressionData<mat>& data, const bool& intercept, const List& regParam, const List& control) :
   GenericRegularizer<mat>::GenericRegularizer(data, intercept, regParam) {
-
-  // set the penalty to l infinity
-  penalty_ = Penalty(LINF) ;
-  lambda_factor_ = as<vec>(regParam["lambda_factor"]) ;
-  lambda_seq(regParam) ;
-  
-  // Scale the structuring matrix according to main penalty factor and the amount of l2 penalty 
-  gamma_   = as<double>(regParam["gamma"]) ;
-  data_.scale_struct(sqrt(gamma_)*pow(lambda_factor_,-1/2)) ;
-
-  // Initialize the active set with starting coefficient
-  set_= ActiveSet(data, as<bool>(control["usechol"])) ;
-  
-  // Compute the Gram matrix (+ S scaled)  
-  XTX = data_.X_.t() * data_.X_ - data_.n_ * data_.X_bar_ * data_.X_bar_.t() + data_.S_;
-  
-}
+    
+    // set the penalty to l infinity
+    penalty_ = Penalty(LINF) ;
+    lambda_factor_ = as<vec>(regParam["lambda_factor"]) ;
+    get_lambda_seq(regParam) ;
+    
+    // Scale the structuring matrix according to main penalty factor and the amount of l2 penalty 
+    gamma_   = as<double>(regParam["gamma"]) ;
+    data_.scale_struct(sqrt(gamma_)*pow(lambda_factor_,-1/2)) ;
+    
+    // Initialize the active set with starting coefficient
+    set_= ActiveSet(data, as<bool>(control["usechol"])) ;
+    
+    // Compute the Gram matrix (+ S scaled)  
+    XTX = data_.X_.t() * data_.X_ - data_.n_ * data_.X_bar_ * data_.X_bar_.t() + data_.S_;
+    
+    beta_ = zeros<vec>(data_.p_) ; // vector of current parameters
+    grad_ = -data_.XTy_          ; // vector of current gradient (smooth part)
+    
+  }
 
 double BoundedRegression::get_df() {
 
@@ -60,6 +63,8 @@ List BoundedRegression::solution_path(const List& control) {
   SolverType algorithm = QUADRA; // Optimizer (default to QUADRA)
   if (as<std::string>(control["method"]) == "FISTA") {
     algorithm = FISTA;
+    set_.reset();
+    set_.add_vars(all, data_);
   }
 
   // Variables monitoring the algorithm
@@ -70,11 +75,9 @@ List BoundedRegression::solution_path(const List& control) {
   vector<double> timing ; // successive timing for solving for each lambda value
    
   // LAMBDA LOOP
-  vec current_beta = zeros<vec>(data_.p_) ; // vector of current parameters
-  vec current_grad = -data_.XTy_          ; // vector of current gradient (smooth part)
   wall_clock timer ; timer.tic(); // clock
-  for(auto current_lambda : lambda_) {
-    if (verbose) {Rprintf("\n lambda_linf = %f",current_lambda) ;}
+  for(auto lambda_ : lambdas_) {
+    if (verbose) {Rprintf("\n lambda_linf = %f",lambda_) ;}
 
     // OPTIMIZER LOOP (FIX-LAMBDA VALUE): IDENTIFY THE ACTIVE SET AND SOLVE
     uword current_it = 0 ;
@@ -85,7 +88,7 @@ List BoundedRegression::solution_path(const List& control) {
       if (algorithm == FISTA) {
         Optimizer solver(data_, penalty_, algorithm) ;
         ioptim.push_back(
-          solver.run(current_beta, current_lambda, set_, XTX, 1e-3, 10000)
+          solver.run(beta_, lambda_, set_, XTX, 1e-3, 10000)
         );
         break;
       } else { // QUADRA solver
@@ -95,7 +98,7 @@ List BoundedRegression::solution_path(const List& control) {
           } else {
             Optimizer solver(data_, penalty_, algorithm) ;
             ioptim.push_back(
-              solver.run(current_beta, current_lambda, set_, XTX, 1e-10, 10)
+              solver.run(beta_, lambda_, set_, XTX, 1e-10, 10)
             );
           }
         } catch (std::runtime_error& error) {
@@ -104,27 +107,30 @@ List BoundedRegression::solution_path(const List& control) {
           }
           current_it = 0; // start this lambda all the way back, with FISTA algorithm
           algorithm = FISTA ;
+          set_.reset();
+          set_.add_vars(all, data_);
         }
       }
 
       // OPTIMALITY TESTING
-      current_grad = - data_.XTy_ + XTX * current_beta ;
-      current_gap = penalty_.dual_norm(current_grad) - current_lambda ;
+      grad_ = - data_.XTy_ + XTX * beta_ ;
+      current_gap = penalty_.dual_norm(grad_) - lambda_ ;
     } while ((current_gap > accuracy) && (current_it <= maxiter));
 
     // Checking convergence status
-    gap.push_back(fmax(0.0, penalty_.dual_norm(current_grad) - current_lambda)) ;
+    gap.push_back(fmax(0.0, penalty_.dual_norm(grad_) - lambda_)) ;
     iactive.push_back(current_it) ;
     status.push_back(0) ;
     if (current_it >= maxiter) { status.back() = 1 ; }
-    if (set_.size() > maxfeat) { status.back() = 2 ; }
+    if ((set_.size() > maxfeat) & 
+        (algorithm == QUADRA)) { status.back() = 2 ; }
 
     // Preparing next value of the penalty
     if (status.back() >= 2) {
       break;
     } else {
-      beta_.push_back(current_beta/(data_.norm_X() % lambda_factor_)) ;
-      mu_.push_back(as_scalar(data_.y_bar_ - dot(current_beta, data_.X_bar_)));
+      coef_.push_back(beta_/(data_.norm_X() % lambda_factor_)) ;
+      const_.push_back(as_scalar(data_.y_bar_ - dot(beta_, data_.X_bar_)));
       df_.push_back(get_df()) ;
       iA_ = join_rows(iA_, df_.size()*ones<urowvec>(set_.size()) );
       jA_ = join_rows(jA_, set_.A_.t()) ;
@@ -133,7 +139,7 @@ List BoundedRegression::solution_path(const List& control) {
     timing.push_back(timer.toc()) ;
   } // END OF THE LOOP OVER LAMBDA
 
-  lambda_.resize(df_.size()) ;
+  lambdas_.resize(df_.size()) ;
   
   return(
     List::create(

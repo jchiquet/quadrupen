@@ -254,7 +254,7 @@ uword Optimizer<matrix>::fista(
   vec betak = beta  ; // output vector
   vec betal = beta  ;
   double delta = 2*accuracy  ; // change in beta
-  double L = max( XTX.diag()) ; // Lipchitz constant
+  double L = max( set.XATXA_.diag()) ; // Lipchitz constant
 
   double t0 = 1.0, tk ; // auxiliary variables in FISTA 
   uword iter = 0      ; // current iterate
@@ -262,8 +262,8 @@ uword Optimizer<matrix>::fista(
     
     double l_num, l_den ;
     double f0, fk ;
-    f0 = as_scalar(.5 * strans(betal) * XTX * betal - strans(data_.XTy_) * betal) ;
-    vec grad = - data_.XTy_ + XTX * betal ;
+    f0 = as_scalar(.5 * strans(betal) * set.XATXA_ * betal - strans(data_.XTy_(set.A_)) * betal) ;
+    vec grad = - data_.XTy_(set.A_) + set.XATXA_ * betal ;
     
     // Line search over L
     bool found=false;
@@ -271,7 +271,7 @@ uword Optimizer<matrix>::fista(
       // Apply proximal operator (implemented in penalty object)
       betak = penalty_.proximal(betal - grad/L, lambda/L);
 
-      fk = as_scalar(.5 * strans(betak) * XTX * betak - strans(data_.XTy_) * betak) ;
+      fk = as_scalar(.5 * strans(betak) * set.XATXA_ * betak - strans(data_.XTy_(set.A_)) * betak) ;
       l_num = as_scalar(2 * (fk - f0 - dot(grad, betak-betal) ));
       l_den = as_scalar(pow(norm(betak-betal,2),2));
 
@@ -299,9 +299,6 @@ uword Optimizer<matrix>::fista(
 
     R_CheckUserInterrupt();
   }
-
-  // Evaluating the set of active variables (between the boundary)
-  // A = find(abs(penalty_.elt_norm(beta) - penalty_.pen_norm(beta)) >= ZERO );
 
   return(iter) ;
 

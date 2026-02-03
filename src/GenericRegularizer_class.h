@@ -33,15 +33,15 @@ public:
     return(penalty_.dual_norm(data_.XTy_));
   } ;
   
-  void lambda_seq(const List&);
+  void get_lambda_seq(const List&);
   
   // Getter functions to access private members
   const RegressionData<matrix>& data()    const { return data_      ; }
   const ActiveSet<matrix>& active_set()   const { return set_       ; }
   const bool& intercept()                 const { return intercept_ ; }
-  const vector<vec>& coefficients()       const { return beta_      ; }
-  const vector<double>& interceptTerm()   const { return mu_        ; }
-  const vector<double>& tuning_param()    const { return lambda_    ; }
+  const vector<vec>& coefficients()       const { return coef_      ; }
+  const vector<double>& interceptTerm()   const { return const_     ; }
+  const vector<double>& path_tuning()     const { return lambdas_   ; }
   const vector<double>& degrees_freedom() const { return df_        ; }
   
 protected:
@@ -50,27 +50,29 @@ protected:
   bool intercept_              ; // does the model include intercept
   Penalty penalty_             ; // main penalty object 
   ActiveSet<matrix> set_       ; // Active set of variable and data
-  vector<double> lambda_       ; // vector of parameters tuning the man penalty
+  vector<double> lambdas_      ; // vector of parameters tuning the man penalty
   vec lambda_factor_           ; // main penalty factors
-  vector<vec> beta_            ; // matrix of coefficients
+  vector<vec> coef_            ; // matrix of coefficients
   vector<double> df_           ; // degrees of freedom along the path
-  vector<double> mu_           ; // vector of intercept term
-
+  vector<double> const_        ; // vector of intercept term
+  uvec all                     ; // a vector with all variable indices
 };
 
 template <typename matrix>
 GenericRegularizer<matrix>::GenericRegularizer(
   RegressionData<matrix>& data, const bool& intercept, const List& regParam) :
   data_ (data), intercept_ (intercept), set_ (data) 
-{}
+{
+  all = regspace<uvec>(0,data_.p_-1) ;
+}
 
 template <typename matrix>
-void GenericRegularizer<matrix>::lambda_seq(const List& regParam) {
+void GenericRegularizer<matrix>::get_lambda_seq(const List& regParam) {
   if (regParam[0] != R_NilValue) {
-    lambda_  = as<vector<double>>(regParam["lambda"]) ;
+    lambdas_  = as<vector<double>>(regParam["lambda"]) ;
   } else {
     double lambda_max = this->get_lambda_max() ;
-    lambda_ = conv_to<vector<double>>::from(
+    lambdas_ = conv_to<vector<double>>::from(
       logspace(
         log10(lambda_max),
         log10(as<double>(regParam["min_ratio"])*lambda_max),

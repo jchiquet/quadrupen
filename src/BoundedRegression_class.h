@@ -29,13 +29,17 @@ public:
   
   List solution_path(const List&);
 
+  const double& struct_tuning() const { return gamma_ ; }
+  
 private:
 
   // Specific to Bounded regression
-  mat    XTX        ; // Gram matrix
-  double gamma_     ; // overall amount of l2 penalty
-  urowvec iA_       ; // contains row indices of the active variables
-  urowvec jA_       ; // contains column indices of the active variables
+  mat    XTX    ; // Gram matrix
+  double gamma_ ; // overall amount of l2 penalty
+  vec beta_     ; // vector of current parameters
+  vec grad_     ; // vector of current gradient (smooth part)
+  urowvec iA_   ; // contains row indices of the active variables
+  urowvec jA_   ; // contains column indices of the active variables
   
   // Compute degrees of freedom for the current estimate
   double get_df() ; 

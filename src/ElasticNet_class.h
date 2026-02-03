@@ -30,16 +30,26 @@ class ElasticNet : public GenericRegularizer<mat> {
   ElasticNet(RegressionData<mat>&, const bool&, const List&, const List&);
   
   List solution_path(const List&);
+  
+  const double& struct_tuning() const { return gamma_ ; }
 
+  const sp_mat coefficients() const { 
+    return sp_mat(join_cols(iA_, jA_), nzeros_, lambdas_.size(), data_.p_) ; 
+  }
+
+  const sp_mat active_var() const { 
+    return sp_mat(join_cols(iA_, jA_), vec(iA_.n_elem, fill::ones), lambdas_.size(), data_.p_) ; 
+  }
+  
 private:
 
   // Specific to Elastic-Net regularization
-  double gamma_  ; // overall amount of l2 penalty
-
-  mat  R_     ; // Cholesky decomposition of XAtXA
-  vec  xtxw_  ; // t(x_A) * x_A * beta(A)
-  urowvec iA_ ; // contains row indices of the non-zero values
-  urowvec jA_ ; // contains column indices of the non-zero values
+  double gamma_ ; // overall amount of l2 penalty
+  vec beta_     ; // vector of current parameters
+  vec grad_     ; // vector of current gradient (smooth part)
+  vec   nzeros_ ; // contains non-zero value of beta
+  urowvec iA_   ; // contains row indices of the non-zero values
+  urowvec jA_   ; // contains column indices of the non-zero values
 
   // Compute degrees of freedom for the current estimate
   double get_df() ; 

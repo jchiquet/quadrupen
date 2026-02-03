@@ -20,15 +20,15 @@ Rcpp::List elastic_net_dense_cpp(
 
   ElasticNet enet(data, intercept, regParam, control);
 
-  List results;
-  // List results = enet.solution_path(control);
+  List results = enet.solution_path(control);
   
   return List::create(
     Named("tuning_param") = List::create(
-      Named("linf") = enet.tuning_param(),
-      Named("l2")   = regParam["lambda_factor"]
+      Named("l1") = enet.path_tuning(),
+      Named("l2") = enet.struct_tuning()
     ),
     Named("beta")        = enet.coefficients(),
+    Named("active")      = enet.active_var(),
     Named("mu")          = enet.interceptTerm(),
     Named("normx")       = enet.data().norm_X(),
     Named("df")          = enet.degrees_freedom(),
