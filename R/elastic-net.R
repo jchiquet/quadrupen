@@ -217,6 +217,7 @@ elastic.net <- function(x,
 #' labels <- rep("irrelevant", length(beta))
 #' labels[beta != 0] <- "relevant"
 #' out <- elastic.net.test(x,y,lambda2=10, control = list(method = "fista", verbose = TRUE))
+#' out2 <- elastic.net.test(x,y,lambda2=10, control = list(method = "quadra", verbose = TRUE))
 #' plot(elastic.net.test(x,y,lambda2=10,struct=solve(Sigma)), label=labels) ## even better
 #'
 #' @export
@@ -278,7 +279,7 @@ elastic.net.test <- function(x,
   ## POSTREATMENT + SEND BACK THE RESULTING MODEL
   ##
   if (ctrl$verbose > 0) cat("\nPost-treatment")
-  # myModel$debias(ctrl$rescaling)
-  # myModel$criteria()
+  myModel$debias(ctrl$rescaling)
+  myModel$criteria()
   myModel
 }

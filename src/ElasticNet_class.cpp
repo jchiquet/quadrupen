@@ -86,7 +86,7 @@ List ElasticNet::solution_path(const List& control) {
   for(auto lambda_ : lambdas_) {
      if (verbose) {
        Rprintf("\n lambda_l1 = %f",lambda_) ;
-       Rprintf("\n nb active variables = %i",set_.active().n_elem) ;
+       Rprintf("\n nb active variables = %i\n",set_.active().n_elem) ;
      }
 
     // OPTIMIZER LOOP (FIX-LAMBDA VALUE): IDENTIFY THE ACTIVE SET AND SOLVE
@@ -113,42 +113,41 @@ List ElasticNet::solution_path(const List& control) {
         set_.add_var(var_in, data_) ;
         beta_.resize(beta_.size()+1) ; // update the vector of active parameters
         beta_.tail(1) = 0.0   ;
-        if (verbose) {Rprintf("newly added variable %i\n",var_in);}
-      } else if (verbose) Rprintf("already in %i\n",var_in);
+        if (verbose) {Rprintf("\tnewly added variable %i\n",var_in);}
+      }
 
       // ________________________________________________________________________
       // OPTIMIZATION OVER THE CURRENTLY ACTIVATED VARIABLES
       //
-      // if (algorithm == FISTA) {
-        std::cout << "Go FISTA" <<  std::endl;
+      if (algorithm == FISTA) {
         Optimizer solver(data_, penalty_, algorithm) ;
         ioptim.push_back(
-          solver.run(beta_, lambda_, set_, set_.XATXA_, 1e-3, 10000)
+          solver.run(beta_, lambda_, set_, set_.XATXA_, 1e-10, 10000)
         );
-        std::cout << "DONE" <<  std::endl;
-        //   break;
-      // } else { // QUADRA solver
-      //   try {
-      //     Optimizer solver(data_, penalty_, algorithm) ;
-      //     ioptim.push_back(
-      //       solver.run(beta_, lambda_, set_, set_.XATXA_, 1e-10, 50)
-      //     );
-      //   } catch (std::runtime_error& error) {
-      //     if (verbose > 0) {
-      //       Rprintf("\nWarning: singular system at this stage of the solution path, cutting here.\n");
-      //     }
-      //     success = false ;
-      //   }
-      // }
-      // update the smooth part of the gradient - WILL PROBABLY BE REMOVED
-      grad_ = - data_.XTy_ + set_.XTXA_ * beta_ ;
+      } else { // QUADRA solver
+        try {
+          Optimizer solver(data_, penalty_, algorithm) ;
+          ioptim.push_back(
+            solver.run(beta_, lambda_, set_, set_.XATXA_, 1e-10, 50)
+          );
+        } catch (std::runtime_error& error) {
+          if (verbose > 0) {
+            Rprintf("\nWarning: singular system at this stage of the solution path, cutting here.\n");
+          }
+          success = false ;
+        }
+      }
+      
       // VARIABLE DELETION IF APPLICABLE
+      
+      // update the smooth part of the gradient
+      grad_ = - data_.XTy_ + set_.XTXA_ * beta_ ;
       // removing variables zeroed during optimization
       null = sort(find(abs(beta_) + abs(grad_(set_.A_)) - lambda_ < ZERO), "descend") ;
       if (!null.is_empty()) {
         set_.del_vars(null) ;
         for (uword j=0; j<null.n_elem; j++) {
-          if (verbose) Rprintf("removing variable %i\n",null[j]);
+          if (verbose) Rprintf("\tremoving variable %i\n",null[j]);
           beta_.shed_row(null[j]) ;
         }
       }
@@ -160,9 +159,10 @@ List ElasticNet::solution_path(const List& control) {
       grd_norm.elem(set_.A_) = abs(grad_(set_.A_) + lambda_ * sign(beta_)) ;
       current_gap = std::max(0.0, grd_norm.max()) ;
     }
-
+    Rprintf("\tcurrent gap = %f\n",current_gap) ;
+    
     // Checking convergence status
-    gap.push_back(std::max(0.0, penalty_.dual_norm(grad_) - lambda_)) ;
+    gap.push_back(current_gap) ;
     iactive.push_back(current_it) ;
     status.push_back(0) ;
     if (current_it >= maxiter)  { status.back() = 1 ; }

@@ -41,7 +41,15 @@ public:
       mat& XTX,
       const double& accuracy=1e-10,
       const uword& max_iter=50) ;
-  
+
+  uword quadratic_enet(
+      vec &beta0,
+      const double &lambda ,
+      ActiveSet<matrix> &set,
+      mat&  XTX,
+      const double& accuracy,
+      const uword& max_iter) ;
+
   uword fista(
       vec& beta,
       const double& lambda, 
@@ -49,7 +57,7 @@ public:
       mat& XTX, 
       const double& accuracy=1e-2, 
       const uword& max_iter=10000) ;
-  
+
 private:
   RegressionData<matrix> data_ ;
   Penalty penalty_ ;
@@ -65,18 +73,6 @@ private:
 
   solver_ptr _current_solver_ptr ;
 
-  
-  // int quadra_enet(
-  //     vec &beta,
-  //     mat &R,
-  //     mat &XTX,
-  //     vec  xty,
-  //     vec  sgn_grd,
-  //     double &lambda,
-  //     uvec   &null,
-  //     const double& accuracy=1e-10) ;
-
-  
 };
 
 template <typename matrix>
@@ -85,8 +81,8 @@ Optimizer<matrix>::Optimizer(
   data_ (data), penalty_ (penalty), solver_(solver) {
 
   if (solver_ ==  QUADRA) {
-    if (penalty_.type() == LINF) _current_solver_ptr  = &Optimizer::quadratic_breg ;
-    // if (penalty_.type() == L1) _current_solver_ptr  = &Optimizer::quadratic_enet ;
+    if (penalty_.type() == LINF) _current_solver_ptr = &Optimizer::quadratic_breg ;
+    if (penalty_.type() == L1)   _current_solver_ptr = &Optimizer::quadratic_enet ;
   } else if (solver == FISTA) {
     _current_solver_ptr  = &Optimizer::fista ;
   }
@@ -169,77 +165,85 @@ uword Optimizer<matrix>::quadratic_breg(
   return(iter) ;
 }
 
-// template <typename matrix>
-// int Optimizer<matrix>::quadra_enet(
-//     vec &x0,
-//     RegressionData& data,
-//     ActiveSet &set,
-//     vec  xty,
-//     vec  sgn_grd,
-//     double &lambda ,
-//     uvec   &null,
-//     double accuracy) {
-//   
-//   uword iter = 1; // current iterate
-//   
-//   uvec A = find(abs(x0) > ZERO) ; // vector of active variables
-//   vec theta = -sgn_grd   ; // vector of sign of the solution
-//   theta.elem(A)   = sign(x0.elem(A));
-//   
-//   // Solving the quadratic problem
-//   vec x1 ;
-//   if (usechol) {
-//     x1 = solve(trimatu(R), solve(trimatl(strans(R)), xty - pen * theta));
-//   } else {
-//     x1 = solve(xAtxA, xty - pen*theta, solve_opts::fast + solve_opts::force_approx) ;
-//   }
-//   
-//   // Check for swapping variables
-//   uvec swap = find(abs(sign(x1.elem(A)) - theta.elem(A)) > ZERO);
-//   if (swap.is_empty()) {
-//     null = swap ; // this is empty
-//     x0 = x1;
-//   } else {
-//     swap = A.elem(swap);
-//     colvec x0_swap = x0.elem(swap);
-//     colvec x1_swap = x1.elem(swap);
-//     // first, go to zero for the swapped variable which cost the minimum
-//     vec gamma = -x0_swap / (x1_swap-x0_swap);
-//     uword i_swap = gamma.index_min();
-//     double scale = gamma(i_swap) ;
-//     null = swap[i_swap];
-//     x1 = x0 + (x1-x0) * scale ;
-//     // second, solve the problem after swaping the signs of the
-//     // incriminated variable
-//     x0 = x1;
-//     x0(null[0]) = -x1_swap[i_swap];
-//     
-//     A = find(abs(x0) > ZERO) ; // vector of active variables
-//     theta = -sgn_grd        ; // vector of sign of the solution
-//     theta.elem(A)   = sign(x0.elem(A));
-//     
-//     vec x2 ;
-//     if (usechol) {
-//       x2 = solve(trimatu(R), solve( trimatl(strans(R)), xty - pen * theta));
-//     } else {
-//       x2 = cg(xAtxA, xty - pen*theta, x1, tol) ;
-//     }
-//     iter++;
-//     
-//     // This is the gradient on the active part of the parameters
-//     vec grd = -xty + xAtxA * x2;
-//     // if the sign is coherent, keep that one...
-//     if (fabs(grd(null[0]) + pen * as_scalar(sign(x2(null)))) <= ZERO) {
-//       null = swap; // this is empty
-//       x0 = x2 ;
-//     } else {
-//       // otherwise, backtrack to x1
-//       x0 = x1 ;
-//     }
-//   }
-//   
-//   return(iter);
-// }
+template <typename matrix>
+uword Optimizer<matrix>::quadratic_enet(
+    vec &beta0,
+    const double &lambda ,
+    ActiveSet<matrix> &set,
+    mat&  XTX,
+    const double& accuracy,
+    const uword& max_iter) {
+
+  uword iter = 1; // current iterate
+
+  vec grad = - data_.XTy_(set.A_) + set.XATXA_ * beta0 ;
+  vec theta = -sign(grad)   ; // vector of sign of the solution
+  
+  uvec A = find(abs(beta0) > ZERO) ; // vector of locally active variables
+  theta.elem(A)   = sign(beta0.elem(A));
+
+  // Solving the quadratic problem
+  vec betak ;
+  if (!set.R_.is_empty()) {
+    betak = solve(trimatu(set.R_), 
+                  solve(trimatl(strans(set.R_)), data_.XTy_(set.A_) - lambda * theta));
+  } else {
+    betak = solve(set.XATXA_, data_.XTy_(set.A_) - lambda*theta, 
+                  solve_opts::likely_sympd + solve_opts::fast + 
+                    solve_opts::force_approx) ;
+  }
+
+  // Check for swapping variables
+  uvec swap = find(abs(sign(betak.elem(A)) - theta.elem(A)) > ZERO);
+  uvec null ;
+  if (swap.is_empty()) {
+    null = swap ; // this is empty
+    beta0 = betak;
+  } else {
+    swap = A.elem(swap);
+    colvec beta0_swap = beta0.elem(swap);
+    colvec betak_swap = betak.elem(swap);
+    // first, go to zero for the swapped variable which cost the minimum
+    vec eta = -beta0_swap / (betak_swap-beta0_swap);
+    uword i_swap = eta.index_min();
+    double scale = eta(i_swap) ;
+    null = swap[i_swap];
+    betak = beta0 + (betak-beta0) * scale ;
+    // second, solve the problem after swaping the signs of the
+    // incriminated variable
+    beta0 = betak;
+    beta0(null[0]) = -betak_swap[i_swap];
+
+    A = find(abs(beta0) > ZERO) ; // new vector of active variables
+    theta = -sign(grad)        ; // vector of sign of the solution
+    theta.elem(A) = sign(beta0.elem(A));
+
+    vec betal ;
+    if (!set.R_.is_empty()) {
+      betal = solve(trimatu(set.R_),
+                    solve( trimatl(strans(set.R_)), data_.XTy_(set.A_) - lambda * theta));
+    } else {
+      betal = solve(set.XATXA_, data_.XTy_(set.A_) - lambda*theta, betak, 
+                    solve_opts::likely_sympd + 
+                      solve_opts::fast + 
+                      solve_opts::force_approx) ;
+    }
+    iter++;
+    
+    // This is the gradient on the active part of the parameters
+    grad = - data_.XTy_(set.A_) + set.XATXA_ * betal ;
+    // if the sign is coherent, keep that one...
+    if (fabs(grad(null[0]) + lambda * as_scalar(sign(betal(null)))) <= ZERO) {
+      null = swap; // this is empty
+      beta0 = betal ;
+    } else {
+      // otherwise, backtrack to betak
+      beta0 = betak ;
+    }
+  }
+
+  return(iter);
+}
 
 
 template <typename matrix>
