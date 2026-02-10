@@ -39,8 +39,8 @@ public:
       const double& lambda,
       ActiveSet<matrix>& set,
       mat& XTX,
-      const double& accuracy=1e-10,
-      const uword& max_iter=50) ;
+      const double& accuracy,
+      const uword& max_iter) ;
 
   uword quadratic_enet(
       vec &beta0,
@@ -55,9 +55,17 @@ public:
       const double& lambda, 
       ActiveSet<matrix>& set,
       mat& XTX, 
-      const double& accuracy=1e-2, 
-      const uword& max_iter=10000) ;
+      const double& accuracy, 
+      const uword& max_iter) ;
 
+  uword coordinate_descent(
+      vec& beta,
+      const double& lambda,
+      ActiveSet<matrix>& set,
+      mat& XTX,
+      const double& accuracy,
+      const uword& max_iter) ;
+    
 private:
   RegressionData<matrix> data_ ;
   Penalty penalty_ ;
@@ -307,6 +315,59 @@ uword Optimizer<matrix>::fista(
   return(iter) ;
 
 }
+// 
+// template <typename matrix>
+// uword Optimizer<matrix>::coordinate_descent(
+//     vec& beta,
+//     const double& lambda,
+//     ActiveSet<matrix>& set,
+//     mat& XTX,
+//     const double& accuracy,
+//     const uword& max_iter) {
+//   
+
+// int pathwise_enet(vec&  x0,
+//                   mat& xtx,
+//                   vec xty,
+//                   vec& xtxw,
+//                   double& pen,
+//                   uvec &null,
+//                   const double& gam   ,
+//                   const double eps    ) {
+  
+//   double u, d               ; // temporary scalar
+//   vec betak = beta         ; // output vector
+//   double delta = 2*accuracy ; // change in beta
+// 
+//   double t0 = 1.0, tk ; // auxiliary variables in FISTA 
+//   uword iter = 0      ; // current iterate
+//   while ((delta > accuracy/beta.n_elem ) && (iter < max_iter)) {
+// 
+//     delta = 0;
+//     for (uword j=0; j<beta.n_elem; j++) {
+//       // Soft thresholding operator
+//       u = beta(j) * (1+gam) + xty(j) - xtxw(j) ;
+//       betak(j)  = fmax(1-pen/fabs(u),0) * u/(1+gam) ;
+// 
+//       // max(zeros(x.n_elem), 1-lambda/elt_norm(x)) % x;
+//       
+//       d = betak(j)-beta(j);
+//       delta += pow(d,2);
+//       xtxw  += d*xtx.col(j) ;
+//     }
+//     
+//     // preparing next iterate
+//     delta = sqrt(delta);
+//     beta = betak;
+//     iter++;
+//     
+//     R_CheckUserInterrupt();
+//   }
+//   
+//   // null = sort(find(abs(betak) + (abs(-xty + xtxw) - pen) < ZERO), "descend") ;
+//   return(iter);
+// }
+
 
 #endif
 

@@ -9,7 +9,7 @@ using namespace Rcpp;
 using namespace arma;
 
 ElasticNet::ElasticNet(
-  RegressionData<mat>& data, const bool& intercept, const List& regParam, const List& control) :
+  const RegressionData<mat>& data, const bool& intercept, const List& regParam, const List& control) :
   GenericRegularizer<mat>::GenericRegularizer(data, intercept, regParam) {
     
     // set the penalty to l1

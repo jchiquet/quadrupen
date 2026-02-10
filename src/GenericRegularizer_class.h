@@ -27,8 +27,11 @@ using namespace std;
 template <typename matrix>
 class GenericRegularizer {
 public:
-  GenericRegularizer(RegressionData<matrix>&, const bool&, const List&);
-
+  
+  GenericRegularizer() {} ;
+  ~GenericRegularizer() {} ;
+  GenericRegularizer(const RegressionData<matrix>&, const bool&, const List&);
+  
   double get_lambda_max() {
     return(penalty_.dual_norm(data_.XTy_));
   } ;
@@ -60,7 +63,7 @@ protected:
 
 template <typename matrix>
 GenericRegularizer<matrix>::GenericRegularizer(
-  RegressionData<matrix>& data, const bool& intercept, const List& regParam) :
+  const RegressionData<matrix>& data, const bool& intercept, const List& regParam) :
   data_ (data), intercept_ (intercept), set_ (data) 
 {
   all = regspace<uvec>(0,data_.p_-1) ;

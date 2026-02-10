@@ -16,9 +16,8 @@ template <typename matrix> class ActiveSet {
   friend class GenericRegularizer<matrix> ;
   friend class Optimizer<matrix>          ;
   friend class BoundedRegression          ;
-  friend class ElasticNet                 ;
-  friend class Optimizer<matrix>          ;
-  
+  friend class ElasticNet<matrix>         ;
+
 protected:
   // VARIABLES FOR HANDLING THE ACTIVE SET
   uvec A_        ; // set of currently activated variables
