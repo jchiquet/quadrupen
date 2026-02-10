@@ -34,8 +34,8 @@ public:
   ActiveSet(const RegressionData<matrix> &data, const uvec&, const bool use_chol) ;
   
   // ACTIVE SET HANDLING
-  void add_var(uword, RegressionData<matrix> &) ; // add a variable in the active set
-  void add_vars(uvec, RegressionData<matrix> &) ; // add a list of variables in the active set
+  void add_var(uword, const RegressionData<matrix> &) ; // add a variable in the active set
+  void add_vars(uvec, const RegressionData<matrix> &) ; // add a list of variables in the active set
   void del_var(uword) ; // remove the variable activated in position ind_var_out
   void del_vars(uvec) ; // remove a set of non contiguous varables
   void reset()        ; // empty the active set 
@@ -67,21 +67,9 @@ ActiveSet<matrix>::ActiveSet(const RegressionData<matrix>& data, const bool use_
 
 template <typename matrix>
 ActiveSet<matrix>::ActiveSet(const RegressionData<matrix>& data, const uvec& A0, const bool use_chol) {
-  A_        = A0           ;
-  is_in_.zeros(A0.n_elem)  ;
-  is_in_.elem(A_).fill(1)  ;
-  use_chol_ = use_chol     ;
-  
-  if (!A_.is_empty()) {
-    for (uword i=0; i<A_.n_elem;i++) {
-    XTXA_.col(i) = data.X_.t() * data.X_.col(i) - 
-      data.n_ * data.X_bar_ * as_scalar(data.X_bar_[i]) + data.S_.col(i) ;
-    }
-    XATXA_ = XTXA_.rows(A_) ;
-    if (use_chol_){
-      R_ = chol(XATXA_) ;
-    }
-  }
+  is_in_.zeros(data.p_) ;
+  use_chol_ = use_chol  ;
+  add_vars(A0, data)    ;
 }
 
 template <typename matrix>
@@ -91,11 +79,10 @@ void ActiveSet<matrix>::reset() {
   XATXA_.reset()  ;
   XTXA_.reset()   ; 
   R_.reset()      ;
-  
 }
 
 template <typename matrix>
-void ActiveSet<matrix>::add_var(uword var_in, RegressionData<matrix>& data) {
+void ActiveSet<matrix>::add_var(uword var_in, const RegressionData<matrix>& data) {
   A_.resize(size() + 1) ;
   A_.tail(1) = var_in   ;
   is_in_[var_in] = 1    ;
@@ -114,7 +101,7 @@ void ActiveSet<matrix>::add_var(uword var_in, RegressionData<matrix>& data) {
 }
 
 template <typename matrix>
-void ActiveSet<matrix>::add_vars(uvec vars, RegressionData<matrix>& data) {
+void ActiveSet<matrix>::add_vars(uvec vars, const RegressionData<matrix>& data) {
   for (uword v=0; v < vars.n_elem ; v++) {
     add_var(vars[v], data) ;
   }

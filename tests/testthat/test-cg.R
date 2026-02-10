@@ -13,8 +13,8 @@ test_that("dev_conjugate_gradient", {
                                 control=list(timer=TRUE,usechol=FALSE,threshold=1e-3))
 
     cat("\n\tTimings with warm-restart along the path")
-    cat("\n\t\tfrom stratch (cholesky): ",enet.ref$optim_monitoring$timer)
-    cat("\n\t\tfrom stratch (conjugate-gradient): ",enet.cg$optim_monitoring$timer)
+    cat("\n\t\tfrom stratch (Cholesky): ",enet.ref$optim_monitoring$timer)
+    cat("\n\t\tfrom stratch (Arma solver): ", enet.cg$optim_monitoring$timer)
     cat("\n\t\tCG starting from sparser solution: ",enet.cg.warm$optim_monitoring$timer)
 
     return(list(

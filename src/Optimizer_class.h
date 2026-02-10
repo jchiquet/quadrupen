@@ -242,7 +242,7 @@ uword Optimizer<matrix>::quadratic_enet(
     grad = - data_.XTy_(set.A_) + set.XATXA_ * betal ;
     // if the sign is coherent, keep that one...
     if (fabs(grad(null[0]) + lambda * as_scalar(sign(betal(null)))) <= ZERO) {
-      null = swap; // this is empty
+      null = swap; 
       beta0 = betal ;
     } else {
       // otherwise, backtrack to betak

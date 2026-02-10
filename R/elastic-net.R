@@ -60,7 +60,7 @@ elastic.net.old <- function(x,
   ## ============================================
   ## INSTANTIATE THE PENALIZED MODEL
   ##
-  myModel <- ElasticNetFit$new(
+  myModel <- ElasticNetFitOld$new(
     data      = myData,
     intercept = intercept,
     regParam  = list(l1 = lambda1, l2 = lambda2, 
@@ -260,7 +260,7 @@ elastic.net <- function(x,
   ## ============================================
   ## INSTANTIATE THE PENALIZED MODEL
   ##
-  myModel <- ElasticNetFitOO$new(
+  myModel <- ElasticNetFit$new(
     data      = myData,
     intercept = intercept,
     regParam  = list(lambda = lambda1, 

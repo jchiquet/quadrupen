@@ -86,8 +86,9 @@ RegressionData<matrix>::RegressionData(
   if (Rf_isS4(dataModel["X"])) {
     if(Rf_inherits(dataModel["X"], "dgCMatrix")) {
       X_ = as<sp_mat>(dataModel["X"]) ;
+    } else {
+      stop("unknown class of X") ;
     }
-    stop("unknown class of X") ;
   } else {
       X_ = as<mat>(dataModel["X"]) ;
   }

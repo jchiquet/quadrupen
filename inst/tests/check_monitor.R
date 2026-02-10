@@ -34,7 +34,10 @@ delta_fenchel [delta_fenchel < .Machine$double.eps] <- .Machine$double.eps
 delta_grandvt <- grandvt$optim_monitoring$delta_hat
 delta_grandvt [delta_grandvt < .Machine$double.eps] <- .Machine$double.eps
 
-delta_optimal <- grandvt$optim_monitoring$delta_star
+it_active <- grandvt$optim_monitoring$it_active
+J_hat  <- grandvt$optim_monitoring$gap_hat
+J_star <- rep(J_hat[c(1,cumsum(it_active))], it_active) 
+delta_optimal <- J_hat - J_star
 delta_optimal[delta_optimal < .Machine$double.eps] <- .Machine$double.eps
 
 plot(log10(delta_optimal), xlab="# iteration", type="l", lty=3, col="black", main="",
