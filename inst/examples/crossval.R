@@ -27,7 +27,7 @@ beta10K <- enet$get_model("CV_min")[-1]
 
 ## Try leave one out also
 cvLOO <- cross_validate(enet, K=n)
-plot(cv.loo)
+plot(cvLOO)
 betaLOO <- enet$get_model("CV_min")[-1]
 
 ## Performance for selection purpose

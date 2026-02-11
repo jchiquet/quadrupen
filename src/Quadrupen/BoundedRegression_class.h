@@ -25,18 +25,21 @@ using namespace std;
 
 class BoundedRegression : public GenericRegularizer<mat> {
 public:
-  BoundedRegression(RegressionData<mat>&, const bool&, const List&);
+  BoundedRegression(RegressionData<mat>&, const bool&, const List&, const List&);
   
   List solution_path(const List&);
 
+  const double& struct_tuning() const { return gamma_ ; }
+  
 private:
 
   // Specific to Bounded regression
-  mat    XTX        ; // Gram matrix
-  double gamma_     ; // overall amount of l2 penalty
-  uvec B            ; // guys reaching the boundary
-  urowvec iB_       ; // contains row indices of the bounded variables
-  urowvec jB_       ; // contains column indices of the bounded variables
+  mat    XTX    ; // Gram matrix
+  double gamma_ ; // overall amount of l2 penalty
+  vec beta_     ; // vector of current parameters
+  vec grad_     ; // vector of current gradient (smooth part)
+  urowvec iA_   ; // contains row indices of the active variables
+  urowvec jA_   ; // contains column indices of the active variables
   
   // Compute degrees of freedom for the current estimate
   double get_df() ; 

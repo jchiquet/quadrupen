@@ -1,4 +1,4 @@
-testthat::context("Testing consistency and timings of conjugate gradient algorithm - VERY PRELIMINARY")
+testthat::context("Testing consistency and timings of conjugate gradient algorithm")
 
 test_that("dev_conjugate_gradient", {
 
@@ -10,11 +10,11 @@ test_that("dev_conjugate_gradient", {
 
     enet.cg  <- elastic.net(x,y,lambda1=lambda1, control=list(timer=TRUE,usechol=FALSE,threshold=1e-3))
     enet.cg.warm <- elastic.net(x,y,lambda1=lambda1, beta0 = as.numeric(enet.ref.bot$coefficients),
-                                control=list(timer=TRUE,usechol=FALSE,threshold=1e-3))
+                                control=list(timer=TRUE,usechol=FALSE))
 
     cat("\n\tTimings with warm-restart along the path")
-    cat("\n\t\tfrom stratch (cholesky): ",enet.ref$optim_monitoring$timer)
-    cat("\n\t\tfrom stratch (conjugate-gradient): ",enet.cg$optim_monitoring$timer)
+    cat("\n\t\tfrom stratch (Cholesky): ",enet.ref$optim_monitoring$timer)
+    cat("\n\t\tfrom stratch (Conjugate Gradient): ", enet.cg$optim_monitoring$timer)
     cat("\n\t\tCG starting from sparser solution: ",enet.cg.warm$optim_monitoring$timer)
 
     return(list(

@@ -5,15 +5,19 @@ bounded_regression_cpp <- function(dataModel, intercept, regParam, control) {
     .Call(`_quadrupen_bounded_regression_cpp`, dataModel, intercept, regParam, control)
 }
 
+elastic_net_dense_cpp <- function(dataModel, intercept, regParam, control) {
+    .Call(`_quadrupen_elastic_net_dense_cpp`, dataModel, intercept, regParam, control)
+}
+
+elastic_net_sparse_cpp <- function(dataModel, intercept, regParam, control) {
+    .Call(`_quadrupen_elastic_net_sparse_cpp`, dataModel, intercept, regParam, control)
+}
+
 FusedLasso_cpp <- function(dataModel, intercept, regParam, controlFit) {
     .Call(`_quadrupen_FusedLasso_cpp`, dataModel, intercept, regParam, controlFit)
 }
 
 ridge_cpp <- function(dataModel, intercept, regParam, controlFit) {
     .Call(`_quadrupen_ridge_cpp`, dataModel, intercept, regParam, controlFit)
-}
-
-elastic_net_cpp <- function(dataModel, intercept, regParam, controlFit) {
-    .Call(`_quadrupen_elastic_net_cpp`, dataModel, intercept, regParam, controlFit)
 }
 

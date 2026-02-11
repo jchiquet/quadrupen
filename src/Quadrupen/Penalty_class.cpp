@@ -71,10 +71,10 @@ void Penalty::setPenalty(){
   }
 }
 
-vec    Penalty::elt_norm  (vec x) {return((this->*_current_elt_norm_ptr)(x));}
-double Penalty::pen_norm  (vec x) {return((this->*_current_pen_norm_ptr)(x));}
-double Penalty::dual_norm (vec x) {return((this->*_current_dual_norm_ptr)(x));}
-vec    Penalty::proximal  (vec x, double lambda) {return((this->*_current_proximal_ptr)(x,lambda));}
+vec    Penalty::elt_norm (vec x) {return((this->*_current_elt_norm_ptr)(x));}
+double Penalty::pen_norm (vec x) {return((this->*_current_pen_norm_ptr)(x));}
+double Penalty::dual_norm(vec x) {return((this->*_current_dual_norm_ptr)(x));}
+vec    Penalty::proximal (vec x, double lambda) {return((this->*_current_proximal_ptr)(x,lambda));}
 
 // ______________________________________________________
 // L1 NORM A.K.A LASSO

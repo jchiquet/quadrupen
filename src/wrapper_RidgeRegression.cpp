@@ -3,7 +3,7 @@
  *         MIA Paris-Saclay
  */
 
-#include "RidgeRegression_class.h"
+#include "Quadrupen/RidgeRegression_class.h"
 
 using namespace Rcpp;
 using namespace arma;
@@ -24,7 +24,7 @@ Rcpp::List ridge_cpp(
   
   return List::create(
     Named("tuning_param") = List::create(
-      Named("l2") = ridge.tuning_param(),
+      Named("l2") = ridge.path_tuning(),
       Named("l1") = 0 
     ),
     Named("beta")        = ridge.coefficients(),

@@ -2,13 +2,22 @@
 
 // Include Armadillo / Rcpp / R to C/C++ basics
 #include "RcppArmadillo.h"
-#include "FusedLasso_class.h"
-#include "FusedLasso_data_struct.h"
-#include "utils.h"
+#include "FusedLasso/FusedLasso_class.h"
+#include "FusedLasso/FusedLasso_data_struct.h"
 
 using namespace Rcpp;
 using namespace arma;
 using namespace std;
+
+vec get_lambda1(SEXP LAMBDA1, uword n_lambda, const double min_ratio, double lmax) {
+  vec lambda1 ;
+  if (LAMBDA1 != R_NilValue) {
+    lambda1  = as<vec>(LAMBDA1)  ;
+  } else {
+    lambda1 = exp10(linspace(log10(lmax), log10(min_ratio*lmax), n_lambda)) ;
+  }
+  return(lambda1);
+}
 
 // [[Rcpp::export]]
 Rcpp::List FusedLasso_cpp(

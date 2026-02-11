@@ -162,6 +162,8 @@ Rcpp::List elastic_net_cpp(
       //
       // (1) VARIABLE ACTIVATION IF APPLICABLE
       // _____________________________________________________________
+
+      if (verbose == 2) {Rprintf("max grad %f\n",max_grd[m]);}
       
       // Check if the variable is already in the active set
       if (are_in[var_in] == 0) {

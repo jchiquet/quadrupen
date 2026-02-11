@@ -14,7 +14,7 @@ RidgeRegression::RidgeRegression(
 {
   penalty_ = Penalty(RIDGE) ;
   lambda_factor_ = as<vec>(regParam["lambda_factor"]) ;
-  lambda_seq(regParam) ;
+  get_lambda_seq(regParam) ;
 }
 
 List RidgeRegression::solution_path(const mat& C_inv) {
@@ -30,14 +30,14 @@ List RidgeRegression::solution_path(const mat& C_inv) {
 
   vector<double> timing ; // successive timing for solving for each lambda value
   wall_clock timer ; timer.tic(); // clock
-  for(auto current_lambda : lambda_) {
+  for(auto lambda : lambdas_) {
     // computing the structured ridge estimate
-    vec current_beta = (C_invV * diagmat(eta/(square(eta) + current_lambda)) * Uty) / data_.norm_X() ;
-    beta_.push_back(current_beta);
+    vec beta = (C_invV * diagmat(eta/(square(eta) + lambda)) * Uty) / data_.norm_X() ;
+    coef_.push_back(beta);
     // estimating the intercept term
-    mu_.push_back(as_scalar(data_.y_bar_ - dot(current_beta, data_.X_bar_)));  
+    const_.push_back(as_scalar(data_.y_bar_ - dot(beta, data_.X_bar_)));  
     // computing the estimated degrees of freedom
-    df_.push_back(sum(square(eta)/(square(eta) + current_lambda)));
+    df_.push_back(sum(square(eta)/(square(eta) + lambda)));
     
     timing.push_back(timer.toc()) ;
   }

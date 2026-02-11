@@ -3,7 +3,7 @@
  *         MIA Paris-Saclay
  */
 
-#include "BoundedRegression_class.h"
+#include "Quadrupen/BoundedRegression_class.h"
 
 using namespace Rcpp;
 using namespace arma;
@@ -18,14 +18,14 @@ Rcpp::List bounded_regression_cpp(
 
   RegressionData<mat> data(dataModel, intercept, as<bool>(control["normalize"])) ;
 
-  BoundedRegression bounded(data, intercept, regParam);
+  BoundedRegression bounded(data, intercept, regParam, control);
 
   List results = bounded.solution_path(control);
-  
+
   return List::create(
     Named("tuning_param") = List::create(
-      Named("linf") = bounded.tuning_param(),
-      Named("l2")   = regParam["lambda_factor"]
+      Named("linf") = bounded.path_tuning(),
+      Named("l2")   = bounded.struct_tuning()
     ),
     Named("beta")        = bounded.coefficients(),
     Named("mu")          = bounded.interceptTerm(),
@@ -33,5 +33,5 @@ Rcpp::List bounded_regression_cpp(
     Named("df")          = bounded.degrees_freedom(),
     Named("monitoring")  = results
   );
-  
+
 }

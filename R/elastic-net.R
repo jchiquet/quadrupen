@@ -149,7 +149,7 @@ elastic.net <- function(x,
                         maxfeat   = ifelse(lambda2 < 1e-2, min(nrow(x),ncol(x)), min(4*nrow(x),ncol(x))),
                         beta0     = numeric(ncol(x)),
                         control   = list()) {
-
+  
   ## ============================================
   ## RECOVER LOW LEVEL CONFIGURATION
   ##
@@ -157,7 +157,7 @@ elastic.net <- function(x,
   ctrl$maxfeat <- maxfeat
   if (!is.null(control$method)) if (control$method != "quadra") ctrl$threshold <- 1e-2
   ctrl[names(control)] <- control # default overwritten by user specifications
-  ctrl$method <- switch(ctrl$method, quadra = 0, pathwise = 1, fista = 2, 0)
+  ctrl$method <- switch(ctrl$method, quadra = "QUADRA", pathwise = "PATHWISE", fista = "FISTA", 0)
   ctrl$rescaling <- match.arg(debiasing)
   ctrl$normalize <- normalize
   ctrl$beta0  <- beta0
@@ -170,18 +170,19 @@ elastic.net <- function(x,
     outcome     = y,
     cov_struct  = struct
   )
-
+  
   ## ============================================
   ## INSTANTIATE THE PENALIZED MODEL
   ##
   myModel <- ElasticNetFit$new(
     data      = myData,
     intercept = intercept,
-    regParam  = list(l1 = lambda1, l2 = lambda2, 
-                     l1_weights = penscale, 
-                     min_ratio = minratio, n_lambda1 = nlambda1)
+    regParam  = list(lambda = lambda1, 
+                     gamma  = lambda2, 
+                     lambda_factor = penscale, 
+                     min_ratio = minratio, n_lambda = nlambda1)
   )
-
+    
   ## ============================================
   ## FIT THE MODEL WITH ACTIVE SET ALGORITHM
   ##

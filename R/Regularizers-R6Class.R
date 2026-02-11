@@ -19,7 +19,10 @@ ElasticNetFit <- R6::R6Class(
     #' @param regParam a list with two elements, a vector and a scalar, for the regularization
     initialize =  function(data, intercept, regParam) {
       super$initialize(data, intercept, regParam)
-      private$optimizer <- elastic_net_cpp
+      private$optimizer <- 
+        ifelse(data$sparse_encoding,
+               elastic_net_sparse_cpp,
+               elastic_net_dense_cpp)
     }
   ),
   private = list(

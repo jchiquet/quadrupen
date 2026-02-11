@@ -14,15 +14,19 @@ using namespace Rcpp;
 using namespace arma;
 
 template <typename matrix>  class GenericRegularizer ;
-template <typename matrix>  class Optimizer ;
+template <typename matrix>  class ElasticNet ;
+template <typename matrix>  class ActiveSet  ;
+template <typename matrix>  class Optimizer  ;
 
 // Use template to handle dense or sparse encoding (mat/sp_mat in armadillo)
 template <typename matrix>
 class RegressionData {
   friend class GenericRegularizer<matrix> ;
-  friend class RidgeRegression ;
-  friend class BoundedRegression ;
-  friend class Optimizer<matrix> ;
+  friend class Optimizer<matrix>          ;
+  friend class ActiveSet<matrix>          ;
+  friend class ElasticNet<matrix>         ;
+  friend class RidgeRegression            ;
+  friend class BoundedRegression          ;
 
 private:
   // DATA VARIABLES FOR REGRESSION PURPOSE
@@ -42,6 +46,7 @@ private:
   
 public:
 
+  RegressionData() ;
   RegressionData(const Environment& dataModel, const bool& center, const bool& scale);
   
   // DATA NORMALIZATION
@@ -51,6 +56,26 @@ public:
   void scale_struct(vec weights) {
     sp_mat diag_S = spdiags(weights, ivec({0}), p_, p_) ;
     S_ = diag_S * S_ * diag_S  ; 
+  };
+
+  void scale_regressors(vec weights) {
+    
+    if (any(weights != 1)) {
+      for (uword i=0; i<n_; i++) {
+        X_.row(i) /= trans(weights) ;
+      }
+      X_bar_ /= weights ;
+    }
+    
+    if (centered_) {
+      XTy_ = trans(trans(y_-y_bar_) * X_) ;
+      for (uword j=0; j<p_; j++) {
+        XTy_(j) -=  sum(y_-y_bar_) * X_bar_(j);
+      }
+    } else {
+      XTy_ = trans(y_.t()*X_) ;
+    }
+    
   };
   
   // getter functions to access private members
@@ -81,8 +106,9 @@ RegressionData<matrix>::RegressionData(
   if (Rf_isS4(dataModel["X"])) {
     if(Rf_inherits(dataModel["X"], "dgCMatrix")) {
       X_ = as<sp_mat>(dataModel["X"]) ;
+    } else {
+      stop("unknown class of X") ;
     }
-    stop("unknown class of X") ;
   } else {
       X_ = as<mat>(dataModel["X"]) ;
   }

@@ -6,7 +6,7 @@ test_that("warm_restart", {
 
   get.coef <- function(x,y) {
     lambda1 <- .25
-
+    
     enet.ref <- elastic.net(x,y,lambda1=lambda1, control=list(timer=TRUE))
 
     enet.ref.bot <- elastic.net(x,y,lambda1=lambda1*2)
@@ -20,7 +20,8 @@ test_that("warm_restart", {
     cat("\n\t\tfrom stratch: ",enet.ref$optim_monitoring$timer)
     cat("\n\t\tstarting from sparser solution: ",enet.bot$optim_monitoring$timer)
     cat("\n\t\tstarting from more dense solution: ",enet.up$optim_monitoring$timer)
-
+    cat("\n\n")
+    
     return(list(
       coef.ref=as.matrix(enet.ref$coefficients),
       coef.bot=as.matrix(enet.bot$coefficients),
@@ -34,8 +35,8 @@ test_that("warm_restart", {
   ## Run the tests...
   cat("\n  * tiny-size problem...")
   out <- get.coef(x,y)
-  expect_that(out$coef.bot,is_equivalent_to(out$coef.ref))
-  expect_that(out$coef.up ,is_equivalent_to(out$coef.ref))
+  expect_equal(out$coef.bot, out$coef.ref, check.attributs = FALSE)
+  expect_equal(out$coef.up , out$coef.ref, check.attributs = FALSE)
 
   ## RANDOM DATA
   seed <- sample(1:10000,1)
@@ -57,8 +58,8 @@ test_that("warm_restart", {
   ## Run the tests...
   cat("\n  * small-size problem, with correlation...")
   out <- get.coef(x,y)
-  expect_that(out$coef.bot,is_equivalent_to(out$coef.ref))
-  expect_that(out$coef.up ,is_equivalent_to(out$coef.ref))
+  expect_equal(out$coef.bot, out$coef.ref, check.attributs = FALSE)
+  expect_equal(out$coef.up , out$coef.ref, check.attributs = FALSE)
 
 })
 
