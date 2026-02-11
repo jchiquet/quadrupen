@@ -98,7 +98,7 @@ List BoundedRegression::solution_path(const List& control) {
           } else {
             Optimizer solver(data_, penalty_, algorithm) ;
             ioptim.push_back(
-              solver.run(beta_, lambda_, set_, XTX, 1e-10, 10)
+              solver.run(beta_, lambda_, set_, XTX, accuracy, 10000)
             );
           }
         } catch (std::runtime_error& error) {

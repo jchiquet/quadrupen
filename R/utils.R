@@ -35,9 +35,9 @@ model_default <- function()
 optim_enet_default <- function(d)
   list(verbose     = 0, # default control options
        timer       = FALSE,
-       maxiter     = max(500, d),
+       maxiter     = max(50, d),
        method      = "quadra",
-       threshold   = 1e-7,
+       threshold   = 1e-5,
        monitor     = 0,
        usechol     = TRUE
   )
@@ -45,9 +45,9 @@ optim_enet_default <- function(d)
 optim_breg_default <- function(d)
   list(verbose     = 0, # default control options
        timer       = FALSE,
-       maxiter     = max(500, d),
+       maxiter     = 10,
        method      = "quadra",
-       threshold   = 1e-7,
+       threshold   = 1e-5,
        monitor     = 0,
        usechol     = FALSE
   )

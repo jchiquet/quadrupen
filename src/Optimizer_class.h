@@ -65,7 +65,14 @@ public:
       mat& XTX,
       const double& accuracy,
       const uword& max_iter) ;
-    
+
+  uword conjugate_gradient(
+      vec& x0,
+      const mat& A,
+      const vec& b,
+      const double& accuracy,
+      const uword& max_iter) ;
+      
 private:
   RegressionData<matrix> data_ ;
   Penalty penalty_ ;
@@ -108,6 +115,38 @@ uword Optimizer<matrix>::run(
 {return((this->*_current_solver_ptr)(beta, lambda, set, XTX, accuracy, max_iter));};
 
 template <typename matrix>
+uword Optimizer<matrix>:: conjugate_gradient(
+    vec& x0,
+    const mat& A,
+    const vec& b,
+    const double& accuracy,
+    const uword& max_iter) {
+  
+  vec r = b - A * x0;
+  vec p = r ;
+  double rs_old = sum(square(r)) ;
+
+  double rs_new = rs_old ;
+  uword i = 0;
+  double alpha ;
+  mat Ap ;
+  
+  while ((sqrt(rs_new) > accuracy) & (i < max_iter)) {
+    Ap = A * p;
+    alpha = rs_old/dot(p,Ap) ;
+    x0 += alpha * p ;
+    r -= alpha * Ap ;
+    // Polak-Ribière update
+    rs_new = dot(r,-alpha * Ap);
+    p = r + rs_new/rs_old*p;
+    rs_old = rs_new;
+    i++;
+  }
+  return(i) ;
+}
+
+
+template <typename matrix>
 uword Optimizer<matrix>::quadratic_breg(
     vec& beta,
     const double& lambda,
@@ -120,9 +159,9 @@ uword Optimizer<matrix>::quadratic_breg(
   vec grad = -data_.XTy_ + XTX * beta ;
   vec theta = -sign(grad.elem(B)) ; // sign of the guys on the boundary
 
-  uword iter = 0 ; // count the number of systems solved
+  uword iter = 0, iter_in= 0 ; // count the number of systems solved
   bool success = false ;
-  while ((!success > 0) && (iter < max_iter)) {
+  while ((!success) && (iter < 3)) {
 
     iter++;
 
@@ -137,9 +176,16 @@ uword Optimizer<matrix>::quadratic_breg(
         join_cols(sum(theta % XX_B.elem(B),0), XX_B.elem(set.A_)),
         join_cols(strans(XX_B.elem(set.A_)), set.XATXA_));
       vec b = join_cols(theta.t()*data_.XTy_.elem(B)-lambda, data_.XTy_.elem(set.A_)) ;
-      // Solving via Cholesky factorization...
-      mat R = chol(XX) ;
-      vec tmp = solve(trimatu(R), solve(trimatl(strans(R)), b)) ;
+      vec tmp ;
+      if (set.use_chol()) {
+        // Solving via Cholesky factorization...
+        mat R = chol(XX) ;
+        tmp = solve(trimatu(R), solve(trimatl(strans(R)), b)) ;
+      } else {
+        double bound = penalty_.pen_norm(beta.elem(B)) ;
+        tmp = join_cols(ones(1) * bound, beta.elem(set.A_));
+        iter_in = conjugate_gradient(tmp, XX, b, accuracy, max_iter) ;
+      }
       beta.elem(B) = theta * tmp[0] ;
       beta.elem(set.A_) = tmp.subvec(1,tmp.n_elem-1) ;
     }
@@ -169,8 +215,10 @@ uword Optimizer<matrix>::quadratic_breg(
       throw std::runtime_error("Every variable left the boudary. Try more regularization.");
     }
   }
-  
-  return(iter) ;
+  if (set.use_chol()) {
+    return(iter) ;
+  } else return(iter_in) ;
+    
 }
 
 template <typename matrix>
@@ -191,14 +239,13 @@ uword Optimizer<matrix>::quadratic_enet(
   theta.elem(A)   = sign(beta0.elem(A));
 
   // Solving the quadratic problem
-  vec betak ;
-  if (!set.R_.is_empty()) {
+  vec betak = beta0;
+  if (set.use_chol()) {
     betak = solve(trimatu(set.R_), 
                   solve(trimatl(strans(set.R_)), data_.XTy_(set.A_) - lambda * theta));
   } else {
-    betak = solve(set.XATXA_, data_.XTy_(set.A_) - lambda*theta, 
-                  solve_opts::likely_sympd + solve_opts::fast + 
-                    solve_opts::force_approx) ;
+    conjugate_gradient(betak, set.XATXA_, data_.XTy_(set.A_) - lambda*theta,
+                       accuracy, max_iter) ;
   }
 
   // Check for swapping variables
@@ -226,15 +273,13 @@ uword Optimizer<matrix>::quadratic_enet(
     theta = -sign(grad)        ; // vector of sign of the solution
     theta.elem(A) = sign(beta0.elem(A));
 
-    vec betal ;
-    if (!set.R_.is_empty()) {
+    vec betal = betak;
+    if (set.use_chol()) {
       betal = solve(trimatu(set.R_),
                     solve( trimatl(strans(set.R_)), data_.XTy_(set.A_) - lambda * theta));
     } else {
-      betal = solve(set.XATXA_, data_.XTy_(set.A_) - lambda*theta, betak, 
-                    solve_opts::likely_sympd + 
-                      solve_opts::fast + 
-                      solve_opts::force_approx) ;
+      conjugate_gradient(betal, set.XATXA_, data_.XTy_(set.A_) - lambda*theta,
+                         accuracy, max_iter) ;
     }
     iter++;
     

@@ -47,6 +47,7 @@ public:
   void downdate_Cholesky(uword j) ; 
   
   // Getter for private member
+  const bool& use_chol() const { return use_chol_ ; }
   const uvec& active() const { return A_  ; }
   const uword size() const { return accu(is_in_)  ; }
   bool is_active (uword i) { return (is_in_(i)) ; }

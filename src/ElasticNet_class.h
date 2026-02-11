@@ -206,7 +206,7 @@ List ElasticNet<matrix>::solution_path(const List& control) {
         try {
           Optimizer solver(data_, penalty_, algorithm) ;
           ioptim.push_back(
-            solver.run(beta_, lambda_, set_, set_.XATXA_, 1e-10, 50)
+            solver.run(beta_, lambda_, set_, set_.XATXA_, 1e-5, 10000)
           );
           null = find(abs(beta_) < ZERO) ;
         } catch (std::runtime_error& error) {
@@ -286,9 +286,7 @@ void ElasticNet<matrix>::optimality_gap(double lambda, uword type) {
 
   // gamma equals the max |gradient|
   double nu = norm(grad_, "inf");
-  double loss = get_loss() ;
-  double old_J = J_ ;
-  double old_D = D_ ;
+  double loss = get_loss(), old_J = J_, old_D = D_ ;
   J_ = loss - dot(beta_, grad_.elem(set_.A_))  ;
   uvec Ac ;
   
