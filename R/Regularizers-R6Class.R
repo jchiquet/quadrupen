@@ -37,36 +37,6 @@ ElasticNetFit <- R6::R6Class(
   )
 )
 
-#' @export
-#' 
-ElasticNetFitOld <- R6::R6Class(
-  classname = "ElasticNetFit",
-  inherit = QuadrupenFit,
-  #' @field penalty character describing the regularizer/penalty
-  active  = list(penalty = function(value) "elastic.net"),
-  public  = list(
-    #' @description Initialize a [`ElasticNetFit`] model
-    #' @param data a [`DataModel`] object
-    #' @param intercept a logical; should an intercept be included in the mode?
-    #' @param regParam a list with two elements, a vector and a scalar, for the regularization
-    initialize =  function(data, intercept, regParam) {
-      super$initialize(data, intercept, regParam)
-      private$optimizer <- elastic_net_cpp
-    }
-  ),
-  private = list(
-    rescaled = function(beta = private$beta, mu = private$mu) { # Zhou and Hastie Rescaling
-      factor <- ( 1 + private$tuning[[2]] )
-      mean_y <- ifelse(self$has_intercept, mean(private$data$y), 0)
-      list(
-        beta = factor * private$beta,
-        mu   = factor * private$mu - private$tuning[[2]] * mean_y
-      )
-    }
-  )
-)
-
-
 #' Class "BoundedRegression"
 #' 
 #' Class of object returned by the fitting function [bounded.reg()]. Inherits fields

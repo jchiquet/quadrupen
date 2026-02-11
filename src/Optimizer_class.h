@@ -134,13 +134,17 @@ uword Optimizer<matrix>:: conjugate_gradient(
   while ((sqrt(rs_new) > accuracy) & (i < max_iter)) {
     Ap = A * p;
     alpha = rs_old/dot(p,Ap) ;
-    x0 += alpha * p ;
-    r -= alpha * Ap ;
-    // Polak-Ribière update
-    rs_new = dot(r,-alpha * Ap);
-    p = r + rs_new/rs_old*p;
-    rs_old = rs_new;
-    i++;
+    if (std::isfinite(alpha)) {
+      x0 += alpha * p ;
+      r -= alpha * Ap ;
+      // Polak-Ribière update
+      rs_new = dot(r,-alpha * Ap);
+      p = r + rs_new/rs_old*p;
+      rs_old = rs_new;
+      i++;
+    } else {
+      break ;
+    }
   }
   return(i) ;
 }
@@ -294,14 +298,6 @@ uword Optimizer<matrix>::quadratic_enet(
       beta0 = betak ;
     }
   }
-  
-  // // VARIABLE DELETION IF APPLICABLE
-  // if (!null.is_empty()) {
-  //   null = sort(null, "descend") ;
-  //   set.del_vars(null) ;
-  //   beta0.shed_rows(null) ;
-  //   null.t().print("\tremoving variables") ;
-  // }
 
   return(iter);
 }

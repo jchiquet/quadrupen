@@ -57,6 +57,26 @@ public:
     sp_mat diag_S = spdiags(weights, ivec({0}), p_, p_) ;
     S_ = diag_S * S_ * diag_S  ; 
   };
+
+  void scale_regressors(vec weights) {
+    
+    if (any(weights != 1)) {
+      for (uword i=0; i<n_; i++) {
+        X_.row(i) /= trans(weights) ;
+      }
+      X_bar_ /= weights ;
+    }
+    
+    if (centered_) {
+      XTy_ = trans(trans(y_-y_bar_) * X_) ;
+      for (uword j=0; j<p_; j++) {
+        XTy_(j) -=  sum(y_-y_bar_) * X_bar_(j);
+      }
+    } else {
+      XTy_ = trans(y_.t()*X_) ;
+    }
+    
+  };
   
   // getter functions to access private members
   const uword& n()          const { return n_        ; }

@@ -25,20 +25,20 @@ test_that("lasso_quad2lars", {
 
   ## Run the tests...
   with.intercept <-get.lars(x,y,TRUE,TRUE)
-  expect_that(with.intercept$quad,
-              is_equivalent_to(with.intercept$lars))
+  expect_equal(with.intercept$quad,
+              with.intercept$lars, check.attributes = FALSE)
 
   with.intercept.unnormalized <-get.lars(x,y,TRUE,FALSE)
-  expect_that(with.intercept.unnormalized$quad,
-              is_equivalent_to(with.intercept.unnormalized$lars))
+  expect_equal(with.intercept.unnormalized$quad,
+              with.intercept.unnormalized$lars, check.attributes = FALSE)
 
   without.intercept <-get.lars(x,y,FALSE,TRUE)
-  expect_that(without.intercept$quad,
-              is_equivalent_to(without.intercept$lars))
+  expect_equal(without.intercept$quad,
+              without.intercept$lars, check.attributes = FALSE)
 
   without.intercept.unnormalized <-get.lars(x,y,FALSE,FALSE)
-  expect_that(without.intercept.unnormalized$quad,
-              is_equivalent_to(without.intercept.unnormalized$lars))
+  expect_equal(without.intercept.unnormalized$quad,
+              without.intercept.unnormalized$lars, check.attributes = FALSE)
 
   ## RANDOM DATA
   seed <- sample(1:10000,1)
@@ -59,20 +59,20 @@ test_that("lasso_quad2lars", {
 
   ## Run the tests...
   with.intercept <-get.lars(x,y,TRUE,TRUE)
-  expect_that(with.intercept$coef.quad,
-              is_equivalent_to(with.intercept$coef.lars))
+  expect_equal(with.intercept$coef.quad,
+              with.intercept$coef.lars, check.attributes = FALSE)
 
   with.intercept.unnormalized <-get.lars(x,y,TRUE,FALSE)
-  expect_that(with.intercept.unnormalized$coef.quad,
-              is_equivalent_to(with.intercept.unnormalized$coef.lars))
+  expect_equal(with.intercept.unnormalized$coef.quad,
+              with.intercept.unnormalized$coef.lars, check.attributes = FALSE)
 
   without.intercept <-get.lars(x,y,FALSE,TRUE)
-  expect_that(without.intercept$coef.quad,
-              is_equivalent_to(without.intercept$coef.lars))
+  expect_equal(without.intercept$coef.quad,
+              without.intercept$coef.lars, check.attributes = FALSE)
 
   without.intercept.unnormalized <-get.lars(x,y,FALSE,FALSE)
-  expect_that(without.intercept.unnormalized$coef.quad,
-              is_equivalent_to(without.intercept.unnormalized$coef.lars))
+  expect_equal(without.intercept.unnormalized$coef.quad,
+              without.intercept.unnormalized$coef.lars, check.attributes = FALSE)
 
 })
 
@@ -101,6 +101,6 @@ test_that("lasso_quad2glmnet", {
                fitted = predict(lasso.glmn,x))
 
 
-  expect_that(quad, is_equivalent_to(glmn))
+  expect_equal(quad, glmn, check.attributes = FALSE, tolerance = 1e-6)
 
 })

@@ -53,25 +53,25 @@ test_that("Consistency of the structured elastic-net", {
   ## Simple Elastic.net: structuring matrix is the indentity
   C <- diag(rep(1,p))
   out <- get.coef(x,y,C=C)
-  expect_that(out$coef.our,is_equivalent_to(out$coef.ref))
+  expect_equal(out$coef.our, out$coef.ref, check.attributes = FALSE)
 
   ## Structured Elastic.net
   C <- as.matrix(bandSparse(p,k=0:1,diagonals=list(rep(1,p),rep(-1,p-1))))
   ## with intercept and normalization
   out <- get.coef(x,y,intercept=TRUE,normalize=TRUE,C=C)
-  expect_that(out$coef.our,is_equivalent_to(out$coef.ref))
+  expect_equal(out$coef.our, out$coef.ref, check.attributes = FALSE)
 
   ## without intercept, with normalization
   out <- get.coef(x,y,intercept=FALSE,normalize=TRUE,C=C)
-  expect_that(out$coef.our,is_equivalent_to(out$coef.ref))
+  expect_equal(out$coef.our, out$coef.ref, check.attributes = FALSE)
 
   ## without intercept, without normalization
   out <- get.coef(x,y,intercept=FALSE,normalize=FALSE,C=C)
-  expect_that(out$coef.our,is_equivalent_to(out$coef.ref))
+  expect_equal(out$coef.our, out$coef.ref, check.attributes = FALSE)
 
   ## with intercept, without normalization
   out <- get.coef(x,y,intercept=TRUE,normalize=FALSE,C=C)
-  expect_that(out$coef.our,is_equivalent_to(out$coef.ref))
+  expect_equal(out$coef.our, out$coef.ref, check.attributes = FALSE)
 
   ## RANDOM DATA
   seed <- sample(1:10000,1)
@@ -94,25 +94,25 @@ test_that("Consistency of the structured elastic-net", {
   ## Simple Elastic.net: structuring matrix is the indentity
   C <- diag(rep(1,p))
   out <- get.coef(x,y,C=C)
-  expect_that(out$coef.our,is_equivalent_to(out$coef.ref))
+  expect_equal(out$coef.our, out$coef.ref, check.attributes = FALSE)
 
   ## Structured Elastic.net
   C <- as.matrix(bandSparse(p,k=0:1,diagonals=list(rep(1,p),rep(-1,p-1))))
   ## with intercept and normalization
   out <- get.coef(x,y,intercept=TRUE,normalize=TRUE,C=C)
-  expect_that(out$coef.our,is_equivalent_to(out$coef.ref))
+  expect_equal(out$coef.our, out$coef.ref, check.attributes = FALSE)
 
   ## without intercept, with normalization
   out <- get.coef(x,y,intercept=FALSE,normalize=TRUE,C=C)
-  expect_that(out$coef.our,is_equivalent_to(out$coef.ref))
+  expect_equal(out$coef.our, out$coef.ref, check.attributes = FALSE)
 
   ## without intercept, without normalization
   out <- get.coef(x,y,intercept=FALSE,normalize=FALSE,C=C)
-  expect_that(out$coef.our,is_equivalent_to(out$coef.ref))
+  expect_equal(out$coef.our, out$coef.ref, check.attributes = FALSE)
 
   ## with intercept, without normalization
   out <- get.coef(x,y,intercept=TRUE,normalize=FALSE,C=C)
-  expect_that(out$coef.our,is_equivalent_to(out$coef.ref))
+  expect_equal(out$coef.our, out$coef.ref, check.attributes = FALSE)
 
 })
 

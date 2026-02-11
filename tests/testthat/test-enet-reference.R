@@ -26,36 +26,36 @@ test_that("enet_quad2elasticnet", {
 
   ## Run the tests...
   with.intercept <-get.enet(x,y,intercept=TRUE,naive=TRUE)
-  expect_that(with.intercept$quad,
-              is_equivalent_to(with.intercept$enet))
+  expect_equal(with.intercept$quad,
+              with.intercept$enet, check.attributes = FALSE)
 
   without.intercept <- get.enet(x,y,intercept=FALSE,naive=TRUE)
-  expect_that(without.intercept$quad,
-              is_equivalent_to(without.intercept$enet))
+  expect_equal(without.intercept$quad,
+              without.intercept$enet, check.attributes = FALSE)
 
   with.intercept <- get.enet(x,y,intercept=TRUE,naive=FALSE)
-  expect_that(with.intercept$quad,
-              is_equivalent_to(with.intercept$enet))
+  expect_equal(with.intercept$quad,
+              with.intercept$enet, check.attributes = FALSE)
 
   without.intercept <-get.enet(x,y,intercept=FALSE,naive=FALSE)
-  expect_that(without.intercept$quad,
-              is_equivalent_to(without.intercept$enet))
+  expect_equal(without.intercept$quad,
+              without.intercept$enet, check.attributes = FALSE)
 
   with.intercept <-get.enet(x,y,intercept=TRUE,normalize=FALSE,naive=TRUE)
-  expect_that(with.intercept$quad,
-              is_equivalent_to(with.intercept$enet))
+  expect_equal(with.intercept$quad,
+              with.intercept$enet, check.attributes = FALSE)
 
   without.intercept <-get.enet(x,y,intercept=FALSE,normalize=FALSE,naive=TRUE)
-  expect_that(without.intercept$quad,
-              is_equivalent_to(without.intercept$enet))
+  expect_equal(without.intercept$quad,
+              without.intercept$enet, check.attributes = FALSE)
 
   with.intercept <-get.enet(x,y,intercept=TRUE,normalize=FALSE,naive=FALSE)
-  expect_that(with.intercept$quad,
-              is_equivalent_to(with.intercept$enet))
+  expect_equal(with.intercept$quad,
+              with.intercept$enet, check.attributes = FALSE)
 
   without.intercept <-get.enet(x,y,intercept=FALSE,normalize=FALSE,naive=FALSE)
-  expect_that(without.intercept$quad,
-              is_equivalent_to(without.intercept$enet))
+  expect_equal(without.intercept$quad,
+              without.intercept$enet, check.attributes = FALSE)
 
   ## RANDOM DATA
   seed <- sample(1:10000,1)
@@ -76,44 +76,44 @@ test_that("enet_quad2elasticnet", {
 
   ## Run the tests...
   with.intercept <-get.enet(x,y,intercept=TRUE,naive=TRUE)
-  expect_that(with.intercept$quad,
-              is_equivalent_to(with.intercept$enet))
+  expect_equal(with.intercept$quad,
+              with.intercept$enet, check.attributes = FALSE)
 
   without.intercept <-get.enet(x,y,intercept=FALSE,naive=TRUE)
-  expect_that(without.intercept$quad,
-              is_equivalent_to(without.intercept$enet))
+  expect_equal(without.intercept$quad,
+              without.intercept$enet, check.attributes = FALSE)
 
   with.intercept <-get.enet(x,y,intercept=TRUE,naive=FALSE)
-  expect_that(with.intercept$quad,
-              is_equivalent_to(with.intercept$enet))
+  expect_equal(with.intercept$quad,
+              with.intercept$enet, check.attributes = FALSE)
 
   without.intercept <-get.enet(x,y,intercept=FALSE,naive=FALSE)
-  expect_that(without.intercept$quad,
-              is_equivalent_to(without.intercept$enet))
+  expect_equal(without.intercept$quad,
+              without.intercept$enet, check.attributes = FALSE)
 
   with.intercept <-get.enet(x,y,intercept=TRUE,normalize=FALSE,naive=TRUE)
-  expect_that(with.intercept$quad,
-              is_equivalent_to(with.intercept$enet))
+  expect_equal(with.intercept$quad,
+              with.intercept$enet, check.attributes = FALSE)
 
   without.intercept <-get.enet(x,y,intercept=FALSE,normalize=FALSE,naive=TRUE)
-  expect_that(without.intercept$quad,
-              is_equivalent_to(without.intercept$enet))
+  expect_equal(without.intercept$quad,
+              without.intercept$enet, check.attributes = FALSE)
 
   with.intercept <-get.enet(x,y,intercept=TRUE,normalize=FALSE,naive=FALSE)
-  expect_that(with.intercept$quad,
-              is_equivalent_to(with.intercept$enet))
+  expect_equal(with.intercept$quad,
+               with.intercept$enet, check.attributes = FALSE)
 
   without.intercept <-get.enet(x,y,intercept=FALSE,normalize=FALSE,naive=FALSE)
-  expect_that(without.intercept$quad,
-              is_equivalent_to(without.intercept$enet))
+  expect_equal(without.intercept$quad,
+              without.intercept$enet, check.attributes = FALSE)
   ## Run the tests...
   with.intercept <-get.enet(x,y,intercept=TRUE)
-  expect_that(with.intercept$quad,
-              is_equivalent_to(with.intercept$enet))
+  expect_equal(with.intercept$quad,
+              with.intercept$enet, check.attributes = FALSE)
 
   without.intercept <-get.enet(x,y,intercept=FALSE)
-  expect_that(without.intercept$quad,
-              is_equivalent_to(without.intercept$enet))
+  expect_equal(without.intercept$quad,
+              without.intercept$enet, check.attributes = FALSE)
 
 })
 

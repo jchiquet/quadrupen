@@ -34,15 +34,18 @@ BoundedRegression::BoundedRegression(
 
 double BoundedRegression::get_df() {
 
-  mat SAA(set_.size(),set_.size()) ;
-  double df = set_.size() ;
+  double bound = max(abs(beta_)) ;
+  uvec A = find(abs(beta_) >= bound) ;
+  
+  mat SAA(A.size(),A.size()) ;
+  double df = A.size() ;
   
   if (gamma_ > 0) {
-    mat C = inv_sympd(set_.XATXA_);
+    mat C = inv_sympd(XTX(A,A));
     // loop due to sparse encoding. should iterate over the n_zeros only...
-    for (uword i=0;i<set_.size();i++){
-      for (uword j=i;j<set_.size();j++){
-        SAA(i,j) = data_.S_.at(set_.A_(i),set_.A_(j));
+    for (uword i=0;i<A.size();i++){
+      for (uword j=i;j<A.size();j++){
+        SAA(i,j) = data_.S_.at(A(i),A(j));
         SAA(j,i) = SAA(i,j);
       }
     }
