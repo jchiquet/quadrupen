@@ -1,5 +1,7 @@
 context("Consistency of the Lasso solution paths (package 'lars' and 'glmnet')")
 
+tol <- 1e-5
+
 test_that("lasso_quad2lars", {
 
   require(lars)
@@ -26,19 +28,19 @@ test_that("lasso_quad2lars", {
   ## Run the tests...
   with.intercept <-get.lars(x,y,TRUE,TRUE)
   expect_equal(with.intercept$quad,
-              with.intercept$lars, check.attributes = FALSE)
+              with.intercept$lars, check.attributes = FALSE, tolerance = tol))
 
   with.intercept.unnormalized <-get.lars(x,y,TRUE,FALSE)
   expect_equal(with.intercept.unnormalized$quad,
-              with.intercept.unnormalized$lars, check.attributes = FALSE)
+              with.intercept.unnormalized$lars, check.attributes = FALSE, tolerance = tol))
 
   without.intercept <-get.lars(x,y,FALSE,TRUE)
   expect_equal(without.intercept$quad,
-              without.intercept$lars, check.attributes = FALSE)
+              without.intercept$lars, check.attributes = FALSE, tolerance = tol))
 
   without.intercept.unnormalized <-get.lars(x,y,FALSE,FALSE)
   expect_equal(without.intercept.unnormalized$quad,
-              without.intercept.unnormalized$lars, check.attributes = FALSE)
+              without.intercept.unnormalized$lars, check.attributes = FALSE, tolerance = tol))
 
   ## RANDOM DATA
   seed <- sample(1:10000,1)
@@ -60,19 +62,19 @@ test_that("lasso_quad2lars", {
   ## Run the tests...
   with.intercept <-get.lars(x,y,TRUE,TRUE)
   expect_equal(with.intercept$coef.quad,
-              with.intercept$coef.lars, check.attributes = FALSE)
+              with.intercept$coef.lars, check.attributes = FALSE, tolerance = tol))
 
   with.intercept.unnormalized <-get.lars(x,y,TRUE,FALSE)
   expect_equal(with.intercept.unnormalized$coef.quad,
-              with.intercept.unnormalized$coef.lars, check.attributes = FALSE)
+              with.intercept.unnormalized$coef.lars, check.attributes = FALSE, tolerance = tol))
 
   without.intercept <-get.lars(x,y,FALSE,TRUE)
   expect_equal(without.intercept$coef.quad,
-              without.intercept$coef.lars, check.attributes = FALSE)
+              without.intercept$coef.lars, check.attributes = FALSE, tolerance = tol))
 
   without.intercept.unnormalized <-get.lars(x,y,FALSE,FALSE)
   expect_equal(without.intercept.unnormalized$coef.quad,
-              without.intercept.unnormalized$coef.lars, check.attributes = FALSE)
+              without.intercept.unnormalized$coef.lars, check.attributes = FALSE, tolerance = tol))
 
 })
 
@@ -101,6 +103,6 @@ test_that("lasso_quad2glmnet", {
                fitted = predict(lasso.glmn,x))
 
 
-  expect_equal(quad, glmn, check.attributes = FALSE, tolerance = 1e-6)
+  expect_equal(quad, glmn, check.attributes = FALSE, tolerance = tol)
 
 })

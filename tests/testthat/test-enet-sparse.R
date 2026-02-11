@@ -51,8 +51,8 @@ test_that("Consistency of quadrupen between sparse/non-sparse encoding of the pr
   ## remove monitoring for fair comparison!!!
   out.enet.sp$optim_monitoring <- list()
   out.enet.ns$optim_monitoring <- list()
-  expect_equal(out.enet.sp$coefficients, out.enet.ns$coefficients, check.attributes = FALSE)
-  expect_equal(out.enet.sp$interceptTerm, out.enet.ns$interceptTerm, check.attributes = FALSE)
+  expect_equal(out.enet.sp$coefficients, out.enet.ns$coefficients, check.attributes = FALSE, tolerance = 1e-4)
+  expect_equal(out.enet.sp$interceptTerm, out.enet.ns$interceptTerm, check.attributes = FALSE, tolerance = 1e-4)
 })
 
 

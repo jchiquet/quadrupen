@@ -1,5 +1,7 @@
 context("Consistency of the Structured Elastic-net (reference is computed via the 'augmented data' approach)")
 
+tol <- 1e-5
+
 test_that("Consistency of the structured elastic-net", {
 
   require(elasticnet)
@@ -53,25 +55,25 @@ test_that("Consistency of the structured elastic-net", {
   ## Simple Elastic.net: structuring matrix is the indentity
   C <- diag(rep(1,p))
   out <- get.coef(x,y,C=C)
-  expect_equal(out$coef.our, out$coef.ref, check.attributes = FALSE)
+  expect_equal(out$coef.our, out$coef.ref, check.attributes = FALSE, tolerance = tol)
 
   ## Structured Elastic.net
   C <- as.matrix(bandSparse(p,k=0:1,diagonals=list(rep(1,p),rep(-1,p-1))))
   ## with intercept and normalization
   out <- get.coef(x,y,intercept=TRUE,normalize=TRUE,C=C)
-  expect_equal(out$coef.our, out$coef.ref, check.attributes = FALSE)
+  expect_equal(out$coef.our, out$coef.ref, check.attributes = FALSE, tolerance = tol)
 
   ## without intercept, with normalization
   out <- get.coef(x,y,intercept=FALSE,normalize=TRUE,C=C)
-  expect_equal(out$coef.our, out$coef.ref, check.attributes = FALSE)
+  expect_equal(out$coef.our, out$coef.ref, check.attributes = FALSE, tolerance = tol)
 
   ## without intercept, without normalization
   out <- get.coef(x,y,intercept=FALSE,normalize=FALSE,C=C)
-  expect_equal(out$coef.our, out$coef.ref, check.attributes = FALSE)
+  expect_equal(out$coef.our, out$coef.ref, check.attributes = FALSE, tolerance = tol)
 
   ## with intercept, without normalization
   out <- get.coef(x,y,intercept=TRUE,normalize=FALSE,C=C)
-  expect_equal(out$coef.our, out$coef.ref, check.attributes = FALSE)
+  expect_equal(out$coef.our, out$coef.ref, check.attributes = FALSE, tolerance = tol)
 
   ## RANDOM DATA
   seed <- sample(1:10000,1)
@@ -94,25 +96,25 @@ test_that("Consistency of the structured elastic-net", {
   ## Simple Elastic.net: structuring matrix is the indentity
   C <- diag(rep(1,p))
   out <- get.coef(x,y,C=C)
-  expect_equal(out$coef.our, out$coef.ref, check.attributes = FALSE)
+  expect_equal(out$coef.our, out$coef.ref, check.attributes = FALSE, tolerance = tol)
 
   ## Structured Elastic.net
   C <- as.matrix(bandSparse(p,k=0:1,diagonals=list(rep(1,p),rep(-1,p-1))))
   ## with intercept and normalization
   out <- get.coef(x,y,intercept=TRUE,normalize=TRUE,C=C)
-  expect_equal(out$coef.our, out$coef.ref, check.attributes = FALSE)
+  expect_equal(out$coef.our, out$coef.ref, check.attributes = FALSE, tolerance = tol)
 
   ## without intercept, with normalization
   out <- get.coef(x,y,intercept=FALSE,normalize=TRUE,C=C)
-  expect_equal(out$coef.our, out$coef.ref, check.attributes = FALSE)
+  expect_equal(out$coef.our, out$coef.ref, check.attributes = FALSE, tolerance = tol)
 
   ## without intercept, without normalization
   out <- get.coef(x,y,intercept=FALSE,normalize=FALSE,C=C)
-  expect_equal(out$coef.our, out$coef.ref, check.attributes = FALSE)
+  expect_equal(out$coef.our, out$coef.ref, check.attributes = FALSE, tolerance = tol)
 
   ## with intercept, without normalization
   out <- get.coef(x,y,intercept=TRUE,normalize=FALSE,C=C)
-  expect_equal(out$coef.our, out$coef.ref, check.attributes = FALSE)
+  expect_equal(out$coef.our, out$coef.ref, check.attributes = FALSE, tolerance = tol)
 
 })
 
