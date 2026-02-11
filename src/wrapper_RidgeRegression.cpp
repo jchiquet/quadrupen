@@ -3,7 +3,7 @@
  *         MIA Paris-Saclay
  */
 
-#include "RidgeRegression_class.h"
+#include "Quadrupen/RidgeRegression_class.h"
 
 using namespace Rcpp;
 using namespace arma;

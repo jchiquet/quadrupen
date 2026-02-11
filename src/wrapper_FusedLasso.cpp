@@ -2,8 +2,8 @@
 
 // Include Armadillo / Rcpp / R to C/C++ basics
 #include "RcppArmadillo.h"
-#include "FusedLasso_class.h"
-#include "FusedLasso_data_struct.h"
+#include "FusedLasso/FusedLasso_class.h"
+#include "FusedLasso/FusedLasso_data_struct.h"
 
 using namespace Rcpp;
 using namespace arma;
