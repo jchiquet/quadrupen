@@ -294,6 +294,14 @@ uword Optimizer<matrix>::quadratic_enet(
       beta0 = betak ;
     }
   }
+  
+  // // VARIABLE DELETION IF APPLICABLE
+  // if (!null.is_empty()) {
+  //   null = sort(null, "descend") ;
+  //   set.del_vars(null) ;
+  //   beta0.shed_rows(null) ;
+  //   null.t().print("\tremoving variables") ;
+  // }
 
   return(iter);
 }

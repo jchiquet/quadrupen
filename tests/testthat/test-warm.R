@@ -6,7 +6,7 @@ test_that("warm_restart", {
 
   get.coef <- function(x,y) {
     lambda1 <- .25
-
+    
     enet.ref <- elastic.net(x,y,lambda1=lambda1, control=list(timer=TRUE))
 
     enet.ref.bot <- elastic.net(x,y,lambda1=lambda1*2)
@@ -20,7 +20,8 @@ test_that("warm_restart", {
     cat("\n\t\tfrom stratch: ",enet.ref$optim_monitoring$timer)
     cat("\n\t\tstarting from sparser solution: ",enet.bot$optim_monitoring$timer)
     cat("\n\t\tstarting from more dense solution: ",enet.up$optim_monitoring$timer)
-
+    cat("\n\n")
+    
     return(list(
       coef.ref=as.matrix(enet.ref$coefficients),
       coef.bot=as.matrix(enet.bot$coefficients),

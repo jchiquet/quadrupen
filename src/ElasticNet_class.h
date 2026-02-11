@@ -97,14 +97,13 @@ ElasticNet<matrix>::ElasticNet(
     vec beta0 = control["beta0"] ;
     uvec A0 = find(beta0) ;
     if (A0.is_empty()) {
-      set_  = ActiveSet(data, as<bool>(control["usechol"])) ;
+      set_  = ActiveSet(data_, as<bool>(control["usechol"])) ;
       grad_ = - data_.XTy_ ;
     } else {
-      set_  = ActiveSet(data, A0, as<bool>(control["usechol"])) ;
+      set_  = ActiveSet(data_, A0, as<bool>(control["usechol"])) ;
       beta_ = beta0.elem(A0) ;
       grad_ = - data_.XTy_ + set_.XTXA_ * beta_  ;
     }
-  
   }
 
 template <typename matrix>
@@ -216,7 +215,6 @@ List ElasticNet<matrix>::solution_path(const List& control) {
           success = false ;
         }
       }
-      grad_ = - data_.XTy_ + set_.XTXA_ * beta_ ;
       
       // VARIABLE DELETION IF APPLICABLE
       if (!null.is_empty()) {
@@ -227,6 +225,7 @@ List ElasticNet<matrix>::solution_path(const List& control) {
       }
       
       // OPTIMALITY TESTING
+      grad_ = - data_.XTy_ + set_.XTXA_ * beta_ ;
       // dual norm of gradient for inactive variables
       grd_norm = penalty_.elt_norm(grad_) - lambda_ ;
       // gradient for active variables
