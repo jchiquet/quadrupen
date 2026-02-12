@@ -34,7 +34,7 @@ private:
   uword  p_        ; // # of features
   matrix X_        ; // matrix of predictors
   vec    y_        ; // vector of response
-  sp_mat S_        ; // Structuring matrix
+  sp_mat S_        ; // Structuring matrix // à templater en matrix
   vec    weights_  ; // observation weights
   bool   centered_ ; // should intercept be considered?
   bool   scaled_   ; // should predictors be standardized?
@@ -47,7 +47,7 @@ private:
 public:
 
   RegressionData() ;
-  RegressionData(const Environment& dataModel, const bool& center, const bool& scale);
+  RegressionData(const Environment& dataModel, const bool center, const bool scale);
   
   // DATA NORMALIZATION
   // intercept treatment, predictor standardization, observation weights
@@ -96,23 +96,14 @@ public:
 template <typename matrix>
 RegressionData<matrix>::RegressionData(
   const Environment& dataModel,
-  const bool& center, const bool& scale):
+  const bool center, const bool scale):
   n_       (as<uword>  (dataModel["n"])) , // sample size
   p_       (as<uword>  (dataModel["d"])) , // # of features
   y_       (as<vec>    (dataModel["y"])) , // response vector
   S_       (as<sp_mat> (dataModel["S"])) , // structuring matrix
   weights_ (as<vec>    (dataModel["wy"]))  // observation weights
 {
-  if (Rf_isS4(dataModel["X"])) {
-    if(Rf_inherits(dataModel["X"], "dgCMatrix")) {
-      X_ = as<sp_mat>(dataModel["X"]) ;
-    } else {
-      stop("unknown class of X") ;
-    }
-  } else {
-      X_ = as<mat>(dataModel["X"]) ;
-  }
-  
+  X_ = as<matrix>(dataModel["X"]) ;
   standardize(center, scale) ;
 }
 

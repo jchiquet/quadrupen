@@ -15,10 +15,7 @@
 #endif
 
 #include "GenericRegularizer_class.h"
-#include "ActiveSet_class.h"
 #include "Optimizer_class.h"
-
-#define ZERO 2e-16 // practical zero
 
 using namespace Rcpp;
 using namespace arma;
@@ -75,7 +72,7 @@ private:
   urowvec jA_   ; // contains column indices of the non-zero values
 
   // Compute degrees of freedom for the current estimate
-  double get_df() ; 
+  double get_df() ;
 
 };
 

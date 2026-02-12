@@ -47,11 +47,11 @@ public:
   void downdate_Cholesky(uword j) ; 
   
   // Getter for private member
-  const bool& use_chol() const { return use_chol_ ; }
-  const uvec& active() const { return A_  ; }
-  const uword size() const { return accu(is_in_)  ; }
-  bool is_active (uword i) { return (is_in_(i)) ; }
-  const mat& Gram_active() const { return XATXA_ ; }
+  const bool& use_chol()   const { return use_chol_    ; }
+  const uvec& active()     const { return A_           ; }
+  const uword size()       const { return accu(is_in_) ; }
+  bool is_active (uword i) const { return (is_in_(i))  ; }
+  const mat& Gram_active() const { return XATXA_       ; }
   
 };
 
@@ -61,15 +61,15 @@ ActiveSet<matrix>::ActiveSet(const RegressionData<matrix>& data) {
 }
 
 template <typename matrix>
-ActiveSet<matrix>::ActiveSet(const RegressionData<matrix>& data, const bool use_chol) {
+ActiveSet<matrix>::ActiveSet(const RegressionData<matrix>& data, const bool use_chol) : 
+  use_chol_(use_chol) {
   is_in_.zeros(data.p_) ;
-  use_chol_ = use_chol  ;
 }
 
 template <typename matrix>
-ActiveSet<matrix>::ActiveSet(const RegressionData<matrix>& data, const uvec& A0, const bool use_chol) {
+ActiveSet<matrix>::ActiveSet(const RegressionData<matrix>& data, const uvec& A0, const bool use_chol) : 
+  use_chol_(use_chol) {
   is_in_.zeros(data.p_) ;
-  use_chol_ = use_chol  ;
   add_vars(A0, data)    ;
 }
 
@@ -171,44 +171,5 @@ void ActiveSet<matrix>::downdate_Cholesky(uword j) {
   }
   R_.shed_row(p);
 }
-
-
-// // must be sorted in increasing order
-// template <typename matrix>
-// void ActiveSet<matrix>::add_vars(uword first_in, uword last_in, RegressionData<matrix>& data) {
-//   
-//   for (uword k=first_in; k<=last_in; k++) {
-//     A_.resize(A_.n_elem)      ; // update the active set
-//     A_[A_.n_elem] = k     ;
-//     is_in_[k] = 1       ;
-//   }
-//   
-//   mat new_cols = zeros(data.X_.n_rows, last_in - first_in + 1) ;
-//   
-//   // Non Non contiguous subview for sparse Matrices
-//   for (uword k=first_in; k<=last_in; k++) {
-//     new_cols(k) = data.X.t() * data.X.col(k) -
-//       data.n * data.X_bar_ * data.X_bar_.elem(k) + data.S_.col(k);
-//   }
-//   
-//   // UPDATE THE xtxA AND xAtxA MATRICES
-//   if (!XATXA_.is_empty()) {
-//     XATXA_ = join_cols(XATXA_, XTXA_.rows(first_in, last_in)) ;
-//   }
-//   XTXA_  = join_rows(XTXA_, new_cols) ;
-//   XATXA_ = join_rows(XATXA_, trans(XTXA_.rows(first_in, last_in))) ;
-// }
-
-// template <typename matrix>
-// void ActiveSet<matrix>::del_vars(uword first_indVarOut, uword last_indVarOut) {
-//   for (uword k=last_indVarOut; k>=first_indVarOut; k--) {
-//     is_in_[A_[k]] = 0 ; // update the active set
-//     A_.shed_row(k)      ;
-//     if (k == 0) {break;}
-//   }
-//   XTXA_.shed_cols(first_indVarOut, last_indVarOut)  ;
-//   XATXA_.shed_cols(first_indVarOut, last_indVarOut) ;
-//   XATXA_.shed_rows(first_indVarOut, last_indVarOut) ;
-// }
 
 #endif

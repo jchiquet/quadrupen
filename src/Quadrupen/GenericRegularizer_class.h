@@ -29,7 +29,6 @@ class GenericRegularizer {
 public:
   
   GenericRegularizer() {} ;
-  ~GenericRegularizer() {} ;
   GenericRegularizer(const RegressionData<matrix>&, const bool&, const List&);
   
   double get_lambda_max() {
