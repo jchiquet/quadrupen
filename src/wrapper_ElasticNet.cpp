@@ -30,7 +30,7 @@ Rcpp::List elastic_net_dense_cpp(
     Named("beta")        = enet.coefficients(),
     Named("active")      = enet.active_var(),
     Named("mu")          = enet.interceptTerm(),
-    Named("normx")       = enet.data().norm_X(),
+    Named("normx")       = enet.data().norm_X_,
     Named("df")          = enet.degrees_freedom(),
     Named("monitoring")  = results
   );
@@ -59,7 +59,7 @@ Rcpp::List elastic_net_sparse_cpp(
     Named("beta")        = enet.coefficients(),
     Named("active")      = enet.active_var(),
     Named("mu")          = enet.interceptTerm(),
-    Named("normx")       = enet.data().norm_X(),
+    Named("normx")       = enet.data().norm_X_,
     Named("df")          = enet.degrees_freedom(),
     Named("monitoring")  = results
   );

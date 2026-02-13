@@ -29,7 +29,7 @@ Rcpp::List ridge_cpp(
     ),
     Named("beta")        = ridge.coefficients(),
     Named("mu")          = ridge.interceptTerm(),
-    Named("normx")       = ridge.data().norm_X(),
+    Named("normx")       = ridge.data().norm_X_,
     Named("df")          = ridge.degrees_freedom(),
     Named("monitoring")  = results
   );

@@ -32,7 +32,7 @@ List RidgeRegression::solution_path(const mat& C_inv) {
   wall_clock timer ; timer.tic(); // clock
   for(auto lambda : lambdas_) {
     // computing the structured ridge estimate
-    vec beta = (C_invV * diagmat(eta/(square(eta) + lambda)) * Uty) / data_.norm_X() ;
+    vec beta = (C_invV * diagmat(eta/(square(eta) + lambda)) * Uty) / data_.norm_X_ ;
     coef_.push_back(beta);
     // estimating the intercept term
     const_.push_back(as_scalar(data_.y_bar_ - dot(beta, data_.X_bar_)));  
