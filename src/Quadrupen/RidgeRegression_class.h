@@ -20,7 +20,7 @@ using namespace Rcpp;
 using namespace arma;
 using namespace std;
 
-class RidgeRegression : public GenericRegularizer<mat>{
+class RidgeRegression : public GenericRegularizer<mat,Norm::RIDGE>{
  public:
    RidgeRegression(RegressionData<mat>&, const bool&, const List&);
 

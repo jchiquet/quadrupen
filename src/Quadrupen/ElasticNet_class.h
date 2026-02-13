@@ -26,16 +26,16 @@ using namespace std;
 
 template <typename matrix>
 class ElasticNet : 
-  public GenericRegularizer<matrix>{
+  public GenericRegularizer<matrix,Norm::L1>{
 
-  using GenericRegularizer<matrix>::lambdas_ ;
-  using GenericRegularizer<matrix>::penalty_ ;
-  using GenericRegularizer<matrix>::set_     ;
-  using GenericRegularizer<matrix>::data_    ;
-  using GenericRegularizer<matrix>::const_   ;
-  using GenericRegularizer<matrix>::df_      ;
-  using GenericRegularizer<matrix>::lambda_factor_ ;
-  using GenericRegularizer<matrix>::get_lambda_seq ;
+  using GenericRegularizer<matrix,Norm::L1>::lambdas_ ;
+  using GenericRegularizer<matrix,Norm::L1>::penalty_ ;
+  using GenericRegularizer<matrix,Norm::L1>::set_     ;
+  using GenericRegularizer<matrix,Norm::L1>::data_    ;
+  using GenericRegularizer<matrix,Norm::L1>::const_   ;
+  using GenericRegularizer<matrix,Norm::L1>::df_      ;
+  using GenericRegularizer<matrix,Norm::L1>::lambda_factor_ ;
+  using GenericRegularizer<matrix,Norm::L1>::get_lambda_seq ;
   
   public:
   
@@ -82,10 +82,10 @@ private:
 template <typename matrix>
 ElasticNet<matrix>::ElasticNet(
   const RegressionData<matrix>& data, const bool& intercept, const List& regParam, const List& control) :
-  GenericRegularizer<matrix>::GenericRegularizer(data, intercept, regParam) {
+  GenericRegularizer<matrix,Norm::L1>::GenericRegularizer(data, intercept, regParam) {
 
     // set the penalty to l1
-    penalty_ = Penalty(L1) ;
+    penalty_ = Penalty<Norm::L1>() ;
     lambda_factor_ = as<vec>(regParam["lambda_factor"]) ;
     get_lambda_seq(regParam) ;
     
@@ -163,7 +163,7 @@ List ElasticNet<matrix>::solution_path(const List& control) {
   for(auto lambda_ : lambdas_) {
     if (verbose) {
       Rprintf("\n lambda_l1 = %f",lambda_) ;
-      Rprintf("\n nb active variables = %i\n",set_.active().n_elem) ;
+      Rprintf("\n nb active variables = %i\n",set_.size()) ;
     }
     
     // OPTIMIZER LOOP (FIX-LAMBDA VALUE): IDENTIFY THE ACTIVE SET AND SOLVE

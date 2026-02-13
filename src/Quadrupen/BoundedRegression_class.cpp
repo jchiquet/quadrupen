@@ -10,10 +10,10 @@ using namespace arma;
 
 BoundedRegression::BoundedRegression(
   RegressionData<mat>& data, const bool& intercept, const List& regParam, const List& control) :
-  GenericRegularizer<mat>::GenericRegularizer(data, intercept, regParam) {
+  GenericRegularizer<mat,Norm::LINF>::GenericRegularizer(data, intercept, regParam) {
     
     // set the penalty to l infinity
-    penalty_ = Penalty(LINF) ;
+    penalty_ = Penalty<Norm::LINF>() ;
     lambda_factor_ = as<vec>(regParam["lambda_factor"]) ;
     get_lambda_seq(regParam) ;
     

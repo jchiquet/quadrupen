@@ -15,6 +15,7 @@
 #endif
 
 #include "RegressionData_class.h"
+#include "ActiveSet_class.h"
 #include "Penalty_class.h"
 
 #define ZERO 2e-16 // practical zero
@@ -25,12 +26,12 @@ using namespace Rcpp;
 using namespace arma;
 using namespace std;
 
-template <typename matrix>
+template <typename matrix, Norm norm>
 class Optimizer {
 public:
 
   Optimizer() {} ;
-  Optimizer(RegressionData<matrix>&, Penalty&, SolverType&) ;
+  Optimizer(RegressionData<matrix>&, Penalty<norm>&, SolverType&) ;
   
   uword run(vec&, const double&, ActiveSet<matrix>&, mat&, const double&, const uword&) ;
 
@@ -75,7 +76,7 @@ public:
       
 private:
   RegressionData<matrix> data_ ;
-  Penalty penalty_ ;
+  Penalty<norm> penalty_ ;
   SolverType solver_ ;
 
   typedef uword (Optimizer::*solver_ptr)(
@@ -90,22 +91,60 @@ private:
 
 };
 
-template <typename matrix>
-Optimizer<matrix>::Optimizer(
-  RegressionData<matrix>& data, Penalty& penalty,  SolverType& solver) :
+template <>
+inline Optimizer<mat, Norm::L1>::Optimizer(
+  RegressionData<mat>& data, Penalty<Norm::L1>& penalty,  SolverType& solver) :
   data_ (data), penalty_ (penalty), solver_(solver) {
 
   if (solver_ ==  QUADRA) {
-    if (penalty_.type() == LINF) _current_solver_ptr = &Optimizer::quadratic_breg ;
-    if (penalty_.type() == L1)   _current_solver_ptr = &Optimizer::quadratic_enet ;
+    _current_solver_ptr = &Optimizer::quadratic_enet ;
   } else if (solver == FISTA) {
     _current_solver_ptr  = &Optimizer::fista ;
   }
 
 }
 
-template <typename matrix>
-uword Optimizer<matrix>::run(
+template <>
+inline Optimizer<sp_mat, Norm::L1>::Optimizer(
+    RegressionData<sp_mat>& data, Penalty<Norm::L1>& penalty,  SolverType& solver) :
+  data_ (data), penalty_ (penalty), solver_(solver) {
+  
+  if (solver_ ==  QUADRA) {
+    _current_solver_ptr = &Optimizer::quadratic_enet ;
+  } else if (solver == FISTA) {
+    _current_solver_ptr  = &Optimizer::fista ;
+  }
+  
+}
+
+template <>
+inline Optimizer<mat, Norm::LINF>::Optimizer(
+    RegressionData<mat>& data, Penalty<Norm::LINF>& penalty,  SolverType& solver) :
+  data_ (data), penalty_ (penalty), solver_(solver) {
+  
+  if (solver_ ==  QUADRA) {
+    _current_solver_ptr = &Optimizer::quadratic_breg ;
+  } else if (solver == FISTA) {
+    _current_solver_ptr  = &Optimizer::fista ;
+  }
+  
+}
+
+template <>
+inline Optimizer<sp_mat, Norm::LINF>::Optimizer(
+    RegressionData<sp_mat>& data, Penalty<Norm::LINF>& penalty,  SolverType& solver) :
+  data_ (data), penalty_ (penalty), solver_(solver) {
+  
+  if (solver_ ==  QUADRA) {
+     _current_solver_ptr = &Optimizer::quadratic_breg ;
+  } else if (solver == FISTA) {
+    _current_solver_ptr  = &Optimizer::fista ;
+  }
+  
+}
+
+template <typename matrix, Norm norm>
+uword Optimizer<matrix,norm>::run(
     vec& beta,
     const double& lambda,
     ActiveSet<matrix>& set,
@@ -114,8 +153,8 @@ uword Optimizer<matrix>::run(
     const uword& max_iter)
 {return((this->*_current_solver_ptr)(beta, lambda, set, XTX, accuracy, max_iter));};
 
-template <typename matrix>
-uword Optimizer<matrix>:: conjugate_gradient(
+template <typename matrix, Norm norm>
+uword Optimizer<matrix,norm>:: conjugate_gradient(
     vec& x0,
     const mat& A,
     const vec& b,
@@ -150,8 +189,8 @@ uword Optimizer<matrix>:: conjugate_gradient(
 }
 
 
-template <typename matrix>
-uword Optimizer<matrix>::quadratic_breg(
+template <typename matrix,Norm norm>
+uword Optimizer<matrix,norm>::quadratic_breg(
     vec& beta,
     const double& lambda,
     ActiveSet<matrix>& set,
@@ -181,7 +220,7 @@ uword Optimizer<matrix>::quadratic_breg(
         join_cols(strans(XX_B.elem(set.A_)), set.XATXA_));
       vec b = join_cols(theta.t()*data_.XTy_.elem(B)-lambda, data_.XTy_.elem(set.A_)) ;
       vec tmp ;
-      if (set.use_chol()) {
+      if (set.use_chol_) {
         // Solving via Cholesky factorization...
         mat R = chol(XX) ;
         tmp = solve(trimatu(R), solve(trimatl(strans(R)), b)) ;
@@ -219,14 +258,14 @@ uword Optimizer<matrix>::quadratic_breg(
       throw std::runtime_error("Every variable left the boudary. Try more regularization.");
     }
   }
-  if (set.use_chol()) {
+  if (set.use_chol_) {
     return(iter) ;
   } else return(iter_in) ;
     
 }
 
-template <typename matrix>
-uword Optimizer<matrix>::quadratic_enet(
+template <typename matrix, Norm norm>
+uword Optimizer<matrix,norm>::quadratic_enet(
     vec &beta0,
     const double &lambda ,
     ActiveSet<matrix> &set,
@@ -244,7 +283,7 @@ uword Optimizer<matrix>::quadratic_enet(
 
   // Solving the quadratic problem
   vec betak = beta0;
-  if (set.use_chol()) {
+  if (set.use_chol_) {
     betak = solve(trimatu(set.R_), 
                   solve(trimatl(strans(set.R_)), data_.XTy_(set.A_) - lambda * theta));
   } else {
@@ -278,7 +317,7 @@ uword Optimizer<matrix>::quadratic_enet(
     theta.elem(A) = sign(beta0.elem(A));
 
     vec betal = betak;
-    if (set.use_chol()) {
+    if (set.use_chol_) {
       betal = solve(trimatu(set.R_),
                     solve( trimatl(strans(set.R_)), data_.XTy_(set.A_) - lambda * theta));
     } else {
@@ -302,9 +341,8 @@ uword Optimizer<matrix>::quadratic_enet(
   return(iter);
 }
 
-
-template <typename matrix>
-uword Optimizer<matrix>::fista(
+template <typename matrix, Norm norm>
+uword Optimizer<matrix,norm>::fista(
     vec& beta,
     const double& lambda,
     ActiveSet<matrix>& set,
@@ -334,7 +372,7 @@ uword Optimizer<matrix>::fista(
 
       fk = as_scalar(.5 * strans(betak) * set.XATXA_ * betak - strans(data_.XTy_(set.A_)) * betak) ;
       l_num = as_scalar(2 * (fk - f0 - dot(grad, betak-betal) ));
-      l_den = as_scalar(pow(norm(betak-betal,2),2));
+      l_den = as_scalar(pow(arma::norm(betak-betal,2),2));
 
       if ((L * l_den >= l_num) || (sqrt(l_den) < accuracy)) {
         found = true;
@@ -364,6 +402,7 @@ uword Optimizer<matrix>::fista(
   return(iter) ;
 
 }
+
 // 
 // template <typename matrix>
 // uword Optimizer<matrix>::coordinate_descent(

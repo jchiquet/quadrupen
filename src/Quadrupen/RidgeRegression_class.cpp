@@ -12,7 +12,7 @@ RidgeRegression::RidgeRegression(
   RegressionData<mat>& data, const bool& intercept, const List& regParam) :
   GenericRegularizer::GenericRegularizer(data, intercept, regParam) 
 {
-  penalty_ = Penalty(RIDGE) ;
+  penalty_ = Penalty<Norm::RIDGE>() ;
   lambda_factor_ = as<vec>(regParam["lambda_factor"]) ;
   get_lambda_seq(regParam) ;
 }
