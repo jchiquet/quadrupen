@@ -6,25 +6,15 @@
 #ifndef _GenericRegularizer_H
 #define _GenericRegularizer_H
 
-#define ARMA_NO_DEBUG
-#define ARMA_USE_LAPACK
-#define ARMA_USE_BLAS
-
-#ifndef ARMA_HAVE_GETTIMEOFDAY
-#define ARMA_HAVE_GETTIMEOFDAY
-#endif
-
-#include "RegressionData_class.h"
-#include "ActiveSet_class.h"
-#include "Penalty_class.h"
-
-#define ZERO 2e-16
+#include "RegressionData.h"
+#include "ActiveSet.h"
+#include "Penalty.h"
 
 using namespace Rcpp;
 using namespace arma;
 using namespace std;
 
-template <typename matrix>
+template <typename matrix, Norm norm>
 class GenericRegularizer {
 public:
   
@@ -46,30 +36,28 @@ public:
   const vector<double>& path_tuning()     const { return lambdas_   ; }
   const vector<double>& degrees_freedom() const { return df_        ; }
   
-protected:
-  
-  RegressionData<matrix> data_ ; // data structure
-  bool intercept_              ; // does the model include intercept
-  Penalty penalty_             ; // main penalty object 
-  ActiveSet<matrix> set_       ; // Active set of variable and data
-  vector<double> lambdas_      ; // vector of parameters tuning the man penalty
-  vec lambda_factor_           ; // main penalty factors
-  vector<vec> coef_            ; // matrix of coefficients
-  vector<double> df_           ; // degrees of freedom along the path
-  vector<double> const_        ; // vector of intercept term
-  uvec all                     ; // a vector with all variable indices
+  RegressionData<matrix> data_   ; // data structure
+  bool intercept_                ; // does the model include intercept
+  ActiveSet<matrix> set_         ; // Active set of variable and data
+  Penalty<norm> penalty_         ; // main penalty object 
+  vector<double> lambdas_        ; // vector of parameters tuning the man penalty
+  vec lambda_factor_             ; // main penalty factors
+  vector<arma::vec> coef_        ; // matrix of coefficients
+  vector<double> df_             ; // degrees of freedom along the path
+  vector<double> const_          ; // vector of intercept term
+  uvec all                       ; // a vector with all variable indices
 };
 
-template <typename matrix>
-GenericRegularizer<matrix>::GenericRegularizer(
+template <typename matrix, Norm norm>
+GenericRegularizer<matrix, norm>::GenericRegularizer(
   const RegressionData<matrix>& data, const bool& intercept, const List& regParam) :
   data_ (data), intercept_ (intercept), set_ (data) 
 {
   all = regspace<uvec>(0,data_.p_-1) ;
 }
 
-template <typename matrix>
-void GenericRegularizer<matrix>::get_lambda_seq(const List& regParam) {
+template <typename matrix, Norm norm>
+void GenericRegularizer<matrix,norm>::get_lambda_seq(const List& regParam) {
   if (regParam[0] != R_NilValue) {
     lambdas_  = as<vector<double>>(regParam["lambda"]) ;
   } else {

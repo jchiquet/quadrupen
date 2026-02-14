@@ -1,133 +1,111 @@
-/*
- * Author: Julien CHIQUET
- *         Statistique et Génome
- */
+#ifndef _quadrupen_PENALTY_H
+#define _quadrupen_PENALTY_H
 
-#include "Penalty_class.h"
+#define ARMA_NO_DEBUG
+#define ARMA_USE_LAPACK
+#define ARMA_USE_BLAS
+
+#ifndef ARMA_HAVE_GETTIMEOFDAY
+#define ARMA_HAVE_GETTIMEOFDAY
+#endif
+
+#include <RcppArmadillo.h>
+
+#define ZERO 2e-16 // practical zero
+
+enum class Norm {L1, LINF, RIDGE, L1L2, L1LINF, COOP, FUSED};
 
 using namespace Rcpp;
 using namespace arma;
+using namespace std;
+
+template <Norm norm>
+class Penalty {
+public: 
+  
+  Penalty() ;
+  Penalty(SEXP PK) ;
+
+  vec    elt_norm  (vec x) ;
+  double pen_norm  (vec x) ;
+  double dual_norm (vec x) ;
+  vec proximal(vec x, double lambda) ;
+
+  uvec pk ;
+};
 
 // Empty constructor
-Penalty::Penalty() {}
-
-// Empty constructor for basic penalties
-Penalty::Penalty(PenaltyType type) : type_(type) {
-  setPenalty() ;
-}
+template <Norm norm>
+Penalty<norm>::Penalty() {}
 
 // Constructor requiring group information
-Penalty::Penalty(SEXP PK) : pk (as<uvec>(PK)){}
-
-// Constructor requiring group information
-Penalty::Penalty(PenaltyType type, SEXP PK) : 
-  type_(type) , pk (as<uvec>(PK)){
-  setPenalty() ;
-}
-
-void Penalty::setPenalty(){
-
-  // link public member functions to l1 norm functions
-  if (type_ == L1) {
-    _current_elt_norm_ptr  = &Penalty::elt_norm_L1;
-    _current_pen_norm_ptr  = &Penalty::pen_norm_L1;
-    _current_dual_norm_ptr = &Penalty::dual_norm_L1;
-    _current_proximal_ptr  = &Penalty::proximal_L1;
-
-  // link public member functions to linf norm functions
-  } else if (type_ == RIDGE) {
-    _current_elt_norm_ptr  = &Penalty::elt_norm_L2_square;
-    _current_pen_norm_ptr  = &Penalty::pen_norm_L2_square;
-    _current_dual_norm_ptr = &Penalty::dual_norm_L2_square;
-    _current_proximal_ptr  = &Penalty::proximal_L2_square;
-    
-  // link public member functions to linf norm functions
-  } else if (type_ == LINF) {
-    _current_elt_norm_ptr  = &Penalty::elt_norm_LINF;
-    _current_pen_norm_ptr  = &Penalty::pen_norm_LINF;
-    _current_dual_norm_ptr = &Penalty::dual_norm_LINF;
-    _current_proximal_ptr  = &Penalty::proximal_LINF;
-
-  // link public member functions to l1/l2 norm functions
-  } else if (type_ == L1L2) {
-    _current_elt_norm_ptr  = &Penalty::elt_norm_L1L2;
-    _current_pen_norm_ptr  = &Penalty::pen_norm_L1L2;
-    _current_dual_norm_ptr = &Penalty::dual_norm_L1L2;
-    _current_proximal_ptr  = &Penalty::proximal_L1L2;
-
-  // link public member functions to l1/linf norm functions
-  } else if (type_ == L1LINF) {
-    _current_elt_norm_ptr  = &Penalty::elt_norm_L1LINF;
-    _current_pen_norm_ptr  = &Penalty::pen_norm_L1LINF;
-    _current_dual_norm_ptr = &Penalty::dual_norm_L1LINF;
-    _current_proximal_ptr  = &Penalty::proximal_L1LINF;
-
-  // link public member functions to coop norm functions
-  } else if (type_ == COOP) {
-    _current_elt_norm_ptr  = &Penalty::elt_norm_COOP;
-    _current_pen_norm_ptr  = &Penalty::pen_norm_COOP;
-    _current_dual_norm_ptr = &Penalty::dual_norm_COOP;
-    _current_proximal_ptr  = &Penalty::proximal_COOP;
-  }
-}
-
-vec    Penalty::elt_norm (vec x) {return((this->*_current_elt_norm_ptr)(x));}
-double Penalty::pen_norm (vec x) {return((this->*_current_pen_norm_ptr)(x));}
-double Penalty::dual_norm(vec x) {return((this->*_current_dual_norm_ptr)(x));}
-vec    Penalty::proximal (vec x, double lambda) {return((this->*_current_proximal_ptr)(x,lambda));}
+template <Norm norm>
+Penalty<norm>::Penalty(SEXP PK) : pk (as<uvec>(PK)){}
 
 // ______________________________________________________
 // L1 NORM A.K.A LASSO
-vec Penalty::elt_norm_L1(vec x) {
+template<>
+inline vec Penalty<Norm::L1>::elt_norm(vec x) {
   return(arma::abs(x));
 }
 
-double Penalty::pen_norm_L1(vec x) {
+template<>
+inline double Penalty<Norm::L1>::pen_norm(vec x) {
   return(sum(elt_norm(x)));
 }
 
-double Penalty::dual_norm_L1(vec x) {
+template<>
+inline double Penalty<Norm::L1>::dual_norm(vec x) {
   return(max(elt_norm(x))) ;
 }
 
-vec Penalty::proximal_L1(vec x, double lambda) {
+template<>
+inline vec Penalty<Norm::L1>::proximal(vec x, double lambda) {
   return(max(zeros(x.n_elem), 1-lambda/elt_norm(x)) % x);
 }
 
 // ______________________________________________________
 // L2 NORM SQUARED A.K.A RIDGE
-vec Penalty::elt_norm_L2_square(vec x) {
+template<>
+inline vec Penalty<Norm::RIDGE>::elt_norm(vec x) {
   return(arma::pow(x, 2));
 }
 
-double Penalty::pen_norm_L2_square(vec x) {
+template<>
+inline double Penalty<Norm::RIDGE>::pen_norm(vec x) {
   return(sum(elt_norm(x)));
 }
 
 // Slight abuse: take the Fenchel conjuguate of L2^2
-double Penalty::dual_norm_L2_square(vec x) {
+template<>
+inline double Penalty<Norm::RIDGE>::dual_norm(vec x) {
   return(.25*sum(elt_norm(x))) ;
 }
 
-vec Penalty::proximal_L2_square(vec x, double lambda) {
+template<>
+inline vec Penalty<Norm::RIDGE>::proximal(vec x, double lambda) {
   return(x / (1+2*lambda));
 }
 
 // ______________________________________________________
 // LINF NORM A.K.A BOUNDED REGRESSION
-vec Penalty::elt_norm_LINF(vec x) {
+template<>
+inline vec Penalty<Norm::LINF>::elt_norm(vec x) {
   return(arma::abs(x));
 }
 
-double Penalty::pen_norm_LINF(vec x) {
+template<>
+inline double Penalty<Norm::LINF>::pen_norm(vec x) {
   return(max(elt_norm(x)));
 }
 
-double Penalty::dual_norm_LINF(vec x) {
+template<>
+inline double Penalty<Norm::LINF>::dual_norm(vec x) {
   return(sum(elt_norm(x))) ;
 }
 
-vec Penalty::proximal_LINF(vec x, double lambda) {
+template<>
+inline vec Penalty<Norm::LINF>::proximal(vec x, double lambda) {
   uword p = x.n_elem;
   vec u, proj;
   vec res = zeros<vec>(p);
@@ -136,14 +114,14 @@ vec Penalty::proximal_LINF(vec x, double lambda) {
     
     // Reordering absolute values
     u = sort(abs(x), "descend");
-
+    
     // values of the projected coordinate if non zero (dual problem)
     proj = (cumsum(u) - lambda)/linspace<vec>(1,p,p);
-
+    
     // selecting nonnull entries (dual)
     uvec maxs = sort(find(u-proj>ZERO), "descend") ;
     double thresh = proj[maxs[0]];
-
+    
     // solving primal problem
     // We keep the smallest values and threshold the common values to +- thresh
     for (uword k=0; k < p;k++) {
@@ -161,49 +139,54 @@ vec Penalty::proximal_LINF(vec x, double lambda) {
 
 // ______________________________________________________
 // L1/L2 NORM A.K.A GROUP-LASSO
-vec Penalty::elt_norm_L1L2(vec x) {
-
+template<>
+inline vec Penalty<Norm::L1L2>::elt_norm(vec x) {
+  
   vec  res = zeros<vec> (pk.n_elem) ; // output with group norms
   uword ind = 0 ; // index to go through the groups
-
+  
   for (uword k=0; k<pk.n_elem; k++) {
     res(k) = norm(x.subvec(ind, ind + pk(k) - 1), 2);
     ind += pk(k);
   }
-
+  
   return(res);
 }
 
-double Penalty::pen_norm_L1L2(vec x) {
+template<>
+inline double Penalty<Norm::L1L2>::pen_norm(vec x) {
   return(sum(elt_norm(x)));
 }
 
-double Penalty::dual_norm_L1L2(vec x) {
+template<>
+inline double Penalty<Norm::L1L2>::dual_norm(vec x) {
   return(max(elt_norm(x))) ;
 }
 
-vec Penalty::proximal_L1L2(vec x, double lambda) {
-
+template<>
+inline vec Penalty<Norm::L1L2>::proximal(vec x, double lambda) {
+  
   vec res = zeros<vec>(x.n_elem);
   uword ind = 0 ;
   
   vec tmp = max(zeros(pk.n_elem), 1-lambda/elt_norm(x)) ;
-
+  
   for (uword k=0; k<pk.n_elem; k++) {
     res.subvec(ind, ind + pk(k) - 1) = tmp(k) * x.subvec(ind, ind + pk(k) - 1);
     ind += pk(k);
   }
-
+  
   return(res);
 }
 
 // ______________________________________________________
 // L1/LINF NORM A.K.A GROUP-LASSO type 2
-vec Penalty::elt_norm_L1LINF(vec x) {
-
+template<>
+inline vec Penalty<Norm::L1LINF>::elt_norm(vec x) {
+  
   vec  res = zeros<vec> (pk.n_elem) ; // output with group norms
   uword ind = 0 ; // index to go through the groups
-
+  
   for (uword k=0; k<pk.n_elem; k++) {
     res(k) = norm(x.subvec(ind, ind + pk(k) - 1), "inf");
     ind += pk(k);
@@ -212,15 +195,17 @@ vec Penalty::elt_norm_L1LINF(vec x) {
   return(res);
 }
 
-double Penalty::pen_norm_L1LINF(vec x) {
+template<>
+inline double Penalty<Norm::L1LINF>::pen_norm(vec x) {
   return(sum(elt_norm(x)));
 }
 
-double Penalty::dual_norm_L1LINF(vec x) {
-
+template<>
+inline double Penalty<Norm::L1LINF>::dual_norm(vec x) {
+  
   vec  res = zeros<vec> (pk.n_elem) ; // output with group norms
   uword ind = 0 ; // index to go through the groups
-
+  
   for (uword k=0; k<pk.n_elem; k++) {
     res(k) = norm(x.subvec(ind, ind + pk(k) - 1), 1);
     ind += pk(k);
@@ -229,12 +214,13 @@ double Penalty::dual_norm_L1LINF(vec x) {
   return(max(res)) ;
 }
 
-vec Penalty::proximal_L1LINF(vec x, double lambda) {
-
+template<>
+inline vec Penalty<Norm::L1LINF>::proximal(vec x, double lambda) {
+  
   uword ind = 0 ;
   vec u, v, proj;
   vec res = zeros<vec>(sum(pk));
-
+  
   for (uword k=0; k<pk.n_elem; k++) {
     v = x.subvec(ind,ind+pk(k)-1) ;
     uword p = v.n_elem ;
@@ -270,40 +256,44 @@ vec Penalty::proximal_L1LINF(vec x, double lambda) {
 
 // ______________________________________________________
 // COOP(ERATIVE) NORM A.K.A COOPERATIVE-LASSO
-vec Penalty::elt_norm_COOP(vec x) {
-
+template<>
+inline vec Penalty<Norm::COOP>::elt_norm(vec x) {
+  
   vec  res = zeros<vec> (pk.n_elem) ; // output with group norms
   uword ind = 0 ; // index to go through the groups
-
+  
   for (uword k=0; k<pk.n_elem; k++) {
     res(k) = norm(max(zeros(pk(k)),x.subvec(ind, ind + pk(k) - 1)), 2) + norm(min(zeros(pk(k)),x.subvec(ind, ind + pk(k) - 1)),2);
     ind += pk(k);
   }
-
+  
   return(res);
 }
 
-double Penalty::pen_norm_COOP(vec x) {
+template<>
+inline double Penalty<Norm::COOP>::pen_norm(vec x) {
   return(sum(elt_norm(x)));
 }
 
-double Penalty::dual_norm_COOP(vec x) {
+template<>
+inline double Penalty<Norm::COOP>::dual_norm(vec x) {
   return(max(elt_norm(x)));
 }
 
-vec Penalty::proximal_COOP(vec x, double lambda) {
-
+template<>
+inline vec Penalty<Norm::COOP>::proximal(vec x, double lambda) {
+  
   vec res = zeros<vec>(x.n_elem);
   uword ind = 0 ;
   
   vec tmp = max(zeros(pk.n_elem), 1-lambda/elt_norm(x)) ;
-
+  
   for (uword k=0; k<pk.n_elem; k++) {
     res.subvec(ind, ind + pk(k) - 1) = tmp(k) * x.subvec(ind, ind + pk(k) - 1);
     ind += pk(k);
   }
-
+  
   return(res);
-
 }
 
+#endif

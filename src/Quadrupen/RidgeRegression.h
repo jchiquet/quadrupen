@@ -6,21 +6,13 @@
 #ifndef _quadrupen_RIDGE_H
 #define _quadrupen_RIDGE_H
 
-#define ARMA_NO_DEBUG
-#define ARMA_USE_LAPACK
-#define ARMA_USE_BLAS
-
-#ifndef ARMA_HAVE_GETTIMEOFDAY
-#define ARMA_HAVE_GETTIMEOFDAY
-#endif
-
-#include "GenericRegularizer_class.h"
+#include "GenericRegularizer.h"
 
 using namespace Rcpp;
 using namespace arma;
 using namespace std;
 
-class RidgeRegression : public GenericRegularizer<mat>{
+class RidgeRegression : public GenericRegularizer<mat,Norm::RIDGE>{
  public:
    RidgeRegression(RegressionData<mat>&, const bool&, const List&);
 

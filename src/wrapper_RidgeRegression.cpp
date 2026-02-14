@@ -3,13 +3,13 @@
  *         MIA Paris-Saclay
  */
 
-#include "Quadrupen/RidgeRegression_class.h"
+#include "Quadrupen/RidgeRegression.h"
 
 using namespace Rcpp;
 using namespace arma;
 
 // [[Rcpp::export]]
-Rcpp::List ridge_cpp(
+List ridge_cpp(
     const Environment &dataModel   , // data structure
     const bool        &intercept   , // Boolean for intercept
     const List        &regParam    , // regularization parameters
@@ -29,7 +29,7 @@ Rcpp::List ridge_cpp(
     ),
     Named("beta")        = ridge.coefficients(),
     Named("mu")          = ridge.interceptTerm(),
-    Named("normx")       = ridge.data().norm_X(),
+    Named("normx")       = ridge.data().norm_X_,
     Named("df")          = ridge.degrees_freedom(),
     Named("monitoring")  = results
   );

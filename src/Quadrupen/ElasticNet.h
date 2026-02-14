@@ -6,16 +6,8 @@
 #ifndef _ElasticNet_H
 #define _ElasticNet_H
 
-#define ARMA_NO_DEBUG
-#define ARMA_USE_LAPACK
-#define ARMA_USE_BLAS
-
-#ifndef ARMA_HAVE_GETTIMEOFDAY
-#define ARMA_HAVE_GETTIMEOFDAY
-#endif
-
-#include "GenericRegularizer_class.h"
-#include "Optimizer_class.h"
+#include "GenericRegularizer.h"
+#include "OptimizerL1.h"
 
 using namespace Rcpp;
 using namespace arma;
@@ -23,16 +15,16 @@ using namespace std;
 
 template <typename matrix>
 class ElasticNet : 
-  public GenericRegularizer<matrix>{
+  public GenericRegularizer<matrix,Norm::L1>{
 
-  using GenericRegularizer<matrix>::lambdas_ ;
-  using GenericRegularizer<matrix>::penalty_ ;
-  using GenericRegularizer<matrix>::set_     ;
-  using GenericRegularizer<matrix>::data_    ;
-  using GenericRegularizer<matrix>::const_   ;
-  using GenericRegularizer<matrix>::df_      ;
-  using GenericRegularizer<matrix>::lambda_factor_ ;
-  using GenericRegularizer<matrix>::get_lambda_seq ;
+  using GenericRegularizer<matrix,Norm::L1>::lambdas_ ;
+  using GenericRegularizer<matrix,Norm::L1>::penalty_ ;
+  using GenericRegularizer<matrix,Norm::L1>::set_     ;
+  using GenericRegularizer<matrix,Norm::L1>::data_    ;
+  using GenericRegularizer<matrix,Norm::L1>::const_   ;
+  using GenericRegularizer<matrix,Norm::L1>::df_      ;
+  using GenericRegularizer<matrix,Norm::L1>::lambda_factor_ ;
+  using GenericRegularizer<matrix,Norm::L1>::get_lambda_seq ;
   
   public:
   
@@ -58,9 +50,8 @@ class ElasticNet :
     return sp_mat(join_cols(iA_, jA_), vec(iA_.n_elem, fill::ones), lambdas_.size(), data_.p_) ; 
   }
   
-private:
-
   // Specific to Elastic-Net regularization
+  OptimizerL1<matrix> solver_ ; // Solvers for L1 penalty
   double gamma_ ; // overall amount of l2 penalty
   vec beta_     ; // vector of current parameters
   vec grad_     ; // vector of current gradient (smooth part)
@@ -79,12 +70,15 @@ private:
 template <typename matrix>
 ElasticNet<matrix>::ElasticNet(
   const RegressionData<matrix>& data, const bool& intercept, const List& regParam, const List& control) :
-  GenericRegularizer<matrix>::GenericRegularizer(data, intercept, regParam) {
-
+  GenericRegularizer<matrix,Norm::L1>::GenericRegularizer(data, intercept, regParam) {
+    
     // set the penalty to l1
-    penalty_ = Penalty(L1) ;
+    penalty_ = Penalty<Norm::L1>() ;
     lambda_factor_ = as<vec>(regParam["lambda_factor"]) ;
     get_lambda_seq(regParam) ;
+    
+    // Set up the optimizer
+    solver_ = OptimizerL1<matrix>(penalty_) ;
     
     // Scale the structuring matrix according to main penalty factor and the amount of l2 penalty 
     gamma_   = as<double>(regParam["gamma"]) ;
@@ -112,9 +106,10 @@ double ElasticNet<matrix>::get_df() {
   
   if (gamma_ > 0) {
     mat B ;
-    if (!set_.R_.is_empty()) {
-      B = solve(trimatu(set_.R_), eye(set_.R_.n_cols, set_.R_.n_cols));
-      B = B * B.t();
+    if (set_.use_chol_) {
+      // B = solve(trimatu(set_.R_), eye(set_.R_.n_cols, set_.R_.n_cols));
+      // B = B * B.t();
+      B = set_.Rinv_ * set_.Rinv_.t();
     } else {
       B = inv_sympd(set_.XATXA_);
     }
@@ -160,7 +155,7 @@ List ElasticNet<matrix>::solution_path(const List& control) {
   for(auto lambda_ : lambdas_) {
     if (verbose) {
       Rprintf("\n lambda_l1 = %f",lambda_) ;
-      Rprintf("\n nb active variables = %i\n",set_.active().n_elem) ;
+      Rprintf("\n nb active variables = %i\n",set_.size()) ;
     }
     
     // OPTIMIZER LOOP (FIX-LAMBDA VALUE): IDENTIFY THE ACTIVE SET AND SOLVE
@@ -194,16 +189,14 @@ List ElasticNet<matrix>::solution_path(const List& control) {
       //
       uvec  null ; // stores the variables which go to zero during optimization
       if (algorithm == FISTA) {
-        Optimizer solver(data_, penalty_, algorithm) ;
         ioptim.push_back(
-          solver.run(beta_, lambda_, set_, set_.XATXA_, 1e-10, 10000)
+          solver_.fista(beta_, lambda_, data_, set_, 1e-10, 10000)
         );
         null = find(abs(beta_) + abs(grad_(set_.A_)) - lambda_ < ZERO) ;
       } else { // QUADRA solver
         try {
-          Optimizer solver(data_, penalty_, algorithm) ;
           ioptim.push_back(
-            solver.run(beta_, lambda_, set_, set_.XATXA_, 1e-5, 10000)
+            solver_.quadratic_enet(beta_, lambda_, data_, set_, 1e-5, 10000)
           );
           null = find(abs(beta_) < ZERO) ;
         } catch (std::runtime_error& error) {

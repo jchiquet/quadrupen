@@ -7,30 +7,21 @@
 using namespace Rcpp;
 using namespace arma;
 
-#include "RegressionData_class.h"
-
-template <typename matrix> class GenericRegularizer ;
-template <typename matrix> class Optimizer ;
+#include "RegressionData.h"
 
 template <typename matrix> class ActiveSet {
-  friend class GenericRegularizer<matrix> ;
-  friend class Optimizer<matrix>          ;
-  friend class BoundedRegression          ;
-  friend class ElasticNet<matrix>         ;
-
-protected:
-  // VARIABLES FOR HANDLING THE ACTIVE SET
-  uvec A_        ; // set of currently activated variables
-  uvec is_in_    ; // indicator of active variables (0/1)
-  mat XATXA_     ; // Gram matrix of currently activated variables
-  mat XTXA_      ; 
-  bool use_chol_ ; // Maintain a Cholesky factorization along the active set algorithm
-  mat R_         ; // Cholesky decomposition of XATXA
 
 public:
+  
+  // VARIABLES FOR HANDLING THE ACTIVE SET
+  uvec A_           ; // set of currently activated variables
+  uvec is_in_       ; // indicator of active variables (0/1)
+  mat XATXA_, XTXA_ ; // matrices of currently activated variables
+  bool use_chol_    ; // Maintain a Cholesky factorization along the active set algorithm
+  mat R_, Rinv_     ; // Cholesky decomposition of XATXA
+  
   ActiveSet() {} ;
-  ActiveSet(const RegressionData<matrix> &data) ;
-  ActiveSet(const RegressionData<matrix> &data, const bool use_chol) ;
+  ActiveSet(const RegressionData<matrix> &data, const bool use_chol=true) ;
   ActiveSet(const RegressionData<matrix> &data, const uvec&, const bool use_chol) ;
   
   // ACTIVE SET HANDLING
@@ -39,35 +30,23 @@ public:
   void del_var(uword) ; // remove the variable activated in position ind_var_out
   void del_vars(uvec) ; // remove a set of non contiguous varables
   void reset()        ; // empty the active set 
+  const uword size() const { return A_.n_elem ; }
   
   // Update Cholesky factorisation by inserting the last activated variables
   void update_Cholesky() ; 
   
   // Downdate Cholesky factorisation by removing the specified variables
   void downdate_Cholesky(uword j) ; 
-  
-  // Getter for private member
-  const bool& use_chol()   const { return use_chol_    ; }
-  const uvec& active()     const { return A_           ; }
-  const uword size()       const { return accu(is_in_) ; }
-  bool is_active (uword i) const { return (is_in_(i))  ; }
-  const mat& Gram_active() const { return XATXA_       ; }
-  
 };
 
 template <typename matrix>
-ActiveSet<matrix>::ActiveSet(const RegressionData<matrix>& data) {
-  is_in_.zeros(data.p_) ;
-}
-
-template <typename matrix>
-ActiveSet<matrix>::ActiveSet(const RegressionData<matrix>& data, const bool use_chol) : 
+ActiveSet<matrix>::ActiveSet(const RegressionData<matrix>& data, const bool use_chol) :
   use_chol_(use_chol) {
   is_in_.zeros(data.p_) ;
 }
 
 template <typename matrix>
-ActiveSet<matrix>::ActiveSet(const RegressionData<matrix>& data, const uvec& A0, const bool use_chol) : 
+ActiveSet<matrix>::ActiveSet(const RegressionData<matrix>& data, const uvec& A0, const bool use_chol) :
   use_chol_(use_chol) {
   is_in_.zeros(data.p_) ;
   add_vars(A0, data)    ;
@@ -91,13 +70,12 @@ void ActiveSet<matrix>::add_var(uword var_in, const RegressionData<matrix>& data
   vec new_col = data.X_.t() * data.X_.col(var_in) - 
     data.n_ * data.X_bar_ * as_scalar(data.X_bar_[var_in]) + data.S_.col(var_in) ;
 
-  // UPDATE THE xtxA AND xAtxA MATRICES
   if (!XATXA_.is_empty()) {
     XATXA_ = join_cols(XATXA_, XTXA_.row(var_in)) ;
   }
   XTXA_  = join_rows(XTXA_ , new_col) ;
   XATXA_ = join_rows(XATXA_, trans(XTXA_.row(var_in))) ;
-  
+
   if (use_chol_) update_Cholesky() ;
 }
 
@@ -117,7 +95,7 @@ void ActiveSet<matrix>::del_var(uword ivar_out) {
   XATXA_.shed_row(ivar_out)  ;
 
   if (use_chol_) downdate_Cholesky(ivar_out) ;
-  
+
 }
 
 template <typename matrix>
@@ -140,7 +118,7 @@ void ActiveSet<matrix>::update_Cholesky() {
     rp(p-1) = sqrt(XATXA_(p-1,p-1) - dot(rp,rp));
     R_ = join_rows( join_cols(R_, zeros<mat>(1,p-1)) , rp);
   }
-  
+  Rinv_ = solve(trimatu(R_), eye(p, p)) ;
 }
 
 template <typename matrix>
@@ -170,6 +148,7 @@ void ActiveSet<matrix>::downdate_Cholesky(uword j) {
     }
   }
   R_.shed_row(p);
+  Rinv_ = solve(trimatu(R_), eye(p, p)) ;
 }
 
 #endif

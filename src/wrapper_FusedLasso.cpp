@@ -20,28 +20,28 @@ vec get_lambda1(SEXP LAMBDA1, uword n_lambda, const double min_ratio, double lma
 }
 
 // [[Rcpp::export]]
-Rcpp::List FusedLasso_cpp(
+List FusedLasso_cpp(
     const Environment &dataModel   , // data structure
     const bool        &intercept   , // boolean for intercept
     const List        &regParam    , // config of the optimisation 
     const List        &controlFit  // config of the optimisation   
 ) {
-  const uword n                = dataModel["n"]  ; // sample size
-  const uword p                = dataModel["d"]  ; // number of features
-  const SEXP &R_XMat           = dataModel["X"]  ; // design matrix
-  std::vector<double> y        = dataModel["y"]  ; // response vector
-  List R_graph                 = dataModel["S"]  ; // Structuring matrix
-  std::vector<double> wObs     = dataModel["wy"] ; // responses to predictors vector
+  const uword n           = dataModel["n"]  ; // sample size
+  const uword p           = dataModel["d"]  ; // number of features
+  const SEXP &R_XMat      = dataModel["X"]  ; // design matrix
+  std::vector<double> y   = dataModel["y"]  ; // response vector
+  List R_graph            = dataModel["S"]  ; // Structuring matrix
+  vector<double> wObs     = dataModel["wy"] ; // responses to predictors vector
 
-  const SEXP R_LAMBDA1         = regParam["l1"]         ; // vector of L1 penalties ; if NULL, automatically set
-  std::vector<double> wlambda1 = regParam["l1_weights"] ; // l1-penalty weights
-  double lambda2               = regParam["l2"]   ; // scalar for the amount L2 penalty
-  uword n_lambda               = regParam["n_lambda1"]  ; // # of l1-penalty levels
-  const double min_ratio       = regParam["min_ratio"]  ; // minimum penlaty value as a ratio of lambda1 max
+  const SEXP R_LAMBDA1    = regParam["l1"]         ; // vector of L1 penalties ; if NULL, automatically set
+  vector<double> wlambda1 = regParam["l1_weights"] ; // l1-penalty weights
+  double lambda2          = regParam["l2"]   ; // scalar for the amount L2 penalty
+  uword n_lambda          = regParam["n_lambda1"]  ; // # of l1-penalty levels
+  const double min_ratio  = regParam["min_ratio"]  ; // minimum penlaty value as a ratio of lambda1 max
 
-  std::vector<double>  beta0          = controlFit["beta0"]         ;
+  vector<double>  beta0               = controlFit["beta0"]         ;
   double mu0                          = controlFit["mu0"]           ;
-  std::string penalty                 = controlFit["pen_fused"]     ; 
+  string penalty                      = controlFit["pen_fused"]     ; 
   const unsigned int maxIterInner     = controlFit["maxiterin"]     ;
   const unsigned int maxIterOuter     = controlFit["maxiterout"]    ;
   const double accuracy               = controlFit["accuracy"]      ;
@@ -114,7 +114,7 @@ Rcpp::List FusedLasso_cpp(
   );
   
   // Preparing R output
-  arma::sp_mat beta = Rcpp::as<arma::sp_mat>(res.todgCMatrix()) ;
+  sp_mat beta = Rcpp::as<arma::sp_mat>(res.todgCMatrix()) ;
   beta = beta.t() ;
   vec mu = arma::zeros(lambda1Vec.size()) ;
   if (intercept) {
@@ -123,7 +123,7 @@ Rcpp::List FusedLasso_cpp(
   }
   
   // degrees of freedom : number of non-zero values
-  arma::vec df(beta.n_rows) ;
+  vec df(beta.n_rows) ;
   for (uword i=0; i<beta.n_rows; i++) {
     rowvec row = beta.row(i).as_dense() ;
     vec val = nonzeros(unique(row.t())) ;

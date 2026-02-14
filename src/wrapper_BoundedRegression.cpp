@@ -3,13 +3,13 @@
  *         MIA Paris-Saclay
  */
 
-#include "Quadrupen/BoundedRegression_class.h"
+#include "Quadrupen/BoundedRegression.h"
 
 using namespace Rcpp;
 using namespace arma;
 
 // [[Rcpp::export]]
-Rcpp::List bounded_regression_cpp(
+List bounded_regression_cpp(
     const Environment &dataModel   , // data structure
     const bool        &intercept   , // Boolean for intercept
     const List        &regParam    , // regularization parameters
@@ -29,7 +29,7 @@ Rcpp::List bounded_regression_cpp(
     ),
     Named("beta")        = bounded.coefficients(),
     Named("mu")          = bounded.interceptTerm(),
-    Named("normx")       = bounded.data().norm_X(),
+    Named("normx")       = bounded.data().norm_X_,
     Named("df")          = bounded.degrees_freedom(),
     Named("monitoring")  = results
   );

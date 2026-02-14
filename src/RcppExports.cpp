@@ -12,7 +12,7 @@ Rcpp::Rostream<false>& Rcpp::Rcerr = Rcpp::Rcpp_cerr_get();
 #endif
 
 // bounded_regression_cpp
-Rcpp::List bounded_regression_cpp(const Environment& dataModel, const bool& intercept, const List& regParam, const List& control);
+List bounded_regression_cpp(const Environment& dataModel, const bool& intercept, const List& regParam, const List& control);
 RcppExport SEXP _quadrupen_bounded_regression_cpp(SEXP dataModelSEXP, SEXP interceptSEXP, SEXP regParamSEXP, SEXP controlSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
@@ -26,7 +26,7 @@ BEGIN_RCPP
 END_RCPP
 }
 // elastic_net_dense_cpp
-Rcpp::List elastic_net_dense_cpp(const Environment& dataModel, const bool& intercept, const List& regParam, const List& control);
+List elastic_net_dense_cpp(const Environment& dataModel, const bool& intercept, const List& regParam, const List& control);
 RcppExport SEXP _quadrupen_elastic_net_dense_cpp(SEXP dataModelSEXP, SEXP interceptSEXP, SEXP regParamSEXP, SEXP controlSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
@@ -40,7 +40,7 @@ BEGIN_RCPP
 END_RCPP
 }
 // elastic_net_sparse_cpp
-Rcpp::List elastic_net_sparse_cpp(const Environment& dataModel, const bool& intercept, const List& regParam, const List& control);
+List elastic_net_sparse_cpp(const Environment& dataModel, const bool& intercept, const List& regParam, const List& control);
 RcppExport SEXP _quadrupen_elastic_net_sparse_cpp(SEXP dataModelSEXP, SEXP interceptSEXP, SEXP regParamSEXP, SEXP controlSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
@@ -54,7 +54,7 @@ BEGIN_RCPP
 END_RCPP
 }
 // FusedLasso_cpp
-Rcpp::List FusedLasso_cpp(const Environment& dataModel, const bool& intercept, const List& regParam, const List& controlFit);
+List FusedLasso_cpp(const Environment& dataModel, const bool& intercept, const List& regParam, const List& controlFit);
 RcppExport SEXP _quadrupen_FusedLasso_cpp(SEXP dataModelSEXP, SEXP interceptSEXP, SEXP regParamSEXP, SEXP controlFitSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
@@ -68,7 +68,7 @@ BEGIN_RCPP
 END_RCPP
 }
 // ridge_cpp
-Rcpp::List ridge_cpp(const Environment& dataModel, const bool& intercept, const List& regParam, const List& controlFit);
+List ridge_cpp(const Environment& dataModel, const bool& intercept, const List& regParam, const List& controlFit);
 RcppExport SEXP _quadrupen_ridge_cpp(SEXP dataModelSEXP, SEXP interceptSEXP, SEXP regParamSEXP, SEXP controlFitSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;

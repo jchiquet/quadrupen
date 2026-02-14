@@ -6,16 +6,8 @@
 #ifndef _BoundedRegression_H
 #define _BoundedRegression_H
 
-#define ARMA_NO_DEBUG
-#define ARMA_USE_LAPACK
-#define ARMA_USE_BLAS
-
-#ifndef ARMA_HAVE_GETTIMEOFDAY
-#define ARMA_HAVE_GETTIMEOFDAY
-#endif
-
-#include "GenericRegularizer_class.h"
-#include "Optimizer_class.h"
+#include "GenericRegularizer.h"
+#include "OptimizerLINF.h"
 
 #define ZERO 2e-16 // practical zero
 
@@ -23,17 +15,17 @@ using namespace Rcpp;
 using namespace arma;
 using namespace std;
 
-class BoundedRegression : public GenericRegularizer<mat> {
+class BoundedRegression : public GenericRegularizer<mat,Norm::LINF> {
 public:
+  
   BoundedRegression(RegressionData<mat>&, const bool&, const List&, const List&);
   
   List solution_path(const List&);
 
   const double& struct_tuning() const { return gamma_ ; }
-  
-private:
 
   // Specific to Bounded regression
+  OptimizerLINF<mat> solver_ ; // Solvers for LINF penalty
   mat    XTX    ; // Gram matrix
   double gamma_ ; // overall amount of l2 penalty
   vec beta_     ; // vector of current parameters

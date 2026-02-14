@@ -3,19 +3,22 @@
  *         MIA Paris-Saclay
  */
 
-#include "BoundedRegression_class.h"
+#include "BoundedRegression.h"
 
 using namespace Rcpp;
 using namespace arma;
 
 BoundedRegression::BoundedRegression(
   RegressionData<mat>& data, const bool& intercept, const List& regParam, const List& control) :
-  GenericRegularizer<mat>::GenericRegularizer(data, intercept, regParam) {
+  GenericRegularizer<mat,Norm::LINF>::GenericRegularizer(data, intercept, regParam) {
     
     // set the penalty to l infinity
-    penalty_ = Penalty(LINF) ;
+    penalty_ = Penalty<Norm::LINF>() ;
     lambda_factor_ = as<vec>(regParam["lambda_factor"]) ;
     get_lambda_seq(regParam) ;
+
+    // Set up the optimizer 
+    solver_ = OptimizerLINF<mat>(penalty_) ;
     
     // Scale the structuring matrix according to main penalty factor and the amount of l2 penalty 
     gamma_   = as<double>(regParam["gamma"]) ;
@@ -29,7 +32,6 @@ BoundedRegression::BoundedRegression(
     
     beta_ = zeros<vec>(data_.p_) ; // vector of current parameters
     grad_ = -data_.XTy_          ; // vector of current gradient (smooth part)
-    
   }
 
 double BoundedRegression::get_df() {
@@ -89,9 +91,8 @@ List BoundedRegression::solution_path(const List& control) {
       R_CheckUserInterrupt();
       current_it++;
       if (algorithm == FISTA) {
-        Optimizer solver(data_, penalty_, algorithm) ;
         ioptim.push_back(
-          solver.run(beta_, lambda_, set_, XTX, 1e-3, 10000)
+          solver_.fista(beta_, lambda_, data_, set_, 1e-3, 10000)
         );
         break;
       } else { // QUADRA solver
@@ -99,9 +100,8 @@ List BoundedRegression::solution_path(const List& control) {
           if (current_it == maxiter) {
             throw std::runtime_error("Fail to converge...");
           } else {
-            Optimizer solver(data_, penalty_, algorithm) ;
             ioptim.push_back(
-              solver.run(beta_, lambda_, set_, XTX, accuracy, 10000)
+              solver_.quadratic_breg(beta_, lambda_, data_, set_, XTX, accuracy, 10000)
             );
           }
         } catch (std::runtime_error& error) {
@@ -132,7 +132,7 @@ List BoundedRegression::solution_path(const List& control) {
     if (status.back() >= 2) {
       break;
     } else {
-      coef_.push_back(beta_/(data_.norm_X() % lambda_factor_)) ;
+      coef_.push_back(beta_/(data_.norm_X_ % lambda_factor_)) ;
       const_.push_back(data_.y_bar_ - as_scalar(dot(beta_, data_.X_bar_)));
       df_.push_back(get_df()) ;
       iA_ = join_rows(iA_, df_.size()*ones<urowvec>(set_.size()) );
