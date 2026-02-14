@@ -8,7 +8,7 @@ eps <- 0.25 # correlation between relevant and irrelevant variable
 S11 <- toeplitz(cor^(0:(80-1))) ## Toeplitz correlation for irrelevant variable
 S22 <- matrix(cor,10,10) ## bloc correlation bewteen relevant variables
 diag(S22) <- 1
-Sigma <- bdiag(S11,S22,S22) + eps
+Sigma <- Matrix::bdiag(S11,S22,S22) + eps
 
 ## Build a vector of label for true nonzeros
 labels <- rep("irrelevant", length(beta))
@@ -16,26 +16,24 @@ labels[beta != 0] <- c("relevant")
 labels <- factor(labels, ordered=TRUE, levels=c("relevant","irrelevant"))
 
 ## uncomment if you want insights on the correlation structure
-## image(Sigma)
+## Matrix::image(Sigma)
 x <- as.matrix(matrix(rnorm(100*n),n,100) %*% chol(Sigma))
 y <- mu + x %*% beta + rnorm(n, 0, sigma)
 
 ## Test simple and double cross-validation
-cv.double <- crossval(x, y, "bounded.reg", lambda2=10^seq(2,-2,len=50))
-cv.simple <- crossval(x, y, "bounded.reg", lambda2=slot(cv.double, "lambda2.min"))
-plot(cv.double)
+fit <- bounded.reg(x,y,lambda2=.1)
+cv.simple <- cross_validate(fit)
 plot(cv.simple)
-fit <- bounded.reg(x,y,lambda2=slot(cv.double, "lambda2.min"))
 
 ## plot the solution path
 plot(fit)
 ## a quick summary of the fit
 print(fit)
 ## AIC and BIC
-criteria(fit)
+plot(fit, "criteria")
 
 ## Call to stability selection function, 200 subsampling
-stab <- stability(x,y, "bounded.reg", subsamples=200, lambda2=1, min.ratio=1e-2)
+stab <- stability(fit, n_subsamples = 100)
 ## plot the stability path
 plot(stab, labels=labels)
 ## a quick summary of the fit

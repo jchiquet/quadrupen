@@ -17,8 +17,6 @@
 #include "GenericRegularizer.h"
 #include "OptimizerL1.h"
 
-#define ZERO 2e-16 // practical zero
-
 using namespace Rcpp;
 using namespace arma;
 using namespace std;
@@ -73,7 +71,7 @@ class ElasticNet :
   urowvec jA_   ; // contains column indices of the non-zero values
 
   // Compute degrees of freedom for the current estimate
-  double get_df() ; 
+  double get_df() ;
 
 };
 

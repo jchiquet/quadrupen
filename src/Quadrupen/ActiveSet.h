@@ -37,7 +37,6 @@ public:
   
   // Downdate Cholesky factorisation by removing the specified variables
   void downdate_Cholesky(uword j) ; 
-
 };
 
 template <typename matrix>
