@@ -58,8 +58,9 @@ uword OptimizerL1<matrix>::quadratic_enet(
   // Solving the quadratic problem
   vec betak = beta0;
   if (set.use_chol_) {
-    betak = solve(trimatu(set.R_), 
-                  solve(trimatl(strans(set.R_)), data.XTy_(set.A_) - lambda * theta));
+    // betak = solve(trimatu(set.R_), 
+    //               solve(trimatl(strans(set.R_)), data.XTy_(set.A_) - lambda * theta));
+    betak =  set.Rinv_* set.Rinv_.t() * (data.XTy_(set.A_) - lambda * theta);
   } else {
     iter_in = this->conjugate_gradient(betak, set.XATXA_, data.XTy_(set.A_) - lambda*theta,
                        accuracy, max_iter) ;
@@ -92,8 +93,9 @@ uword OptimizerL1<matrix>::quadratic_enet(
     
     vec betal = betak;
     if (set.use_chol_) {
-      betal = solve(trimatu(set.R_),
-                    solve( trimatl(strans(set.R_)), data.XTy_(set.A_) - lambda * theta));
+      // betal = solve(trimatu(set.R_),
+      //               solve( trimatl(strans(set.R_)), data.XTy_(set.A_) - lambda * theta));
+      betal =  set.Rinv_* set.Rinv_.t() * (data.XTy_(set.A_) - lambda * theta);
     } else {
       iter_in = this->conjugate_gradient(betal, set.XATXA_, data.XTy_(set.A_) - lambda*theta,
                          accuracy, max_iter) ;

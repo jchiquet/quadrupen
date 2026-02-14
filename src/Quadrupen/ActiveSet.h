@@ -18,7 +18,7 @@ public:
   uvec is_in_       ; // indicator of active variables (0/1)
   mat XATXA_, XTXA_ ; // matrices of currently activated variables
   bool use_chol_    ; // Maintain a Cholesky factorization along the active set algorithm
-  mat R_            ; // Cholesky decomposition of XATXA
+  mat R_, Rinv_     ; // Cholesky decomposition of XATXA
   
   ActiveSet() {} ;
   ActiveSet(const RegressionData<matrix> &data, const bool use_chol=true) ;
@@ -95,7 +95,7 @@ void ActiveSet<matrix>::del_var(uword ivar_out) {
   XATXA_.shed_row(ivar_out)  ;
 
   if (use_chol_) downdate_Cholesky(ivar_out) ;
-  
+
 }
 
 template <typename matrix>
@@ -118,7 +118,7 @@ void ActiveSet<matrix>::update_Cholesky() {
     rp(p-1) = sqrt(XATXA_(p-1,p-1) - dot(rp,rp));
     R_ = join_rows( join_cols(R_, zeros<mat>(1,p-1)) , rp);
   }
-  
+  Rinv_ = solve(trimatu(R_), eye(p, p)) ;
 }
 
 template <typename matrix>
@@ -148,6 +148,7 @@ void ActiveSet<matrix>::downdate_Cholesky(uword j) {
     }
   }
   R_.shed_row(p);
+  Rinv_ = solve(trimatu(R_), eye(p, p)) ;
 }
 
 #endif

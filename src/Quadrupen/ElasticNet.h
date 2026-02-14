@@ -107,8 +107,9 @@ double ElasticNet<matrix>::get_df() {
   if (gamma_ > 0) {
     mat B ;
     if (set_.use_chol_) {
-      B = solve(trimatu(set_.R_), eye(set_.R_.n_cols, set_.R_.n_cols));
-      B = B * B.t();
+      // B = solve(trimatu(set_.R_), eye(set_.R_.n_cols, set_.R_.n_cols));
+      // B = B * B.t();
+      B = set_.Rinv_ * set_.Rinv_.t();
     } else {
       B = inv_sympd(set_.XATXA_);
     }
