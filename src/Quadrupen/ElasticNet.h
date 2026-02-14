@@ -33,9 +33,8 @@ class ElasticNet :
   List solution_path(const List&);
 
   double get_loss() {
-    double loss = pow(data_.norm_y_ ,2) + dot(beta_, set_.XATXA_ * beta_) - 
-      2*dot(beta_, data_.XTy_(set_.A_)) ;
-    return (.5 * loss) ;
+    return(.5 * pow(data_.norm_y_ ,2) + 
+           dot(beta_, .5 * set_.XATXA_ * beta_ - data_.XTy_(set_.A_))) ;
   };
   
   void optimality_gap(double lambda_, uword type) ;
