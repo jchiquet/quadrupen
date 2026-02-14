@@ -126,8 +126,8 @@ uword GenericOptimizer<matrix,norm>::fista(
 
       fk = dot(betak, .5 * set.XATXA_ * betak - data.XTy_(set.A_)) ;
       l_num = 2 * (fk - f0 - dot(grad, betak-betal));
-      l_den = pow(arma::norm(betak-betal,2),2);
-
+      l_den = accu(pow(betak-betal,2));
+      
       if ((L * l_den >= l_num) || (sqrt(l_den) < accuracy)) {
         found = true;
       } else {

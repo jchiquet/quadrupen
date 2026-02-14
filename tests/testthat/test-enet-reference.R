@@ -134,10 +134,6 @@ test_that("Elastic-net is correct w.r.t a reference solution - FISTA", {
   expect_equal(with.intercept$quad,
                with.intercept$enet, check.attributes = FALSE, tolerance = tol)
   
-  # without.intercept <- get.enet(x,y,intercept=FALSE,naive=TRUE, method="fista")
-  # expect_equal(without.intercept$quad,
-  #              without.intercept$enet, check.attributes = FALSE, tolerance = tol)
-  
   with.intercept <- get.enet(x,y,intercept=TRUE,naive=FALSE)
   expect_equal(with.intercept$quad,
                with.intercept$enet, check.attributes = FALSE, tolerance = tol)

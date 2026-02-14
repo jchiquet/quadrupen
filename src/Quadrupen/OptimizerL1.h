@@ -78,7 +78,7 @@ uword OptimizerL1<matrix>::quadratic_enet(
     uword i_swap = swap[i_min];
     beta0 = betak;
     beta0(i_swap) = -betak_swap[i_min];
-    double grad_swap = - as_scalar(data.XTy_(set.A_(i_swap))) + 
+    double grad_swap = - data.XTy_(set.A_(i_swap)) + 
       dot(set.XATXA_.row(i_swap), betak) ;
     theta(i_swap) = - sign(grad_swap) ;
     vec betal = betak;
@@ -92,7 +92,7 @@ uword OptimizerL1<matrix>::quadratic_enet(
     }
 
     // if the sign is coherent, keep that one...
-    grad_swap = - as_scalar(data.XTy_(set.A_(i_swap))) + 
+    grad_swap = - data.XTy_(set.A_(i_swap)) + 
       dot(set.XATXA_.row(i_swap), betal) ;
     if (abs(grad_swap + lambda * sign(betal(i_swap))) <= ZERO) {
         beta0 = betal ;
