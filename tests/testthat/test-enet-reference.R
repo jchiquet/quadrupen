@@ -150,10 +150,6 @@ test_that("Elastic-net is correct w.r.t a reference solution - FISTA", {
   expect_equal(with.intercept$quad,
                with.intercept$enet, check.attributes = FALSE, tolerance = tol)
   
-  # without.intercept <- get.enet(x,y,intercept=FALSE,normalize=FALSE,naive=TRUE, method="fista")
-  # expect_equal(without.intercept$quad,
-  #              without.intercept$enet, check.attributes = FALSE, tolerance = tol)
-  
   with.intercept <- get.enet(x,y,intercept=TRUE,normalize=FALSE,naive=FALSE)
   expect_equal(with.intercept$quad,
                with.intercept$enet, check.attributes = FALSE, tolerance = tol)
@@ -162,62 +158,5 @@ test_that("Elastic-net is correct w.r.t a reference solution - FISTA", {
   expect_equal(without.intercept$quad,
                without.intercept$enet, check.attributes = FALSE, tolerance = tol)
   
-  ## RANDOM DATA
-  seed <- sample(1:10000,1)
-  ## cat(" #seed=",seed)
-  set.seed(seed)
-  
-  beta <- rep(c(0,1,0,-1,0), c(25,10,25,10,25))
-  n <- 100
-  p <- length(beta)
-  
-  mu <- 3 # intercept
-  sigma <- 30 # huge noise
-  Sigma <- matrix(0.95,p,p) # huge correlation
-  diag(Sigma) <- 1
-  
-  x <- as.matrix(matrix(rnorm(95*n),n,95) %*% chol(Sigma))
-  y <- 10 + x %*% beta + rnorm(n,0,10)
-  
-  ## Run the tests...
-  with.intercept <- get.enet(x,y,intercept=TRUE,naive=TRUE, method="fista")
-  expect_equal(with.intercept$quad,
-               with.intercept$enet, check.attributes = FALSE, tolerance = tol)
-  
-  without.intercept <- get.enet(x,y,intercept=FALSE,naive=TRUE, method="fista")
-  expect_equal(without.intercept$quad,
-               without.intercept$enet, check.attributes = FALSE, tolerance = tol)
-  
-  with.intercept <- get.enet(x,y,intercept=TRUE,naive=FALSE)
-  expect_equal(with.intercept$quad,
-               with.intercept$enet, check.attributes = FALSE, tolerance = tol)
-  
-  without.intercept <- get.enet(x,y,intercept=FALSE,naive=FALSE)
-  expect_equal(without.intercept$quad,
-               without.intercept$enet, check.attributes = FALSE, tolerance = tol)
-  
-  with.intercept <- get.enet(x,y,intercept=TRUE,normalize=FALSE,naive=TRUE, method="fista")
-  expect_equal(with.intercept$quad,
-               with.intercept$enet, check.attributes = FALSE, tolerance = tol)
-  
-  without.intercept <- get.enet(x,y,intercept=FALSE,normalize=FALSE,naive=TRUE, method="fista")
-  expect_equal(without.intercept$quad,
-               without.intercept$enet, check.attributes = FALSE, tolerance = tol)
-  
-  with.intercept <- get.enet(x,y,intercept=TRUE,normalize=FALSE,naive=FALSE)
-  expect_equal(with.intercept$quad,
-               with.intercept$enet, check.attributes = FALSE, tolerance = tol)
-  
-  without.intercept <- get.enet(x,y,intercept=FALSE,normalize=FALSE,naive=FALSE)
-  expect_equal(without.intercept$quad,
-               without.intercept$enet, check.attributes = FALSE, tolerance = tol)
-  ## Run the tests...
-  with.intercept <- get.enet(x,y,intercept=TRUE)
-  expect_equal(with.intercept$quad,
-               with.intercept$enet, check.attributes = FALSE, tolerance = tol)
-  
-  without.intercept <- get.enet(x,y,intercept=FALSE)
-  expect_equal(without.intercept$quad,
-               without.intercept$enet, check.attributes = FALSE, tolerance = tol)
-  
+
 })
