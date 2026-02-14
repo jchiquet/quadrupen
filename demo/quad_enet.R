@@ -22,7 +22,7 @@ y <- mu + x %*% beta + rnorm(n, 0, sigma)
 
 ## Test simple and double cross-validation
 fit <- elastic.net(x,y,lambda2=1, minratio = 1e-2)
-cv.double <- cross_validate(fit, lambda2=10^seq(2,-2,len=50))
+cv.double <- cross_validate(fit, lambda2=10^seq(2,-2,len=50), cores = 10)
 cv.simple <- cross_validate(fit, lambda2=cv.double$lambda2_min)
 plot(cv.double)
 plot(cv.simple)

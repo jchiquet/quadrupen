@@ -34,7 +34,7 @@ class ElasticNet :
 
   double get_loss() {
     double loss = pow(data_.norm_y_ ,2) + dot(beta_, set_.XATXA_ * beta_) - 
-      2*dot(beta_, data_.XTy_.elem(set_.A_)) ;
+      2*dot(beta_, data_.XTy_(set_.A_)) ;
     return (.5 * loss) ;
   };
   
@@ -93,7 +93,7 @@ ElasticNet<matrix>::ElasticNet(
       grad_ = - data_.XTy_ ;
     } else {
       set_  = ActiveSet(data_, A0, as<bool>(control["usechol"])) ;
-      beta_ = beta0.elem(A0) ;
+      beta_ = beta0(A0) ;
       grad_ = - data_.XTy_ + set_.XTXA_ * beta_  ;
     }
   }
@@ -163,7 +163,7 @@ List ElasticNet<matrix>::solution_path(const List& control) {
     // dual norm of gradient for inactive variables
     vec grd_norm = penalty_.elt_norm(grad_) - lambda_ ;
     // gradient for active variables
-    grd_norm.elem(set_.A_) = abs(grad_(set_.A_) + lambda_ * sign(beta_)) ;
+    grd_norm(set_.A_) = abs(grad_(set_.A_) + lambda_ * sign(beta_)) ;
     // variable associated with the highest violation of KKT conditions 
     uword var_in = grd_norm.index_max() ;
     double current_gap = std::max(0.0, grd_norm(var_in)) ;
@@ -220,7 +220,7 @@ List ElasticNet<matrix>::solution_path(const List& control) {
       // dual norm of gradient for inactive variables
       grd_norm = penalty_.elt_norm(grad_) - lambda_ ;
       // gradient for active variables
-      grd_norm.elem(set_.A_) = abs(grad_(set_.A_) + lambda_ * sign(beta_)) ;
+      grd_norm(set_.A_) = abs(grad_(set_.A_) + lambda_ * sign(beta_)) ;
       var_in = grd_norm.index_max() ;
       current_gap = std::max(0.0, grd_norm(var_in)) ;
       
@@ -245,8 +245,8 @@ List ElasticNet<matrix>::solution_path(const List& control) {
     if (status.back() >= 2) {
       break;
     } else {
-      nzeros_ = join_cols(nzeros_, beta_/(data_.norm_X_.elem(set_.A_) % lambda_factor_.elem(set_.A_)));
-      const_.push_back(data_.y_bar_ - as_scalar(dot(beta_, data_.X_bar_.elem(set_.A_))));
+      nzeros_ = join_cols(nzeros_, beta_/(data_.norm_X_(set_.A_) % lambda_factor_(set_.A_)));
+      const_.push_back(data_.y_bar_ - as_scalar(dot(beta_, data_.X_bar_(set_.A_))));
       iA_ = join_rows(iA_, df_.size()*ones<urowvec>(set_.size()) );
       jA_ = join_rows(jA_, set_.A_.t()) ;
       df_.push_back(get_df()) ;
@@ -277,7 +277,7 @@ void ElasticNet<matrix>::optimality_gap(double lambda, uword type) {
   // gamma equals the max |gradient|
   double nu = norm(grad_, "inf");
   double loss = get_loss(), old_J = J_, old_D = D_ ;
-  J_ = loss - dot(beta_, grad_.elem(set_.A_))  ;
+  J_ = loss - dot(beta_, grad_(set_.A_))  ;
   uvec Ac ;
   
   switch (type) {
@@ -285,12 +285,12 @@ void ElasticNet<matrix>::optimality_gap(double lambda, uword type) {
     Ac = find(grad_ > nu); // set of adversarial variables outside the boundary
     D_ = J_ * (1 - lambda/nu) - 
       (pow(lambda,2)/(2*gamma_))*((lambda*(data_.p_-Ac.n_elem))/nu + 
-      pow(norm(grad_.elem(Ac),2)/nu,2)-data_.p_);
+      pow(norm(grad_(Ac),2)/nu,2)-data_.p_);
     break;
   case 2: // Fenchel's bound
     if (nu < lambda) nu = lambda;
     D_ = loss * (1+pow(lambda/nu,2)) + sum(abs(lambda*beta_)) + 
-      (lambda/nu)*(dot(beta_,data_.XTy_.elem(set_.A_))-pow(data_.norm_y_,2));
+      (lambda/nu)*(dot(beta_,data_.XTy_(set_.A_))-pow(data_.norm_y_,2));
     break;
   default: 
     D_ = datum::inf ;

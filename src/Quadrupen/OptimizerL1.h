@@ -53,7 +53,7 @@ uword OptimizerL1<matrix>::quadratic_enet(
   vec theta = -sign(grad)   ; // vector of sign of the solution
   
   uvec A = find(abs(beta0) > ZERO) ; // vector of locally active variables
-  theta.elem(A)   = sign(beta0.elem(A));
+  theta(A)   = sign(beta0(A));
   
   // Solving the quadratic problem
   vec betak = beta0;
@@ -67,15 +67,15 @@ uword OptimizerL1<matrix>::quadratic_enet(
   }
   
   // Check for swapping variables
-  uvec swap = find(abs(sign(betak.elem(A)) - theta.elem(A)) > ZERO);
+  uvec swap = find(abs(sign(betak(A)) - theta(A)) > ZERO);
   uvec null ;
   if (swap.is_empty()) {
     null = swap ; // this is empty
     beta0 = betak;
   } else {
-    swap = A.elem(swap);
-    colvec beta0_swap = beta0.elem(swap);
-    colvec betak_swap = betak.elem(swap);
+    swap = A(swap);
+    colvec beta0_swap = beta0(swap);
+    colvec betak_swap = betak(swap);
     // first, go to zero for the swapped variable which cost the minimum
     vec eta = -beta0_swap / (betak_swap-beta0_swap);
     uword i_swap = eta.index_min();
@@ -89,7 +89,7 @@ uword OptimizerL1<matrix>::quadratic_enet(
     
     A = find(abs(beta0) > ZERO) ; // new vector of active variables
     theta = -sign(grad)        ; // vector of sign of the solution
-    theta.elem(A) = sign(beta0.elem(A));
+    theta(A) = sign(beta0(A));
     
     vec betal = betak;
     if (set.use_chol_) {
