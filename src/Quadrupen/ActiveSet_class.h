@@ -14,12 +14,11 @@ template <typename matrix> class ActiveSet {
 public:
   
   // VARIABLES FOR HANDLING THE ACTIVE SET
-  uvec A_        ; // set of currently activated variables
-  uvec is_in_    ; // indicator of active variables (0/1)
-  mat XATXA_     ; // Gram matrix of currently activated variables
-  mat XTXA_      ; 
-  bool use_chol_ ; // Maintain a Cholesky factorization along the active set algorithm
-  mat R_         ; // Cholesky decomposition of XATXA
+  uvec A_           ; // set of currently activated variables
+  uvec is_in_       ; // indicator of active variables (0/1)
+  mat XATXA_, XTXA_ ; // matrices of currently activated variables
+  bool use_chol_    ; // Maintain a Cholesky factorization along the active set algorithm
+  mat R_            ; // Cholesky decomposition of XATXA
   
   ActiveSet() {} ;
   ActiveSet(const RegressionData<matrix> &data, const bool use_chol=true) ;
@@ -77,7 +76,7 @@ void ActiveSet<matrix>::add_var(uword var_in, const RegressionData<matrix>& data
   }
   XTXA_  = join_rows(XTXA_ , new_col) ;
   XATXA_ = join_rows(XATXA_, trans(XTXA_.row(var_in))) ;
-  
+
   if (use_chol_) update_Cholesky() ;
 }
 

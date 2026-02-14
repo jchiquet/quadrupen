@@ -28,11 +28,11 @@ public:
 
 // Empty constructor
 template <Norm norm>
-inline Penalty<norm>::Penalty() {}
+Penalty<norm>::Penalty() {}
 
 // Constructor requiring group information
 template <Norm norm>
-inline Penalty<norm>::Penalty(SEXP PK) : pk (as<uvec>(PK)){}
+Penalty<norm>::Penalty(SEXP PK) : pk (as<uvec>(PK)){}
 
 // ______________________________________________________
 // L1 NORM A.K.A LASSO

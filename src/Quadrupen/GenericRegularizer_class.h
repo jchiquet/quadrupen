@@ -17,8 +17,7 @@
 #include "RegressionData_class.h"
 #include "ActiveSet_class.h"
 #include "Penalty_class.h"
-
-#define ZERO 2e-16
+#include "Optimizer_class.h"
 
 using namespace Rcpp;
 using namespace arma;
@@ -29,7 +28,6 @@ class GenericRegularizer {
 public:
   
   GenericRegularizer() {} ;
-  ~GenericRegularizer() {} ;
   GenericRegularizer(const RegressionData<matrix>&, const bool&, const List&);
   
   double get_lambda_max() {
@@ -47,16 +45,16 @@ public:
   const vector<double>& path_tuning()     const { return lambdas_   ; }
   const vector<double>& degrees_freedom() const { return df_        ; }
   
-  RegressionData<matrix> data_ ; // data structure
-  bool intercept_              ; // does the model include intercept
-  Penalty<norm> penalty_             ; // main penalty object 
-  ActiveSet<matrix> set_       ; // Active set of variable and data
-  vector<double> lambdas_      ; // vector of parameters tuning the man penalty
-  vec lambda_factor_           ; // main penalty factors
-  vector<vec> coef_            ; // matrix of coefficients
-  vector<double> df_           ; // degrees of freedom along the path
-  vector<double> const_        ; // vector of intercept term
-  uvec all                     ; // a vector with all variable indices
+  RegressionData<matrix> data_   ; // data structure
+  bool intercept_                ; // does the model include intercept
+  ActiveSet<matrix> set_         ; // Active set of variable and data
+  Penalty<norm> penalty_         ; // main penalty object 
+  vector<double> lambdas_        ; // vector of parameters tuning the man penalty
+  vec lambda_factor_             ; // main penalty factors
+  vector<arma::vec> coef_        ; // matrix of coefficients
+  vector<double> df_             ; // degrees of freedom along the path
+  vector<double> const_          ; // vector of intercept term
+  uvec all                       ; // a vector with all variable indices
 };
 
 template <typename matrix, Norm norm>
@@ -68,7 +66,7 @@ GenericRegularizer<matrix, norm>::GenericRegularizer(
 }
 
 template <typename matrix, Norm norm>
-void GenericRegularizer<matrix, norm>::get_lambda_seq(const List& regParam) {
+void GenericRegularizer<matrix,norm>::get_lambda_seq(const List& regParam) {
   if (regParam[0] != R_NilValue) {
     lambdas_  = as<vector<double>>(regParam["lambda"]) ;
   } else {
