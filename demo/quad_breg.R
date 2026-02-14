@@ -21,7 +21,7 @@ x <- as.matrix(matrix(rnorm(100*n),n,100) %*% chol(Sigma))
 y <- mu + x %*% beta + rnorm(n, 0, sigma)
 
 ## Test simple and double cross-validation
-fit <- bounded.reg(x,y,lambda2=.1)
+fit <- bounded.reg(x,y,lambda2=1)
 cv.simple <- cross_validate(fit)
 plot(cv.simple)
 

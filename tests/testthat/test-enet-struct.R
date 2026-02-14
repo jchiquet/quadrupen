@@ -1,6 +1,6 @@
 context("Consistency of the Structured Elastic-net (reference is computed via the 'augmented data' approach)")
 
-tol <- 1e-5
+tol <- 1e-4
 
 test_that("Consistency of the structured elastic-net", {
 

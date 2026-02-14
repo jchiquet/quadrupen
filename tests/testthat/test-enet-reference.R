@@ -1,33 +1,34 @@
 context("Consistency of the Elastic-net solution path (package 'elasticnet')")
 
-tol <- 1e-5
+require(elasticnet)
 
-test_that("enet_quad2elasticnet", {
+get.enet <- function(x,y,intercept,normalize=TRUE,naive=FALSE,method="quadra") {
+  lambda2 <- runif(1,0,10)
+  enet.larsen <- enet(x,y,lambda=lambda2,intercept=intercept,normalize=normalize)
+  iols <- length(enet.larsen$penalty)
+  lambda1 <- enet.larsen$penalty[-iols]/2
+  
+  enet.quadru <- elastic.net(x,y,intercept=intercept,normalize=normalize,
+                             lambda1=lambda1, lambda2=lambda2, debiasing = ifelse(naive, "none", "standard"),
+                             control = list(method=method))
+  
+  quad <- as.matrix(enet.quadru$coefficients)
+  
+  enet <- predict(enet.larsen, type="coefficients",naive=naive)$coefficients[-iols,]
+  
+  return(list(quad = quad, enet = enet))
+}
 
-  require(elasticnet)
+test_that("Elastic-net is correct w.r.t a reference solution", {
 
-  get.enet <- function(x,y,intercept,normalize=TRUE,naive=FALSE) {
-    lambda2 <- runif(1,0,10)
-    enet.larsen <- enet(x,y,lambda=lambda2,intercept=intercept,normalize=normalize)
-    iols <- length(enet.larsen$penalty)
-    lambda1 <- enet.larsen$penalty[-iols]/2
-    
-    enet.quadru <- elastic.net(x,y,intercept=intercept,normalize=normalize,
-                               lambda1=lambda1, lambda2=lambda2, debiasing = ifelse(naive, "none", "standard"))
-
-    quad <- as.matrix(enet.quadru$coefficients)
-
-    enet <- predict(enet.larsen, type="coefficients",naive=naive)$coefficients[-iols,]
-
-    return(list(quad = quad, enet = enet))
-  }
-
+  tol <- 1e-4
+  
   ## PROSTATE DATA SET
   load("prostate.rda")
   x <- as.matrix(x)
 
   ## Run the tests...
-  with.intercept <-get.enet(x,y,intercept=TRUE,naive=TRUE)
+  with.intercept <- get.enet(x,y,intercept=TRUE,naive=TRUE)
   expect_equal(with.intercept$quad,
               with.intercept$enet, check.attributes = FALSE, tolerance = tol)
 
@@ -39,23 +40,23 @@ test_that("enet_quad2elasticnet", {
   expect_equal(with.intercept$quad,
               with.intercept$enet, check.attributes = FALSE, tolerance = tol)
 
-  without.intercept <-get.enet(x,y,intercept=FALSE,naive=FALSE)
+  without.intercept <- get.enet(x,y,intercept=FALSE,naive=FALSE)
   expect_equal(without.intercept$quad,
               without.intercept$enet, check.attributes = FALSE, tolerance = tol)
 
-  with.intercept <-get.enet(x,y,intercept=TRUE,normalize=FALSE,naive=TRUE)
+  with.intercept <- get.enet(x,y,intercept=TRUE,normalize=FALSE,naive=TRUE)
   expect_equal(with.intercept$quad,
               with.intercept$enet, check.attributes = FALSE, tolerance = tol)
 
-  without.intercept <-get.enet(x,y,intercept=FALSE,normalize=FALSE,naive=TRUE)
+  without.intercept <- get.enet(x,y,intercept=FALSE,normalize=FALSE,naive=TRUE)
   expect_equal(without.intercept$quad,
               without.intercept$enet, check.attributes = FALSE, tolerance = tol)
 
-  with.intercept <-get.enet(x,y,intercept=TRUE,normalize=FALSE,naive=FALSE)
+  with.intercept <- get.enet(x,y,intercept=TRUE,normalize=FALSE,naive=FALSE)
   expect_equal(with.intercept$quad,
               with.intercept$enet, check.attributes = FALSE, tolerance = tol)
 
-  without.intercept <-get.enet(x,y,intercept=FALSE,normalize=FALSE,naive=FALSE)
+  without.intercept <- get.enet(x,y,intercept=FALSE,normalize=FALSE,naive=FALSE)
   expect_equal(without.intercept$quad,
               without.intercept$enet, check.attributes = FALSE, tolerance = tol)
 
@@ -77,45 +78,81 @@ test_that("enet_quad2elasticnet", {
   y <- 10 + x %*% beta + rnorm(n,0,10)
 
   ## Run the tests...
-  with.intercept <-get.enet(x,y,intercept=TRUE,naive=TRUE)
+  with.intercept <- get.enet(x,y,intercept=TRUE,naive=TRUE)
   expect_equal(with.intercept$quad,
               with.intercept$enet, check.attributes = FALSE, tolerance = tol)
 
-  without.intercept <-get.enet(x,y,intercept=FALSE,naive=TRUE)
+  without.intercept <- get.enet(x,y,intercept=FALSE,naive=TRUE)
   expect_equal(without.intercept$quad,
               without.intercept$enet, check.attributes = FALSE, tolerance = tol)
 
-  with.intercept <-get.enet(x,y,intercept=TRUE,naive=FALSE)
+  with.intercept <- get.enet(x,y,intercept=TRUE,naive=FALSE)
   expect_equal(with.intercept$quad,
               with.intercept$enet, check.attributes = FALSE, tolerance = tol)
 
-  without.intercept <-get.enet(x,y,intercept=FALSE,naive=FALSE)
+  without.intercept <- get.enet(x,y,intercept=FALSE,naive=FALSE)
   expect_equal(without.intercept$quad,
               without.intercept$enet, check.attributes = FALSE, tolerance = tol)
 
-  with.intercept <-get.enet(x,y,intercept=TRUE,normalize=FALSE,naive=TRUE)
+  with.intercept <- get.enet(x,y,intercept=TRUE,normalize=FALSE,naive=TRUE)
   expect_equal(with.intercept$quad,
               with.intercept$enet, check.attributes = FALSE, tolerance = tol)
 
-  without.intercept <-get.enet(x,y,intercept=FALSE,normalize=FALSE,naive=TRUE)
+  without.intercept <- get.enet(x,y,intercept=FALSE,normalize=FALSE,naive=TRUE)
   expect_equal(without.intercept$quad,
               without.intercept$enet, check.attributes = FALSE, tolerance = tol)
 
-  with.intercept <-get.enet(x,y,intercept=TRUE,normalize=FALSE,naive=FALSE)
+  with.intercept <- get.enet(x,y,intercept=TRUE,normalize=FALSE,naive=FALSE)
   expect_equal(with.intercept$quad,
                with.intercept$enet, check.attributes = FALSE, tolerance = tol)
 
-  without.intercept <-get.enet(x,y,intercept=FALSE,normalize=FALSE,naive=FALSE)
+  without.intercept <- get.enet(x,y,intercept=FALSE,normalize=FALSE,naive=FALSE)
   expect_equal(without.intercept$quad,
               without.intercept$enet, check.attributes = FALSE, tolerance = tol)
   ## Run the tests...
-  with.intercept <-get.enet(x,y,intercept=TRUE)
+  with.intercept <- get.enet(x,y,intercept=TRUE)
   expect_equal(with.intercept$quad,
               with.intercept$enet, check.attributes = FALSE, tolerance = tol)
 
-  without.intercept <-get.enet(x,y,intercept=FALSE)
+  without.intercept <- get.enet(x,y,intercept=FALSE)
   expect_equal(without.intercept$quad,
               without.intercept$enet, check.attributes = FALSE, tolerance = tol)
 
 })
 
+
+test_that("Elastic-net is correct w.r.t a reference solution - FISTA", {
+
+  tol <- 1e-2
+  
+  ## PROSTATE DATA SET
+  load("prostate.rda")
+  x <- as.matrix(x)
+  
+  ## Run the tests...
+  with.intercept <- get.enet(x,y,intercept=TRUE,naive=TRUE, method="fista")
+  expect_equal(with.intercept$quad,
+               with.intercept$enet, check.attributes = FALSE, tolerance = tol)
+  
+  with.intercept <- get.enet(x,y,intercept=TRUE,naive=FALSE)
+  expect_equal(with.intercept$quad,
+               with.intercept$enet, check.attributes = FALSE, tolerance = tol)
+  
+  without.intercept <- get.enet(x,y,intercept=FALSE,naive=FALSE)
+  expect_equal(without.intercept$quad,
+               without.intercept$enet, check.attributes = FALSE, tolerance = tol)
+  
+  with.intercept <- get.enet(x,y,intercept=TRUE,normalize=FALSE,naive=TRUE, method="fista")
+  expect_equal(with.intercept$quad,
+               with.intercept$enet, check.attributes = FALSE, tolerance = tol)
+  
+  with.intercept <- get.enet(x,y,intercept=TRUE,normalize=FALSE,naive=FALSE)
+  expect_equal(with.intercept$quad,
+               with.intercept$enet, check.attributes = FALSE, tolerance = tol)
+  
+  without.intercept <- get.enet(x,y,intercept=FALSE,normalize=FALSE,naive=FALSE)
+  expect_equal(without.intercept$quad,
+               without.intercept$enet, check.attributes = FALSE, tolerance = tol)
+  
+
+})

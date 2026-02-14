@@ -13,7 +13,7 @@ cor <- 0.75
 beta <- rep(c(0,1,0,-1,0), c(25,10,25,10,25))
 Soo  <- toeplitz(cor^(0:24)) ## bloc correlation between zero variables
 Sww  <- matrix(cor,10,10) ## bloc correlation between active variables
-Sigma <- bdiag(Soo,Sww,Soo,Sww,Soo)
+Sigma <- Matrix::bdiag(Soo,Sww,Soo,Sww,Soo)
 p <- length(beta)
 
 diag(Sigma) <- 1

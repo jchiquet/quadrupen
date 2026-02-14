@@ -114,8 +114,9 @@ uword GenericOptimizer<matrix,norm>::fista(
     
     double l_num, l_den ;
     double f0, fk ;
-    f0 = as_scalar(.5 * strans(betal) * set.XATXA_ * betal - strans(data.XTy_(set.A_)) * betal) ;
-    vec grad = - data.XTy_(set.A_) + set.XATXA_ * betal ;
+    vec XATXA_betal = set.XATXA_ * betal ;
+    f0 = dot(betal, .5 * XATXA_betal  - data.XTy_(set.A_)) ;
+    vec grad = XATXA_betal - data.XTy_(set.A_);
     
     // Line search over L
     bool found=false;
@@ -123,10 +124,10 @@ uword GenericOptimizer<matrix,norm>::fista(
       // Apply proximal operator (implemented in penalty object)
       betak = penalty_.proximal(betal - grad/L, lambda/L);
 
-      fk = as_scalar(.5 * strans(betak) * set.XATXA_ * betak - strans(data.XTy_(set.A_)) * betak) ;
-      l_num = as_scalar(2 * (fk - f0 - dot(grad, betak-betal) ));
-      l_den = as_scalar(pow(arma::norm(betak-betal,2),2));
-
+      fk = dot(betak, .5 * set.XATXA_ * betak - data.XTy_(set.A_)) ;
+      l_num = 2 * (fk - f0 - dot(grad, betak-betal));
+      l_den = accu(pow(betak-betal,2));
+      
       if ((L * l_den >= l_num) || (sqrt(l_den) < accuracy)) {
         found = true;
       } else {
@@ -146,7 +147,6 @@ uword GenericOptimizer<matrix,norm>::fista(
     delta = sqrt(l_num);
     beta = betak;
     t0 = tk;
-    found = false;
     iter++;
 
     R_CheckUserInterrupt();

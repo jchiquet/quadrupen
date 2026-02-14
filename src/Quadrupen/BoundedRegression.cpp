@@ -60,10 +60,10 @@ double BoundedRegression::get_df() {
 List BoundedRegression::solution_path(const List& control) {
 
   // Parameters controlling the optimization
-  const bool verbose(as<bool>(control["verbose"]))        ; // verbosity level
-  const double accuracy(as<double>(control["threshold"])) ; // precision required
-  const uword maxiter(as<uword>(control["maxiter"]))      ; // max # of passes in the active set
-  const uword maxfeat(as<uword>(control["maxfeat"]))      ; // max # of variables activated
+  const bool verbose(control["verbose"])      ; // verbosity level
+  const double accuracy(control["threshold"]) ; // precision required
+  const uword maxiter(control["maxiter"])     ; // max # of passes in the active set
+  const uword maxfeat(control["maxfeat"])     ; // max # of variables activated
 
   SolverType algorithm = QUADRA; // Optimizer (default to QUADRA)
   if (as<std::string>(control["method"]) == "FISTA") {
@@ -73,12 +73,9 @@ List BoundedRegression::solution_path(const List& control) {
   }
 
   // Variables monitoring the algorithm
-  vector<double> gap    ; // a vector with the successively reach duality gap
-  vector<uword> status  ; // a vector indicating if convergence occurred (0/1/2)
-  vector<uword> iactive ; // # of loop in the active set for each lambda
-  vector<uword> ioptim  ; // # of loop in the optimization process for each loop of the active set
-  vector<double> timing ; // successive timing for solving for each lambda value
-   
+  vector<double> gap, timing ; // timings and optimality measures
+  vector<uword> status, iactive, ioptim ; // convergence and # of inner/outer iterates
+  
   // LAMBDA LOOP
   wall_clock timer ; timer.tic(); // clock
   for(auto lambda_ : lambdas_) {

@@ -33,9 +33,8 @@ class ElasticNet :
   List solution_path(const List&);
 
   double get_loss() {
-    double loss = pow(data_.norm_y_ ,2) + dot(beta_, set_.XATXA_ * beta_) - 
-      2*dot(beta_, data_.XTy_.elem(set_.A_)) ;
-    return (.5 * loss) ;
+    return(.5 * pow(data_.norm_y_ ,2) + 
+           dot(beta_, .5 * set_.XATXA_ * beta_ - data_.XTy_(set_.A_))) ;
   };
   
   void optimality_gap(double lambda_, uword type) ;
@@ -93,7 +92,7 @@ ElasticNet<matrix>::ElasticNet(
       grad_ = - data_.XTy_ ;
     } else {
       set_  = ActiveSet(data_, A0, as<bool>(control["usechol"])) ;
-      beta_ = beta0.elem(A0) ;
+      beta_ = beta0(A0) ;
       grad_ = - data_.XTy_ + set_.XTXA_ * beta_  ;
     }
   }
@@ -107,8 +106,6 @@ double ElasticNet<matrix>::get_df() {
   if (gamma_ > 0) {
     mat B ;
     if (set_.use_chol_) {
-      // B = solve(trimatu(set_.R_), eye(set_.R_.n_cols, set_.R_.n_cols));
-      // B = B * B.t();
       B = set_.Rinv_ * set_.Rinv_.t();
     } else {
       B = inv_sympd(set_.XATXA_);
@@ -130,26 +127,19 @@ template <typename matrix>
 List ElasticNet<matrix>::solution_path(const List& control) {
   
   // Parameters controlling the optimization
-  const bool verbose(as<bool>(control["verbose"]))        ; // verbosity level
-  const double accuracy(as<double>(control["threshold"])) ; // precision required
-  const uword maxiter(as<uword>(control["maxiter"]))      ; // max # of passes in the active set
-  const uword maxfeat(as<uword>(control["maxfeat"]))      ; // max # of variables activated
-  const uword monitoring(as<uword>(control["monitor"]))   ; // optimality monitor (0=none; 1=Grandvalet; 2=Fenchel)
+  const bool verbose(control["verbose"])      ; // verbosity level
+  const double accuracy(control["threshold"]) ; // precision required
+  const uword maxiter(control["maxiter"])     ; // max # of passes in the active set
+  const uword maxfeat(control["maxfeat"])     ; // max # of variables activated
+  const uword monitoring(control["monitor"])  ; // optimality monitor (0=none; 1=Grandvalet; 2=Fenchel)
   
   SolverType algorithm = QUADRA; // Optimizer (default to QUADRA)
-  if (as<std::string>(control["method"]) == "FISTA") {
-    algorithm = FISTA;
-  }
+  if (as<std::string>(control["method"]) == "FISTA") algorithm = FISTA;
 
   // Variables monitoring the algorithm
-  vector<double> gap    ; // a vector with the successively reach duality gap
-  vector<uword> status  ; // a vector indicating if convergence occurred (0/1/2)
-  vector<uword> iactive ; // # of loop in the active set for each lambda
-  vector<uword> ioptim  ; // # of loop in the optimization process for each loop of the active set
-  vector<double> timing ; // successive timing for solving for each lambda value
-  vector<double> J_hat  ; // successive value of optimality gap
-  vector<double> D_hat  ; // successive delta in optimality gap
-  
+  vector<double> gap, timing, J_hat, D_hat ; // timings and optimality measures
+  vector<uword> status, iactive, ioptim    ; // convergence and # of inner/outer iterates
+
   // LAMBDA LOOP
   wall_clock timer ; timer.tic(); // clock
   for(auto lambda_ : lambdas_) {
@@ -160,13 +150,13 @@ List ElasticNet<matrix>::solution_path(const List& control) {
     
     // OPTIMIZER LOOP (FIX-LAMBDA VALUE): IDENTIFY THE ACTIVE SET AND SOLVE
     
-    // dual norm of gradient for inactive variables
-    vec grd_norm = penalty_.elt_norm(grad_) - lambda_ ;
-    // gradient for active variables
-    grd_norm.elem(set_.A_) = abs(grad_(set_.A_) + lambda_ * sign(beta_)) ;
+    // dual norm of the gradient
+    vec grd_norm = abs(grad_) - lambda_ ;
+    grd_norm(set_.A_) = abs(grad_(set_.A_) + lambda_ * sign(beta_)) ;
     // variable associated with the highest violation of KKT conditions 
     uword var_in = grd_norm.index_max() ;
     double current_gap = std::max(0.0, grd_norm(var_in)) ;
+    uvec zeroed ;
     
     uword current_it = 0 ; bool success = true ; 
     J_ = datum::inf ; D_ = datum::inf ;
@@ -180,25 +170,22 @@ List ElasticNet<matrix>::solution_path(const List& control) {
       if (set_.is_in_[var_in] == 0) { // Is var_in already in the active set?
         set_.add_var(var_in, data_) ;
         beta_.resize(beta_.size()+1) ; // update the vector of active parameters
-        beta_.tail(1) = 0.0   ;
+        beta_.tail(1) = - 1e-3 * sign(grad_(var_in)) ;
         if (verbose) {Rprintf("\tnewly added variable %i\n",var_in);}
       } else if (verbose) {Rprintf("\talready in %i\n",var_in);}
       
       // ________________________________________________________________________
       // OPTIMIZATION OVER THE CURRENTLY ACTIVATED VARIABLES
       //
-      uvec  null ; // stores the variables which go to zero during optimization
       if (algorithm == FISTA) {
         ioptim.push_back(
           solver_.fista(beta_, lambda_, data_, set_, 1e-10, 10000)
         );
-        null = find(abs(beta_) + abs(grad_(set_.A_)) - lambda_ < ZERO) ;
       } else { // QUADRA solver
         try {
           ioptim.push_back(
             solver_.quadratic_enet(beta_, lambda_, data_, set_, 1e-5, 10000)
           );
-          null = find(abs(beta_) < ZERO) ;
         } catch (std::runtime_error& error) {
           if (verbose > 0) {
             Rprintf("\nWarning: singular system at this stage of the solution path, cutting here.\n");
@@ -207,20 +194,10 @@ List ElasticNet<matrix>::solution_path(const List& control) {
         }
       }
       
-      // VARIABLE DELETION IF APPLICABLE
-      if (!null.is_empty()) {
-        null = sort(null, "descend") ;
-        set_.del_vars(null) ;
-        beta_.shed_rows(null) ;
-        if (verbose) null.t().print("\tremoving variables") ;
-      }
-      
       // OPTIMALITY TESTING
       grad_ = - data_.XTy_ + set_.XTXA_ * beta_ ;
-      // dual norm of gradient for inactive variables
       grd_norm = penalty_.elt_norm(grad_) - lambda_ ;
-      // gradient for active variables
-      grd_norm.elem(set_.A_) = abs(grad_(set_.A_) + lambda_ * sign(beta_)) ;
+      grd_norm(set_.A_) = abs(grad_(set_.A_) + lambda_ * sign(beta_)) ;
       var_in = grd_norm.index_max() ;
       current_gap = std::max(0.0, grd_norm(var_in)) ;
       
@@ -245,8 +222,8 @@ List ElasticNet<matrix>::solution_path(const List& control) {
     if (status.back() >= 2) {
       break;
     } else {
-      nzeros_ = join_cols(nzeros_, beta_/(data_.norm_X_.elem(set_.A_) % lambda_factor_.elem(set_.A_)));
-      const_.push_back(data_.y_bar_ - as_scalar(dot(beta_, data_.X_bar_.elem(set_.A_))));
+      nzeros_ = join_cols(nzeros_, beta_/(data_.norm_X_(set_.A_) % lambda_factor_(set_.A_)));
+      const_.push_back(data_.y_bar_ - as_scalar(dot(beta_, data_.X_bar_(set_.A_))));
       iA_ = join_rows(iA_, df_.size()*ones<urowvec>(set_.size()) );
       jA_ = join_rows(jA_, set_.A_.t()) ;
       df_.push_back(get_df()) ;
@@ -277,7 +254,7 @@ void ElasticNet<matrix>::optimality_gap(double lambda, uword type) {
   // gamma equals the max |gradient|
   double nu = norm(grad_, "inf");
   double loss = get_loss(), old_J = J_, old_D = D_ ;
-  J_ = loss - dot(beta_, grad_.elem(set_.A_))  ;
+  J_ = loss - dot(beta_, grad_(set_.A_))  ;
   uvec Ac ;
   
   switch (type) {
@@ -285,12 +262,12 @@ void ElasticNet<matrix>::optimality_gap(double lambda, uword type) {
     Ac = find(grad_ > nu); // set of adversarial variables outside the boundary
     D_ = J_ * (1 - lambda/nu) - 
       (pow(lambda,2)/(2*gamma_))*((lambda*(data_.p_-Ac.n_elem))/nu + 
-      pow(norm(grad_.elem(Ac),2)/nu,2)-data_.p_);
+      pow(norm(grad_(Ac),2)/nu,2)-data_.p_);
     break;
   case 2: // Fenchel's bound
     if (nu < lambda) nu = lambda;
     D_ = loss * (1+pow(lambda/nu,2)) + sum(abs(lambda*beta_)) + 
-      (lambda/nu)*(dot(beta_,data_.XTy_.elem(set_.A_))-pow(data_.norm_y_,2));
+      (lambda/nu)*(dot(beta_,data_.XTy_(set_.A_))-pow(data_.norm_y_,2));
     break;
   default: 
     D_ = datum::inf ;
