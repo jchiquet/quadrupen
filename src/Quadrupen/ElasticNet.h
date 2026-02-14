@@ -181,26 +181,17 @@ List ElasticNet<matrix>::solution_path(const List& control) {
         ioptim.push_back(
           solver_.fista(beta_, lambda_, data_, set_, 1e-10, 10000)
         );
-        zeroed = find(abs(beta_) + abs(grad_(set_.A_)) - lambda_ < ZERO) ;
       } else { // QUADRA solver
         try {
           ioptim.push_back(
             solver_.quadratic_enet(beta_, lambda_, data_, set_, 1e-5, 10000)
           );
-          zeroed = find(abs(beta_) < ZERO) ;
         } catch (std::runtime_error& error) {
           if (verbose > 0) {
             Rprintf("\nWarning: singular system at this stage of the solution path, cutting here.\n");
           }
           success = false ;
         }
-      }
-      
-      // VARIABLE DELETION IF APPLICABLE
-      if (!zeroed.is_empty()) {
-        set_.del_vars(zeroed) ;
-        beta_.shed_rows(zeroed) ;
-        if (verbose) zeroed.t().print("\tremoving variables") ;
       }
       
       // OPTIMALITY TESTING

@@ -98,7 +98,9 @@ uword OptimizerL1<matrix>::quadratic_enet(
         beta0 = betal ;
     } else {
       beta0 = betak ; // otherwise, backtrack to betak
-      // set.del_var(i_swap) ;
+      // if (verbose) Rprint("\tremoving variables %i", set.A_(i_swap)) ;
+      set.del_var(i_swap) ; // and desactivate de zeroed variable
+      beta0.shed_row(i_swap) ;
     }
   }
 
