@@ -49,11 +49,9 @@ uword OptimizerL1<matrix>::quadratic_enet(
   
   uword iter = 1, iter_in= 0 ; // count the number of systems solved
   
-  vec grad = - data.XTy_(set.A_) + set.XATXA_ * beta0 ;
-  vec theta = sign(beta0) ; // vector of sign of the solution
-
   // Solving the quadratic problem
   vec betak = beta0;
+  vec theta = sign(beta0) ; // vector of sign of the solution
   if (set.use_chol_) {
     betak =  set.Rinv_* set.Rinv_.t() * (data.XTy_(set.A_) - lambda * theta);
   } else {
@@ -77,10 +75,12 @@ uword OptimizerL1<matrix>::quadratic_enet(
     betak = beta0 + (betak-beta0) * eta(i_min) ;
     
     // second, solve the problem after swapping the signs of the incriminated variable
-    beta0 = betak;
     uword i_swap = swap[i_min];
+    beta0 = betak;
     beta0(i_swap) = -betak_swap[i_min];
-    theta(i_swap) = -sign(grad(i_swap)) ;
+    double grad_swap = - as_scalar(data.XTy_(set.A_(i_swap))) + 
+      dot(set.XATXA_.row(i_swap), betak) ;
+    theta(i_swap) = - sign(grad_swap) ;
     vec betal = betak;
     if (set.use_chol_) {
       betal =  set.Rinv_* set.Rinv_.t() * (data.XTy_(set.A_) - lambda * theta);
@@ -92,12 +92,13 @@ uword OptimizerL1<matrix>::quadratic_enet(
     }
 
     // if the sign is coherent, keep that one...
-    double grad_swap = - as_scalar(data.XTy_(set.A_(i_swap))) + 
+    grad_swap = - as_scalar(data.XTy_(set.A_(i_swap))) + 
       dot(set.XATXA_.row(i_swap), betal) ;
     if (abs(grad_swap + lambda * sign(betal(i_swap))) <= ZERO) {
         beta0 = betal ;
     } else {
       beta0 = betak ; // otherwise, backtrack to betak
+      // set.del_var(i_swap) ;
     }
   }
 

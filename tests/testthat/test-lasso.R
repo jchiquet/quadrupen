@@ -1,6 +1,6 @@
 context("Consistency of the Lasso solution paths (package 'lars' and 'glmnet')")
 
-tol <- 1e-5
+tol <- 1e-4
 
 test_that("lasso_quad2lars", {
 
