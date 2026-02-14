@@ -6,14 +6,6 @@
 #ifndef _quadrupen_OPTIMIZER_L1_H
 #define _quadrupen_OPTIMIZER_L1_H
 
-#define ARMA_NO_DEBUG
-#define ARMA_USE_LAPACK
-#define ARMA_USE_BLAS
-
-#ifndef ARMA_HAVE_GETTIMEOFDAY
-#define ARMA_HAVE_GETTIMEOFDAY
-#endif
-
 #include "GenericOptimizer.h"
 
 using namespace Rcpp;

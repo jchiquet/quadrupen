@@ -24,7 +24,7 @@ List RidgeRegression::solution_path(const mat& C_inv) {
   arma::mat U   ; // left singular vectors of X
   arma::mat V   ; // right singular vectors of X
   svd_econ(U, eta, V, (data_.X_.each_row() - data_.X_bar_.t())*C_inv) ;
-
+  
   arma::mat C_invV = C_inv * V ;
   arma::mat Uty = trans(U) * data_.y_ ;
 

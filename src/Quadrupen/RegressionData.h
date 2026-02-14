@@ -8,6 +8,14 @@
 #ifndef _quadrupen_REGRESSION_DATA_H
 #define _quadrupen_REGRESSION_DATA_H
 
+#define ARMA_NO_DEBUG
+#define ARMA_USE_LAPACK
+#define ARMA_USE_BLAS
+
+#ifndef ARMA_HAVE_GETTIMEOFDAY
+#define ARMA_HAVE_GETTIMEOFDAY
+#endif
+
 #include <RcppArmadillo.h>
 
 using namespace Rcpp;
