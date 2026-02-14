@@ -3,7 +3,7 @@
  *         MIA Paris-Saclay
  */
 
-#include "Quadrupen/BoundedRegression_class.h"
+#include "Quadrupen/BoundedRegression.h"
 
 using namespace Rcpp;
 using namespace arma;

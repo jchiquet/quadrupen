@@ -14,9 +14,8 @@
 #define ARMA_HAVE_GETTIMEOFDAY
 #endif
 
-#include "GenericRegularizer_class.h"
-#include "ActiveSet_class.h"
-#include "Optimizer_class.h"
+#include "GenericRegularizer.h"
+#include "OptimizerL1.h"
 
 #define ZERO 2e-16 // practical zero
 
@@ -61,9 +60,8 @@ class ElasticNet :
     return sp_mat(join_cols(iA_, jA_), vec(iA_.n_elem, fill::ones), lambdas_.size(), data_.p_) ; 
   }
   
-private:
-
   // Specific to Elastic-Net regularization
+  OptimizerL1<matrix> solver_ ; // Solvers for L1 penalty
   double gamma_ ; // overall amount of l2 penalty
   vec beta_     ; // vector of current parameters
   vec grad_     ; // vector of current gradient (smooth part)
@@ -83,11 +81,14 @@ template <typename matrix>
 ElasticNet<matrix>::ElasticNet(
   const RegressionData<matrix>& data, const bool& intercept, const List& regParam, const List& control) :
   GenericRegularizer<matrix,Norm::L1>::GenericRegularizer(data, intercept, regParam) {
-
+    
     // set the penalty to l1
     penalty_ = Penalty<Norm::L1>() ;
     lambda_factor_ = as<vec>(regParam["lambda_factor"]) ;
     get_lambda_seq(regParam) ;
+    
+    // Set up the optimizer
+    solver_ = OptimizerL1<matrix>(penalty_) ;
     
     // Scale the structuring matrix according to main penalty factor and the amount of l2 penalty 
     gamma_   = as<double>(regParam["gamma"]) ;
@@ -197,16 +198,14 @@ List ElasticNet<matrix>::solution_path(const List& control) {
       //
       uvec  null ; // stores the variables which go to zero during optimization
       if (algorithm == FISTA) {
-        Optimizer solver(data_, penalty_, algorithm) ;
         ioptim.push_back(
-          solver.run(beta_, lambda_, set_, set_.XATXA_, 1e-10, 10000)
+          solver_.fista(beta_, lambda_, data_, set_, 1e-10, 10000)
         );
         null = find(abs(beta_) + abs(grad_(set_.A_)) - lambda_ < ZERO) ;
       } else { // QUADRA solver
         try {
-          Optimizer solver(data_, penalty_, algorithm) ;
           ioptim.push_back(
-            solver.run(beta_, lambda_, set_, set_.XATXA_, 1e-5, 10000)
+            solver_.quadratic_enet(beta_, lambda_, data_, set_, 1e-5, 10000)
           );
           null = find(abs(beta_) < ZERO) ;
         } catch (std::runtime_error& error) {

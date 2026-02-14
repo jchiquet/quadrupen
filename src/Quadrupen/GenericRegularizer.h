@@ -14,10 +14,10 @@
 #define ARMA_HAVE_GETTIMEOFDAY
 #endif
 
-#include "RegressionData_class.h"
-#include "ActiveSet_class.h"
-#include "Penalty_class.h"
-#include "Optimizer_class.h"
+#include "RegressionData.h"
+#include "ActiveSet.h"
+#include "Penalty.h"
+// #include "GenericOptimizer.h"
 
 using namespace Rcpp;
 using namespace arma;

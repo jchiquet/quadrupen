@@ -14,7 +14,7 @@
 #define ARMA_HAVE_GETTIMEOFDAY
 #endif
 
-#include "GenericRegularizer_class.h"
+#include "GenericRegularizer.h"
 
 using namespace Rcpp;
 using namespace arma;

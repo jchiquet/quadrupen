@@ -7,7 +7,7 @@
 using namespace Rcpp;
 using namespace arma;
 
-#include "RegressionData_class.h"
+#include "RegressionData.h"
 
 template <typename matrix> class ActiveSet {
 

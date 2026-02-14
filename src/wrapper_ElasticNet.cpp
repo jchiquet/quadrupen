@@ -3,7 +3,7 @@
  *         MIA Paris-Saclay
  */
 
-#include "Quadrupen/ElasticNet_class.h"
+#include "Quadrupen/ElasticNet.h"
 
 using namespace Rcpp;
 using namespace arma;
