@@ -106,7 +106,7 @@ double ElasticNet<matrix>::get_df() {
   
   if (gamma_ > 0) {
     mat B ;
-    if (!set_.R_.is_empty()) {
+    if (set_.use_chol_) {
       B = solve(trimatu(set_.R_), eye(set_.R_.n_cols, set_.R_.n_cols));
       B = B * B.t();
     } else {

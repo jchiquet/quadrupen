@@ -20,13 +20,13 @@ RidgeRegression::RidgeRegression(
 List RidgeRegression::solution_path(const mat& C_inv) {
 
   // SVD DECOMPOSITION OF ( X * C^-1)
-  arma::vec eta ; // eigen value of X cinv
-  arma::mat U   ; // left singular vectors of X
-  arma::mat V   ; // right singular vectors of X
+  vec eta ; // eigen value of X cinv
+  mat U   ; // left singular vectors of X
+  mat V   ; // right singular vectors of X
   svd_econ(U, eta, V, (data_.X_.each_row() - data_.X_bar_.t())*C_inv) ;
   
-  arma::mat C_invV = C_inv * V ;
-  arma::mat Uty = trans(U) * data_.y_ ;
+  mat C_invV = C_inv * V ;
+  mat Uty = trans(U) * data_.y_ ;
 
   vector<double> timing ; // successive timing for solving for each lambda value
   wall_clock timer ; timer.tic(); // clock

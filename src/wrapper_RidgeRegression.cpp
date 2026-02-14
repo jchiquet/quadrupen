@@ -9,7 +9,7 @@ using namespace Rcpp;
 using namespace arma;
 
 // [[Rcpp::export]]
-Rcpp::List ridge_cpp(
+List ridge_cpp(
     const Environment &dataModel   , // data structure
     const bool        &intercept   , // Boolean for intercept
     const List        &regParam    , // regularization parameters

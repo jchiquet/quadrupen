@@ -9,7 +9,7 @@ using namespace Rcpp;
 using namespace arma;
 
 // [[Rcpp::export]]
-Rcpp::List elastic_net_dense_cpp(
+List elastic_net_dense_cpp(
     const Environment &dataModel   , // data structure
     const bool        &intercept   , // Boolean for intercept
     const List        &regParam    , // regularization parameters
@@ -38,7 +38,7 @@ Rcpp::List elastic_net_dense_cpp(
 }
 
 // [[Rcpp::export]]
-Rcpp::List elastic_net_sparse_cpp(
+List elastic_net_sparse_cpp(
     const Environment &dataModel   , // data structure
     const bool        &intercept   , // Boolean for intercept
     const List        &regParam    , // regularization parameters
