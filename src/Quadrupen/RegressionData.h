@@ -44,6 +44,7 @@ public:
   
   RegressionData() ;
   RegressionData(const Environment& dataModel, const bool& center, const bool& scale);
+  RegressionData(const List& dataModel, const bool& center, const bool& scale);
   
   void standardize();
 
@@ -56,6 +57,21 @@ public:
 template <typename matrix>
 RegressionData<matrix>::RegressionData(
   const Environment& dataModel,
+  const bool& center, const bool& scale):
+  n_       (as<uword>  (dataModel["n"])) , // sample size
+  p_       (as<uword>  (dataModel["d"])) , // # of features
+  y_       (as<vec>    (dataModel["y"])) , // response vector
+  S_       (as<sp_mat> (dataModel["S"])) , // structuring matrix
+  weights_ (as<vec>    (dataModel["wy"])), // observation weights
+  centered_(center), scaled_(scale)        // standardization options
+{
+  X_ = as<matrix>(dataModel["X"]) ;
+  standardize() ;
+}
+
+template <typename matrix>
+RegressionData<matrix>::RegressionData(
+  const List& dataModel,
   const bool& center, const bool& scale):
   n_       (as<uword>  (dataModel["n"])) , // sample size
   p_       (as<uword>  (dataModel["d"])) , // # of features
