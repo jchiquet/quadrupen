@@ -27,7 +27,8 @@ List lava_dense_cpp(
       Named("l1") = lava.path_tuning(),
       Named("l2") = lava.struct_tuning()
     ),
-    Named("beta")        = lava.coefficients(),
+    Named("delta")       = lava.sparse_coefficients(),
+    Named("beta")        = lava.dense_coefficients(),
     Named("active")      = lava.active_var(),
     Named("mu")          = lava.interceptTerm(),
     Named("normx")       = lava.data().norm_X_,

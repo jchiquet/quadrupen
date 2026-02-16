@@ -29,13 +29,21 @@ class Lava :
 public:
   
   Lava(const RegressionData<matrix>&, const bool&, const List&, const List&);
+
+  double get_lambda_max() {
+    return(penalty_.dual_norm(scaled_data_.XTy_));
+  } ;
   
   List solution_path(const List&);
 
   const double& struct_tuning() const { return gamma_ ; }
   
-  const sp_mat coefficients() const { 
+  const sp_mat sparse_coefficients() const { 
     return sp_mat(join_cols(iA_, jA_), nzeros_, lambdas_.size(), data_.p_) ; 
+  }
+
+  const vector<vec>& dense_coefficients() const { 
+    return dense_coef_ ; 
   }
   
   const sp_mat active_var() const { 
@@ -46,11 +54,13 @@ public:
   OptimizerL1<matrix> solver_ ; // Solvers for L1 penalty
   double gamma_ ; // overall amount of l2 penalty
   RegressionData<matrix> scaled_data_   ; // data structure
-  vec beta_     ; // vector of current sparse parameters
-  vec delta_    ; // vector of current dense parameters
+  vector<vec> dense_coef_ ; // matrix of dense coefficients
+  vec beta_     ; // vector of current dense parameters
+  vec delta_    ; // vector of current sparse parameters
   vec grad_     ; // vector of current gradient (smooth part)
-  mat Proj      ; // Lava projector matrix
-  vec   nzeros_ ; // contains non-zero value of beta
+  mat Proj_     ; // Lava projector matrix
+  mat XTXinv_   ; // Lava projector matrix
+  vec   nzeros_ ; // contains non-zero value of delta
   urowvec iA_   ; // contains row indices of the non-zero values
   urowvec jA_   ; // contains column indices of the non-zero values
   
@@ -64,47 +74,42 @@ Lava<matrix>::Lava(
   const RegressionData<matrix>& data, const bool& intercept, const List& regParam, const List& control) :
   GenericRegularizer<matrix,Norm::L1>::GenericRegularizer(data, intercept, regParam) {
     
-    // set the penalty to l1
-    penalty_ = Penalty<Norm::L1>() ;
-    lambda_factor_ = as<vec>(regParam["lambda_factor"]) ;
-    get_lambda_seq(regParam) ;
-    
-    // Set up the optimizer
-    solver_ = OptimizerL1<matrix>(penalty_) ;
-    
     // Scale the structuring matrix according to main penalty factor and the amount of l2 penalty 
-    gamma_   = as<double>(regParam["gamma"]) ;
+    lambda_factor_ = as<vec>(regParam["lambda_factor"]) ;
+    gamma_ = as<double>(regParam["gamma"]) ;
     data_.scale_struct(sqrt(gamma_)*pow(lambda_factor_,-1)) ;
     data_.scale_regressors(lambda_factor_) ;
 
-    // Compute the Gram matrix (+ S scaled)  
-    mat XTX = data_.X_.t() * data_.X_ - data_.n_ * data_.X_bar_ * data_.X_bar_.t() + data_.S_;
-
     // Compute the Projection matrices 
-    Proj = data_.X_ * inv_sympd(XTX) * data_.X_.t() ;
-    mat C = chol(diagmat(ones(data_.p_)) - Proj) ;
-
+    mat XTX = data_.X_.t() * data_.X_ - data_.n_ * data_.X_bar_ * data_.X_bar_.t() + data_.S_;
+    XTXinv_ = inv_sympd(XTX) ;
+    Proj_ = data_.X_ * XTXinv_ * data_.X_.t() ;
+    mat C = chol(diagmat(ones(data_.p_)) - Proj_) ;
+    mat X_tilde = C * data_.X_ ;
+    vec y_tilde = C * data_.y_ ;
+    
     // Create the corresponding scaled/transformed data 
-    List scaledData= List::create(
-      Named("n")  = data_.n_,
-      Named("d")  = data_.p_,
-      Named("y")  = C * data_.y_,
-      Named("X")  = C * data_.X_,
-      Named("S")  = diagmat(ones(data_.p_)),
-      Named("wy") = ones(data_.p_)
-    );
-    scaled_data_ = RegressionData<mat>(scaledData, false, false) ;
+    RegressionData<mat> scaled_data_(
+        X_tilde,
+        y_tilde,
+        sp_mat(data_.p_, data_.p_),
+        ones(data_.p_), false, false) ;
+
+    // set the penalty to L1 and initialize the optimizer
+    penalty_ = Penalty<Norm::L1>() ;
+    get_lambda_seq(regParam) ;
+    solver_ = OptimizerL1<matrix>(penalty_) ; 
     
     // Initialize the active set, beta_ and gradient with starting coefficient
     vec beta0 = control["beta0"] ;
     uvec A0 = find(beta0) ;
     if (A0.is_empty()) {
-      set_  = ActiveSet(data_, as<bool>(control["usechol"])) ;
-      grad_ = - data_.XTy_ ;
+      set_  = ActiveSet(scaled_data_, as<bool>(control["usechol"])) ;
+      grad_ = - scaled_data_.XTy_ ;
     } else {
-      set_  = ActiveSet(data_, A0, as<bool>(control["usechol"])) ;
+      set_  = ActiveSet(scaled_data_, A0, as<bool>(control["usechol"])) ;
       beta_ = beta0(A0) ;
-      grad_ = - data_.XTy_ + set_.XTXA_ * beta_  ;
+      grad_ = - scaled_data_.XTy_ + set_.XTXA_ * beta_  ;
     }
   }
 
@@ -121,14 +126,9 @@ double Lava<matrix>::get_df() {
     } else {
       B = inv_sympd(set_.XATXA_);
     }
-    // loop due to sparse encoding. should iterate over the n_zeros only...
-    for (uword i=0;i<set_.size();i++){
-      for (uword j=i;j<set_.size();j++){
-        SAA(i,j) = data_.S_.at(set_.A_(i),set_.A_(j));
-        SAA(j,i) = SAA(i,j);
-      }
-    }
-    df -= trace(SAA * B);
+    mat K = diagmat(ones(set_.size())) - 
+      scaled_data_.X_.cols(set_.A_) * B * scaled_data_.X_.cols(set_.A_).t() ;
+    df -= trace(K * Proj_);
   }
   
   return(df);
@@ -148,7 +148,7 @@ List Lava<matrix>::solution_path(const List& control) {
   if (as<std::string>(control["method"]) == "FISTA") algorithm = FISTA;
   
   // Variables monitoring the algorithm
-  vector<double> gap, timing, J_hat, D_hat ; // timings and optimality measures
+  vector<double> gap, timing ; // timings and optimality measures
   vector<uword> status, iactive, ioptim    ; // convergence and # of inner/outer iterates
   
   // LAMBDA LOOP
@@ -163,14 +163,13 @@ List Lava<matrix>::solution_path(const List& control) {
     
     // dual norm of the gradient
     vec grd_norm = abs(grad_) - lambda_ ;
-    grd_norm(set_.A_) = abs(grad_(set_.A_) + lambda_ * sign(beta_)) ;
+    grd_norm(set_.A_) = abs(grad_(set_.A_) + lambda_ * sign(delta_)) ;
     // variable associated with the highest violation of KKT conditions 
     uword var_in = grd_norm.index_max() ;
     double current_gap = std::max(0.0, grd_norm(var_in)) ;
     uvec zeroed ;
     
     uword current_it = 0 ; bool success = true ; 
-    J_ = datum::inf ; D_ = datum::inf ;
     while ((current_gap > accuracy) && (current_it <= maxiter)) {
       R_CheckUserInterrupt();
       current_it++;
@@ -179,9 +178,9 @@ List Lava<matrix>::solution_path(const List& control) {
       // VARIABLE ACTIVATION IF APPLICABLE
       //
       if (set_.is_in_[var_in] == 0) { // Is var_in already in the active set?
-        set_.add_var(var_in, data_) ;
-        beta_.resize(beta_.size()+1) ; // update the vector of active parameters
-        beta_.tail(1) = - 1e-3 * sign(grad_(var_in)) ;
+        set_.add_var(var_in, scaled_data_) ;
+        delta_.resize(delta_.size()+1) ; // update the vector of active parameters
+        delta_.tail(1) = - 1e-3 * sign(grad_(var_in)) ;
         if (verbose) {Rprintf("\tnewly added variable %i\n",var_in);}
       } else if (verbose) {Rprintf("\talready in %i\n",var_in);}
       
@@ -190,12 +189,12 @@ List Lava<matrix>::solution_path(const List& control) {
       //
       if (algorithm == FISTA) {
         ioptim.push_back(
-          solver_.fista(beta_, lambda_, data_, set_, 1e-10, 10000)
+          solver_.fista(delta_, lambda_, scaled_data_, set_, 1e-10, 10000)
         );
       } else { // QUADRA solver
         try {
           ioptim.push_back(
-            solver_.quadratic_enet(beta_, lambda_, data_, set_, 1e-5, 10000)
+            solver_.quadratic_enet(delta_, lambda_, scaled_data_, set_, 1e-5, 10000)
           );
         } catch (std::runtime_error& error) {
           if (verbose > 0) {
@@ -206,18 +205,12 @@ List Lava<matrix>::solution_path(const List& control) {
       }
       
       // OPTIMALITY TESTING
-      grad_ = - data_.XTy_ + set_.XTXA_ * beta_ ;
+      grad_ = - scaled_data_.XTy_ + set_.XTXA_ * delta_ ;
       grd_norm = penalty_.elt_norm(grad_) - lambda_ ;
-      grd_norm(set_.A_) = abs(grad_(set_.A_) + lambda_ * sign(beta_)) ;
+      grd_norm(set_.A_) = abs(grad_(set_.A_) + lambda_ * sign(delta_)) ;
       var_in = grd_norm.index_max() ;
       current_gap = std::max(0.0, grd_norm(var_in)) ;
-      
-      if (monitoring > 0) {
-        optimality_gap(lambda_, monitoring) ;
-        J_hat.push_back(J_) ;
-        D_hat.push_back(D_) ;
-      }
-      
+
     }
     if (verbose) Rprintf("\tcurrent gap = %f\n",current_gap) ;
     
@@ -233,8 +226,10 @@ List Lava<matrix>::solution_path(const List& control) {
     if (status.back() >= 2) {
       break;
     } else {
-      nzeros_ = join_cols(nzeros_, beta_/(data_.norm_X_(set_.A_) % lambda_factor_(set_.A_)));
-      const_.push_back(data_.y_bar_ - as_scalar(dot(beta_, data_.X_bar_(set_.A_))));
+      nzeros_ = join_cols(nzeros_, delta_/(scaled_data_.norm_X_(set_.A_) % lambda_factor_(set_.A_)));
+      beta_ = XTXinv_ * ( data_.XTy_ - data_.X_.cols(set_.A_) * delta_) / data_.norm_X_ ;
+      dense_coef_.push_back(beta_) ;
+      const_.push_back(data_.y_bar_ - dot(delta_, data_.X_bar_(set_.A_)) - dot(beta_, data_.X_bar_));
       iA_ = join_rows(iA_, df_.size()*ones<urowvec>(set_.size()) );
       jA_ = join_rows(jA_, set_.A_.t()) ;
       df_.push_back(get_df()) ;
@@ -250,8 +245,6 @@ List Lava<matrix>::solution_path(const List& control) {
       Named("it_active")      = iactive,
       Named("it_optim")       = ioptim ,
       Named("max_grd")        = gap    ,
-      Named("gap_hat")        = J_hat  ,
-      Named("delta_hat")      = D_hat  ,
       Named("convergence")    = status ,
       Named("pensteps_timer") = timing
     )

@@ -44,8 +44,8 @@ public:
   
   RegressionData() ;
   RegressionData(const Environment& dataModel, const bool& center, const bool& scale);
-  RegressionData(const List& dataModel, const bool& center, const bool& scale);
-  
+  RegressionData(const matrix X,  const vec y, const sp_mat S, const vec weights, const bool center, const bool scale) ;
+
   void standardize();
 
   void scale_struct(vec weights) ;
@@ -58,31 +58,30 @@ template <typename matrix>
 RegressionData<matrix>::RegressionData(
   const Environment& dataModel,
   const bool& center, const bool& scale):
-  n_       (as<uword>  (dataModel["n"])) , // sample size
-  p_       (as<uword>  (dataModel["d"])) , // # of features
   y_       (as<vec>    (dataModel["y"])) , // response vector
   S_       (as<sp_mat> (dataModel["S"])) , // structuring matrix
   weights_ (as<vec>    (dataModel["wy"])), // observation weights
   centered_(center), scaled_(scale)        // standardization options
 {
   X_ = as<matrix>(dataModel["X"]) ;
+  n_ = X_.n_rows ; p_ = X_.n_cols ;
   standardize() ;
 }
 
+// Constructor from arma objects
 template <typename matrix>
 RegressionData<matrix>::RegressionData(
-  const List& dataModel,
-  const bool& center, const bool& scale):
-  n_       (as<uword>  (dataModel["n"])) , // sample size
-  p_       (as<uword>  (dataModel["d"])) , // # of features
-  y_       (as<vec>    (dataModel["y"])) , // response vector
-  S_       (as<sp_mat> (dataModel["S"])) , // structuring matrix
-  weights_ (as<vec>    (dataModel["wy"])), // observation weights
-  centered_(center), scaled_(scale)        // standardization options
-{
-  X_ = as<matrix>(dataModel["X"]) ;
-  standardize() ;
-}
+  const matrix X, 
+  const vec y, 
+  const sp_mat S, 
+  const vec weights,
+  const bool center, const bool scale):
+  X_       (X)    , // response vector
+  y_       (y) , // response vector
+  S_       (S) , // structuring matrix
+  weights_ (weights), // observation weights
+  centered_(center), scaled_(scale) // standardization options
+{ n_ = X_.n_rows ; p_ = X_.n_cols ; }
 
 template <typename matrix>
 void RegressionData<matrix>::scale_struct(vec weights) {
