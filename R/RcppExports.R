@@ -21,10 +21,6 @@ lava_dense_cpp <- function(dataModel, intercept, regParam, control) {
     .Call(`_quadrupen_lava_dense_cpp`, dataModel, intercept, regParam, control)
 }
 
-lava_sparse_cpp <- function(dataModel, intercept, regParam, control) {
-    .Call(`_quadrupen_lava_sparse_cpp`, dataModel, intercept, regParam, control)
-}
-
 ridge_cpp <- function(dataModel, intercept, regParam, controlFit) {
     .Call(`_quadrupen_ridge_cpp`, dataModel, intercept, regParam, controlFit)
 }

@@ -182,6 +182,7 @@ QuadrupenFit <- R6::R6Class(
       private$monitoring  <- out$monitoring
       private$monitoring$timer <- timer
       private$control     <- control
+      invisible(out)
     },
     #' @description Model extraction
     #' @param selection either a character (model selection criteria) of a scalar (lambda value)

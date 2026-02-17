@@ -28,7 +28,7 @@ class Lava :
   
 public:
   
-  Lava(const RegressionData<matrix>&, const bool&, const List&, const List&);
+  Lava(const RegressionData<matrix>&, const RegressionData<matrix>&, const bool&, const List&, const List&);
 
   double get_lambda_max() {
     return(penalty_.dual_norm(scaled_data_.XTy_));
@@ -71,29 +71,19 @@ public:
 
 template <typename matrix>
 Lava<matrix>::Lava(
-  const RegressionData<matrix>& data, const bool& intercept, const List& regParam, const List& control) :
-  GenericRegularizer<matrix,Norm::L1>::GenericRegularizer(data, intercept, regParam) {
+  const RegressionData<matrix>& data, 
+  const RegressionData<matrix>& scaled_data, const bool& intercept, const List& regParam, const List& control) :
+  GenericRegularizer<matrix,Norm::L1>::GenericRegularizer(data, intercept, regParam), 
+  scaled_data_(scaled_data) {
     
     // Scale the structuring matrix according to main penalty factor and the amount of l2 penalty 
     lambda_factor_ = as<vec>(regParam["lambda_factor"]) ;
     gamma_ = as<double>(regParam["gamma"]) ;
-    data_.scale_struct(sqrt(gamma_)*pow(lambda_factor_,-1)) ;
-    data_.scale_regressors(lambda_factor_) ;
 
     // Compute the Projection matrices 
     mat XTX = data_.X_.t() * data_.X_ - data_.n_ * data_.X_bar_ * data_.X_bar_.t() + data_.S_;
     XTXinv_ = inv_sympd(XTX) ;
     Proj_ = data_.X_ * XTXinv_ * data_.X_.t() ;
-    mat C = chol(diagmat(ones(data_.p_)) - Proj_) ;
-    mat X_tilde = C * data_.X_ ;
-    vec y_tilde = C * data_.y_ ;
-    
-    // Create the corresponding scaled/transformed data 
-    RegressionData<mat> scaled_data_(
-        X_tilde,
-        y_tilde,
-        sp_mat(data_.p_, data_.p_),
-        ones(data_.p_), false, false) ;
 
     // set the penalty to L1 and initialize the optimizer
     penalty_ = Penalty<Norm::L1>() ;
@@ -116,20 +106,17 @@ Lava<matrix>::Lava(
 template <typename matrix>
 double Lava<matrix>::get_df() {
   
-  mat SAA(set_.size(),set_.size()) ;
   double df = set_.size() ;
-  
-  if (gamma_ > 0) {
-    mat B ;
-    if (set_.use_chol_) {
-      B = set_.Rinv_ * set_.Rinv_.t();
-    } else {
-      B = inv_sympd(set_.XATXA_);
-    }
-    mat K = diagmat(ones(set_.size())) - 
-      scaled_data_.X_.cols(set_.A_) * B * scaled_data_.X_.cols(set_.A_).t() ;
-    df -= trace(K * Proj_);
+  mat B ;
+  if (set_.use_chol_) {
+    B = set_.Rinv_ * set_.Rinv_.t();
+  } else {
+    B = inv_sympd(set_.XATXA_);
   }
+  mat K = diagmat(ones(scaled_data_.n_)) - 
+    scaled_data_.X_.cols(set_.A_) * B * scaled_data_.X_.cols(set_.A_).t() ;
+  
+  df -= trace(K * Proj_);
   
   return(df);
 }
@@ -227,7 +214,11 @@ List Lava<matrix>::solution_path(const List& control) {
       break;
     } else {
       nzeros_ = join_cols(nzeros_, delta_/(scaled_data_.norm_X_(set_.A_) % lambda_factor_(set_.A_)));
-      beta_ = XTXinv_ * ( data_.XTy_ - data_.X_.cols(set_.A_) * delta_) / data_.norm_X_ ;
+      if (set_.size() > 0) {
+        beta_ = (XTXinv_ * ( data_.XTy_ - data_.X_.t() * data_.X_.cols(set_.A_) * delta_)) / data_.norm_X_ ;
+      } else {
+        beta_ = (XTXinv_ * data_.XTy_) / data_.norm_X_ ;
+      }
       dense_coef_.push_back(beta_) ;
       const_.push_back(data_.y_bar_ - dot(delta_, data_.X_bar_(set_.A_)) - dot(beta_, data_.X_bar_));
       iA_ = join_rows(iA_, df_.size()*ones<urowvec>(set_.size()) );

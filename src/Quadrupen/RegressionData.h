@@ -81,7 +81,10 @@ RegressionData<matrix>::RegressionData(
   S_       (S) , // structuring matrix
   weights_ (weights), // observation weights
   centered_(center), scaled_(scale) // standardization options
-{ n_ = X_.n_rows ; p_ = X_.n_cols ; }
+{ 
+  n_ = X_.n_rows ; p_ = X_.n_cols ; 
+  standardize() ;
+}
 
 template <typename matrix>
 void RegressionData<matrix>::scale_struct(vec weights) {

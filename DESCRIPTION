@@ -52,6 +52,7 @@ Collate:
     'elastic-net.R'
     'fused-lasso.R'
     'lasso.R'
+    'lava.R'
     'utils.R'
     'ridge.R'
     'RcppExports.R'

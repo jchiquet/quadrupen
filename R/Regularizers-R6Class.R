@@ -150,7 +150,12 @@ LavaFit <- R6::R6Class(
   classname = "LavaFit",
   inherit = QuadrupenFit,
   #' @field penalty character describing the regularizer/penalty
-  active  = list(penalty = function(value) "lava"),
+  active  = list(
+    penalty = function(value) "lava",
+    sparse_coef = function(value) sparse_coef_,
+    dense_coef  = function(value) dense_coef_
+    ),
+  private = list(sparse_coef_ = NA, dense_coef_ = NA),
   public  = list(
     #' @description Initialize a [`LavaFit`] model
     #' @param data a [`DataModel`] object
@@ -158,10 +163,17 @@ LavaFit <- R6::R6Class(
     #' @param regParam a list with two elements, a vector and a scalar, for the regularization
     initialize =  function(data, intercept, regParam) {
       super$initialize(data, intercept, regParam)
-      private$optimizer <- 
-        ifelse(data$sparse_encoding,
-               lava_sparse_cpp,
-               lava_dense_cpp)
+      private$optimizer <- lava_dense_cpp
+      # private$optimizer <- 
+      #   ifelse(data$sparse_encoding,
+      #          lava_sparse_cpp,
+      #          lava_dense_cpp)
+    },
+    fit = function(control) {
+      out <- super$fit(control)
+      private$sparse_coef <- out$delta
+      private$dense_coef <- out$delta
+      private$beta <- out$delta + out$beta
     }
   )
 )
