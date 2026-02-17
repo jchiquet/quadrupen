@@ -171,8 +171,8 @@ LavaFit <- R6::R6Class(
     },
     fit = function(control) {
       out <- super$fit(control)
-      private$sparse_coef <- out$delta
-      private$dense_coef <- out$delta
+      private$sparse_coef_ <- out$delta
+      private$dense_coef_ <- out$delta
       private$beta <- out$delta + out$beta
     }
   )
