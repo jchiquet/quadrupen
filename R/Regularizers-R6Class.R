@@ -164,16 +164,12 @@ LavaFit <- R6::R6Class(
     initialize =  function(data, intercept, regParam) {
       super$initialize(data, intercept, regParam)
       private$optimizer <- lava_dense_cpp
-      # private$optimizer <- 
-      #   ifelse(data$sparse_encoding,
-      #          lava_sparse_cpp,
-      #          lava_dense_cpp)
     },
     fit = function(control) {
       out <- super$fit(control)
       private$sparse_coef_ <- out$delta
-      private$dense_coef_ <- out$delta
-      private$beta <- out$delta + out$beta
+      private$dense_coef_  <-  do.call(rbind, private$beta)
+      private$beta <- private$sparse_coef_ + private$dense_coef_
     }
   )
 )

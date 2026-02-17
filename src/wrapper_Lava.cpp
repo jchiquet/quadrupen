@@ -25,12 +25,10 @@ List lava_dense_cpp(
   data.scale_regressors(lambda_factor) ;
   
   // Create the scaled/transformed data
-  vec eta ; // eigen value of X cinv
-  mat U   ; // left singular vectors of X
-  mat V   ; // right singular vectors of X
   mat C_inv = solve(trimatu(chol(data.S_.as_dense())), eye(data.p_, data.p_)) ;
-  svd_econ(U, eta, V, (data.X_.each_row() - data.X_bar_.t())*C_inv) ;
-  mat Proj = U * diagmat(square(eta)/(square(eta) + 1)) * U.t()  ;
+  mat U, V ; vec D ; // U D V = X C^-1
+  svd_econ(U, D, V, (data.X_.each_row() - data.X_bar_.t())*C_inv) ;
+  mat Proj = U * diagmat(square(D)/(square(D) + 1)) * U.t()  ;
   mat K12 = sqrtmat_sympd(diagmat(ones(data.n_)) - Proj) ;
   mat X_tilde = K12 * data.X_ ;
   vec y_tilde = K12 * data.y_ ;
