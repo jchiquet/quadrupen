@@ -10,6 +10,8 @@ Functions for fitting various structured regularization models
   : Fit a linear model with elastic-net regularization
 - [`fusedlasso()`](https://jchiquet.github.io/quadrupen/reference/fusedlasso.md)
   : A function for fitting generalized fused-Lasso problems
+- [`lava()`](https://jchiquet.github.io/quadrupen/reference/lava.md) :
+  Fit a linear model with lava regularization
 - [`lasso()`](https://jchiquet.github.io/quadrupen/reference/lasso.md) :
   Fit a linear model with lasso regularization
 - [`ridge()`](https://jchiquet.github.io/quadrupen/reference/ridge.md) :
@@ -25,6 +27,8 @@ R6 Classes for the user to manipulate the ouput of the main functions
   : Class "ElasticNetFit"
 - [`FusedLassoFit`](https://jchiquet.github.io/quadrupen/reference/FusedLassoFit.md)
   : Class "FusedLassoFit"
+- [`LavaFit`](https://jchiquet.github.io/quadrupen/reference/LavaFit.md)
+  : Class "LavaFit"
 - [`BoundedRegressionFit`](https://jchiquet.github.io/quadrupen/reference/BoundedRegressionFit.md)
   : Class "BoundedRegression"
 - [`RidgeRegressionFit`](https://jchiquet.github.io/quadrupen/reference/RidgeRegressionFit.md)

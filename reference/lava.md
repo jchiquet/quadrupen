@@ -1,23 +1,27 @@
-# Fit a linear model with a structured ridge regularization
+# Fit a linear model with lava regularization
 
-Adjust a linear model with ridge regularization (possibly structured
-\\\ell_2\\-norm). The solution path is computed at a grid of values for
-the \\\ell_2\\-penalty. See details for the criterion optimized.
+Adjust a the lava regularized linear models, that is a (possibly
+weighted) \\\ell_1\\-norm. The solution path is computed at a grid of
+values for the \\\ell_1\\-penalty. See details for the criterion
+optimized.
 
 ## Usage
 
 ``` r
-ridge(
+lava(
   x,
   y,
-  lambda = NULL,
-  struct = Matrix::Diagonal(ncol(x), 1),
+  lambda1 = NULL,
+  lambda2 = 1,
   penscale = rep(1, ncol(x)),
+  struct = Matrix::Diagonal(ncol(x), 1),
   intercept = TRUE,
   normalize = TRUE,
-  nlambda = 100,
-  minratio = 1e-05,
-  lambda_max = 100,
+  debiasing = c("none", "standard", "ridge"),
+  nlambda1 = ifelse(is.null(lambda1), 100, length(lambda1)),
+  minratio = ifelse(nrow(x) <= ncol(x), 0.01, 1e-04),
+  maxfeat = ifelse(lambda2 < 0.01, min(nrow(x), ncol(x)), min(4 * nrow(x), ncol(x))),
+  beta0 = numeric(ncol(x)),
   control = list()
 )
 ```
@@ -34,23 +38,28 @@ ridge(
 
   response vector.
 
-- lambda:
+- lambda1:
 
-  sequence of decreasing \\\ell_2\\-penalty levels. If `NULL` (the
-  default), a vector is generated with `nlambda` entries, starting from
-  a guessed level `lambda_max` where only the intercept is included,
-  then shrunken to `minratio*lambda_max`.
+  sequence of decreasing \\\ell_1\\-penalty levels. If `NULL` (the
+  default), a vector is generated with `nlambda1` entries, starting from
+  a guessed level `lambda1.max` where only the intercept is included,
+  then shrunken to `minratio*lambda1.max`.
+
+- lambda2:
+
+  real scalar; tunes the \\\ell_2\\ penalty in the Elastic-net. Default
+  is 0.01. Set to 0 to recover the Lasso.
+
+- penscale:
+
+  vector with real positive values that weight the \\\ell_1\\-penalty of
+  each feature. Default set all weights to 1.
 
 - struct:
 
   matrix structuring the coefficients, possibly sparsely encoded. Must
   be at least positive semidefinite (this is checked internally). If
   `NULL` (the default), the identity matrix is used. See details below.
-
-- penscale:
-
-  vector with real positive values that weight the \\\ell_1\\-penalty of
-  each feature. Default set all weights to 1.
 
 - intercept:
 
@@ -62,10 +71,18 @@ ridge(
   logical; indicates if variables should be normalized to have unit L2
   norm before fitting. Default is `TRUE`.
 
-- nlambda:
+- debiasing:
 
-  integer that indicates the number of values to put in the `lambda`
-  vector. Ignored if `lambda` is provided.
+  character picked in "none" or "standard": indicates if coefficients
+  should be rescaled to avoid excessive biais due to double shrinkage.
+  "standard" is Zou and Hastie (2006) orginal proposa: : the vector of
+  parameters is rescaled by a factor `(1+lambda2)`. "none" is for no
+  rescaling, the default.
+
+- nlambda1:
+
+  integer that indicates the number of values to put in the `lambda1`
+  vector. Ignored if `lambda1` is provided.
 
 - minratio:
 
@@ -76,9 +93,19 @@ ridge(
   to avoid this, adapting to the '\\n\<p\\' context. Ignored if
   `lambda1` is provided.
 
-- lambda_max:
+- maxfeat:
 
-  the largest value of `lambda` considered
+  integer; limits the number of features ever to enter the model; i.e.,
+  non-zero coefficients for the Elastic-net: the algorithm stops if this
+  number is exceeded and `lambda1` is cut at the corresponding level.
+  Default is `min(nrow(x),ncol(x))` for small `lambda2` (\<0.01) and
+  `min(4*nrow(x),ncol(x))` otherwise. Use with care, as it considerably
+  changes the computation time.
+
+- beta0:
+
+  a starting point for the vector of parameter. By default, will
+  initialized zero. May save time in some situation.
 
 - control:
 
@@ -114,7 +141,10 @@ ridge(
 ## Value
 
 an object with class
-[RidgeRegressionFit](https://jchiquet.github.io/quadrupen/reference/RidgeRegressionFit.md),
+[QuadrupenFit](https://jchiquet.github.io/quadrupen/reference/QuadrupenFit.md).
+
+an object with class
+[LavaFit](https://jchiquet.github.io/quadrupen/reference/LavaFit.md),
 inheriting from
 [QuadrupenFit](https://jchiquet.github.io/quadrupen/reference/QuadrupenFit.md).
 
@@ -122,22 +152,24 @@ inheriting from
 
 The optimized criterion is the following:
 
-β^(hat)_(λ₂) = argmin_(β) 1/2 RSS(&beta) + λ/2 ₂ β^(T) S β,
+β^(hat)_(λ₁) = argmin_(&theta = &beta+δ) 1/2n RSS(&beta + &delta) + λ₁
+\| β \|₁ + λ/2 ₂ δ^(T) S δ,
 
-where the \\\ell_2\\ structuring positive semidefinite matrix \\S\\ is
-provided via the `struct` argument (possibly of class `Matrix`).
+.
 
-## See also
+## References
 
-See also
-[QuadrupenFit](https://jchiquet.github.io/quadrupen/reference/QuadrupenFit.md)
+Chernozhukov, Victor, Christian Hansen, and Yuan Liao. "A lava attack on
+the recovery of sums of dense and sparse signals." The Annals of
+Statistics (2017): 39-76. <doi:10.1214/16-AOS1434>
 
 ## Examples
 
 ``` r
 ## Simulating multivariate Gaussian with blockwise correlation
 ## and piecewise constant vector of parameters
-beta <- rep(c(0,1,0,-1,0), c(25,10,25,10,25))
+beta  <- rep(c(0,1,0,-1,0), c(25,10,25,10,25))
+delta <- runif(sum(c(25,10,25,10,25)),-.1,.1)
 cor <- 0.75
 Soo <- toeplitz(cor^(0:(25-1))) ## Toeplitz correlation for irrelevant variables
 Sww  <- matrix(cor,10,10) ## bloc correlation between active variables
@@ -149,8 +181,7 @@ y <- 10 + x %*% beta + rnorm(n,0,10)
 
 labels <- rep("irrelevant", length(beta))
 labels[beta != 0] <- "relevant"
-plot(ridge(x,y) , label=labels) ## a mess
-#> Error in h(simpleError(msg, call)): error in evaluating the argument 'x' in selecting a method for function 'drop': error in evaluating the argument 'x' in selecting a method for function 'colSums': object 'x' not found
-plot(ridge(x,y, struct=solve(Sigma)), label=labels) ## even better
+## The solution path of the LASSO
+plot(lava(x,y), label=labels)
 #> Error in h(simpleError(msg, call)): error in evaluating the argument 'x' in selecting a method for function 'drop': error in evaluating the argument 'x' in selecting a method for function 'colSums': object 'x' not found
 ```
