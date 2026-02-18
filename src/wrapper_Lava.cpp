@@ -40,19 +40,21 @@ List lava_dense_cpp(
       sp_mat(data.p_, data.p_),
       ones(data.p_), false, false) ;
 
-  Lava<mat> lava(data, scaled_data, intercept, regParam, control);
-  
+  Lava<mat> lava(scaled_data, Proj, false, regParam, control);
+
   List results = lava.solution_path(control);
+
+  lava.post_treatment(data, U, V, D, C_inv) ;
   
   return List::create(
     Named("tuning_param") = List::create(
       Named("l1") = lava.path_tuning(),
-      Named("l2") = lava.struct_tuning()
+      Named("l2") = gamma
     ),
-    Named("delta")       = lava.sparse_coefficients(),
-    Named("beta")        = lava.dense_coefficients(),
+    Named("delta")       = lava.sparse_coef_,
     Named("active")      = lava.active_var(),
-    Named("mu")          = lava.interceptTerm(),
+    Named("beta")        = lava.dense_coef_,
+    Named("mu")          = lava.const_,
     Named("normx")       = lava.data().norm_X_,
     Named("df")          = lava.degrees_freedom(),
     Named("monitoring")  = results

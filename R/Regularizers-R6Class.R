@@ -152,8 +152,8 @@ LavaFit <- R6::R6Class(
   #' @field penalty character describing the regularizer/penalty
   active  = list(
     penalty = function(value) "lava",
-    sparse_coef = function(value) sparse_coef_,
-    dense_coef  = function(value) dense_coef_
+    sparse_coef = function(value) private$sparse_coef_,
+    dense_coef  = function(value) private$dense_coef_
     ),
   private = list(sparse_coef_ = NA, dense_coef_ = NA),
   public  = list(
@@ -167,9 +167,9 @@ LavaFit <- R6::R6Class(
     },
     fit = function(control) {
       out <- super$fit(control)
+      private$beta <- private$sparse_coef_ + private$dense_coef_
       private$sparse_coef_ <- out$delta
       private$dense_coef_  <-  do.call(rbind, private$beta)
-      private$beta <- private$sparse_coef_ + private$dense_coef_
     }
   )
 )
