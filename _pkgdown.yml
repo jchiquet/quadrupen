@@ -10,6 +10,7 @@ reference:
   - bounded.reg
   - elastic.net
   - fusedlasso
+  - lava
   - lasso
   - ridge
 - title: "Classes and methods for handling the Quadrupen fits"
@@ -18,6 +19,7 @@ reference:
   - QuadrupenFit
   - ElasticNetFit
   - FusedLassoFit
+  - LavaFit
   - BoundedRegressionFit
   - RidgeRegressionFit
 - title: "Auxiliaries Classes and methods"
