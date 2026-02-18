@@ -19,7 +19,7 @@ class GenericRegularizer {
 public:
   
   GenericRegularizer() {} ;
-  GenericRegularizer(const RegressionData<matrix>&, const bool&, const List&);
+  GenericRegularizer(const RegressionData<matrix>&, const List&);
   
   double get_lambda_max() {
     return(penalty_.dual_norm(data_.XTy_));
@@ -30,14 +30,12 @@ public:
   // Getter functions to access private members
   const RegressionData<matrix>& data()    const { return data_      ; }
   const ActiveSet<matrix>& active_set()   const { return set_       ; }
-  const bool& intercept()                 const { return intercept_ ; }
   const vector<vec>& coefficients()       const { return coef_      ; }
-  const vector<double>& interceptTerm()   const { return const_     ; }
+  const vector<double>& intercept()   const { return const_     ; }
   const vector<double>& path_tuning()     const { return lambdas_   ; }
   const vector<double>& degrees_freedom() const { return df_        ; }
   
   RegressionData<matrix> data_   ; // data structure
-  bool intercept_                ; // does the model include intercept
   ActiveSet<matrix> set_         ; // Active set of variable and data
   Penalty<norm> penalty_         ; // main penalty object 
   vector<double> lambdas_        ; // vector of parameters tuning the man penalty
@@ -50,8 +48,8 @@ public:
 
 template <typename matrix, Norm norm>
 GenericRegularizer<matrix, norm>::GenericRegularizer(
-  const RegressionData<matrix>& data, const bool& intercept, const List& regParam) :
-  data_ (data), intercept_ (intercept), set_ (data) 
+  const RegressionData<matrix>& data, const List& regParam) :
+  data_ (data), set_ (data) 
 {
   all = regspace<uvec>(0,data_.p_-1) ;
 }

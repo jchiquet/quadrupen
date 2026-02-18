@@ -149,10 +149,12 @@ FusedLassoFit <- R6::R6Class(
 LavaFit <- R6::R6Class(
   classname = "LavaFit",
   inherit = QuadrupenFit,
-  #' @field penalty character describing the regularizer/penalty
   active  = list(
+    #' @field penalty character describing the regularizer/penalty
     penalty = function(value) "lava",
+    #' @field sparse_coef sparse part of the  decomposition of the coefficients
     sparse_coef = function(value) private$sparse_coef_,
+    #' @field dense_coef dense part of the  decomposition of the coefficients
     dense_coef  = function(value) private$dense_coef_
     ),
   private = list(sparse_coef_ = NA, dense_coef_ = NA),
@@ -165,11 +167,13 @@ LavaFit <- R6::R6Class(
       super$initialize(data, intercept, regParam)
       private$optimizer <- lava_dense_cpp
     },
+    #' @description function performing the optimization
+    #' @param control list controlling the optimization process    
     fit = function(control) {
       out <- super$fit(control)
+      private$sparse_coef_ <- out$beta
+      private$dense_coef_  <-  do.call(rbind, out$b)
       private$beta <- private$sparse_coef_ + private$dense_coef_
-      private$sparse_coef_ <- out$delta
-      private$dense_coef_  <-  do.call(rbind, private$beta)
     }
   )
 )

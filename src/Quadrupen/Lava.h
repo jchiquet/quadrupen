@@ -19,19 +19,11 @@ class Lava :
   
 public:
   
-  Lava(const RegressionData<matrix>&, const mat&, const bool&, const List&, const List&);
+  Lava(const RegressionData<matrix>&, const mat&, const List&, const List&);
 
   void post_treatment(const RegressionData<matrix>& data,
                       const mat& U, const mat& V, const vec& D, const mat& C_inv) ;
 
-  const sp_mat sparse_coefficients() const { 
-    return sp_mat(join_cols(this->iA_, this->jA_), this->nzeros_, this->lambdas_.size(), this->data_.p_) ; 
-  }
-
-  const vector<vec>& dense_coefficients() const { 
-    return dense_coef_ ; 
-  }
-  
   // Specific to Elastic-Net regularization
   sp_mat sparse_coef_     ; // matrix of dense coefficients
   vector<vec> dense_coef_ ; // matrix of dense coefficients
@@ -47,10 +39,9 @@ template <typename matrix>
 Lava<matrix>::Lava(
   const RegressionData<matrix>& data,
   const mat& Proj,
-  const bool& intercept,
   const List& regParam,
   const List& control) :
-  ElasticNet<matrix>::ElasticNet(data, intercept, regParam, control), 
+  ElasticNet<matrix>::ElasticNet(data, regParam, control), 
   Proj_(Proj) {}
 
 template <typename matrix>
@@ -76,22 +67,19 @@ template <typename matrix>
 void Lava<matrix>::post_treatment(const RegressionData<matrix>& data,
                                   const mat& U, const mat& V, const vec& D, const mat& C_inv) {
   
-  sp_mat sparse_coef = this->coefficients() ;
+  sp_mat beta = this->coefficients() ;
   
   mat M = C_inv * V * diagmat(D/(square(D) + 1)) ;
-  mat UTy = U.t() * data.y_ ;
+  mat UTy = U.t() * (data.y_ - data.y_bar_) ;
   mat DVT = diagmat(D) * V.t();
 
-  for (uword i=0;i< sparse_coef.n_rows ;i++){
-    // Renormalize the sparse coefficient
-    sparse_coef.row(i) /= data.norm_X_.t() ;
-    // Compute the dense coefficient
-    vec beta_ = M * (UTy - DVT * sparse_coef.row(i).t()) / data.norm_X_ ;
-    dense_coef_.push_back(beta_) ;
-    // Compute the constant / intercept term
-    this->const_.push_back(data.y_bar_ - dot(sparse_coef.row(i).t() - beta_, data.X_bar_));
+  for (uword i=0;i< beta.n_rows ;i++){
+    beta.row(i) /= data.norm_X_.t() ;
+    vec b = M * (UTy - DVT * beta.row(i).t()) / data.norm_X_ ;
+    dense_coef_.push_back(b) ;
+    this->const_.push_back(data.y_bar_ - dot(beta.row(i).t() - b, data.X_bar_));
   }
-  sparse_coef_ = sparse_coef ;
+  sparse_coef_ = beta ;
   
 }
 

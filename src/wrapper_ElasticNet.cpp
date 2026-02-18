@@ -18,18 +18,18 @@ List elastic_net_dense_cpp(
 
   RegressionData<mat> data(dataModel, intercept, as<bool>(control["normalize"])) ;
 
-  ElasticNet<mat> enet(data, intercept, regParam, control);
+  ElasticNet<mat> enet(data, regParam, control);
 
   List results = enet.solution_path(control);
   
   return List::create(
     Named("tuning_param") = List::create(
       Named("l1") = enet.path_tuning(),
-      Named("l2") = enet.struct_tuning()
+      Named("l2") = enet.gamma_
     ),
     Named("beta")        = enet.coefficients(),
     Named("active")      = enet.active_var(),
-    Named("mu")          = enet.interceptTerm(),
+    Named("mu")          = enet.intercept(),
     Named("normx")       = enet.data().norm_X_,
     Named("df")          = enet.degrees_freedom(),
     Named("monitoring")  = results
@@ -47,18 +47,18 @@ List elastic_net_sparse_cpp(
   
   RegressionData<sp_mat> data(dataModel, intercept, as<bool>(control["normalize"])) ;
   
-  ElasticNet<sp_mat> enet(data, intercept, regParam, control);
+  ElasticNet<sp_mat> enet(data, regParam, control);
   
   List results = enet.solution_path(control);
   
   return List::create(
     Named("tuning_param") = List::create(
       Named("l1") = enet.path_tuning(),
-      Named("l2") = enet.struct_tuning()
+      Named("l2") = enet.gamma_
     ),
     Named("beta")        = enet.coefficients(),
     Named("active")      = enet.active_var(),
-    Named("mu")          = enet.interceptTerm(),
+    Named("mu")          = enet.intercept(),
     Named("normx")       = enet.data().norm_X_,
     Named("df")          = enet.degrees_freedom(),
     Named("monitoring")  = results

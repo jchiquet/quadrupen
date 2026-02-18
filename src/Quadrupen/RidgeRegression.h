@@ -14,7 +14,7 @@ using namespace std;
 
 class RidgeRegression : public GenericRegularizer<mat,Norm::RIDGE>{
  public:
-   RidgeRegression(RegressionData<mat>&, const bool&, const List&);
+   RidgeRegression(RegressionData<mat>&, const List&);
 
   List solution_path(const mat&);
   

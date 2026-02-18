@@ -28,19 +28,12 @@ class ElasticNet :
   
   public:
   
-  ElasticNet(const RegressionData<matrix>&, const bool&, const List&, const List&);
+  ElasticNet(const RegressionData<matrix>&, const List&, const List&);
   
   List solution_path(const List&);
 
-  double get_loss() {
-    return(.5 * pow(data_.norm_y_ ,2) + 
-           dot(beta_, .5 * set_.XATXA_ * beta_ - data_.XTy_(set_.A_))) ;
-  };
-  
   void optimality_gap(double lambda_, uword type) ;
   
-  const double& struct_tuning() const { return gamma_ ; }
-
   const sp_mat coefficients() const { 
     return sp_mat(join_cols(iA_, jA_), nzeros_, lambdas_.size(), data_.p_) ; 
   }
@@ -68,8 +61,8 @@ class ElasticNet :
 
 template <typename matrix>
 ElasticNet<matrix>::ElasticNet(
-  const RegressionData<matrix>& data, const bool& intercept, const List& regParam, const List& control) :
-  GenericRegularizer<matrix,Norm::L1>::GenericRegularizer(data, intercept, regParam) {
+  const RegressionData<matrix>& data, const List& regParam, const List& control) :
+  GenericRegularizer<matrix,Norm::L1>::GenericRegularizer(data, regParam) {
     
     // set the penalty to l1
     penalty_ = Penalty<Norm::L1>() ;
@@ -253,7 +246,9 @@ void ElasticNet<matrix>::optimality_gap(double lambda, uword type) {
 
   // gamma equals the max |gradient|
   double nu = norm(grad_, "inf");
-  double loss = get_loss(), old_J = J_, old_D = D_ ;
+  double loss = .5 * pow(data_.norm_y_ ,2) + 
+    dot(beta_, .5 * set_.XATXA_ * beta_ - data_.XTy_(set_.A_)) ;
+  double old_J = J_, old_D = D_ ;
   J_ = loss - dot(beta_, grad_(set_.A_))  ;
   uvec Ac ;
   

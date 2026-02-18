@@ -18,7 +18,7 @@ List ridge_cpp(
 
   RegressionData<mat> data(dataModel, intercept, as<bool>(controlFit["normalize"])) ;
 
-  RidgeRegression ridge(data, intercept, regParam);
+  RidgeRegression ridge(data, regParam);
 
   List results = ridge.solution_path(trimatu(as<mat>(dataModel["C_inv"])));
   
@@ -28,7 +28,7 @@ List ridge_cpp(
       Named("l1") = 0 
     ),
     Named("beta")        = ridge.coefficients(),
-    Named("mu")          = ridge.interceptTerm(),
+    Named("mu")          = ridge.intercept(),
     Named("normx")       = ridge.data().norm_X_,
     Named("df")          = ridge.degrees_freedom(),
     Named("monitoring")  = results

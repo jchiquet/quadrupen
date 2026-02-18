@@ -21,7 +21,7 @@ List lava_dense_cpp(
   // Scale the structuring matrix according to main penalty factor and the amount of l2 penalty 
   vec lambda_factor = as<vec>(regParam["lambda_factor"]) ;
   double gamma = as<double>(regParam["gamma"]) ;
-  data.scale_struct(sqrt(gamma)*pow(lambda_factor,-1)) ;
+  data.scale_struct(sqrt(data.n_*gamma)*pow(lambda_factor,-1)) ;
   data.scale_regressors(lambda_factor) ;
   
   // Create the scaled/transformed data
@@ -30,8 +30,8 @@ List lava_dense_cpp(
   svd_econ(U, D, V, (data.X_.each_row() - data.X_bar_.t())*C_inv) ;
   mat Proj = U * diagmat(square(D)/(square(D) + 1)) * U.t()  ;
   mat K12 = sqrtmat_sympd(diagmat(ones(data.n_)) - Proj) ;
-  mat X_tilde = K12 * data.X_ ;
-  vec y_tilde = K12 * data.y_ ;
+  mat X_tilde = K12 * (data.X_.each_row() - data.X_bar_.t()) ;
+  vec y_tilde = K12 * (data.y_ - data.y_bar_) ;
   
   // Create the corresponding scaled/transformed data 
   RegressionData<mat> scaled_data(
@@ -40,7 +40,7 @@ List lava_dense_cpp(
       sp_mat(data.p_, data.p_),
       ones(data.p_), false, false) ;
 
-  Lava<mat> lava(scaled_data, Proj, false, regParam, control);
+  Lava<mat> lava(scaled_data, Proj, regParam, control);
 
   List results = lava.solution_path(control);
 
@@ -51,9 +51,9 @@ List lava_dense_cpp(
       Named("l1") = lava.path_tuning(),
       Named("l2") = gamma
     ),
-    Named("delta")       = lava.sparse_coef_,
+    Named("beta")        = lava.sparse_coef_,
+    Named("b")           = lava.dense_coef_,
     Named("active")      = lava.active_var(),
-    Named("beta")        = lava.dense_coef_,
     Named("mu")          = lava.const_,
     Named("normx")       = lava.data().norm_X_,
     Named("df")          = lava.degrees_freedom(),
@@ -83,7 +83,7 @@ List lava_dense_cpp(
 //     ),
 //     Named("beta")        = lava.coefficients(),
 //     Named("active")      = lava.active_var(),
-//     Named("mu")          = lava.interceptTerm(),
+//     Named("mu")          = lava.intercept(),
 //     Named("normx")       = lava.data().norm_X_,
 //     Named("df")          = lava.degrees_freedom(),
 //     Named("monitoring")  = results

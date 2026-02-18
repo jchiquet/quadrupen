@@ -9,8 +9,8 @@ using namespace Rcpp;
 using namespace arma;
 
 RidgeRegression::RidgeRegression(
-  RegressionData<mat>& data, const bool& intercept, const List& regParam) :
-  GenericRegularizer::GenericRegularizer(data, intercept, regParam) 
+  RegressionData<mat>& data, const List& regParam) :
+  GenericRegularizer::GenericRegularizer(data, regParam) 
 {
   penalty_ = Penalty<Norm::RIDGE>() ;
   lambda_factor_ = as<vec>(regParam["lambda_factor"]) ;
@@ -26,13 +26,14 @@ List RidgeRegression::solution_path(const mat& C_inv) {
   svd_econ(U, eta, V, (data_.X_.each_row() - data_.X_bar_.t())*C_inv) ;
   
   mat C_invV = C_inv * V ;
-  mat Uty = trans(U) * data_.y_ ;
-
+  mat Uty = trans(U) * (data_.y_ - data_.y_bar_) ;
+  uword n = U.n_rows ;
+  
   vector<double> timing ; // successive timing for solving for each lambda value
   wall_clock timer ; timer.tic(); // clock
   for(auto lambda : lambdas_) {
     // computing the structured ridge estimate
-    vec beta = (C_invV * diagmat(eta/(square(eta) + lambda)) * Uty) / data_.norm_X_ ;
+    vec beta = (C_invV * diagmat(eta/(square(eta) + lambda/n)) * Uty) / data_.norm_X_ ;
     coef_.push_back(beta);
     // estimating the intercept term
     const_.push_back(data_.y_bar_ - dot(beta, data_.X_bar_));  

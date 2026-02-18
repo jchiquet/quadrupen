@@ -22,6 +22,10 @@ and methods of \link{QuadrupenFit}
 \if{html}{\out{<div class="r6-active-bindings">}}
 \describe{
 \item{\code{penalty}}{character describing the regularizer/penalty}
+
+\item{\code{sparse_coef}}{sparse part of the  decomposition of the coefficients}
+
+\item{\code{dense_coef}}{dense part of the  decomposition of the coefficients}
 }
 \if{html}{\out{</div>}}
 }
@@ -29,6 +33,7 @@ and methods of \link{QuadrupenFit}
 \subsection{Public methods}{
 \itemize{
 \item \href{#method-LavaFit-new}{\code{LavaFit$new()}}
+\item \href{#method-LavaFit-fit}{\code{LavaFit$fit()}}
 \item \href{#method-LavaFit-clone}{\code{LavaFit$clone()}}
 }
 }
@@ -38,7 +43,6 @@ and methods of \link{QuadrupenFit}
 <li><span class="pkg-link" data-pkg="quadrupen" data-topic="QuadrupenFit" data-id="criteria"><a href='../../quadrupen/html/QuadrupenFit.html#method-QuadrupenFit-criteria'><code>quadrupen::QuadrupenFit$criteria()</code></a></span></li>
 <li><span class="pkg-link" data-pkg="quadrupen" data-topic="QuadrupenFit" data-id="cross_validate"><a href='../../quadrupen/html/QuadrupenFit.html#method-QuadrupenFit-cross_validate'><code>quadrupen::QuadrupenFit$cross_validate()</code></a></span></li>
 <li><span class="pkg-link" data-pkg="quadrupen" data-topic="QuadrupenFit" data-id="debias"><a href='../../quadrupen/html/QuadrupenFit.html#method-QuadrupenFit-debias'><code>quadrupen::QuadrupenFit$debias()</code></a></span></li>
-<li><span class="pkg-link" data-pkg="quadrupen" data-topic="QuadrupenFit" data-id="fit"><a href='../../quadrupen/html/QuadrupenFit.html#method-QuadrupenFit-fit'><code>quadrupen::QuadrupenFit$fit()</code></a></span></li>
 <li><span class="pkg-link" data-pkg="quadrupen" data-topic="QuadrupenFit" data-id="get_model"><a href='../../quadrupen/html/QuadrupenFit.html#method-QuadrupenFit-get_model'><code>quadrupen::QuadrupenFit$get_model()</code></a></span></li>
 <li><span class="pkg-link" data-pkg="quadrupen" data-topic="QuadrupenFit" data-id="plot"><a href='../../quadrupen/html/QuadrupenFit.html#method-QuadrupenFit-plot'><code>quadrupen::QuadrupenFit$plot()</code></a></span></li>
 <li><span class="pkg-link" data-pkg="quadrupen" data-topic="QuadrupenFit" data-id="plot_path"><a href='../../quadrupen/html/QuadrupenFit.html#method-QuadrupenFit-plot_path'><code>quadrupen::QuadrupenFit$plot_path()</code></a></span></li>
@@ -66,6 +70,23 @@ Initialize a \code{\link{LavaFit}} model
 \item{\code{intercept}}{a logical; should an intercept be included in the mode?}
 
 \item{\code{regParam}}{a list with two elements, a vector and a scalar, for the regularization}
+}
+\if{html}{\out{</div>}}
+}
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-LavaFit-fit"></a>}}
+\if{latex}{\out{\hypertarget{method-LavaFit-fit}{}}}
+\subsection{Method \code{fit()}}{
+function performing the optimization
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{LavaFit$fit(control)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{control}}{list controlling the optimization process}
 }
 \if{html}{\out{</div>}}
 }
