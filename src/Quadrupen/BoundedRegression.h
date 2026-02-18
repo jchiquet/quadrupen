@@ -18,7 +18,7 @@ using namespace std;
 class BoundedRegression : public GenericRegularizer<mat,Norm::LINF> {
 public:
   
-  BoundedRegression(RegressionData<mat>&, const bool&, const List&, const List&);
+  BoundedRegression(RegressionData<mat>&, const List&, const List&);
   
   List solution_path(const List&);
 

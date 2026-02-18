@@ -25,7 +25,7 @@
 #' \beta)^T (y - X \beta) + \frac{\lambda_2}{2} \beta^T S \beta, }}
 #' \if{html}{\out{ <center> &beta;<sup>hat</sup>
 #' <sub>&lambda;<sub>2</sub></sub> = argmin<sub>&beta;</sub> 1/2
-#' RSS(&beta) + + &lambda;/2 <sub>2</sub> &beta;<sup>T</sup> S
+#' RSS(&beta) + &lambda;/2 <sub>2</sub> &beta;<sup>T</sup> S
 #' &beta;, </center> }} \if{text}{\deqn{beta.hat(lambda2) =
 #' argmin_beta 1/2 RSS(beta) + lambda2 beta' S beta,}} where the
 #' \eqn{\ell_2}{l2} structuring positive semidefinite matrix

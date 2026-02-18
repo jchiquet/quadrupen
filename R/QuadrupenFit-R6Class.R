@@ -182,6 +182,7 @@ QuadrupenFit <- R6::R6Class(
       private$monitoring  <- out$monitoring
       private$monitoring$timer <- timer
       private$control     <- control
+      invisible(out)
     },
     #' @description Model extraction
     #' @param selection either a character (model selection criteria) of a scalar (lambda value)
@@ -321,6 +322,8 @@ QuadrupenFit <- R6::R6Class(
           out <- private$optimizer(CVData[[fold]]$trainData, private$intercept, regParam, control)
 ### Temporary fix          
           if (is.list(out$beta)) out$beta <- do.call(rbind, out$beta)
+          if (!is.null(out$b)) out$beta <- out$beta + do.call(rbind, out$b)
+### Temporary fix          
           if (control$rescaling != "none"){
             res <- private$rescaled(out$beta, out$mu)
             out$mu   <- res$mu

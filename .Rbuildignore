@@ -9,3 +9,4 @@ README.qmd
 ^pkgdown$
 ^\.vscode$
 ^tools$
+^memcheck

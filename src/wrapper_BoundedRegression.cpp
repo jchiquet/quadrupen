@@ -18,7 +18,7 @@ List bounded_regression_cpp(
 
   RegressionData<mat> data(dataModel, intercept, as<bool>(control["normalize"])) ;
 
-  BoundedRegression bounded(data, intercept, regParam, control);
+  BoundedRegression bounded(data, regParam, control);
 
   List results = bounded.solution_path(control);
 
@@ -28,7 +28,7 @@ List bounded_regression_cpp(
       Named("l2")   = bounded.struct_tuning()
     ),
     Named("beta")        = bounded.coefficients(),
-    Named("mu")          = bounded.interceptTerm(),
+    Named("mu")          = bounded.intercept(),
     Named("normx")       = bounded.data().norm_X_,
     Named("df")          = bounded.degrees_freedom(),
     Named("monitoring")  = results

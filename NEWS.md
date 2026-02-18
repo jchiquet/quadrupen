@@ -6,6 +6,7 @@ NEWS/Changelog
   - complete rewriting of R code using R6 classes
   - complete rewriting of C++ code using template and OO style programing
   - added FusedLasso from the archived package by Holger Hoefling (fixed CRAN's complaints)
+  - added lava (combinaision of sparse and dense regularization, Chernozukov et al, 2017)
   - changing many parameters (badly) named, do not expect backward compatibility
 - minor updates
   - Integration of changes from CRAN versions from 0.2-4 to 0.2-13  

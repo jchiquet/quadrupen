@@ -9,8 +9,8 @@ using namespace Rcpp;
 using namespace arma;
 
 BoundedRegression::BoundedRegression(
-  RegressionData<mat>& data, const bool& intercept, const List& regParam, const List& control) :
-  GenericRegularizer<mat,Norm::LINF>::GenericRegularizer(data, intercept, regParam) {
+  RegressionData<mat>& data, const List& regParam, const List& control) :
+  GenericRegularizer<mat,Norm::LINF>::GenericRegularizer(data, regParam) {
     
     // set the penalty to l infinity
     penalty_ = Penalty<Norm::LINF>() ;

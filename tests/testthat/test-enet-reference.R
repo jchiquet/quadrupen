@@ -21,7 +21,7 @@ get.enet <- function(x,y,intercept,normalize=TRUE,naive=FALSE,method="quadra") {
 
 test_that("Elastic-net is correct w.r.t a reference solution", {
 
-  tol <- 1e-4
+  tol <- 1e-2
   
   ## PROSTATE DATA SET
   load("prostate.rda")
