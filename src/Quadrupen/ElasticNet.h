@@ -16,17 +16,16 @@ using namespace std;
 template <typename matrix>
 class ElasticNet : 
   public GenericRegularizer<matrix,Norm::L1>{
-
-  using GenericRegularizer<matrix,Norm::L1>::intercept_ ;
-  using GenericRegularizer<matrix,Norm::L1>::lambdas_   ;
-  using GenericRegularizer<matrix,Norm::L1>::penalty_   ;
-  using GenericRegularizer<matrix,Norm::L1>::set_       ;
-  using GenericRegularizer<matrix,Norm::L1>::data_      ;
-  using GenericRegularizer<matrix,Norm::L1>::df_        ;
-  using GenericRegularizer<matrix,Norm::L1>::lambda_factor_ ;
-  using GenericRegularizer<matrix,Norm::L1>::get_lambda_seq ;
-  
   public:
+    
+    using GenericRegularizer<matrix,Norm::L1>::intercept_ ;
+    using GenericRegularizer<matrix,Norm::L1>::lambdas_   ;
+    using GenericRegularizer<matrix,Norm::L1>::penalty_   ;
+    using GenericRegularizer<matrix,Norm::L1>::set_  ;
+    using GenericRegularizer<matrix,Norm::L1>::data_ ;
+    using GenericRegularizer<matrix,Norm::L1>::df_   ;
+    using GenericRegularizer<matrix,Norm::L1>::lambda_factor_ ;
+    using GenericRegularizer<matrix,Norm::L1>::get_lambda_seq ;
   
   ElasticNet(const RegressionData<matrix>&, const List&, const List&);
   
@@ -76,7 +75,7 @@ ElasticNet<matrix>::ElasticNet(
     penalty_ = Penalty<Norm::L1>() ;
     lambda_factor_ = as<vec>(regParam["lambda_factor"]) ;
     get_lambda_seq(regParam) ;
-    
+
     // Set up the optimizer
     solver_ = OptimizerL1<matrix>(penalty_) ;
     
@@ -140,7 +139,7 @@ List ElasticNet<matrix>::solution_path(const List& control) {
   for(auto lambda_ : lambdas_) {
     if (verbose) {
       Rprintf("\n lambda_l1 = %f",lambda_) ;
-      Rprintf("\n nb active variables = %i\n",set_.size()) ;
+      Rprintf("\n nb active variables = %i\n", set_.size()) ;
     }
     
     // OPTIMIZER LOOP (FIX-LAMBDA VALUE): IDENTIFY THE ACTIVE SET AND SOLVE
@@ -209,9 +208,9 @@ List ElasticNet<matrix>::solution_path(const List& control) {
     gap.push_back(current_gap) ;
     iactive.push_back(current_it) ;
     status.push_back(0) ;
-    if (current_it >= maxiter)  { status.back() = 1 ; }
-    if (set_.size()  > maxfeat) { status.back() = 2 ; }
-    if (!success)               { status.back() = 3 ; }
+    if (current_it >= maxiter)       { status.back() = 1 ; }
+    if (set_.size() > maxfeat) { status.back() = 2 ; }
+    if (!success)                    { status.back() = 3 ; }
     
     // Preparing next value of the penalty
     if (status.back() >= 2) {
