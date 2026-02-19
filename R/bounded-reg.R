@@ -120,7 +120,7 @@ bounded.reg <- function(x,
   ##
   if (ctrl$verbose) cat("\nModel fitting and optimization")
   myModel$fit(ctrl)
-  
+
   ## ============================================
   ## POSTREATMENT + SEND BACK THE RESULTING MODEL
   ##

@@ -100,11 +100,10 @@ ElasticNet<matrix>::ElasticNet(
 template <typename matrix>
 double ElasticNet<matrix>::get_df() {
   
-  mat SAA(set_.size(),set_.size()) ;
   double df = set_.size() ;
-  
   if (gamma_ > 0) {
     // loop due to sparse encoding. should iterate over the n_zeros only...
+    mat SAA(set_.size(),set_.size()) ;
     for (uword i=0;i<set_.size();i++){
       for (uword j=i;j<set_.size();j++){
         SAA(i,j) = data_.S_.at(set_.A_(i),set_.A_(j));
@@ -220,8 +219,8 @@ List ElasticNet<matrix>::solution_path(const List& control) {
       nzeros_   = join_cols(nzeros_, beta_/(data_.norm_X_(set_.A_) % lambda_factor_(set_.A_)));
       vec beta_debiased = set_.XATXAinv_ * (data_.XTy_(set_.A_) - data_.X_bar_(set_.A_) * accu(data_.y_)) ;
       debiased_ = join_cols(debiased_, beta_debiased/(data_.norm_X_(set_.A_) % lambda_factor_(set_.A_)));
-      intercept_.push_back(data_.y_bar_ - as_scalar(dot(beta_, data_.X_bar_(set_.A_))));
-      intercept_debiased_.push_back(data_.y_bar_ - as_scalar(dot(beta_debiased, data_.X_bar_(set_.A_)))) ;
+      intercept_.push_back(data_.y_bar_ - dot(beta_, data_.X_bar_(set_.A_)));
+      intercept_debiased_.push_back(data_.y_bar_ - dot(beta_debiased, data_.X_bar_(set_.A_))) ;
       iA_ = join_rows(iA_, df_.size()*ones<urowvec>(set_.size()) );
       jA_ = join_rows(jA_, set_.A_.t()) ;
       df_.push_back(get_df()) ;

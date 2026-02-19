@@ -30,10 +30,10 @@ List elastic_net_dense_cpp(
     Named("beta")          = enet.coefficients(),
     Named("beta_debiased") = enet.debiased_coefficients(),
     Named("active")        = enet.active_var(),
-    Named("mu")            = enet.intercept(),
-    Named("mu_debiased")   = enet.intercept_debiased(),
-    Named("normx")         = enet.data().norm_X_,
-    Named("df")            = enet.degrees_freedom(),
+    Named("mu")            = enet.intercept_,
+    Named("mu_debiased")   = enet.intercept_debiased_,
+    Named("normx")         = enet.data_.norm_X_,
+    Named("df")            = enet.df_,
     Named("monitoring")    = results
   );
   

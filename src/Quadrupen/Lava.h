@@ -51,20 +51,13 @@ template <typename matrix>
 double Lava<matrix>::get_df() {
   
   double df = set_.size() ;
-  mat B ;
-  if (set_.use_chol_) {
-    B = set_.Rinv_ * set_.Rinv_.t();
-  } else {
-    B = inv_sympd(set_.XATXA_);
-  }
   mat K = diagmat(ones(data_.n_)) - 
-    data_.X_.cols(set_.A_) * B * data_.X_.cols(set_.A_).t() ;
+    data_.X_.cols(set_.A_) * set_.XATXAinv_ * data_.X_.cols(set_.A_).t() ;
   
   df -= trace(K * Proj_);
   
   return(df);
 }
-
 
 template <typename matrix>
 void Lava<matrix>::post_treatment(const RegressionData<matrix>& data,
@@ -81,6 +74,9 @@ void Lava<matrix>::post_treatment(const RegressionData<matrix>& data,
     vec b = M * (UTy - DVT * beta.row(i).t()) / data.norm_X_ ;
     dense_coef_.push_back(b) ;
     intercept_.push_back(data.y_bar_ - dot(beta.row(i).t() - b, data.X_bar_));
+    
+    
+    
   }
   sparse_coef_ = beta ;
   

@@ -27,8 +27,8 @@ List ridge_cpp(
       Named("l2") = ridge.path_tuning(),
       Named("l1") = 0 
     ),
-    Named("beta")        = ridge.coefficients(),
-    Named("mu")          = ridge.intercept(),
+    Named("beta")        = ridge.coef_,
+    Named("mu")          = ridge.intercept_,
     Named("normx")       = ridge.data().norm_X_,
     Named("df")          = ridge.degrees_freedom(),
     Named("monitoring")  = results

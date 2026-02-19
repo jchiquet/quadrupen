@@ -30,18 +30,18 @@ public:
   // Getter functions to access private members
   const RegressionData<matrix>& data()    const { return data_      ; }
   const ActiveSet<matrix>& active_set()   const { return set_       ; }
-  const vector<vec>& coefficients()       const { return coef_      ; }
+  const matrix& coefficients()            const { return coef_      ; }
   const vector<double>& intercept()       const { return intercept_ ; }
   const vector<double>& path_tuning()     const { return lambdas_   ; }
   const vector<double>& degrees_freedom() const { return df_        ; }
   
   RegressionData<matrix> data_ ; // data structure
   ActiveSet<matrix> set_       ; // Active set of variable and data
-  vector<double> intercept_    ; // vector of intercept term
   Penalty<norm> penalty_       ; // main penalty object 
   vector<double> lambdas_      ; // vector of parameters tuning the man penalty
   vec lambda_factor_           ; // main penalty factors
-  vector<arma::vec> coef_      ; // matrix of coefficients
+  vector<double> intercept_    ; // vector of intercept term
+  matrix coef_                 ; // matrix of coefficients
   vector<double> df_           ; // degrees of freedom along the path
   uvec all                     ; // a vector with all variable indices
 };
