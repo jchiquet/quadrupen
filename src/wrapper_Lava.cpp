@@ -54,7 +54,7 @@ List lava_dense_cpp(
     Named("beta")        = lava.sparse_coef_,
     Named("b")           = lava.dense_coef_,
     Named("active")      = lava.active_var(),
-    Named("mu")          = lava.const_,
+    Named("mu")          = lava.intercept(),
     Named("normx")       = lava.data().norm_X_,
     Named("df")          = lava.degrees_freedom(),
     Named("monitoring")  = results

@@ -17,12 +17,12 @@ template <typename matrix>
 class ElasticNet : 
   public GenericRegularizer<matrix,Norm::L1>{
 
-  using GenericRegularizer<matrix,Norm::L1>::lambdas_ ;
-  using GenericRegularizer<matrix,Norm::L1>::penalty_ ;
-  using GenericRegularizer<matrix,Norm::L1>::set_     ;
-  using GenericRegularizer<matrix,Norm::L1>::data_    ;
-  using GenericRegularizer<matrix,Norm::L1>::const_   ;
-  using GenericRegularizer<matrix,Norm::L1>::df_      ;
+  using GenericRegularizer<matrix,Norm::L1>::intercept_ ;
+  using GenericRegularizer<matrix,Norm::L1>::lambdas_   ;
+  using GenericRegularizer<matrix,Norm::L1>::penalty_   ;
+  using GenericRegularizer<matrix,Norm::L1>::set_       ;
+  using GenericRegularizer<matrix,Norm::L1>::data_      ;
+  using GenericRegularizer<matrix,Norm::L1>::df_        ;
   using GenericRegularizer<matrix,Norm::L1>::lambda_factor_ ;
   using GenericRegularizer<matrix,Norm::L1>::get_lambda_seq ;
   
@@ -38,21 +38,29 @@ class ElasticNet :
     return sp_mat(join_cols(iA_, jA_), nzeros_, lambdas_.size(), data_.p_) ; 
   }
 
+  const sp_mat debiased_coefficients() const { 
+    return sp_mat(join_cols(iA_, jA_), debiased_, lambdas_.size(), data_.p_) ; 
+  }
+
+  const vector<double>& intercept_debiased() const { return intercept_debiased_ ; }
+  
   const sp_mat active_var() const { 
     return sp_mat(join_cols(iA_, jA_), vec(iA_.n_elem, fill::ones), lambdas_.size(), data_.p_) ; 
   }
   
   // Specific to Elastic-Net regularization
   OptimizerL1<matrix> solver_ ; // Solvers for L1 penalty
-  double gamma_ ; // overall amount of l2 penalty
-  vec beta_     ; // vector of current parameters
-  vec grad_     ; // vector of current gradient (smooth part)
-  double loss_  ; // current quadratic loss
-  double J_     ; // current optimality gap
-  double D_     ; // current move in the optimality gap
-  vec   nzeros_ ; // contains non-zero value of beta
-  urowvec iA_   ; // contains row indices of the non-zero values
-  urowvec jA_   ; // contains column indices of the non-zero values
+  double gamma_   ; // overall amount of l2 penalty
+  vec beta_       ; // vector of current parameters
+  vec grad_       ; // vector of current gradient (smooth part)
+  double loss_    ; // current quadratic loss
+  double J_       ; // current optimality gap
+  double D_       ; // current move in the optimality gap
+  vec   nzeros_   ; // contains non-zero value of beta
+  vec   debiased_ ; // contains the debiased non-zero value of beta
+  vector<double >intercept_debiased_ ; // contains the debiased vector of intercept
+  urowvec iA_     ; // contains row indices of the non-zero values
+  urowvec jA_     ; // contains column indices of the non-zero values
 
   // Compute degrees of freedom for the current estimate
   double get_df() ;
@@ -97,12 +105,6 @@ double ElasticNet<matrix>::get_df() {
   double df = set_.size() ;
   
   if (gamma_ > 0) {
-    mat B ;
-    if (set_.use_chol_) {
-      B = set_.Rinv_ * set_.Rinv_.t();
-    } else {
-      B = inv_sympd(set_.XATXA_);
-    }
     // loop due to sparse encoding. should iterate over the n_zeros only...
     for (uword i=0;i<set_.size();i++){
       for (uword j=i;j<set_.size();j++){
@@ -110,7 +112,7 @@ double ElasticNet<matrix>::get_df() {
         SAA(j,i) = SAA(i,j);
       }
     }
-    df -= trace(SAA * B);
+    df -= trace(SAA * set_.XATXAinv_);
   }
   
   return(df);
@@ -215,8 +217,12 @@ List ElasticNet<matrix>::solution_path(const List& control) {
     if (status.back() >= 2) {
       break;
     } else {
-      nzeros_ = join_cols(nzeros_, beta_/(data_.norm_X_(set_.A_) % lambda_factor_(set_.A_)));
-      const_.push_back(data_.y_bar_ - as_scalar(dot(beta_, data_.X_bar_(set_.A_))));
+      set_.inverse_Gram() ;
+      nzeros_   = join_cols(nzeros_, beta_/(data_.norm_X_(set_.A_) % lambda_factor_(set_.A_)));
+      vec beta_debiased = set_.XATXAinv_ * (data_.XTy_(set_.A_) - data_.X_bar_(set_.A_) * accu(data_.y_)) ;
+      debiased_ = join_cols(debiased_, beta_debiased/(data_.norm_X_(set_.A_) % lambda_factor_(set_.A_)));
+      intercept_.push_back(data_.y_bar_ - as_scalar(dot(beta_, data_.X_bar_(set_.A_))));
+      intercept_debiased_.push_back(data_.y_bar_ - as_scalar(dot(beta_debiased, data_.X_bar_(set_.A_)))) ;
       iA_ = join_rows(iA_, df_.size()*ones<urowvec>(set_.size()) );
       jA_ = join_rows(jA_, set_.A_.t()) ;
       df_.push_back(get_df()) ;

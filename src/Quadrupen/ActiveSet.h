@@ -17,6 +17,7 @@ public:
   uvec A_           ; // set of currently activated variables
   uvec is_in_       ; // indicator of active variables (0/1)
   mat XATXA_, XTXA_ ; // matrices of currently activated variables
+  mat XATXAinv_     ;
   bool use_chol_    ; // Maintain a Cholesky factorization along the active set algorithm
   mat R_, Rinv_     ; // Cholesky decomposition of XATXA
   
@@ -37,6 +38,10 @@ public:
   
   // Downdate Cholesky factorisation by removing the specified variables
   void downdate_Cholesky(uword j) ; 
+  
+  // Inverse the currently activte Gram matrix
+  void inverse_Gram() ; 
+  
 };
 
 template <typename matrix>
@@ -151,4 +156,14 @@ void ActiveSet<matrix>::downdate_Cholesky(uword j) {
   Rinv_ = solve(trimatu(R_), eye(p, p)) ;
 }
 
+template <typename matrix>
+void ActiveSet<matrix>::inverse_Gram() {
+  if (use_chol_) {
+    XATXAinv_ = Rinv_ * Rinv_.t();
+  } else {
+    XATXAinv_ = inv_sympd(XATXA_);
+  }
+}
+
 #endif
+

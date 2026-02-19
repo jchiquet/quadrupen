@@ -16,9 +16,9 @@ using namespace std;
 template <typename matrix>
 class Lava : 
   public ElasticNet<matrix> {
-  
+
 public:
-  
+
   Lava(const RegressionData<matrix>&, const mat&, const List&, const List&);
 
   void post_treatment(const RegressionData<matrix>& data,
@@ -27,7 +27,7 @@ public:
   // Specific to Elastic-Net regularization
   sp_mat sparse_coef_     ; // matrix of dense coefficients
   vector<vec> dense_coef_ ; // matrix of dense coefficients
-  vector<double> const_   ; // matrix of dense coefficients
+  vector<double> intercept_ ; // matrix of dense coefficients
   mat Proj_               ; // Lava projector matrix
 
   // Compute degrees of freedom for the current estimate
@@ -77,7 +77,7 @@ void Lava<matrix>::post_treatment(const RegressionData<matrix>& data,
     beta.row(i) /= data.norm_X_.t() ;
     vec b = M * (UTy - DVT * beta.row(i).t()) / data.norm_X_ ;
     dense_coef_.push_back(b) ;
-    this->const_.push_back(data.y_bar_ - dot(beta.row(i).t() - b, data.X_bar_));
+    this->intercept_.push_back(data.y_bar_ - dot(beta.row(i).t() - b, data.X_bar_));
   }
   sparse_coef_ = beta ;
   

@@ -36,7 +36,7 @@ List RidgeRegression::solution_path(const mat& C_inv) {
     vec beta = (C_invV * diagmat(eta/(square(eta) + lambda/n)) * Uty) / data_.norm_X_ ;
     coef_.push_back(beta);
     // estimating the intercept term
-    const_.push_back(data_.y_bar_ - dot(beta, data_.X_bar_));  
+    intercept_.push_back(data_.y_bar_ - dot(beta, data_.X_bar_));  
     // computing the estimated degrees of freedom
     df_.push_back(sum(square(eta)/(square(eta) + lambda)));
     
