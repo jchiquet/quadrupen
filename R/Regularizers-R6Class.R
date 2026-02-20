@@ -20,19 +20,7 @@ ElasticNetFit <- R6::R6Class(
     initialize =  function(data, intercept, regParam) {
       super$initialize(data, intercept, regParam)
       private$optimizer <- 
-        ifelse(data$sparse_encoding,
-               elastic_net_sparse_cpp,
-               elastic_net_dense_cpp)
-    }
-  ),
-  private = list(
-    rescaled = function(beta = private$beta, mu = private$mu) { # Zhou and Hastie Rescaling
-      factor <- ( 1 + private$tuning[[2]] )
-      mean_y <- ifelse(self$has_intercept, mean(private$data$y), 0)
-      list(
-        beta = factor * private$beta,
-        mu   = factor * private$mu - private$tuning[[2]] * mean_y
-      )
+        ifelse(data$sparse_encoding, elastic_net_sparse_cpp, elastic_net_dense_cpp)
     }
   )
 )
@@ -58,16 +46,6 @@ BoundedRegressionFit <- R6::R6Class(
     initialize =  function(data, intercept, regParam) {
       super$initialize(data, intercept, regParam)
       private$optimizer <- bounded_regression_cpp
-    }
-  ),
-  private = list(
-    rescaled = function(beta = private$beta, mu = private$mu) { # Zhou and Hastie Rescaling
-      factor <- ( 1 + private$tuning[[2]] )
-      mean_y <- ifelse(self$has_intercept, mean(private$data$y), 0)
-      list(
-        beta = factor * private$beta,
-        mu   = factor * private$mu - private$tuning[[2]] * mean_y
-      )
     }
   )
 )
@@ -158,9 +136,9 @@ LavaFit <- R6::R6Class(
     #' @description function performing the optimization
     #' @param control list controlling the optimization process    
     fit = function(control) {
-      out <- super$fit(control)
-      private$sparse_coef_ <- out$beta
-      private$dense_coef_  <-  do.call(rbind, out$b)
+     super$fit(control)
+      private$sparse_coef_ <- private$stored_fit$beta
+      private$dense_coef_  <-  do.call(rbind, private$stored_fit$b)
       private$beta <- private$sparse_coef_ + private$dense_coef_
     }
   )

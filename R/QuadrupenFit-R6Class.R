@@ -36,18 +36,20 @@ QuadrupenFit <- R6::R6Class(
   ## PRIVATE MEMBERS
   ## ____________________________________________________
   private = list(
-    data        = NA,
-    beta        = Matrix()  ,
-    mu          = numeric() ,
-    df          = numeric() ,
-    tuning      = numeric() ,
-    intercept   = NA        ,
-    control     = list()    ,
-    optimizer   = NA        ,
-    infocrit    = NA        ,
-    crossval    = NA        ,
-    stabsel     = NA        ,
-    monitoring  = list()
+    data          = NA,
+    beta          = Matrix()  ,
+    mu            = numeric() ,
+    stored_fit    = list()    ,
+    df            = numeric() ,
+    tuning        = numeric() ,
+    intercept     = NA        ,
+    debias_       = NA        ,
+    control       = list()    ,
+    optimizer     = NA        ,
+    infocrit      = NA        ,
+    crossval      = NA        ,
+    stabsel       = NA        ,
+    monitoring    = list()
   ),
   ## ____________________________________________________
   ## 
@@ -99,7 +101,25 @@ QuadrupenFit <- R6::R6Class(
     #' @field interceptTerm A vector containing the successive values of the 
     #' (unpenalized) intercept.
     #' Equals to zero if \code{intercept} has been set to `FALSE`.
-    interceptTerm        = function(value) {private$mu},
+    interceptTerm = function(value) {
+      private$mu
+    },
+    #' @field debias logical, should we rely on the debias coefficient of the regularizer (if available) or not
+    debias = function(value) {
+      if (missing(value))
+        return(private$debias_)
+      else {
+        stopifnot(is.logical(value))
+        private$debias_ <- value
+        if (private$debias_) {
+          private$beta <- private$stored_fit$beta_debias
+          private$mu   <- private$stored_fit$mu_debias
+        } else {
+          private$beta <- private$stored_fit$beta
+          private$mu   <- private$stored_fit$mu
+        }
+      }
+    },
     #' @field residuals Matrix of residuals, each column corresponding to a value of `lambda1`.
     residuals            = function(value) {apply(self$fitted, 2, function(y_hat) private$data$y - y_hat)},
     #' @field deviance the model deviance
@@ -143,6 +163,7 @@ QuadrupenFit <- R6::R6Class(
       private$data      <- data
       private$intercept <- intercept
       private$tuning    <- regParam
+      private$debias_   <- FALSE
     },
     #' @description User friendly print method
     show = function() {
@@ -171,18 +192,17 @@ QuadrupenFit <- R6::R6Class(
       ## C++ CALL OPTIMIZER
       ## 
       if (control$timer) {cpp.start <- proc.time()}
-      out <- private$optimizer(private$data, private$intercept, private$tuning, control)
+      private$stored_fit <- private$optimizer(private$data, private$intercept, private$tuning, control)
       timer <- ifelse(control$timer, (proc.time() - cpp.start)[3], NA)
       ## END OF CALL
       ## ======================================================
-      private$tuning[[1]] <- out$tuning_param[[1]]
-      private$mu          <- drop(out$mu)
-      private$beta        <- out$beta
-      private$df          <- drop(out$df)
-      private$monitoring  <- out$monitoring
+      private$tuning[[1]] <- private$stored_fit$tuning_param[[1]]
+      private$mu          <- drop(private$stored_fit$mu)
+      private$beta        <- private$stored_fit$beta
+      private$df          <- drop(private$stored_fit$df)
+      private$monitoring  <- private$stored_fit$monitoring
       private$monitoring$timer <- timer
       private$control     <- control
-      invisible(out)
     },
     #' @description Model extraction
     #' @param selection either a character (model selection criteria) of a scalar (lambda value)
@@ -243,27 +263,6 @@ QuadrupenFit <- R6::R6Class(
       }
       res
     },
-    #' Debias model coefficients
-    #' 
-    #' @description Apply various debiasing schemes to correct effect of shrinkage 
-    #' on the estimation of the coefficients
-    #' @param type a character, either "rescaled", "relaxed" or "original". See details
-    #' 
-    #' @details
-    #' the 'rescaled' debaising is as defined in Zou and Hastie (2006): the vector of
-    #' parameters is rescaled by a coefficient \code{(1+lambda2)}. 'Original' reset to 
-    #' the original scaling
-    #' 
-    #' @return nothing is return, the beta are internaly rescaled
-    #'
-    debias = function(type = c("none", "standard")) {
-      type <- match.arg(type)
-      if (type != "none"){
-        res <- private$rescaled()
-        private$mu   <- res$mu
-        private$beta <- res$beta
-      }
-    },
     #' Cross-validation for Quadrupen object
     #' 
     #' @description Function that computes K-fold cross-validated error of a
@@ -321,15 +320,17 @@ QuadrupenFit <- R6::R6Class(
           regParam[[2]] <- lambda2
           out <- private$optimizer(CVData[[fold]]$trainData, private$intercept, regParam, control)
 ### Temporary fix          
-          if (is.list(out$beta)) out$beta <- do.call(rbind, out$beta)
-          if (!is.null(out$b)) out$beta <- out$beta + do.call(rbind, out$b)
+          # if (is.list(out$beta)) out$beta <- do.call(rbind, out$beta)
+          if (!is.null(out$b)) beta <- out$beta + do.call(rbind, out$b)
 ### Temporary fix          
-          if (control$rescaling != "none"){
-            res <- private$rescaled(out$beta, out$mu)
-            out$mu   <- res$mu
-            out$beta <- res$beta
+          if (private$debias_){
+            mu   <- out$mu_debiased
+            beta <- out$beta_debiased
+          } else {
+            mu   <- out$mu
+            beta <- out$beta
           }
-          y_hat <- scale(tcrossprod(CVData[[fold]]$testData$X, out$beta), -out$mu, FALSE)
+          y_hat <- scale(tcrossprod(CVData[[fold]]$testData$X, beta), - mu, FALSE)
           err <- sweep(y_hat, 1L, CVData[[fold]]$testData$y)^2
           if (ncol(err) < length(regParam[[1]])) {
             NAs <- length(regParam[[1]]) - ncol(err)
