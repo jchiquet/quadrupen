@@ -52,7 +52,6 @@ class ElasticNet :
   double gamma_   ; // overall amount of l2 penalty
   vec beta_       ; // vector of current parameters
   vec grad_       ; // vector of current gradient (smooth part)
-  double loss_    ; // current quadratic loss
   double J_       ; // current optimality gap
   double D_       ; // current move in the optimality gap
   vec   nzeros_   ; // contains non-zero value of beta

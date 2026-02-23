@@ -58,12 +58,14 @@ List elastic_net_sparse_cpp(
       Named("l1") = enet.path_tuning(),
       Named("l2") = enet.gamma_
     ),
-    Named("beta")        = enet.coefficients(),
-    Named("active")      = enet.active_var(),
-    Named("mu")          = enet.intercept(),
-    Named("normx")       = enet.data().norm_X_,
-    Named("df")          = enet.degrees_freedom(),
-    Named("monitoring")  = results
+    Named("beta")          = enet.coefficients(),
+    Named("beta_debiased") = enet.debiased_coefficients(),
+    Named("active")        = enet.active_var(),
+    Named("mu")            = enet.intercept_,
+    Named("mu_debiased")   = enet.intercept_debiased_,
+    Named("normx")         = enet.data_.norm_X_,
+    Named("df")            = enet.df_,
+    Named("monitoring")    = results
   );
   
 }
