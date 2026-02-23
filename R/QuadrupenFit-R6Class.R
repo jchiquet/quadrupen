@@ -85,7 +85,6 @@ QuadrupenFit <- R6::R6Class(
     optim_config = function(value) {private$control},
     #' @field fitted Matrix of fitted values, each column corresponding to a value of \code{lambda1}.
     fitted = function(value) {
-      browser()
       res <- sweep(tcrossprod(private$data_$X, private$coef_),2L,-private$intercept_)
       res
     },
