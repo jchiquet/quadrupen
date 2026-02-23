@@ -36,20 +36,20 @@ QuadrupenFit <- R6::R6Class(
   ## PRIVATE MEMBERS
   ## ____________________________________________________
   private = list(
-    data          = NA,
-    beta          = Matrix()  ,
-    mu            = numeric() ,
-    stored_fit    = list()    ,
-    df            = numeric() ,
-    tuning        = numeric() ,
-    intercept     = NA        ,
-    debias_       = NA        ,
-    control       = list()    ,
-    optimizer     = NA        ,
-    infocrit      = NA        ,
-    crossval      = NA        ,
-    stabsel       = NA        ,
-    monitoring    = list()
+    data_          = NA,
+    coef_          = Matrix()  ,
+    intercept_     = numeric() ,
+    has_intercept_ = NA        ,
+    debias_        = NA        ,
+    df_            = numeric() ,
+    stored_fit     = list()    ,
+    tuning         = numeric() ,
+    control        = list()    ,
+    optimizer      = NA        ,
+    infocrit       = NA        ,
+    crossval       = NA        ,
+    stabsel        = NA        ,
+    monitoring     = list()
   ),
   ## ____________________________________________________
   ## 
@@ -57,13 +57,11 @@ QuadrupenFit <- R6::R6Class(
   ## ____________________________________________________
   active = list(
     #' @field nvar number of coefficient (without intercept)
-    nvar = function(value) {private$data$d},
+    nvar = function(value) {private$data_$d},
     #' @field nobs sample size
-    nobs = function(value) {private$data$n},
+    nobs = function(value) {private$data_$n},
     #' @field dataModel an object with class [`DataModel`] storing the data
-    dataModel = function(value) {private$data},
-    #' @field has_intercept boolean indicating wether an intercept is included in the model
-    has_intercept = function(value) {private$intercept},
+    dataModel = function(value) {private$data_},
     #' @field major_tuning vector of "leading" tuning parameters (either l1, linf or l2)
     major_tuning = function(value) {
       if (missing(value))
@@ -87,22 +85,23 @@ QuadrupenFit <- R6::R6Class(
     optim_config = function(value) {private$control},
     #' @field fitted Matrix of fitted values, each column corresponding to a value of \code{lambda1}.
     fitted = function(value) {
-      res <- sweep(tcrossprod(private$data$X, private$beta),2L,-private$mu,check.margin=FALSE)
+      browser()
+      res <- sweep(tcrossprod(private$data_$X, private$coef_),2L,-private$intercept_)
       res
     },
     #' @field coefficients Matrix (class `"dgCMatrix"`) of
     #' coefficients with respect to the original input. The number of
     #' rows corresponds the length of \code{lambda1}.
     coefficients         = function(value) {
-      dimnames(private$beta) <- 
-        list(round(c(private$tuning[[1]]),3), colnames(private$data$X))
-      private$beta
+      dimnames(private$coef_) <- 
+        list(round(c(private$tuning[[1]]),3), colnames(private$data_$X))
+      private$coef_
     },
-    #' @field interceptTerm A vector containing the successive values of the 
+    #' @field intercept A vector containing the successive values of the 
     #' (unpenalized) intercept.
     #' Equals to zero if \code{intercept} has been set to `FALSE`.
-    interceptTerm = function(value) {
-      private$mu
+    intercept = function(value) {
+      private$intercept_
     },
     #' @field debias logical, should we rely on the debias coefficient of the regularizer (if available) or not
     debias = function(value) {
@@ -112,31 +111,31 @@ QuadrupenFit <- R6::R6Class(
         stopifnot(is.logical(value))
         private$debias_ <- value
         if (private$debias_) {
-          private$beta <- private$stored_fit$beta_debias
-          private$mu   <- private$stored_fit$mu_debias
+          private$coef_ <- private$stored_fit$coef_debias
+          private$intercept_ <- private$stored_fit$intercept_debias
         } else {
-          private$beta <- private$stored_fit$beta
-          private$mu   <- private$stored_fit$mu
+          private$coef_ <- private$stored_fit$coef
+          private$intercept_ <- private$stored_fit$intercept
         }
       }
     },
     #' @field residuals Matrix of residuals, each column corresponding to a value of `lambda1`.
-    residuals            = function(value) {apply(self$fitted, 2, function(y_hat) private$data$y - y_hat)},
+    residuals       = function(value) {apply(self$fitted, 2, function(y_hat) private$data_$y - y_hat)},
     #' @field deviance the model deviance
-    deviance             = function(value) {colSums(self$residuals^2)},
+    deviance        = function(value) {colSums(self$residuals^2)},
     #' @field degrees_freedom Estimated degree of freedoms for the successive `lambda1`.
-    degrees_freedom      = function(value) {private$df + ifelse(self$has_intercept, 1L, 0L)},
+    degrees_freedom = function(value) {private$df_},
     #' @field r_squared vector giving the coefficient of determination as a function of lambda1.
-    r_squared            = function(value) {1 - colSums(self$residuals^2) / private$data$rss},
+    r_squared       = function(value) {1 - colSums(self$residuals^2) / private$data_$rss},
     #' @field information_criteria object with class [`InformationCriteria`] storing various information criteria 
     #' (AIC, BIC, GCV, etc) for the current fit.
     information_criteria = function(value) {private$infocrit},
     #' @field cross_validation object with class [`CrossValidation`] storing output of CV job. 
     #' Only available once method cross_validate has been called.
-    cross_validation     = function(value) {private$crossval},
+    cross_validation = function(value) {private$crossval},
     #' @field stability_path object with class [`StabilityPath`] storing output of stability selection. 
     #' Only available once method $stability has been called.
-    stability_path       = function(value) {private$stabsel}
+    stability_path   = function(value) {private$stabsel}
   ),
   
   ## ____________________________________________________
@@ -160,20 +159,15 @@ QuadrupenFit <- R6::R6Class(
                   (length(regParam[[2]]) == 1 & inherits(regParam[[2]], "numeric")))
       stopifnot("minratio must be non negative." = regParam$min_ratio > 0)
       stopifnot("nlambda1 must be non negative." = regParam$n_lambda1 > 0)
-      private$data      <- data
-      private$intercept <- intercept
-      private$tuning    <- regParam
-      private$debias_   <- FALSE
+      private$data_          <- data
+      private$has_intercept_ <- intercept
+      private$tuning         <- regParam
+      private$debias_        <- FALSE
     },
     #' @description User friendly print method
     show = function() {
       cat("Linear regression with", self$penalty, "penalizer.\n")
-      # cat("Linear regression with", x@penalty, "penalizer,", self$rescaling, "rescaling applied to the coefficients.\n")
-      if (self$has_intercept) {
-        cat("- number of coefficients:", self$nvar,"+ intercept\n")
-      } else {
-        cat("- number of coefficients:", self$nvar,"(no intercept)\n")
-      }
+      cat("- number of coefficients:", self$nvar,"+ intercept\n")
       cat("- ", names(private$tuning)[[1]], " regularization: ",
           length(self$major_tuning), " points from ",
           format(max(self$major_tuning), digits = 3)," to ",
@@ -192,14 +186,14 @@ QuadrupenFit <- R6::R6Class(
       ## C++ CALL OPTIMIZER
       ## 
       if (control$timer) {cpp.start <- proc.time()}
-      private$stored_fit <- private$optimizer(private$data, private$intercept, private$tuning, control)
+      private$stored_fit <- private$optimizer(private$data_, private$has_intercept_, private$tuning, control)
       timer <- ifelse(control$timer, (proc.time() - cpp.start)[3], NA)
       ## END OF CALL
       ## ======================================================
       private$tuning[[1]] <- private$stored_fit$tuning_param[[1]]
-      private$mu          <- drop(private$stored_fit$mu)
-      private$beta        <- private$stored_fit$beta
-      private$df          <- drop(private$stored_fit$df)
+      private$intercept_  <- drop(private$stored_fit$intercept)
+      private$coef_       <- private$stored_fit$coef
+      private$df_         <- drop(private$stored_fit$df)
       private$monitoring  <- private$stored_fit$monitoring
       private$monitoring$timer <- timer
       private$control     <- control
@@ -240,7 +234,7 @@ QuadrupenFit <- R6::R6Class(
         match.arg(type), 
         "index"        = index,
         "penalty"      = lambda[index],
-        setNames(c(private$mu[index], private$beta[index, ]), private$data$varnames)
+        setNames(c(private$intercept_[index], private$coef_[index, ]), private$data_$varnames)
         )
       res
     },
@@ -259,7 +253,7 @@ QuadrupenFit <- R6::R6Class(
       if (is.null(newx)) {
         res <- self$fitted[ , index, drop = FALSE]
       } else {
-        res <- sweep(newx %*% t(private$beta[index, , drop = FALSE]), 2L, -private$mu[index])
+        res <- sweep(newx %*% t(private$coef_[index, , drop = FALSE]), 2L, -private$intercept_[index])
       }
       res
     },
@@ -293,7 +287,7 @@ QuadrupenFit <- R6::R6Class(
     cross_validate = 
       function(
           K       = 10,
-          folds   = split(sample(1:self$nobs), rep(1:K, length=self$nobs)),
+          folds   = split(sample(1:self$nobs), rep(1:K, length = self$nobs)),
           lambda2 = self$minor_tuning, verbose = TRUE, cores = max(K, detectCores() - 2)) {
 
         ## Some variables and copies useful for CV work
@@ -305,10 +299,10 @@ QuadrupenFit <- R6::R6Class(
         lambda2_vec <- rep(lambda2, each = K)
         fold_id <- rep(1:K, nlambda2)
         
-        if (verbose){
+        if (verbose) {
           cat("\nCROSS-VALIDATION FOR ", self$penalty," REGULARIZER \n\n")
           cat(K, "-fold CV on a grid of (", 
-              nlambda1, ",", nlambda2, ") tuning parameters\n", sep="")
+              nlambda1, ",", nlambda2, ") tuning parameters\n", sep = "")
         }
 
         ## Same data splitting is kept for varying lambda2 values
@@ -318,19 +312,15 @@ QuadrupenFit <- R6::R6Class(
         one_fold <- function(fold, lambda2) {
           if (verbose & (fold == 1)) cat(round(lambda2, 3),"\t")
           regParam[[2]] <- lambda2
-          out <- private$optimizer(CVData[[fold]]$trainData, private$intercept, regParam, control)
-### Temporary fix          
-          # if (is.list(out$beta)) out$beta <- do.call(rbind, out$beta)
-          if (!is.null(out$b)) beta <- out$beta + do.call(rbind, out$b)
-### Temporary fix          
-          if (private$debias_){
-            mu   <- out$mu_debiased
-            beta <- out$beta_debiased
+          out <- private$optimizer(CVData[[fold]]$trainData, private$has_intercept_, regParam, control)
+          if (private$debias_) {
+            intercept   <- out$intercept_debiased
+            coef <- out$coef_debiased
           } else {
-            mu   <- out$mu
-            beta <- out$beta
+            intercept   <- out$intercept
+            coef <- out$coef
           }
-          y_hat <- scale(tcrossprod(CVData[[fold]]$testData$X, beta), - mu, FALSE)
+          y_hat <- scale(tcrossprod(CVData[[fold]]$testData$X, coef), -intercept, FALSE)
           err <- sweep(y_hat, 1L, CVData[[fold]]$testData$y)^2
           if (ncol(err) < length(regParam[[1]])) {
             NAs <- length(regParam[[1]]) - ncol(err)
@@ -346,7 +336,7 @@ QuadrupenFit <- R6::R6Class(
           )) |> as.matrix() |> as.data.frame()
         if (verbose) cat("\n")
 
-        res <- do.call(rbind, tapply(err, rep(1:nlambda2, each=self$nobs), function(err_) {
+        res <- do.call(rbind, tapply(err, rep(1:nlambda2, each = self$nobs), function(err_) {
           mean <- colMeans(err_, na.rm = TRUE)
           if (any(is.nan(mean))) {
             warning("\nThere have been a lot of early stops along the path: 
@@ -395,7 +385,7 @@ QuadrupenFit <- R6::R6Class(
     stability = function(
           n_subsamples   = 50,
           subsample_size = floor(self$nobs/2),
-          subsamples     = replicate(n_subsamples, sample(1:self$nobs, subsample_size), simplify=FALSE),
+          subsamples     = replicate(n_subsamples, sample(1:self$nobs, subsample_size), simplify = FALSE),
           weakness       = 1,
           verbose        = TRUE,
           cores       = detectCores() - 2) {
@@ -416,8 +406,8 @@ QuadrupenFit <- R6::R6Class(
       blocs <- suppressWarnings(split(1:n_subsamples, 1:cores))
       
       if (verbose) {
-        cat(paste("\n\nSTABILITY SELECTION ",ifelse(weakness < 1,"with","without")," randomization (weakness = ",weakness,")",sep=""))
-        cat(paste("\nFitting procedure: ", self$penalty," with ", nlambda1,"-dimensional grid of lambda1.", sep=""))
+        cat(paste("\n\nSTABILITY SELECTION ",ifelse(weakness < 1,"with","without")," randomization (weakness = ",weakness,")",sep = ""))
+        cat(paste("\nFitting procedure: ", self$penalty," with ", nlambda1,"-dimensional grid of lambda1.", sep = ""))
         cat("\nRunning",length(blocs),"jobs parallely (1 per core)")
         cat("\nApprox.", length(blocs[[1]]),"subsamplings for each job for a total of", n_subsamples)
       }
@@ -429,7 +419,7 @@ QuadrupenFit <- R6::R6Class(
         select <- Matrix(0, nlambda1, self$nvar)
         subsamples_ok <- 0
         for (s in 1:length(subsets)) {
-          active <- private$optimizer(SubsampledData[[subsets[s]]], private$intercept, private$tuning, control)$active
+          active <- private$optimizer(SubsampledData[[subsets[s]]], private$has_intercept_, private$tuning, control)$active
           if (nrow(active) == nlambda1) {
             subsamples_ok <- subsamples_ok + 1
             select <- select + active
@@ -442,7 +432,7 @@ QuadrupenFit <- R6::R6Class(
       }
       
       ## Now launch the B jobs...
-      prob_bloc <- mclapply(blocs, bloc_stability, mc.cores=cores)
+      prob_bloc <- mclapply(blocs, bloc_stability, mc.cores = cores)
       
       ## Construct the probability path
       path <- Matrix(0, nlambda1, self$nvar)
@@ -482,9 +472,9 @@ QuadrupenFit <- R6::R6Class(
     criteria = function(penalty=
                           setNames(c(2, log(self$nobs), log(self$nvar), log(self$nobs) + 2*log(self$nvar)),
                                    c("AIC","BIC", "mBIC", "eBIC")), sigma=NULL) {
-      betas <- private$beta
+      coefs <- private$coef_
       lambda <- self$major_tuning
-      
+
       n <- self$nobs
       p <- self$nvar
       
@@ -505,7 +495,7 @@ QuadrupenFit <- R6::R6Class(
             crit, 
             df        = self$degrees_freedom, 
             lambda    = lambda, 
-            fraction  = apply(abs(betas),1,sum)/max(apply(abs(betas),1,sum)), 
+            fraction  = apply(abs(coefs),1,sum)/max(apply(abs(coefs),1,sum)), 
             row.names = 1:nrow(crit)
           )
         )
@@ -587,39 +577,39 @@ QuadrupenFit <- R6::R6Class(
     #' }
     #'
     plot_path = function(xvar = c("lambda", "fraction", "df"), log_scale = TRUE,
-                    title = paste(self$penalty," path", sep=""),
-                    standardize=TRUE, labels = NULL) {
+                    title = paste(self$penalty," path", sep = ""),
+                    standardize = TRUE, labels = NULL) {
       
       if (length(self$major_tuning) == 1) {
         stop("Not available when the leading vector of tuning parameters boild down to a scalar.")
       }
       xvar <- match.arg(xvar)
       
-      nzeros <- which(colSums(private$beta) != 0)
+      nzeros <- which(colSums(private$coef_) != 0)
       if (length(nzeros) == 0) {
         stop("Nothing to plot: all coefficients are zero.")
       }
       
-      beta  <- as.matrix(private$beta[, nzeros, drop = FALSE])
-      rownames(beta) <- NULL ## avoid warning message in ggplot2
+      coef  <- as.matrix(private$coef_[, nzeros, drop = FALSE])
+      rownames(coef) <- NULL ## avoid warning message in ggplot2
       
       if (standardize) {
         normx <- sqrt(drop(colSums(x^2)) - nrow(x) * colMeans(x)^2)
-        beta <- scale(beta, FALSE, 1/normx[nzeros])
+        coef <- scale(coef, FALSE, 1/normx[nzeros])
       }
 
       xv <- switch(xvar,
-        "fraction" = apply(abs(beta),1,sum)/max(apply(abs(beta),1,sum)),
-        "df"       = private$df,
+        "fraction" = apply(abs(coef),1,sum)/max(apply(abs(coef),1,sum)),
+        "df"       = private$df_,
          self$major_tuning
       )
       
-      dplot <- data.frame(xvar=xv, beta=beta) |> 
+      dplot <- data.frame(xvar = xv, coef = coef) |> 
          tidyr::pivot_longer(cols = -xvar, names_to = "var", values_to = "coef")
       if (is.null(labels)) {
         dplot$labels <- factor(rep(nzeros, length(xv)))
       } else {
-        if (sum(is.na(labels[nzeros]))>0 ) {
+        if (sum(is.na(labels[nzeros])) > 0 ) {
           labels <- NULL
           warning("The number of label is wrong, ignoring them.")
           dplot$labels <- factor(rep(nzeros, length(xv)))
@@ -628,32 +618,28 @@ QuadrupenFit <- R6::R6Class(
         }
       }
 
-      d <- ggplot(dplot) + aes(x=xvar,y=coef, color=labels, group=var) + 
-        geom_line() +  geom_hline(yintercept=0, alpha=0.5, linetype="dotted") +
+      d <- ggplot(dplot) + aes(x = xvar,y = coef, color = labels, group = var) + 
+        geom_line() +  geom_hline(yintercept = 0, alpha = 0.5, linetype = "dotted") +
         ylab(ifelse(standardize, "standardized coefficients","coefficients")) + 
           ggtitle(title) + theme_bw()
       
       if (is.null(labels)) {
-        d <- d + theme(legend.position="none") 
+        d <- d + theme(legend.position = "none") 
       } else {
         if (length(labels[nzeros]) != length(nzeros)) {
-          d <- d + theme(legend.position="none")
+          d <- d + theme(legend.position = "none")
         }
       }
       
       if (xvar == "lambda") {
         d <- d + xlab(ifelse(log_scale,expression(log[10](lambda)),expression(lambda)))
         if (log_scale)
-          d <- d + scale_x_log10() + annotation_logticks(sides="b")
+          d <- d + scale_x_log10() + annotation_logticks(sides = "b")
       } else if (xvar == "fraction") {
-        d <- d + xlab(expression(paste("|",beta[lambda],"|",{}[1]/max[lambda],"|",beta[lambda],"|",{}[1],sep="")))
+        d <- d + xlab(expression(paste("|",beta[lambda],"|",{}[1]/max[lambda],"|",beta[lambda],"|",{}[1],sep = "")))
       } else {
         d <- d + xlab("Degrees of freedom")
       }
-      
-      d
-      
-      
       d
     }
   )

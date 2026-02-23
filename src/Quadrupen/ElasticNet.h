@@ -99,7 +99,7 @@ ElasticNet<matrix>::ElasticNet(
 template <typename matrix>
 double ElasticNet<matrix>::get_df() {
   
-  double df = set_.size() ;
+  double df = set_.size() + data_.centered_ ;
   if (gamma_ > 0) {
     // loop due to sparse encoding. should iterate over the n_zeros only...
     mat SAA(set_.size(),set_.size()) ;

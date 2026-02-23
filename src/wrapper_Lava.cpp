@@ -51,12 +51,14 @@ List lava_dense_cpp(
       Named("l1") = lava.lambdas_,
       Named("l2") = gamma
     ),
-    Named("beta")          = lava.sparse_coef_,
-    Named("beta_debiased") = lava.debiased_coefficients(),
-    Named("b")             = lava.dense_coef_,
+    
+    Named("coef")          = lava.coef_,
+    Named("coef_debiased") = lava.coef_ + lava.debiased_coefficients(),
+    Named("sparse_coef")   = lava.sparse_coef_,
+    Named("sparse_coef_debiased") = lava.debiased_coefficients(),
     Named("active")        = lava.active_var(),
-    Named("mu")            = lava.intercept_,
-    Named("mu_debiased")   = lava.intercept_debiased_,
+    Named("intercept")     = lava.intercept_,
+    Named("intercept_debiased") = lava.intercept_debiased_,
     Named("normx")         = lava.data_.norm_X_,
     Named("df")            = lava.df_,
     Named("monitoring")    = results

@@ -121,8 +121,26 @@ LavaFit <- R6::R6Class(
     #' @field sparse_coef sparse part of the  decomposition of the coefficients
     sparse_coef = function(value) private$sparse_coef_,
     #' @field dense_coef dense part of the  decomposition of the coefficients
-    dense_coef  = function(value) private$dense_coef_
-    ),
+    dense_coef  = function(value) private$coef_- private$sparse_coef_,
+    #' @field debias logical, should we rely on the debias coefficient of the regularizer (if available) or not
+    debias = function(value) {
+      if (missing(value))
+        return(private$debias_)
+      else {
+        stopifnot(is.logical(value))
+        private$debias_ <- value
+        if (private$debias_) {
+          private$coef_ <- private$stored_fit$coef_debias
+          private$sparse_coef_ <- private$stored_fit$sparse_coef_debias
+          private$intercept_ <- private$stored_fit$intercept_debias
+        } else {
+          private$coef_ <- private$stored_fit$coef
+          private$sparse_coef_ <- private$stored_fit$sparse_coef
+          private$intercept_ <- private$stored_fit$intercept
+        }
+      }
+    }
+  ),
   private = list(sparse_coef_ = NA, dense_coef_ = NA),
   public  = list(
     #' @description Initialize a [`LavaFit`] model
@@ -136,10 +154,8 @@ LavaFit <- R6::R6Class(
     #' @description function performing the optimization
     #' @param control list controlling the optimization process    
     fit = function(control) {
-     super$fit(control)
-      private$sparse_coef_ <- private$stored_fit$beta
-      private$dense_coef_  <-  do.call(rbind, private$stored_fit$b)
-      private$beta <- private$sparse_coef_ + private$dense_coef_
+      super$fit(control)
+      private$sparse_coef_ <- private$stored_fit$sparse_coef
     }
   )
 )

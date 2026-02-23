@@ -22,10 +22,6 @@ cross validation \code{\link[=QuadrupenFit]{QuadrupenFit$cross_validate()}}, sta
 and plotting \code{\link[=QuadrupenFit]{QuadrupenFit$plot()}}. They come with equivalent S3 methods : \code{\link[=cross_validate]{cross_validate()}},
 \code{\link[=stability]{stability()}} and \code{\link[=plot]{plot()}}.
 
-the 'rescaled' debaising is as defined in Zou and Hastie (2006): the vector of
-parameters is rescaled by a coefficient \code{(1+lambda2)}. 'Original' reset to
-the original scaling
-
 The \code{"path"}plot is available as soon as a fit has been performed.
 For the others, the appropriate post-treatments must have been made via the
 methods \code{\link[=QuadrupenFit]{QuadrupenFit$criteria()}}, \code{\link[=QuadrupenFit]{QuadrupenFit$cross_validate()}} or
@@ -89,8 +85,6 @@ Penalized criteria based on estimation of degrees of freedom
 
 \item{\code{dataModel}}{an object with class \code{\link{DataModel}} storing the data}
 
-\item{\code{has_intercept}}{boolean indicating wether an intercept is included in the model}
-
 \item{\code{major_tuning}}{vector of "leading" tuning parameters (either l1, linf or l2)}
 
 \item{\code{minor_tuning}}{vector of "minor" tuning parameters (either l1 or l2)}
@@ -105,9 +99,11 @@ Penalized criteria based on estimation of degrees of freedom
 coefficients with respect to the original input. The number of
 rows corresponds the length of \code{lambda1}.}
 
-\item{\code{interceptTerm}}{A vector containing the successive values of the
+\item{\code{intercept}}{A vector containing the successive values of the
 (unpenalized) intercept.
 Equals to zero if \code{intercept} has been set to \code{FALSE}.}
+
+\item{\code{debias}}{logical, should we rely on the debias coefficient of the regularizer (if available) or not}
 
 \item{\code{residuals}}{Matrix of residuals, each column corresponding to a value of \code{lambda1}.}
 
@@ -137,7 +133,6 @@ Only available once method $stability has been called.}
 \item \href{#method-QuadrupenFit-fit}{\code{QuadrupenFit$fit()}}
 \item \href{#method-QuadrupenFit-get_model}{\code{QuadrupenFit$get_model()}}
 \item \href{#method-QuadrupenFit-predict}{\code{QuadrupenFit$predict()}}
-\item \href{#method-QuadrupenFit-debias}{\code{QuadrupenFit$debias()}}
 \item \href{#method-QuadrupenFit-cross_validate}{\code{QuadrupenFit$cross_validate()}}
 \item \href{#method-QuadrupenFit-stability}{\code{QuadrupenFit$stability()}}
 \item \href{#method-QuadrupenFit-criteria}{\code{QuadrupenFit$criteria()}}
@@ -246,29 +241,6 @@ Predict response for new sample based on the current model
 }
 \subsection{Returns}{
 a vector of predicted value
-Debias model coefficients
-}
-}
-\if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-QuadrupenFit-debias"></a>}}
-\if{latex}{\out{\hypertarget{method-QuadrupenFit-debias}{}}}
-\subsection{Method \code{debias()}}{
-Apply various debiasing schemes to correct effect of shrinkage
-on the estimation of the coefficients
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{QuadrupenFit$debias(type = c("none", "standard"))}\if{html}{\out{</div>}}
-}
-
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{type}}{a character, either "rescaled", "relaxed" or "original". See details}
-}
-\if{html}{\out{</div>}}
-}
-\subsection{Returns}{
-nothing is return, the beta are internaly rescaled
-
 Cross-validation for Quadrupen object
 }
 }

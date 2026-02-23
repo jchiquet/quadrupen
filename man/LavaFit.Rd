@@ -42,7 +42,6 @@ and methods of \link{QuadrupenFit}
 <ul>
 <li><span class="pkg-link" data-pkg="quadrupen" data-topic="QuadrupenFit" data-id="criteria"><a href='../../quadrupen/html/QuadrupenFit.html#method-QuadrupenFit-criteria'><code>quadrupen::QuadrupenFit$criteria()</code></a></span></li>
 <li><span class="pkg-link" data-pkg="quadrupen" data-topic="QuadrupenFit" data-id="cross_validate"><a href='../../quadrupen/html/QuadrupenFit.html#method-QuadrupenFit-cross_validate'><code>quadrupen::QuadrupenFit$cross_validate()</code></a></span></li>
-<li><span class="pkg-link" data-pkg="quadrupen" data-topic="QuadrupenFit" data-id="debias"><a href='../../quadrupen/html/QuadrupenFit.html#method-QuadrupenFit-debias'><code>quadrupen::QuadrupenFit$debias()</code></a></span></li>
 <li><span class="pkg-link" data-pkg="quadrupen" data-topic="QuadrupenFit" data-id="get_model"><a href='../../quadrupen/html/QuadrupenFit.html#method-QuadrupenFit-get_model'><code>quadrupen::QuadrupenFit$get_model()</code></a></span></li>
 <li><span class="pkg-link" data-pkg="quadrupen" data-topic="QuadrupenFit" data-id="plot"><a href='../../quadrupen/html/QuadrupenFit.html#method-QuadrupenFit-plot'><code>quadrupen::QuadrupenFit$plot()</code></a></span></li>
 <li><span class="pkg-link" data-pkg="quadrupen" data-topic="QuadrupenFit" data-id="plot_path"><a href='../../quadrupen/html/QuadrupenFit.html#method-QuadrupenFit-plot_path'><code>quadrupen::QuadrupenFit$plot_path()</code></a></span></li>

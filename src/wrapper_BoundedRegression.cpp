@@ -27,8 +27,8 @@ List bounded_regression_cpp(
       Named("linf") = bounded.lambdas_,
       Named("l2")   = bounded.gamma_
     ),
-    Named("beta")        = bounded.coefficients(),
-    Named("mu")          = bounded.intercept_,
+    Named("coef")        = bounded.coefficients(),
+    Named("intercept")   = bounded.intercept_,
     Named("normx")       = bounded.data_.norm_X_,
     Named("df")          = bounded.df_,
     Named("monitoring")  = results
