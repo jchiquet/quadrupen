@@ -14,7 +14,6 @@ fusedlasso(
   struct = NULL,
   intercept = TRUE,
   normalize = TRUE,
-  debiasing = c("none"),
   nlambda1 = ifelse(is.null(lambda1), 50, length(lambda1)),
   minratio = 0.01,
   maxfeat = ifelse(lambda2 < 1, min(nrow(x), ncol(x)), min(2 * nrow(x), ncol(x))),

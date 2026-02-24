@@ -26,6 +26,8 @@ and methods of \link{QuadrupenFit}
 \item{\code{sparse_coef}}{sparse part of the  decomposition of the coefficients}
 
 \item{\code{dense_coef}}{dense part of the  decomposition of the coefficients}
+
+\item{\code{debias}}{logical, should we rely on the debias coefficient of the regularizer (if available) or not}
 }
 \if{html}{\out{</div>}}
 }

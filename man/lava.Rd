@@ -15,8 +15,8 @@ lava(
   normalize = TRUE,
   refit = FALSE,
   nlambda1 = ifelse(is.null(lambda1), 100, length(lambda1)),
-  minratio = ifelse(nrow(x) <= ncol(x), 0.01, 1e-04),
-  maxfeat = ifelse(lambda2 < 0.01, min(nrow(x), ncol(x)), min(4 * nrow(x), ncol(x))),
+  minratio = 0.01,
+  maxfeat = min(nrow(x), ncol(x)),
   beta0 = numeric(ncol(x)),
   control = list()
 )
