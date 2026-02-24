@@ -78,14 +78,14 @@ void Lava<matrix>::post_treatment(const RegressionData<matrix>& data,
   intercept_.clear() ;
   intercept_debiased_.clear() ;
   
-  for (uword i=0;i< beta.n_rows ;i++){
+  for (uword i=0;i< beta.n_cols ;i++){
     // Rescale sparse and dense coefficient to original scaling factors
-    beta.row(i) /= data.norm_X_.t() ;
-    vec b = M * (UTy - DVT * beta.row(i).t()) / data.norm_X_ ;
-    coef_ = join_cols(coef_, b.t() + beta.row(i).as_dense()) ;
-    intercept_.push_back(data.y_bar_ - dot(beta.row(i).t() - b, data.X_bar_));
+    beta.col(i) /= data.norm_X_ ;
+    vec b = M * (UTy - DVT * beta.col(i)) / data.norm_X_ ;
+    coef_ = join_rows(coef_, b + beta.col(i).as_dense()) ;
+    intercept_.push_back(data.y_bar_ - dot(beta.col(i) - b, data.X_bar_));
     // Refit the sparse coefficient to remove bias due to sparse shrinkage
-    uvec A = find(beta.row(i)) ;
+    uvec A = find(beta.col(i)) ;
     vec w = data.y_ - data.X_ * b  - dot(data.X_bar_,b) * ones(data.n_);
     vec beta_debiased = solve(X.cols(A).t() * X.cols(A), X.cols(A).t() * w) ;
     debiased_ = join_cols(debiased_, beta_debiased/(data_.norm_X_(A) % lambda_factor_(A)));

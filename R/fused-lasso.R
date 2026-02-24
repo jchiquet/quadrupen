@@ -124,7 +124,7 @@ fusedlasso <- function(
   ##
   if (ctrl$verbose > 0) cat("\nModel fitting and optimization")
   myModel$fit(ctrl)
-  
+
   ## ===========================
   ## Post-Treatments
   ## 

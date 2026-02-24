@@ -33,18 +33,18 @@ class ElasticNet :
 
   void optimality_gap(double lambda_, uword type) ;
   
-  const sp_mat coefficients() const { 
-    return sp_mat(join_cols(iA_, jA_), nzeros_, lambdas_.size(), data_.p_) ; 
+  const sp_mat coefficients() const {
+    return sp_mat(join_cols(iA_, jA_), nzeros_, data_.p_, lambdas_.size()) ; 
   }
 
   const sp_mat debiased_coefficients() const { 
-    return sp_mat(join_cols(iA_, jA_), debiased_, lambdas_.size(), data_.p_) ; 
+    return sp_mat(join_cols(iA_, jA_), debiased_, data_.p_, lambdas_.size()) ; 
   }
 
   const vector<double>& intercept_debiased() const { return intercept_debiased_ ; }
   
   const sp_mat active_var() const { 
-    return sp_mat(join_cols(iA_, jA_), vec(iA_.n_elem, fill::ones), lambdas_.size(), data_.p_) ; 
+    return sp_mat(join_cols(iA_, jA_), vec(iA_.n_elem, fill::ones), data_.p_, lambdas_.size()) ; 
   }
   
   // Specific to Elastic-Net regularization
@@ -220,8 +220,8 @@ List ElasticNet<matrix>::solution_path(const List& control) {
       debiased_ = join_cols(debiased_, beta_debiased/(data_.norm_X_(set_.A_) % lambda_factor_(set_.A_)));
       intercept_.push_back(data_.y_bar_ - dot(beta_, data_.X_bar_(set_.A_)));
       intercept_debiased_.push_back(data_.y_bar_ - dot(beta_debiased, data_.X_bar_(set_.A_))) ;
-      iA_ = join_rows(iA_, df_.size()*ones<urowvec>(set_.size()) );
-      jA_ = join_rows(jA_, set_.A_.t()) ;
+      iA_ = join_rows(iA_, set_.A_.t()) ;
+      jA_ = join_rows(jA_, df_.size()*ones<urowvec>(set_.size()) );
       df_.push_back(get_df()) ;
     }
     

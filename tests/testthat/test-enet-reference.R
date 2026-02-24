@@ -16,7 +16,7 @@ get.enet <- function(x,y,intercept,normalize=TRUE,method="quadra") {
   
   enet <- predict(enet.larsen, type="coefficients", naive=TRUE)$coefficients[-iols,]
   
-  return(list(quad = quad, enet = enet))
+  return(list(quad = quad, enet = t(enet)))
 }
 
 test_that("Elastic-net is correct w.r.t a reference solution", {

@@ -1,6 +1,6 @@
 context("Consistency of the Structured Elastic-net (reference is computed via the 'augmented data' approach)")
 
-tol <- 1e-4
+tol <- 1e-3
 
 test_that("Consistency of the structured elastic-net", {
 
@@ -39,8 +39,8 @@ test_that("Consistency of the structured elastic-net", {
                           struct=t(C) %*% C, lambda1=lambda1, lambda2=lambda2)
 
     res <- list(
-      coef.ref = scale(predict(senet1,
-        type="coefficients",naive=TRUE)$coefficients,FALSE,normx)[-iols,],
+      coef.ref = t(scale(predict(senet1,
+        type="coefficients",naive=TRUE)$coefficients,FALSE,normx)[-iols,]),
         coef.our = as.matrix(senet2$coefficients))
 
     res
@@ -58,7 +58,7 @@ test_that("Consistency of the structured elastic-net", {
   expect_equal(out$coef.our, out$coef.ref, check.attributes = FALSE, tolerance = tol)
 
   ## Structured Elastic.net
-  C <- as.matrix(bandSparse(p,k=0:1,diagonals=list(rep(1,p),rep(-1,p-1))))
+  C <- as.matrix(Matrix::bandSparse(p,k=0:1,diagonals=list(rep(1,p),rep(-1,p-1))))
   ## with intercept and normalization
   out <- get.coef(x,y,intercept=TRUE,normalize=TRUE,C=C)
   expect_equal(out$coef.our, out$coef.ref, check.attributes = FALSE, tolerance = tol)

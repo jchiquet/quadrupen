@@ -11,13 +11,21 @@ x <- as.matrix(matrix(rnorm(95*n),n,95) %*% chol(Sigma))
 y <- 10 + x %*% beta + rnorm(n,0,10)
 
 ## Plot penalized criteria for the Elastic-net path
-enet <- elastic.net(x,y, lambda2=1, debiasing = "standard")
+enet <- elastic.net(x,y, lambda2=1, refit = TRUE)
 enet$information_criteria$plot()
 
+## Plot penalized criteria for the Elastic-net path
+enet <- elastic.net(x,y, lambda2=1, refit = FALSE)
+plot(enet, "criteria")
+
 ## Plot penalized criteria for the Bounded regression
-breg <- bounded.reg(x,y, lambda2=1, debiasing = "standard")
+breg <- bounded.reg(x,y, lambda2=1)
 plot(breg, "criteria")
 
 ## Plot penalized criteria for the Ridge regression
 ridge <- ridge(x,y)
 plot(ridge, "criteria")
+
+## Plot penalized criteria for the LAVA path
+lav <- lava(x, y, lambda2 = 0.1, minratio = )
+lav$information_criteria$plot(c("AIC", "BIC", "mBIC"))

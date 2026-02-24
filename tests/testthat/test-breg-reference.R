@@ -9,7 +9,7 @@ test_that("Bounded regression with lambda2 = 0, QUADRA - test on the documentati
     testDataBreg$y,
     lambda2 = 0
     )
-  expect_equal(res$coefficients, testDataBreg$breg_lambda2_0$coefficients, tolerance = tol)
+  expect_equal(res$coefficients, t(testDataBreg$breg_lambda2_0$coefficients), tolerance = tol)
 
 })
 
@@ -20,7 +20,7 @@ test_that("Bounded regression with lambda2 = 5, QUADRA - test on the documentati
     testDataBreg$y,
     lambda2 = 5
   )
-  expect_equal(res$coefficients, testDataBreg$breg_lambda2_5$coefficients, tolerance = tol)
+  expect_equal(res$coefficients, t(testDataBreg$breg_lambda2_5$coefficients), tolerance = tol)
   
 })
 
@@ -32,7 +32,7 @@ test_that("Bounded regression with lambda2 = 10 + S, QUADRA - test on the docume
     lambda2 = 10, 
     struct = testDataBreg$S
   )
-  expect_equal(res$coefficients, testDataBreg$breg_lambda2_10_S$coefficients, tolerance = tol)
+  expect_equal(res$coefficients, t(testDataBreg$breg_lambda2_10_S$coefficients), tolerance = tol)
   
 })
 
@@ -44,7 +44,7 @@ test_that("Bounded regression with lambda2 = 0, QUADRA with conjuguate gradient 
     lambda2 = 0,
     control = list(usechol = FALSE)
   )
-  expect_equal(res$coefficients, testDataBreg$breg_lambda2_0$coefficients, tolerance = tol)
+  expect_equal(res$coefficients, t(testDataBreg$breg_lambda2_0$coefficients), tolerance = tol)
   
 })
 
@@ -56,7 +56,7 @@ test_that("Bounded regression with lambda2 = 5, QUADRA with conjuguate gradient 
     lambda2 = 5,
     control = list(usechol = FALSE)
   )
-  expect_equal(res$coefficients, testDataBreg$breg_lambda2_5$coefficients, tolerance = tol)
+  expect_equal(res$coefficients, t(testDataBreg$breg_lambda2_5$coefficients), tolerance = tol)
   
 })
 
@@ -69,7 +69,7 @@ test_that("Bounded regression with lambda2 = 10 + S, QUADRA with conjuguate grad
     struct = testDataBreg$S,
     control = list(usechol = FALSE)
   )
-  expect_equal(res$coefficients, testDataBreg$breg_lambda2_10_S$coefficients, tolerance = tol)
+  expect_equal(res$coefficients, t(testDataBreg$breg_lambda2_10_S$coefficients), tolerance = tol)
   
 })
 
@@ -83,7 +83,7 @@ test_that("Bounded regression with lambda2 = 0, FISTA - test on the documentatio
     testDataBreg$y,
     lambda2 = 0, control = list(method = "fista")
   )
-  expect_equal(res$coefficients, testDataBreg$breg_lambda2_0$coefficients, tolerance = tol)
+  expect_equal(res$coefficients, t(testDataBreg$breg_lambda2_0$coefficients), tolerance = tol)
   
 })
 
@@ -94,7 +94,7 @@ test_that("Bounded regression with lambda2 = 5, FISTA - test on the documentatio
     testDataBreg$y,
     lambda2 = 5, control = list(method = "fista")
   )
-  expect_equal(res$coefficients, testDataBreg$breg_lambda2_5$coefficients, tolerance = tol)
+  expect_equal(res$coefficients, t(testDataBreg$breg_lambda2_5$coefficients), tolerance = tol)
   
 })
 
@@ -106,7 +106,7 @@ test_that("Bounded regression with lambda2 = 10 + S, FISTA  - test on the docume
     lambda2 = 10, 
     struct = testDataBreg$S, control = list(method = "fista")
   )
-  expect_equal(res$coefficients, testDataBreg$breg_lambda2_10_S$coefficients, tolerance = tol)
+  expect_equal(res$coefficients, t(testDataBreg$breg_lambda2_10_S$coefficients), tolerance = tol)
   
 })
 
