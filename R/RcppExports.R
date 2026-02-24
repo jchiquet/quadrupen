@@ -17,6 +17,14 @@ FusedLasso_cpp <- function(dataModel, intercept, regParam, controlFit) {
     .Call(`_quadrupen_FusedLasso_cpp`, dataModel, intercept, regParam, controlFit)
 }
 
+group_lasso_l1l2_dense_cpp <- function(dataModel, intercept, group, regParam, control) {
+    .Call(`_quadrupen_group_lasso_l1l2_dense_cpp`, dataModel, intercept, group, regParam, control)
+}
+
+group_lasso_l1l2_sparse_cpp <- function(dataModel, intercept, group, regParam, control) {
+    .Call(`_quadrupen_group_lasso_l1l2_sparse_cpp`, dataModel, intercept, group, regParam, control)
+}
+
 lava_dense_cpp <- function(dataModel, intercept, regParam, control) {
     .Call(`_quadrupen_lava_dense_cpp`, dataModel, intercept, regParam, control)
 }

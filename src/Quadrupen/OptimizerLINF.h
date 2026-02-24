@@ -88,7 +88,8 @@ uword OptimizerLINF<matrix>::quadratic_breg(
         mat R = updateCholeskyFromExisting(set.R_, tmp) ;
         tmp = solve(trimatu(R), solve(trimatl(strans(R)), b)) ;
       } else {
-        double bound = penalty_.pen_norm(beta(B)) ;
+        vec pen_arg = beta(B);
+        double bound = penalty_.pen_norm(pen_arg) ;
         tmp = join_cols(beta(set.A_), ones(1) * bound);
         iter_in = this->conjugate_gradient(tmp, XX, b, accuracy, max_iter) ;
       }
@@ -97,7 +98,8 @@ uword OptimizerLINF<matrix>::quadratic_breg(
     }
     
     // Handling guys reaching the boundary (leaving the active set)
-    double bound = penalty_.pen_norm(beta(B)) ; // current boundary
+    vec pen_arg = beta(B);
+    double bound = penalty_.pen_norm(pen_arg) ; // current boundary
     uvec ind_toB = find(abs(beta(set.A_)) > bound) ;
     if (!ind_toB.is_empty()) {
       uvec toB = set.A_(ind_toB) ;

@@ -122,7 +122,8 @@ uword GenericOptimizer<matrix,norm>::fista(
     bool found=false;
     while(!found) {
       // Apply proximal operator (implemented in penalty object)
-      betak = penalty_.proximal(betal - grad/L, lambda/L);
+      vec prox_arg = betal - grad/L;
+      betak = penalty_.proximal(prox_arg, lambda/L);
 
       fk = dot(betak, .5 * set.XATXA_ * betak - data.XTy_(set.A_)) ;
       l_num = 2 * (fk - f0 - dot(grad, betak-betal));

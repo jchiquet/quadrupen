@@ -51,6 +51,7 @@ Collate:
     'bounded-reg.R'
     'elastic-net.R'
     'fused-lasso.R'
+    'group-lasso.R'
     'lasso.R'
     'lava.R'
     'utils.R'

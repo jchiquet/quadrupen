@@ -11,67 +11,67 @@ using namespace arma;
 // ______________________________________________________
 // L1 NORM A.K.A LASSO
 template<>
-vec Penalty<Norm::L1>::elt_norm(vec x) {
+vec Penalty<Norm::L1>::elt_norm(vec x, uvec pk) {
   return(arma::abs(x));
 }
 
 template<>
-double Penalty<Norm::L1>::pen_norm(vec x) {
+double Penalty<Norm::L1>::pen_norm(vec x, uvec pk) {
   return(sum(elt_norm(x)));
 }
 
 template<>
-double Penalty<Norm::L1>::dual_norm(vec x) {
+double Penalty<Norm::L1>::dual_norm(vec x, uvec pk) {
   return(max(elt_norm(x))) ;
 }
 
 template<>
-vec Penalty<Norm::L1>::proximal(vec x, double lambda) {
+vec Penalty<Norm::L1>::proximal(vec x, double lambda, uvec pk) {
   return(max(zeros(x.n_elem), 1-lambda/elt_norm(x)) % x);
 }
 
 // ______________________________________________________
 // L2 NORM SQUARED A.K.A RIDGE
 template<>
-vec Penalty<Norm::RIDGE>::elt_norm(vec x) {
+vec Penalty<Norm::RIDGE>::elt_norm(vec x, uvec pk) {
   return(arma::pow(x, 2));
 }
 
 template<>
-double Penalty<Norm::RIDGE>::pen_norm(vec x) {
+double Penalty<Norm::RIDGE>::pen_norm(vec x, uvec pk) {
   return(sum(elt_norm(x)));
 }
 
 // Slight abuse: take the Fenchel conjuguate of L2^2
 template<>
-double Penalty<Norm::RIDGE>::dual_norm(vec x) {
+double Penalty<Norm::RIDGE>::dual_norm(vec x, uvec pk) {
   return(.25*sum(elt_norm(x))) ;
 }
 
 template<>
-vec Penalty<Norm::RIDGE>::proximal(vec x, double lambda) {
+vec Penalty<Norm::RIDGE>::proximal(vec x, double lambda, uvec pk) {
   return(x / (1+2*lambda));
 }
 
 // ______________________________________________________
 // LINF NORM A.K.A BOUNDED REGRESSION
 template<>
-vec Penalty<Norm::LINF>::elt_norm(vec x) {
+vec Penalty<Norm::LINF>::elt_norm(vec x, uvec pk) {
   return(arma::abs(x));
 }
 
 template<>
-double Penalty<Norm::LINF>::pen_norm(vec x) {
+double Penalty<Norm::LINF>::pen_norm(vec x, uvec pk) {
   return(max(elt_norm(x)));
 }
 
 template<>
-double Penalty<Norm::LINF>::dual_norm(vec x) {
+double Penalty<Norm::LINF>::dual_norm(vec x, uvec pk) {
   return(sum(elt_norm(x))) ;
 }
 
 template<>
-vec Penalty<Norm::LINF>::proximal(vec x, double lambda) {
+vec Penalty<Norm::LINF>::proximal(vec x, double lambda, uvec pk) {
   uword p = x.n_elem;
   vec u, proj;
   vec res = zeros<vec>(p);
@@ -106,7 +106,7 @@ vec Penalty<Norm::LINF>::proximal(vec x, double lambda) {
 // ______________________________________________________
 // L1/L2 NORM A.K.A GROUP-LASSO
 template<>
-vec Penalty<Norm::L1L2>::elt_norm(vec x) {
+vec Penalty<Norm::L1L2>::elt_norm(vec x, uvec pk) {
   
   vec  res = zeros<vec> (pk.n_elem) ; // output with group norms
   uword ind = 0 ; // index to go through the groups
@@ -120,22 +120,22 @@ vec Penalty<Norm::L1L2>::elt_norm(vec x) {
 }
 
 template<>
-double Penalty<Norm::L1L2>::pen_norm(vec x) {
-  return(sum(elt_norm(x)));
+double Penalty<Norm::L1L2>::pen_norm(vec x, uvec pk) {
+  return(sum(elt_norm(x, pk)));
 }
 
 template<>
-double Penalty<Norm::L1L2>::dual_norm(vec x) {
-  return(max(elt_norm(x))) ;
+double Penalty<Norm::L1L2>::dual_norm(vec x, uvec pk) {
+  return(max(elt_norm(x, pk))) ;
 }
 
 template<>
-vec Penalty<Norm::L1L2>::proximal(vec x, double lambda) {
+vec Penalty<Norm::L1L2>::proximal(vec x, double lambda, uvec pk) {
   
   vec res = zeros<vec>(x.n_elem);
   uword ind = 0 ;
   
-  vec tmp = max(zeros(pk.n_elem), 1-lambda/elt_norm(x)) ;
+  vec tmp = max(zeros(pk.n_elem), 1-lambda/elt_norm(x,pk)) ;
   
   for (uword k=0; k<pk.n_elem; k++) {
     res.subvec(ind, ind + pk(k) - 1) = tmp(k) * x.subvec(ind, ind + pk(k) - 1);
@@ -148,7 +148,7 @@ vec Penalty<Norm::L1L2>::proximal(vec x, double lambda) {
 // ______________________________________________________
 // L1/LINF NORM A.K.A GROUP-LASSO type 2
 template<>
-vec Penalty<Norm::L1LINF>::elt_norm(vec x) {
+vec Penalty<Norm::L1LINF>::elt_norm(vec x, uvec pk) {
   
   vec  res = zeros<vec> (pk.n_elem) ; // output with group norms
   uword ind = 0 ; // index to go through the groups
@@ -162,12 +162,12 @@ vec Penalty<Norm::L1LINF>::elt_norm(vec x) {
 }
 
 template<>
-double Penalty<Norm::L1LINF>::pen_norm(vec x) {
-  return(sum(elt_norm(x)));
+double Penalty<Norm::L1LINF>::pen_norm(vec x, uvec pk) {
+  return(sum(elt_norm(x, pk)));
 }
 
 template<>
-double Penalty<Norm::L1LINF>::dual_norm(vec x) {
+double Penalty<Norm::L1LINF>::dual_norm(vec x, uvec pk) {
   
   vec  res = zeros<vec> (pk.n_elem) ; // output with group norms
   uword ind = 0 ; // index to go through the groups
@@ -181,7 +181,7 @@ double Penalty<Norm::L1LINF>::dual_norm(vec x) {
 }
 
 template<>
-vec Penalty<Norm::L1LINF>::proximal(vec x, double lambda) {
+vec Penalty<Norm::L1LINF>::proximal(vec x, double lambda, uvec pk) {
   
   uword ind = 0 ;
   vec u, v, proj;
@@ -223,7 +223,7 @@ vec Penalty<Norm::L1LINF>::proximal(vec x, double lambda) {
 // ______________________________________________________
 // COOP(ERATIVE) NORM A.K.A COOPERATIVE-LASSO
 template<>
-vec Penalty<Norm::COOP>::elt_norm(vec x) {
+vec Penalty<Norm::COOP>::elt_norm(vec x, uvec pk) {
   
   vec  res = zeros<vec> (pk.n_elem) ; // output with group norms
   uword ind = 0 ; // index to go through the groups
@@ -237,22 +237,22 @@ vec Penalty<Norm::COOP>::elt_norm(vec x) {
 }
 
 template<>
-double Penalty<Norm::COOP>::pen_norm(vec x) {
-  return(sum(elt_norm(x)));
+double Penalty<Norm::COOP>::pen_norm(vec x, uvec pk) {
+  return(sum(elt_norm(x, pk)));
 }
 
 template<>
-double Penalty<Norm::COOP>::dual_norm(vec x) {
-  return(max(elt_norm(x)));
+double Penalty<Norm::COOP>::dual_norm(vec x, uvec pk) {
+  return(max(elt_norm(x, pk)));
 }
 
 template<>
-vec Penalty<Norm::COOP>::proximal(vec x, double lambda) {
+vec Penalty<Norm::COOP>::proximal(vec x, double lambda, uvec pk) {
   
   vec res = zeros<vec>(x.n_elem);
   uword ind = 0 ;
   
-  vec tmp = max(zeros(pk.n_elem), 1-lambda/elt_norm(x)) ;
+  vec tmp = max(zeros(pk.n_elem), 1-lambda/elt_norm(x,pk)) ;
   
   for (uword k=0; k<pk.n_elem; k++) {
     res.subvec(ind, ind + pk(k) - 1) = tmp(k) * x.subvec(ind, ind + pk(k) - 1);

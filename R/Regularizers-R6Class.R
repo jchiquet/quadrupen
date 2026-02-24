@@ -103,6 +103,70 @@ FusedLassoFit <- R6::R6Class(
   )
 )
 
+#' Class "GroupLassoFit"
+#' 
+#' Class of object returned by the fitting function [group.lasso()]. Inherits fields
+#' and methods of [QuadrupenFit]
+#' 
+#' @seealso [QuadrupenFit], [group.lasso()]
+#' 
+#' @export
+#' 
+GroupLassoFit <- R6::R6Class(
+  classname = "GroupLassoFit",
+  inherit = QuadrupenFit,
+  active  = list(
+    #' @field penalty character describing the regularizer/penalty
+    penalty = function(value) paste0("group.lasso l1/", private$type_),
+    #' @field group vector of integers indicating group belonging
+    group = function(value) private$group_,
+    #' @param type string indicating whether the \eqn{\ell_1/\ell_2}{l1/l2} or the
+    #' \eqn{\ell_1/\ell_\infty}{l1/linf} group-Lasso must be fitted.
+    type = function(value) private$type_
+  ),
+  public  = list(
+    #' @description Initialize a [`ElasticNetFit`] model
+    #' @param data a [`DataModel`] object
+    #' @param intercept a logical; should an intercept be included in the mode?
+    #' @param group vector of integers indicating group belonging.
+    #' @param type string indicating whether the \eqn{\ell_1/\ell_2}{l1/l2} or the
+    #' \eqn{\ell_1/\ell_\infty}{l1/linf} group-Lasso must be fitted.
+    #' @param regParam a list with two elements, a vector and a scalar, for the regularization
+    initialize =  function(data, intercept, group, type, regParam) {
+      super$initialize(data, intercept, regParam)
+      private$group_ <- group
+      private$type_  <- type
+      private$optimizer <- 
+        ifelse(data$sparse_encoding, group_lasso_l1l2_sparse_cpp, group_lasso_l1l2_dense_cpp)
+    },
+    #' @description function performing the optimization
+    #' @param control list controlling the optimization process
+    fit = function(control) {
+      ## ======================================================
+      ## C++ CALL OPTIMIZER
+      ## 
+      if (control$timer) {cpp.start <- proc.time()}
+      private$stored_fit <- private$optimizer(
+        private$data_,
+        private$has_intercept_, 
+        private$group_,
+        private$tuning,
+        control
+      )
+      timer <- ifelse(control$timer, (proc.time() - cpp.start)[3], NA)
+      ## END OF CALL
+      ## ======================================================
+      private$tuning[[1]] <- private$stored_fit$tuning_param[[1]]
+      private$intercept_  <- drop(private$stored_fit$intercept)
+      private$coef_       <- private$stored_fit$coef
+      private$df_         <- drop(private$stored_fit$df)
+      private$monitoring  <- private$stored_fit$monitoring
+      private$monitoring$timer <- timer
+      private$control     <- control
+    }
+  )
+)
+
 #' Class "LavaFit"
 #' 
 #' Class of object returned by the fitting function [lava()]. Inherits fields

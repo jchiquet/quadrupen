@@ -67,6 +67,36 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// group_lasso_l1l2_dense_cpp
+List group_lasso_l1l2_dense_cpp(const Environment& dataModel, const bool& intercept, const arma::uvec& group, const List& regParam, const List& control);
+RcppExport SEXP _quadrupen_group_lasso_l1l2_dense_cpp(SEXP dataModelSEXP, SEXP interceptSEXP, SEXP groupSEXP, SEXP regParamSEXP, SEXP controlSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const Environment& >::type dataModel(dataModelSEXP);
+    Rcpp::traits::input_parameter< const bool& >::type intercept(interceptSEXP);
+    Rcpp::traits::input_parameter< const arma::uvec& >::type group(groupSEXP);
+    Rcpp::traits::input_parameter< const List& >::type regParam(regParamSEXP);
+    Rcpp::traits::input_parameter< const List& >::type control(controlSEXP);
+    rcpp_result_gen = Rcpp::wrap(group_lasso_l1l2_dense_cpp(dataModel, intercept, group, regParam, control));
+    return rcpp_result_gen;
+END_RCPP
+}
+// group_lasso_l1l2_sparse_cpp
+List group_lasso_l1l2_sparse_cpp(const Environment& dataModel, const bool& intercept, const arma::uvec& group, const List& regParam, const List& control);
+RcppExport SEXP _quadrupen_group_lasso_l1l2_sparse_cpp(SEXP dataModelSEXP, SEXP interceptSEXP, SEXP groupSEXP, SEXP regParamSEXP, SEXP controlSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const Environment& >::type dataModel(dataModelSEXP);
+    Rcpp::traits::input_parameter< const bool& >::type intercept(interceptSEXP);
+    Rcpp::traits::input_parameter< const arma::uvec& >::type group(groupSEXP);
+    Rcpp::traits::input_parameter< const List& >::type regParam(regParamSEXP);
+    Rcpp::traits::input_parameter< const List& >::type control(controlSEXP);
+    rcpp_result_gen = Rcpp::wrap(group_lasso_l1l2_sparse_cpp(dataModel, intercept, group, regParam, control));
+    return rcpp_result_gen;
+END_RCPP
+}
 // lava_dense_cpp
 List lava_dense_cpp(const Environment& dataModel, const bool& intercept, const List& regParam, const List& control);
 RcppExport SEXP _quadrupen_lava_dense_cpp(SEXP dataModelSEXP, SEXP interceptSEXP, SEXP regParamSEXP, SEXP controlSEXP) {
@@ -101,6 +131,8 @@ static const R_CallMethodDef CallEntries[] = {
     {"_quadrupen_elastic_net_dense_cpp", (DL_FUNC) &_quadrupen_elastic_net_dense_cpp, 4},
     {"_quadrupen_elastic_net_sparse_cpp", (DL_FUNC) &_quadrupen_elastic_net_sparse_cpp, 4},
     {"_quadrupen_FusedLasso_cpp", (DL_FUNC) &_quadrupen_FusedLasso_cpp, 4},
+    {"_quadrupen_group_lasso_l1l2_dense_cpp", (DL_FUNC) &_quadrupen_group_lasso_l1l2_dense_cpp, 5},
+    {"_quadrupen_group_lasso_l1l2_sparse_cpp", (DL_FUNC) &_quadrupen_group_lasso_l1l2_sparse_cpp, 5},
     {"_quadrupen_lava_dense_cpp", (DL_FUNC) &_quadrupen_lava_dense_cpp, 4},
     {"_quadrupen_ridge_cpp", (DL_FUNC) &_quadrupen_ridge_cpp, 4},
     {NULL, NULL, 0}
