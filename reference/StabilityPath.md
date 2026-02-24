@@ -45,7 +45,7 @@ function. Owns [`print()`](https://rdrr.io/r/base/print.html) and
 
 - `nonzeroprob`:
 
-  subset of the probabilityes stability path on the nonzero variables
+  subset of the probabilities stability path on the nonzero variables
 
 ## Methods
 
