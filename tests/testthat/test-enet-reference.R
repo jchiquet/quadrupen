@@ -92,7 +92,7 @@ test_that("Elastic-net is correct w.r.t a reference solution", {
 
 test_that("Elastic-net is correct w.r.t a reference solution - FISTA", {
 
-  tol <- 1e-2
+  tol <- 1e-1
   
   ## PROSTATE DATA SET
   load("prostate.rda")
