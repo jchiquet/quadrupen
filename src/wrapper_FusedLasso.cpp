@@ -115,27 +115,26 @@ List FusedLasso_cpp(
   
   // Preparing R output
   sp_mat beta = Rcpp::as<arma::sp_mat>(res.todgCMatrix()) ;
-  beta = beta.t() ;
-  vec mu = arma::zeros(lambda1Vec.size()) ;
+  rowvec mu = zeros<rowvec>(lambda1Vec.size()) ;
   if (intercept) {
-    mu = beta.col(p) ;
-    beta = beta.cols(0, p-1) ;
+    mu = beta.row(p) ;
+    beta.shed_row(p) ;
   }
   
   // degrees of freedom : number of non-zero values
-  vec df(beta.n_rows) ;
-  for (uword i=0; i<beta.n_rows; i++) {
-    rowvec row = beta.row(i).as_dense() ;
-    vec val = nonzeros(unique(row.t())) ;
+  vec df(beta.n_cols) ;
+  for (uword i=0; i<beta.n_cols; i++) {
+    vec col = beta.col(i).as_dense() ;
+    vec val = nonzeros(unique(col)) ;
     df(i) = val.n_elem ;
   }
-
+  
   // Normalizing beta back to original scale
-  beta = beta * arma::diagmat(1/normx) ;
+  beta = arma::diagmat(1/normx) * beta ;
 
   return List::create(
     Named("tuning_param") = List::create(
-      Named("l1") = NumericVector(lambda1Vec.begin(), lambda1Vec.begin()+beta.n_rows),
+      Named("l1") = NumericVector(lambda1Vec.begin(), lambda1Vec.begin()+beta.n_cols),
       Named("l2") = lambda2
     ),
     Named("coef")       = beta,

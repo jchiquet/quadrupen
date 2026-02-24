@@ -37,7 +37,7 @@ optim_enet_default <- function(d)
        timer       = FALSE,
        maxiter     = max(50, d),
        method      = "quadra",
-       threshold   = 1e-5,
+       threshold   = 1e-6,
        monitor     = 0,
        usechol     = TRUE
   )
@@ -47,7 +47,7 @@ optim_breg_default <- function(d)
        timer       = FALSE,
        maxiter     = 10,
        method      = "quadra",
-       threshold   = 1e-5,
+       threshold   = 1e-4,
        monitor     = 0,
        usechol     = FALSE
   )

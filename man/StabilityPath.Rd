@@ -64,7 +64,7 @@ estimated probabilities of selection along the path of solutions.}
 
 \item{\code{nonzero}}{variables with a non-null probability of selection along the stability path}
 
-\item{\code{nonzeroprob}}{subset of the probabilityes stability path on the nonzero variables}
+\item{\code{nonzeroprob}}{subset of the probabilities stability path on the nonzero variables}
 }
 \if{html}{\out{</div>}}
 }

@@ -21,7 +21,7 @@ List elastic_net_dense_cpp(
   ElasticNet<mat> enet(data, regParam, control);
 
   List results = enet.solution_path(control);
-  
+
   return List::create(
     Named("tuning_param") = List::create(
       Named("l1") = enet.path_tuning(),

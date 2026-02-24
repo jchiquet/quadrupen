@@ -69,15 +69,15 @@ StabilityPath <- R6::R6Class(
       if (sel_mode == "PFER") {
         ## estimate the average number of selected variables on the current path
         ## and pick the one controlling the PFER at the desired level
-        q    <- rowSums(prob >= cutoff)
+        q    <- colSums(prob >= cutoff)
         qLim <- sqrt(PFER * (2 * cutoff - 1) * p)
         iq <- q <= qLim
         iq <- ifelse(which.min(iq) != 1,which.min(iq) - 1,ifelse(sum(iq) == 0,1,length(iq)))
-        selected <- self$nonzero[which(prob[iq, ] > cutoff)]
+        selected <- self$nonzero[which(prob[, iq] > cutoff)]
         attr(selected, "iq") <- iq
         attr(selected, "q") <- q
       } else {
-        id <- order(colSums(prob),decreasing = TRUE)[1:nvarsel]
+        id <- order(rowSums(prob),decreasing = TRUE)[1:nvarsel]
         selected <- self$nonzero[id]
       }
       selected
@@ -142,7 +142,7 @@ StabilityPath <- R6::R6Class(
       stopifnot("Not available when length(lambda1) == 1" = (length(self$regParam[[1]]) > 1))
       stopifnot("Nothing to plot: all probabilities are zero along the path." = (length(self$nonzero) > 0))
 
-      prob <- self$nonzeroprob
+      prob <- t(self$nonzeroprob)
       
       ## the x-axis variable
       xv <- switch(xvar,"fraction" = self$regParam[[1]]/max(self$regParam[[1]]), self$regParam[[1]])
@@ -199,15 +199,15 @@ StabilityPath <- R6::R6Class(
   ),
   active =list(
     #' @field nvar number of variables (without intercept)
-    nvar = function(value) {ncol(self$probabilities)},
+    nvar = function(value) {nrow(self$probabilities)},
     #' @field nobs number of observation/sample size
     nobs = function(value) {max(unlist(self$subsamples))},
     #' @field nonzero variables with a non-null probability of selection along the stability path
-    nonzero = function(value) {which(colSums(self$probabilities) != 0)},
-    #' @field nonzeroprob subset of the probabilityes stability path on the nonzero variables
+    nonzero = function(value) {which(rowSums(self$probabilities) != 0)},
+    #' @field nonzeroprob subset of the probabilities stability path on the nonzero variables
     nonzeroprob = function(value) {
-      res  <- as.matrix(self$probabilities[, self$nonzero])
-      rownames(res) <- NULL
+      res  <- as.matrix(self$probabilities[self$nonzero, ])
+      colnames(res) <- NULL
       res      
     }
   )

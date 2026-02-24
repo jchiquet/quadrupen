@@ -12,11 +12,11 @@ test_that("lasso_quad2lars", {
       lambda1 <-  lasso.larsen$lambda ## usde the lars lambda grid
       lasso.quadru <- elastic.net(x,y, intercept=intercept, normalize=normalize,
                                   lambda1=lambda1, lambda2=0, control=list(method="quadra"))
-      quad <- list(coef   = as.matrix(lasso.quadru$coefficients),
-                   rss    = deviance(lasso.quadru))
+      quad <- list(coef = as.matrix(lasso.quadru$coefficients),
+                   rss  = deviance(lasso.quadru))
 
-      lars <- list(coef   = lasso.larsen$beta[-iols, ],
-                   rss    = lasso.larsen$RSS[-iols])
+      lars <- list(coef = t(lasso.larsen$beta[-iols, ]),
+                   rss  = lasso.larsen$RSS[-iols])
 
       return(list(quad=quad,lars=lars))
   }
@@ -98,7 +98,7 @@ test_that("lasso_quad2glmnet", {
                mu     = lasso.quad$intercept,
                fitted = as.matrix(lasso.quad$fitted))
 
-  glmn <- list(coef   = as.matrix(t(lasso.glmn$beta)),
+  glmn <- list(coef   = as.matrix(lasso.glmn$beta),
                mu     = lasso.glmn$a0,
                fitted = predict(lasso.glmn,x))
 

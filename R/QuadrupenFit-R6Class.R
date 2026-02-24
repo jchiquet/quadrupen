@@ -85,7 +85,7 @@ QuadrupenFit <- R6::R6Class(
     optim_config = function(value) {private$control},
     #' @field fitted Matrix of fitted values, each column corresponding to a value of \code{lambda1}.
     fitted = function(value) {
-      res <- sweep(tcrossprod(private$data_$X, private$coef_),2L,-private$intercept_)
+      res <- sweep(private$data_$X %*% private$coef_ ,2L,-private$intercept_)
       res
     },
     #' @field coefficients Matrix (class `"dgCMatrix"`) of
@@ -93,7 +93,7 @@ QuadrupenFit <- R6::R6Class(
     #' rows corresponds the length of \code{lambda1}.
     coefficients         = function(value) {
       dimnames(private$coef_) <- 
-        list(round(c(private$tuning[[1]]),3), colnames(private$data_$X))
+        list(colnames(private$data_$X), round(c(private$tuning[[1]]),3))
       private$coef_
     },
     #' @field intercept A vector containing the successive values of the 
@@ -233,7 +233,7 @@ QuadrupenFit <- R6::R6Class(
         match.arg(type), 
         "index"        = index,
         "penalty"      = lambda[index],
-        setNames(c(private$intercept_[index], private$coef_[index, ]), private$data_$varnames)
+        setNames(c(private$intercept_[index], private$coef_[,index]), private$data_$varnames)
         )
       res
     },
@@ -252,7 +252,7 @@ QuadrupenFit <- R6::R6Class(
       if (is.null(newx)) {
         res <- self$fitted[ , index, drop = FALSE]
       } else {
-        res <- sweep(newx %*% t(private$coef_[index, , drop = FALSE]), 2L, -private$intercept_[index])
+        res <- sweep(newx %*% private$coef_[, index , drop = FALSE], 2L, -private$intercept_[index])
       }
       res
     },
@@ -319,7 +319,7 @@ QuadrupenFit <- R6::R6Class(
             intercept   <- out$intercept
             coef <- out$coef
           }
-          y_hat <- scale(tcrossprod(CVData[[fold]]$testData$X, coef), -intercept, FALSE)
+          y_hat <- scale(CVData[[fold]]$testData$X %*% coef, -intercept, FALSE)
           err <- sweep(y_hat, 1L, CVData[[fold]]$testData$y)^2
           if (ncol(err) < length(regParam[[1]])) {
             NAs <- length(regParam[[1]]) - ncol(err)
@@ -415,11 +415,11 @@ QuadrupenFit <- R6::R6Class(
 
       ## function to run on each core
       bloc_stability <- function(subsets) {
-        select <- Matrix(0, nlambda1, self$nvar)
+        select <- Matrix(0, self$nvar, nlambda1)
         subsamples_ok <- 0
         for (s in 1:length(subsets)) {
           active <- private$optimizer(SubsampledData[[subsets[s]]], private$has_intercept_, private$tuning, control)$active
-          if (nrow(active) == nlambda1) {
+          if (ncol(active) == nlambda1) {
             subsamples_ok <- subsamples_ok + 1
             select <- select + active
           }
@@ -434,7 +434,7 @@ QuadrupenFit <- R6::R6Class(
       prob_bloc <- mclapply(blocs, bloc_stability, mc.cores = cores)
       
       ## Construct the probability path
-      path <- Matrix(0, nlambda1, self$nvar)
+      path <- Matrix(0, self$nvar, nlambda1)
       for (b in 1:length(prob_bloc)) {
         path <- path + prob_bloc[[b]]
       }
@@ -471,21 +471,15 @@ QuadrupenFit <- R6::R6Class(
     criteria = function(penalty=
                           setNames(c(2, log(self$nobs), log(self$nvar), log(self$nobs) + 2*log(self$nvar)),
                                    c("AIC","BIC", "mBIC", "eBIC")), sigma=NULL) {
-      coefs <- private$coef_
-      lambda <- self$major_tuning
-
-      n <- self$nobs
-      p <- self$nvar
       
-      ## Compute all the penalized criteria
       if (is.null(sigma)) {
-        crit <- sapply(penalty, function(pen) n*log(self$deviance/n) + pen * self$degrees_freedom)
+        crit <- sapply(penalty, function(pen) self$nobs*log(self$deviance/self$nobs) + pen * self$degrees_freedom)
       } else {
         crit <- sapply(penalty, function(pen) self$deviance/sigma^2 + pen * self$degrees_freedom)
       }
       crit <- as.data.frame(crit)
       ## Compute generalized cross-validation
-      crit$GCV <- self$deviance/(n*(1 - self$degrees_freedom/n)^2)
+      crit$GCV <- self$deviance/(self$nobs*(1 - self$degrees_freedom/self$nobs)^2)
       
       ## Put together all relevant information about those criteria
       private$infocrit <- 
@@ -493,8 +487,8 @@ QuadrupenFit <- R6::R6Class(
           value = data.frame(
             crit, 
             df        = self$degrees_freedom, 
-            lambda    = lambda, 
-            fraction  = apply(abs(coefs),1,sum)/max(apply(abs(coefs),1,sum)), 
+            lambda    = self$major_tuning, 
+            fraction  = colSums(abs(private$coef_))/max(colSums(abs(private$coef_))), 
             row.names = 1:nrow(crit)
           )
         )
@@ -584,12 +578,12 @@ QuadrupenFit <- R6::R6Class(
       }
       xvar <- match.arg(xvar)
       
-      nzeros <- which(colSums(private$coef_) != 0)
+      nzeros <- which(rowSums(private$coef_) != 0)
       if (length(nzeros) == 0) {
         stop("Nothing to plot: all coefficients are zero.")
       }
       
-      coef  <- as.matrix(private$coef_[, nzeros, drop = FALSE])
+      coef  <- t(as.matrix(private$coef_[nzeros, , drop = FALSE]))
       rownames(coef) <- NULL ## avoid warning message in ggplot2
       
       if (standardize) {

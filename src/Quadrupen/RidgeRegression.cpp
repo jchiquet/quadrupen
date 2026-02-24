@@ -34,7 +34,7 @@ List RidgeRegression::solution_path(const mat& C_inv) {
   for(auto lambda : lambdas_) {
     // computing the structured ridge estimate
     vec beta = (C_invV * diagmat(eta/(square(eta) + lambda/n)) * Uty) / data_.norm_X_ ;
-    coef_ = join_cols(coef_, trans(beta)) ;
+    coef_ = join_rows(coef_, beta) ;
     // estimating the intercept term
     intercept_.push_back(data_.y_bar_ - dot(beta, data_.X_bar_));  
     // computing the estimated degrees of freedom

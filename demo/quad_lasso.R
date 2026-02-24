@@ -38,4 +38,4 @@ stab <- stability(fit, n_subsamples = 200, cores = 10)
 ## a quick summary of the fit
 print(stab)
 ## plot the stability path
-stab$plot()
+plot(stab, labels=labels, nvar=20)
