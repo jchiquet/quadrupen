@@ -115,10 +115,10 @@ List FusedLasso_cpp(
   
   // Preparing R output
   sp_mat beta = Rcpp::as<arma::sp_mat>(res.todgCMatrix()) ;
-  vec mu = arma::zeros(lambda1Vec.size()) ;
+  rowvec mu = zeros<rowvec>(lambda1Vec.size()) ;
   if (intercept) {
     mu = beta.row(p) ;
-    beta = beta.rows(0, p-1) ;
+    beta.shed_row(p) ;
   }
   
   // degrees of freedom : number of non-zero values
@@ -128,7 +128,7 @@ List FusedLasso_cpp(
     vec val = nonzeros(unique(col)) ;
     df(i) = val.n_elem ;
   }
-
+  
   // Normalizing beta back to original scale
   beta = arma::diagmat(1/normx) * beta ;
 
