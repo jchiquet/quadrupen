@@ -27,10 +27,6 @@ with equivalent S3 methods :
 [`stability()`](https://jchiquet.github.io/quadrupen/reference/stability.md)
 and [`plot()`](https://rdrr.io/r/graphics/plot.default.html).
 
-the 'rescaled' debaising is as defined in Zou and Hastie (2006): the
-vector of parameters is rescaled by a coefficient `(1+lambda2)`.
-'Original' reset to the original scaling
-
 The `"path"`plot is available as soon as a fit has been performed. For
 the others, the appropriate post-treatments must have been made via the
 methods `QuadrupenFit$criteria()`, `QuadrupenFit$cross_validate()` or
@@ -78,10 +74,6 @@ Penalized criteria based on estimation of degrees of freedom
   [`DataModel`](https://jchiquet.github.io/quadrupen/reference/DataModel.md)
   storing the data
 
-- `has_intercept`:
-
-  boolean indicating wether an intercept is included in the model
-
 - `major_tuning`:
 
   vector of "leading" tuning parameters (either l1, linf or l2)
@@ -109,10 +101,15 @@ Penalized criteria based on estimation of degrees of freedom
   original input. The number of rows corresponds the length of
   `lambda1`.
 
-- `interceptTerm`:
+- `intercept`:
 
   A vector containing the successive values of the (unpenalized)
   intercept. Equals to zero if `intercept` has been set to `FALSE`.
+
+- `debias`:
+
+  logical, should we rely on the debias coefficient of the regularizer
+  (if available) or not
 
 - `residuals`:
 
@@ -168,8 +165,6 @@ Penalized criteria based on estimation of degrees of freedom
 - [`QuadrupenFit$get_model()`](#method-QuadrupenFit-get_model)
 
 - [`QuadrupenFit$predict()`](#method-QuadrupenFit-predict)
-
-- [`QuadrupenFit$debias()`](#method-QuadrupenFit-debias)
 
 - [`QuadrupenFit$cross_validate()`](#method-QuadrupenFit-cross_validate)
 
@@ -295,30 +290,7 @@ Predict response for new sample based on the current model
 
 #### Returns
 
-a vector of predicted value Debias model coefficients
-
-------------------------------------------------------------------------
-
-### Method `debias()`
-
-Apply various debiasing schemes to correct effect of shrinkage on the
-estimation of the coefficients
-
-#### Usage
-
-    QuadrupenFit$debias(type = c("none", "standard"))
-
-#### Arguments
-
-- `type`:
-
-  a character, either "rescaled", "relaxed" or "original". See details
-
-#### Returns
-
-nothing is return, the beta are internaly rescaled
-
-Cross-validation for Quadrupen object
+a vector of predicted value Cross-validation for Quadrupen object
 
 ------------------------------------------------------------------------
 

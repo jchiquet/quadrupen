@@ -33,15 +33,13 @@ Inherits fields and methods of
 
 - [`BoundedRegressionFit$new()`](#method-BoundedRegressionFit-new)
 
-- [`BoundedRegressionFit$fit()`](#method-BoundedRegressionFit-fit)
-
 - [`BoundedRegressionFit$clone()`](#method-BoundedRegressionFit-clone)
 
 Inherited methods
 
 - [`quadrupen::QuadrupenFit$criteria()`](https://jchiquet.github.io/quadrupen/reference/QuadrupenFit.html#method-criteria)
 - [`quadrupen::QuadrupenFit$cross_validate()`](https://jchiquet.github.io/quadrupen/reference/QuadrupenFit.html#method-cross_validate)
-- [`quadrupen::QuadrupenFit$debias()`](https://jchiquet.github.io/quadrupen/reference/QuadrupenFit.html#method-debias)
+- [`quadrupen::QuadrupenFit$fit()`](https://jchiquet.github.io/quadrupen/reference/QuadrupenFit.html#method-fit)
 - [`quadrupen::QuadrupenFit$get_model()`](https://jchiquet.github.io/quadrupen/reference/QuadrupenFit.html#method-get_model)
 - [`quadrupen::QuadrupenFit$plot()`](https://jchiquet.github.io/quadrupen/reference/QuadrupenFit.html#method-plot)
 - [`quadrupen::QuadrupenFit$plot_path()`](https://jchiquet.github.io/quadrupen/reference/QuadrupenFit.html#method-plot_path)
@@ -76,22 +74,6 @@ Initialize a `BoundedRegressionFit` model
 
   a list with two elements, a vector and a scalar, for the
   regularization
-
-------------------------------------------------------------------------
-
-### Method `fit()`
-
-function performing the optimization
-
-#### Usage
-
-    BoundedRegressionFit$fit(control)
-
-#### Arguments
-
-- `control`:
-
-  list controlling the optimization process
 
 ------------------------------------------------------------------------
 

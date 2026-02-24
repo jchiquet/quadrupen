@@ -33,15 +33,13 @@ Inherits fields and methods of
 
 - [`RidgeRegressionFit$new()`](#method-RidgeRegressionFit-new)
 
-- [`RidgeRegressionFit$fit()`](#method-RidgeRegressionFit-fit)
-
 - [`RidgeRegressionFit$clone()`](#method-RidgeRegressionFit-clone)
 
 Inherited methods
 
 - [`quadrupen::QuadrupenFit$criteria()`](https://jchiquet.github.io/quadrupen/reference/QuadrupenFit.html#method-criteria)
 - [`quadrupen::QuadrupenFit$cross_validate()`](https://jchiquet.github.io/quadrupen/reference/QuadrupenFit.html#method-cross_validate)
-- [`quadrupen::QuadrupenFit$debias()`](https://jchiquet.github.io/quadrupen/reference/QuadrupenFit.html#method-debias)
+- [`quadrupen::QuadrupenFit$fit()`](https://jchiquet.github.io/quadrupen/reference/QuadrupenFit.html#method-fit)
 - [`quadrupen::QuadrupenFit$get_model()`](https://jchiquet.github.io/quadrupen/reference/QuadrupenFit.html#method-get_model)
 - [`quadrupen::QuadrupenFit$plot()`](https://jchiquet.github.io/quadrupen/reference/QuadrupenFit.html#method-plot)
 - [`quadrupen::QuadrupenFit$plot_path()`](https://jchiquet.github.io/quadrupen/reference/QuadrupenFit.html#method-plot_path)
@@ -76,22 +74,6 @@ Initialize a `RidgeRegressionFit` model
 
   a list with two elements, a vector and a scalar, for the
   regularization
-
-------------------------------------------------------------------------
-
-### Method `fit()`
-
-function performing the optimization
-
-#### Usage
-
-    RidgeRegressionFit$fit(control)
-
-#### Arguments
-
-- `control`:
-
-  list controlling the optimization process
 
 ------------------------------------------------------------------------
 

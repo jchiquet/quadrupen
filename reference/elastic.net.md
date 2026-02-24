@@ -18,7 +18,7 @@ elastic.net(
   struct = Matrix::Diagonal(ncol(x), 1),
   intercept = TRUE,
   normalize = TRUE,
-  debiasing = c("none", "standard", "ridge"),
+  refit = FALSE,
   nlambda1 = ifelse(is.null(lambda1), 100, length(lambda1)),
   minratio = ifelse(nrow(x) <= ncol(x), 0.01, 1e-04),
   maxfeat = ifelse(lambda2 < 0.01, min(nrow(x), ncol(x)), min(4 * nrow(x), ncol(x))),
@@ -72,13 +72,11 @@ elastic.net(
   logical; indicates if variables should be normalized to have unit L2
   norm before fitting. Default is `TRUE`.
 
-- debiasing:
+- refit:
 
-  character picked in "none" or "standard": indicates if coefficients
-  should be rescaled to avoid excessive biais due to double shrinkage.
-  "standard" is Zou and Hastie (2006) orginal proposa: : the vector of
-  parameters is rescaled by a factor `(1+lambda2)`. "none" is for no
-  rescaling, the default.
+  logical: indicates if the non null coefficients should be refit to
+  avoid excessive bias. Default is FALSE. Can be changed later (both raw
+  and refit coefficients are stored).
 
 - nlambda1:
 

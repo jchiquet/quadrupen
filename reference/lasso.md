@@ -15,6 +15,7 @@ lasso(
   penscale = rep(1, ncol(x)),
   intercept = TRUE,
   normalize = TRUE,
+  refit = FALSE,
   nlambda1 = ifelse(is.null(lambda1), 100, length(lambda1)),
   minratio = ifelse(nrow(x) <= ncol(x), 0.01, 1e-04),
   maxfeat = min(nrow(x), ncol(x)),
@@ -56,6 +57,12 @@ lasso(
 
   logical; indicates if variables should be normalized to have unit L2
   norm before fitting. Default is `TRUE`.
+
+- refit:
+
+  logical: indicates if the non null coefficients should be refit to
+  avoid excessive bias. Default is FALSE. Can be changed later (both raw
+  and refit coefficients are stored).
 
 - nlambda1:
 

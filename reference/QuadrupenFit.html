@@ -53,9 +53,6 @@ cross validation <code>QuadrupenFit$cross_validate()</code>, stability selection
 <code>QuadrupenFit$stability_path()</code>, criteria derivation QuadrupenFit$criteria()
 and plotting <code>QuadrupenFit$plot()</code>. They come with equivalent S3 methods : <code><a href="cross_validate.html">cross_validate()</a></code>,
 <code><a href="stability.html">stability()</a></code> and <code><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot()</a></code>.</p>
-<p>the 'rescaled' debaising is as defined in Zou and Hastie (2006): the vector of
-parameters is rescaled by a coefficient <code>(1+lambda2)</code>. 'Original' reset to
-the original scaling</p>
 <p>The <code>"path"</code>plot is available as soon as a fit has been performed.
 For the others, the appropriate post-treatments must have been made via the
 methods <code>QuadrupenFit$criteria()</code>, <code>QuadrupenFit$cross_validate()</code> or
@@ -90,10 +87,6 @@ Penalized criteria based on estimation of degrees of freedom</p>
 <dd><p>an object with class <code><a href="DataModel.html">DataModel</a></code> storing the data</p></dd>
 
 
-<dt><code>has_intercept</code></dt>
-<dd><p>boolean indicating wether an intercept is included in the model</p></dd>
-
-
 <dt><code>major_tuning</code></dt>
 <dd><p>vector of "leading" tuning parameters (either l1, linf or l2)</p></dd>
 
@@ -120,10 +113,14 @@ coefficients with respect to the original input. The number of
 rows corresponds the length of <code>lambda1</code>.</p></dd>
 
 
-<dt><code>interceptTerm</code></dt>
+<dt><code>intercept</code></dt>
 <dd><p>A vector containing the successive values of the
 (unpenalized) intercept.
 Equals to zero if <code>intercept</code> has been set to <code>FALSE</code>.</p></dd>
+
+
+<dt><code>debias</code></dt>
+<dd><p>logical, should we rely on the debias coefficient of the regularizer (if available) or not</p></dd>
 
 
 <dt><code>residuals</code></dt>
@@ -171,7 +168,6 @@ Only available once method $stability has been called.</p></dd>
 <li><p><a href="#method-QuadrupenFit-fit"><code>QuadrupenFit$fit()</code></a></p></li>
 <li><p><a href="#method-QuadrupenFit-get_model"><code>QuadrupenFit$get_model()</code></a></p></li>
 <li><p><a href="#method-QuadrupenFit-predict"><code>QuadrupenFit$predict()</code></a></p></li>
-<li><p><a href="#method-QuadrupenFit-debias"><code>QuadrupenFit$debias()</code></a></p></li>
 <li><p><a href="#method-QuadrupenFit-cross_validate"><code>QuadrupenFit$cross_validate()</code></a></p></li>
 <li><p><a href="#method-QuadrupenFit-stability"><code>QuadrupenFit$stability()</code></a></p></li>
 <li><p><a href="#method-QuadrupenFit-criteria"><code>QuadrupenFit$criteria()</code></a></p></li>
@@ -280,36 +276,14 @@ Only available once method $stability has been called.</p></dd>
 <div class="section">
 <h4 id="returns-1">Returns<a class="anchor" aria-label="anchor" href="#returns-1"></a></h4>
 <p>a vector of predicted value
-Debias model coefficients</p>
-</div>
-
-</div><p></p><hr><a id="method-QuadrupenFit-debias"></a><div class="section">
-<h3 id="method-debias-">Method <code>debias()</code><a class="anchor" aria-label="anchor" href="#method-debias-"></a></h3>
-<p>Apply various debiasing schemes to correct effect of shrinkage
-on the estimation of the coefficients</p><div class="section">
-<h4 id="usage-6">Usage<a class="anchor" aria-label="anchor" href="#usage-6"></a></h4>
-<p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">QuadrupenFit</span><span class="op">$</span><span class="fu">debias</span><span class="op">(</span>type <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"none"</span>, <span class="st">"standard"</span><span class="op">)</span><span class="op">)</span></span></code></pre></div><p></p></div>
-</div>
-
-<div class="section">
-<h4 id="arguments-4">Arguments<a class="anchor" aria-label="anchor" href="#arguments-4"></a></h4>
-<p></p><div class="arguments"><dl><dt><code>type</code></dt>
-<dd><p>a character, either "rescaled", "relaxed" or "original". See details</p></dd>
-
-
-</dl><p></p></div>
-</div>
-<div class="section">
-<h4 id="returns-2">Returns<a class="anchor" aria-label="anchor" href="#returns-2"></a></h4>
-<p>nothing is return, the beta are internaly rescaled</p>
-<p>Cross-validation for Quadrupen object</p>
+Cross-validation for Quadrupen object</p>
 </div>
 
 </div><p></p><hr><a id="method-QuadrupenFit-cross_validate"></a><div class="section">
 <h3 id="method-cross-validate-">Method <code><a href="cross_validate.html">cross_validate()</a></code><a class="anchor" aria-label="anchor" href="#method-cross-validate-"></a></h3>
 <p>Function that computes K-fold cross-validated error of a
 <code>quadrupen</code> fit, possibly on a grid of <code>lambda1</code>, <code>lambda2</code>.</p><div class="section">
-<h4 id="usage-7">Usage<a class="anchor" aria-label="anchor" href="#usage-7"></a></h4>
+<h4 id="usage-6">Usage<a class="anchor" aria-label="anchor" href="#usage-6"></a></h4>
 <p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">QuadrupenFit</span><span class="op">$</span><span class="fu">cross_validate</span><span class="op">(</span></span>
 <span>  K <span class="op">=</span> <span class="fl">10</span>,</span>
 <span>  folds <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/split.html" class="external-link">split</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/sample.html" class="external-link">sample</a></span><span class="op">(</span><span class="fl">1</span><span class="op">:</span><span class="va">self</span><span class="op">$</span><span class="va">nobs</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fl">1</span><span class="op">:</span><span class="va">K</span>, length <span class="op">=</span> <span class="va">self</span><span class="op">$</span><span class="va">nobs</span><span class="op">)</span><span class="op">)</span>,</span>
@@ -320,7 +294,7 @@ on the estimation of the coefficients</p><div class="section">
 </div>
 
 <div class="section">
-<h4 id="arguments-5">Arguments<a class="anchor" aria-label="anchor" href="#arguments-5"></a></h4>
+<h4 id="arguments-4">Arguments<a class="anchor" aria-label="anchor" href="#arguments-4"></a></h4>
 <p></p><div class="arguments"><dl><dt><code>K</code></dt>
 <dd><p>integer indicating the number of folds. Default is 10.</p></dd>
 
@@ -352,7 +326,7 @@ the cores available.</p></dd>
 </dl><p></p></div>
 </div>
 <div class="section">
-<h4 id="returns-3">Returns<a class="anchor" aria-label="anchor" href="#returns-3"></a></h4>
+<h4 id="returns-2">Returns<a class="anchor" aria-label="anchor" href="#returns-2"></a></h4>
 <p>an object with class <a href="CrossValidation.html">CrossValidation</a> is sent back and stored as a
 field of the original QuadrupenFit object.</p>
 </div>
@@ -361,7 +335,7 @@ field of the original QuadrupenFit object.</p>
 <h3 id="method-stability-">Method <code><a href="stability.html">stability()</a></code><a class="anchor" aria-label="anchor" href="#method-stability-"></a></h3>
 <p>Compute the stability path of a (possibly randomized) fitting
 procedure as introduced by Meinshausen and Buhlmann (2010).</p><div class="section">
-<h4 id="usage-8">Usage<a class="anchor" aria-label="anchor" href="#usage-8"></a></h4>
+<h4 id="usage-7">Usage<a class="anchor" aria-label="anchor" href="#usage-7"></a></h4>
 <p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">QuadrupenFit</span><span class="op">$</span><span class="fu">stability</span><span class="op">(</span></span>
 <span>  n_subsamples <span class="op">=</span> <span class="fl">50</span>,</span>
 <span>  subsample_size <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">floor</a></span><span class="op">(</span><span class="va">self</span><span class="op">$</span><span class="va">nobs</span><span class="op">/</span><span class="fl">2</span><span class="op">)</span>,</span>
@@ -374,7 +348,7 @@ procedure as introduced by Meinshausen and Buhlmann (2010).</p><div class="secti
 </div>
 
 <div class="section">
-<h4 id="arguments-6">Arguments<a class="anchor" aria-label="anchor" href="#arguments-6"></a></h4>
+<h4 id="arguments-5">Arguments<a class="anchor" aria-label="anchor" href="#arguments-5"></a></h4>
 <p></p><div class="arguments"><dl><dt><code>n_subsamples</code></dt>
 <dd><p>integer indicating the number of subsamplings
 used to estimate the selection probabilities. Default is 100.</p></dd>
@@ -410,7 +384,7 @@ the cores available.</p></dd>
 </dl><p></p></div>
 </div>
 <div class="section">
-<h4 id="returns-4">Returns<a class="anchor" aria-label="anchor" href="#returns-4"></a></h4>
+<h4 id="returns-3">Returns<a class="anchor" aria-label="anchor" href="#returns-3"></a></h4>
 <p>an object with class <a href="StabilityPath.html">StabilityPath</a> is sent back and stored as a
 field of the original QuadrupenFit object.</p>
 </div>
@@ -422,7 +396,7 @@ accompanied with the vector(s) of parameters selected
 accordingly. The default behavior plots the BIC and the AIC (with
 respective factor \(\log(n)\) and \(2\)) yet the user can specify any
 penalty.</p><div class="section">
-<h4 id="usage-9">Usage<a class="anchor" aria-label="anchor" href="#usage-9"></a></h4>
+<h4 id="usage-8">Usage<a class="anchor" aria-label="anchor" href="#usage-8"></a></h4>
 <p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">QuadrupenFit</span><span class="op">$</span><span class="fu">criteria</span><span class="op">(</span></span>
 <span>  penalty <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/setNames.html" class="external-link">setNames</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">2</span>, <span class="fu"><a href="https://rdrr.io/r/base/Log.html" class="external-link">log</a></span><span class="op">(</span><span class="va">self</span><span class="op">$</span><span class="va">nobs</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/base/Log.html" class="external-link">log</a></span><span class="op">(</span><span class="va">self</span><span class="op">$</span><span class="va">nvar</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/base/Log.html" class="external-link">log</a></span><span class="op">(</span><span class="va">self</span><span class="op">$</span><span class="va">nobs</span><span class="op">)</span> <span class="op">+</span> <span class="fl">2</span> <span class="op">*</span></span>
 <span>    <span class="fu"><a href="https://rdrr.io/r/base/Log.html" class="external-link">log</a></span><span class="op">(</span><span class="va">self</span><span class="op">$</span><span class="va">nvar</span><span class="op">)</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"AIC"</span>, <span class="st">"BIC"</span>, <span class="st">"mBIC"</span>, <span class="st">"eBIC"</span><span class="op">)</span><span class="op">)</span>,</span>
@@ -431,7 +405,7 @@ penalty.</p><div class="section">
 </div>
 
 <div class="section">
-<h4 id="arguments-7">Arguments<a class="anchor" aria-label="anchor" href="#arguments-7"></a></h4>
+<h4 id="arguments-6">Arguments<a class="anchor" aria-label="anchor" href="#arguments-6"></a></h4>
 <p></p><div class="arguments"><dl><dt><code>penalty</code></dt>
 <dd><p>a vector with as many penalties a desired. The
 default contains the penalty corresponding to the AIC and the BIC
@@ -450,7 +424,7 @@ relevant. If <code>NULL</code> (the default), it is estimated as usual
 </dl><p></p></div>
 </div>
 <div class="section">
-<h4 id="returns-5">Returns<a class="anchor" aria-label="anchor" href="#returns-5"></a></h4>
+<h4 id="returns-4">Returns<a class="anchor" aria-label="anchor" href="#returns-4"></a></h4>
 <p>an object with class <a href="InformationCriteria.html">InformationCriteria</a> is sent back and stored as a
 field of the original QuadrupenFit object.</p>
 </div>
@@ -458,7 +432,7 @@ field of the original QuadrupenFit object.</p>
 </div><p></p><hr><a id="method-QuadrupenFit-plot"></a><div class="section">
 <h3 id="method-plot-">Method <code><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot()</a></code><a class="anchor" aria-label="anchor" href="#method-plot-"></a></h3>
 <p>Plot method for QuadrupenFit</p><div class="section">
-<h4 id="usage-10">Usage<a class="anchor" aria-label="anchor" href="#usage-10"></a></h4>
+<h4 id="usage-9">Usage<a class="anchor" aria-label="anchor" href="#usage-9"></a></h4>
 <p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">QuadrupenFit</span><span class="op">$</span><span class="fu">plot</span><span class="op">(</span></span>
 <span>  type <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"path"</span>, <span class="st">"criteria"</span>, <span class="st">"crossval"</span>, <span class="st">"stability"</span><span class="op">)</span>,</span>
 <span>  log_scale <span class="op">=</span> <span class="cn">TRUE</span>,</span>
@@ -467,7 +441,7 @@ field of the original QuadrupenFit object.</p>
 </div>
 
 <div class="section">
-<h4 id="arguments-8">Arguments<a class="anchor" aria-label="anchor" href="#arguments-8"></a></h4>
+<h4 id="arguments-7">Arguments<a class="anchor" aria-label="anchor" href="#arguments-7"></a></h4>
 <p></p><div class="arguments"><dl><dt><code>type</code></dt>
 <dd><p>the type of plot, either <code>"path"</code> for regularization path;
 <code>"criteria"</code> for BIC-like  information criteria ; <code>"crossval"</code> for
@@ -493,7 +467,7 @@ small. Remind that the intercept does not count. Default is
 </div><p></p><hr><a id="method-QuadrupenFit-plot_path"></a><div class="section">
 <h3 id="method-plot-path-">Method <code>plot_path()</code><a class="anchor" aria-label="anchor" href="#method-plot-path-"></a></h3>
 <p>Produce a plot of the solution path of a QuadrupenFit object.</p><div class="section">
-<h4 id="usage-11">Usage<a class="anchor" aria-label="anchor" href="#usage-11"></a></h4>
+<h4 id="usage-10">Usage<a class="anchor" aria-label="anchor" href="#usage-10"></a></h4>
 <p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">QuadrupenFit</span><span class="op">$</span><span class="fu">plot_path</span><span class="op">(</span></span>
 <span>  xvar <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"lambda"</span>, <span class="st">"fraction"</span>, <span class="st">"df"</span><span class="op">)</span>,</span>
 <span>  log_scale <span class="op">=</span> <span class="cn">TRUE</span>,</span>
@@ -504,7 +478,7 @@ small. Remind that the intercept does not count. Default is
 </div>
 
 <div class="section">
-<h4 id="arguments-9">Arguments<a class="anchor" aria-label="anchor" href="#arguments-9"></a></h4>
+<h4 id="arguments-8">Arguments<a class="anchor" aria-label="anchor" href="#arguments-8"></a></h4>
 <p></p><div class="arguments"><dl><dt><code>xvar</code></dt>
 <dd><p>variable to plot on the X-axis: either <code>"lambda"</code>
 (\(\ell_1\) penalty level, or
@@ -540,7 +514,7 @@ small. Remind that the intercept does not count. Default is
 </dl><p></p></div>
 </div>
 <div class="section">
-<h4 id="returns-6">Returns<a class="anchor" aria-label="anchor" href="#returns-6"></a></h4>
+<h4 id="returns-5">Returns<a class="anchor" aria-label="anchor" href="#returns-5"></a></h4>
 <p>a <span class="pkg">ggplot2</span> object .</p>
 </div>
 <div class="section">
@@ -575,12 +549,12 @@ plot(bounded.reg(x,y, lambda2=10), xvar="fraction")
 </div><p></p><hr><a id="method-QuadrupenFit-clone"></a><div class="section">
 <h3 id="method-clone-">Method <code>clone()</code><a class="anchor" aria-label="anchor" href="#method-clone-"></a></h3>
 <p>The objects of this class are cloneable with this method.</p><div class="section">
-<h4 id="usage-12">Usage<a class="anchor" aria-label="anchor" href="#usage-12"></a></h4>
+<h4 id="usage-11">Usage<a class="anchor" aria-label="anchor" href="#usage-11"></a></h4>
 <p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">QuadrupenFit</span><span class="op">$</span><span class="fu">clone</span><span class="op">(</span>deep <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></code></pre></div><p></p></div>
 </div>
 
 <div class="section">
-<h4 id="arguments-10">Arguments<a class="anchor" aria-label="anchor" href="#arguments-10"></a></h4>
+<h4 id="arguments-9">Arguments<a class="anchor" aria-label="anchor" href="#arguments-9"></a></h4>
 <p></p><div class="arguments"><dl><dt><code>deep</code></dt>
 <dd><p>Whether to make a deep clone.</p></dd>
 

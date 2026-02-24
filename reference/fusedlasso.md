@@ -17,7 +17,6 @@ fusedlasso(
   struct = NULL,
   intercept = TRUE,
   normalize = TRUE,
-  debiasing = c("none"),
   nlambda1 = ifelse(is.null(lambda1), 50, length(lambda1)),
   minratio = 0.01,
   maxfeat = ifelse(lambda2 < 1, min(nrow(x), ncol(x)), min(2 * nrow(x), ncol(x))),
@@ -76,14 +75,6 @@ fusedlasso(
 
   logical; indicates if variables should be normalized to have unit L2
   norm before fitting. Default is `TRUE`.
-
-- debiasing:
-
-  character picked in "none" or "standard": indicates if coefficients
-  should be rescaled to avoid excessive biais due to double shrinkage.
-  "standard" is Zou and Hastie (2006) orginal proposa: : the vector of
-  parameters is rescaled by a factor `(1+lambda2)`. "none" is for no
-  rescaling, the default.
 
 - nlambda1:
 

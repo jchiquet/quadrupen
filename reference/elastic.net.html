@@ -63,7 +63,7 @@ regularization. See details for the criterion optimized.</p>
 <span>  struct <span class="op">=</span> <span class="fu">Matrix</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/Matrix/man/Diagonal.html" class="external-link">Diagonal</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">ncol</a></span><span class="op">(</span><span class="va">x</span><span class="op">)</span>, <span class="fl">1</span><span class="op">)</span>,</span>
 <span>  intercept <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  normalize <span class="op">=</span> <span class="cn">TRUE</span>,</span>
-<span>  debiasing <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"none"</span>, <span class="st">"standard"</span>, <span class="st">"ridge"</span><span class="op">)</span>,</span>
+<span>  refit <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  nlambda1 <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/ifelse.html" class="external-link">ifelse</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/NULL.html" class="external-link">is.null</a></span><span class="op">(</span><span class="va">lambda1</span><span class="op">)</span>, <span class="fl">100</span>, <span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">lambda1</span><span class="op">)</span><span class="op">)</span>,</span>
 <span>  minratio <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/ifelse.html" class="external-link">ifelse</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="op">&lt;=</span> <span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">ncol</a></span><span class="op">(</span><span class="va">x</span><span class="op">)</span>, <span class="fl">0.01</span>, <span class="fl">1e-04</span><span class="op">)</span>,</span>
 <span>  maxfeat <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/ifelse.html" class="external-link">ifelse</a></span><span class="op">(</span><span class="va">lambda2</span> <span class="op">&lt;</span> <span class="fl">0.01</span>, <span class="fu"><a href="https://rdrr.io/r/base/Extremes.html" class="external-link">min</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">x</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">ncol</a></span><span class="op">(</span><span class="va">x</span><span class="op">)</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/base/Extremes.html" class="external-link">min</a></span><span class="op">(</span><span class="fl">4</span> <span class="op">*</span> <span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">x</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">ncol</a></span><span class="op">(</span><span class="va">x</span><span class="op">)</span><span class="op">)</span><span class="op">)</span>,</span>
@@ -124,12 +124,10 @@ normalized to have unit L2 norm before fitting.  Default is
 <code>TRUE</code>.</p></dd>
 
 
-<dt id="arg-debiasing">debiasing<a class="anchor" aria-label="anchor" href="#arg-debiasing"></a></dt>
-<dd><p>character picked in "none" or "standard": indicates if
-coefficients should be rescaled to avoid excessive biais due to double
-shrinkage. "standard" is Zou and Hastie (2006)
-orginal proposa: : the vector of parameters is rescaled by a factor
-<code>(1+lambda2)</code>. "none" is for no rescaling, the default.</p></dd>
+<dt id="arg-refit">refit<a class="anchor" aria-label="anchor" href="#arg-refit"></a></dt>
+<dd><p>logical: indicates if the non null coefficients should be
+refit to avoid excessive  bias. Default is FALSE. Can be changed later
+(both raw and refit coefficients are stored).</p></dd>
 
 
 <dt id="arg-nlambda-">nlambda1<a class="anchor" aria-label="anchor" href="#arg-nlambda-"></a></dt>
