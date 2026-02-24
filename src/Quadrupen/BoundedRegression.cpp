@@ -129,8 +129,8 @@ List BoundedRegression::solution_path(const List& control) {
     if (status.back() >= 2) {
       break;
     } else {
-      coef_.push_back(beta_/(data_.norm_X_ % lambda_factor_)) ;
-      const_.push_back(data_.y_bar_ - as_scalar(dot(beta_, data_.X_bar_)));
+      coef_ = join_cols(coef_, trans(beta_/(data_.norm_X_ % lambda_factor_))) ;
+      intercept_.push_back(data_.y_bar_ - as_scalar(dot(beta_, data_.X_bar_)));
       df_.push_back(get_df()) ;
       iA_ = join_rows(iA_, df_.size()*ones<urowvec>(set_.size()) );
       jA_ = join_rows(jA_, set_.A_.t()) ;

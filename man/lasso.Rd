@@ -11,6 +11,7 @@ lasso(
   penscale = rep(1, ncol(x)),
   intercept = TRUE,
   normalize = TRUE,
+  refit = FALSE,
   nlambda1 = ifelse(is.null(lambda1), 100, length(lambda1)),
   minratio = ifelse(nrow(x) <= ncol(x), 0.01, 1e-04),
   maxfeat = min(nrow(x), ncol(x)),
@@ -42,6 +43,10 @@ included in the model. Default is \code{TRUE}.}
 \item{normalize}{logical; indicates if variables should be
 normalized to have unit L2 norm before fitting.  Default is
 \code{TRUE}.}
+
+\item{refit}{logical: indicates if the non null coefficients should be
+refit to avoid excessive  bias. Default is FALSE. Can be changed later
+(both raw and refit coefficients are stored).}
 
 \item{nlambda1}{integer that indicates the number of values to put
 in the \code{lambda1} vector.  Ignored if \code{lambda1} is

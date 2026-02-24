@@ -55,10 +55,10 @@ lava <- function(x,
                  struct    = Matrix::Diagonal(ncol(x), 1),
                  intercept = TRUE,
                  normalize = TRUE,
-                 debiasing = c("none", "standard", "ridge"),
+                 refit     = FALSE,
                  nlambda1  = ifelse(is.null(lambda1),100,length(lambda1)),
-                 minratio  = ifelse(nrow(x) <= ncol(x), 1e-2, 1e-4),
-                 maxfeat   = ifelse(lambda2 < 1e-2, min(nrow(x),ncol(x)), min(4*nrow(x),ncol(x))),
+                 minratio  = 1e-2,
+                 maxfeat   = min(nrow(x),ncol(x)),
                  beta0     = numeric(ncol(x)),
                  control   = list()) {
   
@@ -70,7 +70,6 @@ lava <- function(x,
   if (!is.null(control$method)) if (control$method != "quadra") ctrl$threshold <- 1e-2
   ctrl[names(control)] <- control # default overwritten by user specifications
   ctrl$method <- switch(ctrl$method, quadra = "QUADRA", pathwise = "PATHWISE", fista = "FISTA", 0)
-  ctrl$rescaling <- match.arg(debiasing)
   ctrl$normalize <- normalize
   ctrl$beta0  <- beta0
   
@@ -100,12 +99,12 @@ lava <- function(x,
   ##
   if (ctrl$verbose > 0) cat("\nModel fitting and optimization")
   myModel$fit(ctrl)
-  
+
   ## ============================================
   ## POSTREATMENT + SEND BACK THE RESULTING MODEL
   ##
   if (ctrl$verbose > 0) cat("\nPost-treatment")
-  myModel$debias(ctrl$rescaling)
+  myModel$debias <- refit
   myModel$criteria()
   myModel
 }

@@ -138,9 +138,9 @@ List FusedLasso_cpp(
       Named("l1") = NumericVector(lambda1Vec.begin(), lambda1Vec.begin()+beta.n_rows),
       Named("l2") = lambda2
     ),
-    Named("beta")       = beta,
+    Named("coef")       = beta,
     Named("active")     = spones(beta),
-    Named("mu")         = mu,
+    Named("intercept")  = mu,
     Named("df")         = df,
     Named("monitoring") = 
       List::create(

@@ -36,7 +36,7 @@ test_that("weighted_ quad2theo", {
   expect_equal(as.matrix(t(lasso.glmn$beta)), as.matrix(lasso.quad$coefficients), tolerance = tol, check.attributes = FALSE)
   
   ## Check the intercept term also
-  expect_equal(lasso.glmn$a0, lasso.quad$interceptTerm, tolerance = tol, check.attributes = FALSE)
+  expect_equal(lasso.glmn$a0, lasso.quad$intercept, tolerance = tol, check.attributes = FALSE)
 
 })
 

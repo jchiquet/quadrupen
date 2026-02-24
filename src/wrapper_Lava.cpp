@@ -48,16 +48,21 @@ List lava_dense_cpp(
   
   return List::create(
     Named("tuning_param") = List::create(
-      Named("l1") = lava.path_tuning(),
+      Named("l1") = lava.lambdas_,
       Named("l2") = gamma
     ),
-    Named("beta")        = lava.sparse_coef_,
-    Named("b")           = lava.dense_coef_,
-    Named("active")      = lava.active_var(),
-    Named("mu")          = lava.const_,
-    Named("normx")       = lava.data().norm_X_,
-    Named("df")          = lava.degrees_freedom(),
-    Named("monitoring")  = results
+    
+    Named("coef")          = lava.coef_,
+    Named("coef_debiased") = lava.coef_ + lava.debiased_coefficients(),
+    Named("sparse_coef")   = lava.sparse_coef_,
+    Named("sparse_coef_debiased") = lava.debiased_coefficients(),
+    Named("active")        = lava.active_var(),
+    Named("intercept")     = lava.intercept_,
+    Named("intercept_debiased") = lava.intercept_debiased_,
+    Named("normx")         = lava.data_.norm_X_,
+    Named("df")            = lava.df_,
+    Named("monitoring")    = results
+
   );
   
 }

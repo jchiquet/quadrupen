@@ -20,19 +20,7 @@ ElasticNetFit <- R6::R6Class(
     initialize =  function(data, intercept, regParam) {
       super$initialize(data, intercept, regParam)
       private$optimizer <- 
-        ifelse(data$sparse_encoding,
-               elastic_net_sparse_cpp,
-               elastic_net_dense_cpp)
-    }
-  ),
-  private = list(
-    rescaled = function(beta = private$beta, mu = private$mu) { # Zhou and Hastie Rescaling
-      factor <- ( 1 + private$tuning[[2]] )
-      mean_y <- ifelse(self$has_intercept, mean(private$data$y), 0)
-      list(
-        beta = factor * private$beta,
-        mu   = factor * private$mu - private$tuning[[2]] * mean_y
-      )
+        ifelse(data$sparse_encoding, elastic_net_sparse_cpp, elastic_net_dense_cpp)
     }
   )
 )
@@ -58,22 +46,6 @@ BoundedRegressionFit <- R6::R6Class(
     initialize =  function(data, intercept, regParam) {
       super$initialize(data, intercept, regParam)
       private$optimizer <- bounded_regression_cpp
-    },
-    #' @description function performing the optimization
-    #' @param control list controlling the optimization process
-    fit = function(control) {
-      super$fit(control)
-      private$beta <-  do.call(rbind, private$beta)
-    }
-  ),
-  private = list(
-    rescaled = function(beta = private$beta, mu = private$mu) { # Zhou and Hastie Rescaling
-      factor <- ( 1 + private$tuning[[2]] )
-      mean_y <- ifelse(self$has_intercept, mean(private$data$y), 0)
-      list(
-        beta = factor * private$beta,
-        mu   = factor * private$mu - private$tuning[[2]] * mean_y
-      )
     }
   )
 )
@@ -100,12 +72,6 @@ RidgeRegressionFit <- R6::R6Class(
     initialize =  function(data, intercept, regParam) {
       super$initialize(data, intercept, regParam)
       private$optimizer <- ridge_cpp
-    },
-    #' @description function performing the optimization
-    #' @param control list controlling the optimization process
-    fit = function(control) {
-      super$fit(control)
-      private$beta <-  do.call(rbind, private$beta)
     }
   )
 )
@@ -155,8 +121,26 @@ LavaFit <- R6::R6Class(
     #' @field sparse_coef sparse part of the  decomposition of the coefficients
     sparse_coef = function(value) private$sparse_coef_,
     #' @field dense_coef dense part of the  decomposition of the coefficients
-    dense_coef  = function(value) private$dense_coef_
-    ),
+    dense_coef  = function(value) private$coef_- private$sparse_coef_,
+    #' @field debias logical, should we rely on the debias coefficient of the regularizer (if available) or not
+    debias = function(value) {
+      if (missing(value))
+        return(private$debias_)
+      else {
+        stopifnot(is.logical(value))
+        private$debias_ <- value
+        if (private$debias_) {
+          private$coef_ <- private$stored_fit$coef_debias
+          private$sparse_coef_ <- private$stored_fit$sparse_coef_debias
+          private$intercept_ <- private$stored_fit$intercept_debias
+        } else {
+          private$coef_ <- private$stored_fit$coef
+          private$sparse_coef_ <- private$stored_fit$sparse_coef
+          private$intercept_ <- private$stored_fit$intercept
+        }
+      }
+    }
+  ),
   private = list(sparse_coef_ = NA, dense_coef_ = NA),
   public  = list(
     #' @description Initialize a [`LavaFit`] model
@@ -170,10 +154,8 @@ LavaFit <- R6::R6Class(
     #' @description function performing the optimization
     #' @param control list controlling the optimization process    
     fit = function(control) {
-      out <- super$fit(control)
-      private$sparse_coef_ <- out$beta
-      private$dense_coef_  <-  do.call(rbind, out$b)
-      private$beta <- private$sparse_coef_ + private$dense_coef_
+      super$fit(control)
+      private$sparse_coef_ <- private$stored_fit$sparse_coef
     }
   )
 )

@@ -90,12 +90,12 @@ test_that("lasso_quad2glmnet", {
   p <- ncol(x)
 
   ## If thresh is set to the default, the test won't pass!!!
-  ## This is beacause coordinate descent is fast yet not extremely accurate
+  ## This is because coordinate descent is fast yet not extremely accurate
   lasso.glmn <- glmnet(x,y, lambda.min.ratio=1e-2, thresh=1e-20)
   lasso.quad <- elastic.net(x,y, lambda1=lasso.glmn$lambda*sqrt(n), lambda2=0)
 
   quad <- list(coef   = as.matrix(lasso.quad$coefficients),
-               mu     = lasso.quad$interceptTerm,
+               mu     = lasso.quad$intercept,
                fitted = as.matrix(lasso.quad$fitted))
 
   glmn <- list(coef   = as.matrix(t(lasso.glmn$beta)),

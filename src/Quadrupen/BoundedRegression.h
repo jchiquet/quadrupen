@@ -22,8 +22,6 @@ public:
   
   List solution_path(const List&);
 
-  const double& struct_tuning() const { return gamma_ ; }
-
   // Specific to Bounded regression
   OptimizerLINF<mat> solver_ ; // Solvers for LINF penalty
   mat    XTX    ; // Gram matrix

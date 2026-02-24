@@ -75,7 +75,6 @@ fusedlasso <- function(
     struct    = NULL,
     intercept = TRUE,
     normalize = TRUE,
-    debiasing = c("none"),
     nlambda1  = ifelse(is.null(lambda1),50,length(lambda1)),
     minratio  = 1e-2,
     maxfeat   = ifelse(lambda2 < 1, min(nrow(x),ncol(x)), min(2*nrow(x),ncol(x))),
@@ -91,7 +90,6 @@ fusedlasso <- function(
   ctrl$beta0  <- beta0
   ctrl$mu0    <- 0.001
   ctrl$pen_fused  <- match.arg(pen_fused)
-  ctrl$rescaling <- match.arg(debiasing)
   ctrl$normalize <- normalize
   ctrl$fusioncheck <- 
     switch(ctrl$fusioncheck, "all" = 2L, "active" = 1L, "none" = 0L, "naive" = -1L, -2L)

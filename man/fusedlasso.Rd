@@ -14,7 +14,6 @@ fusedlasso(
   struct = NULL,
   intercept = TRUE,
   normalize = TRUE,
-  debiasing = c("none"),
   nlambda1 = ifelse(is.null(lambda1), 50, length(lambda1)),
   minratio = 0.01,
   maxfeat = ifelse(lambda2 < 1, min(nrow(x), ncol(x)), min(2 * nrow(x), ncol(x))),
@@ -56,12 +55,6 @@ included in the model. Default is \code{TRUE}.}
 \item{normalize}{logical; indicates if variables should be
 normalized to have unit L2 norm before fitting.  Default is
 \code{TRUE}.}
-
-\item{debiasing}{character picked in "none" or "standard": indicates if
-coefficients should be rescaled to avoid excessive biais due to double
-shrinkage. "standard" is Zou and Hastie (2006)
-orginal proposa: : the vector of parameters is rescaled by a factor
-\code{(1+lambda2)}. "none" is for no rescaling, the default.}
 
 \item{nlambda1}{integer that indicates the number of values to put
 in the \code{lambda1} vector.  Ignored if \code{lambda1} is
