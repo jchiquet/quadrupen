@@ -7,6 +7,7 @@
 #define _BoundedRegression_H
 
 #include "GenericRegularizer.h"
+#include "ActiveSet.h"
 #include "OptimizerLINF.h"
 
 #define ZERO 2e-16 // practical zero
@@ -24,6 +25,7 @@ public:
 
   // Specific to Bounded regression
   OptimizerLINF<mat> solver_ ; // Solvers for LINF penalty
+  ActiveSet<mat> set_        ; // Active set of variable and data
   mat    XTX    ; // Gram matrix
   double gamma_ ; // overall amount of l2 penalty
   vec beta_     ; // vector of current parameters

@@ -21,8 +21,8 @@ public:
 
   using GenericRegularizer<matrix,Norm::L1>::coef_       ;
   using GenericRegularizer<matrix,Norm::L1>::intercept_  ;
-  using GenericRegularizer<matrix,Norm::L1>::set_        ;
   using GenericRegularizer<matrix,Norm::L1>::data_       ;
+  using ElasticNet<matrix>::set_      ;
   using ElasticNet<matrix>::debiased_ ;
   using ElasticNet<matrix>::intercept_debiased_ ;
   using ElasticNet<matrix>::lambda_factor_ ;

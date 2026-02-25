@@ -7,6 +7,7 @@
 #define _ElasticNet_H
 
 #include "GenericRegularizer.h"
+#include "ActiveSet.h"
 #include "OptimizerL1.h"
 
 using namespace Rcpp;
@@ -21,7 +22,6 @@ class ElasticNet :
     using GenericRegularizer<matrix,Norm::L1>::intercept_ ;
     using GenericRegularizer<matrix,Norm::L1>::lambdas_   ;
     using GenericRegularizer<matrix,Norm::L1>::penalty_   ;
-    using GenericRegularizer<matrix,Norm::L1>::set_  ;
     using GenericRegularizer<matrix,Norm::L1>::data_ ;
     using GenericRegularizer<matrix,Norm::L1>::df_   ;
     using GenericRegularizer<matrix,Norm::L1>::lambda_factor_ ;
@@ -49,6 +49,7 @@ class ElasticNet :
   
   // Specific to Elastic-Net regularization
   OptimizerL1<matrix> solver_ ; // Solvers for L1 penalty
+  ActiveSet<matrix> set_      ; // Active set of variable and data
   double gamma_   ; // overall amount of l2 penalty
   vec beta_       ; // vector of current parameters
   vec grad_       ; // vector of current gradient (smooth part)

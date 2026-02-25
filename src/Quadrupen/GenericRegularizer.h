@@ -7,7 +7,6 @@
 #define _GenericRegularizer_H
 
 #include "RegressionData.h"
-#include "ActiveSet.h"
 #include "Penalty.h"
 
 using namespace Rcpp;
@@ -29,14 +28,12 @@ public:
   
   // Getter functions to access private members
   const RegressionData<matrix>& data()    const { return data_      ; }
-  const ActiveSet<matrix>& active_set()   const { return set_       ; }
   const matrix& coefficients()            const { return coef_      ; }
   const vector<double>& intercept()       const { return intercept_ ; }
   const vector<double>& path_tuning()     const { return lambdas_   ; }
   const vector<double>& degrees_freedom() const { return df_        ; }
   
   RegressionData<matrix> data_ ; // data structure
-  ActiveSet<matrix> set_       ; // Active set of variable and data
   Penalty<norm> penalty_       ; // main penalty object 
   vector<double> lambdas_      ; // vector of parameters tuning the man penalty
   vec lambda_factor_           ; // main penalty factors
@@ -48,8 +45,7 @@ public:
 
 template <typename matrix, Norm norm>
 GenericRegularizer<matrix, norm>::GenericRegularizer(
-  const RegressionData<matrix>& data, const List& regParam) :
-  data_ (data), set_ (data) 
+  const RegressionData<matrix>& data, const List& regParam) : data_ (data)
 {
   all = regspace<uvec>(0,data_.p_-1) ;
 }

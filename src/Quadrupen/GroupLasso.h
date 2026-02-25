@@ -21,60 +21,76 @@ class GroupLassoL1L2 :
     using GenericRegularizer<matrix,Norm::L1L2>::intercept_ ;
     using GenericRegularizer<matrix,Norm::L1L2>::lambdas_   ;
     using GenericRegularizer<matrix,Norm::L1L2>::penalty_   ;
-    using GenericRegularizer<matrix,Norm::L1L2>::set_  ;
     using GenericRegularizer<matrix,Norm::L1L2>::data_ ;
     using GenericRegularizer<matrix,Norm::L1L2>::df_   ;
     using GenericRegularizer<matrix,Norm::L1L2>::lambda_factor_ ;
     using GenericRegularizer<matrix,Norm::L1L2>::get_lambda_seq ;
-  
-  GroupLassoL1L2(const RegressionData<matrix>&, const uvec&, const List&, const List&);
-  
-  List solution_path(const List&);
-
-  const sp_mat coefficients() const {
-    return sp_mat(join_cols(iA_, jA_), nzeros_, data_.p_, lambdas_.size()) ; 
-  }
-
-  const sp_mat debiased_coefficients() const { 
-    return sp_mat(join_cols(iA_, jA_), debiased_, data_.p_, lambdas_.size()) ; 
-  }
-
-  const vector<double>& intercept_debiased() const { return intercept_debiased_ ; }
-  
-  const sp_mat active_var() const { 
-    return sp_mat(join_cols(iA_, jA_), vec(iA_.n_elem, fill::ones), data_.p_, lambdas_.size()) ; 
-  }
-  
-  // Specific to Elastic-Net regularization
-  OptimizerL1<matrix> solver_ ; // Solvers for L1 penalty
-  double gamma_   ; // overall amount of l2 penalty
-  uvec group_     ; // vector of current parameters
-  uvec grp_sizes_ ; // vector of current parameters
-  vec beta_       ; // vector of current parameters
-  vec grad_       ; // vector of current gradient (smooth part)
-  double J_       ; // current optimality gap
-  double D_       ; // current move in the optimality gap
-  vec   nzeros_   ; // contains non-zero value of beta
-  vec   debiased_ ; // contains the debiased non-zero value of beta
-  vector<double >intercept_debiased_ ; // contains the debiased vector of intercept
-  urowvec iA_     ; // contains row indices of the non-zero values
-  urowvec jA_     ; // contains column indices of the non-zero values
-
-  // Compute degrees of freedom for the current estimate
-  double get_df() ;
-
+    
+    double get_lambda_max() {
+      return(penalty_.dual_norm(data_.XTy_, grp_sizes_));
+    } ;
+    
+    GroupLassoL1L2(const RegressionData<matrix>&, const uvec&, const List&, const List&);
+    
+    List solution_path(const List&);
+    
+    uword nb_group() const { return grp_sizes_.n_elem ; }
+    
+    const sp_mat coefficients() const {
+      return sp_mat(join_cols(iA_, jA_), nzeros_, data_.p_, lambdas_.size()) ; 
+    }
+    
+    const sp_mat debiased_coefficients() const { 
+      return sp_mat(join_cols(iA_, jA_), debiased_, data_.p_, lambdas_.size()) ; 
+    }
+    
+    const vector<double>& intercept_debiased() const { return intercept_debiased_ ; }
+    
+    const sp_mat active_var() const { 
+      return sp_mat(join_cols(iA_, jA_), vec(iA_.n_elem, fill::ones), data_.p_, lambdas_.size()) ; 
+    }
+    
+    // Specific to Elastic-Net regularization
+    GenericOptimizer<matrix,Norm::L1L2> solver_ ; // Solvers for L1 penalty
+    ActiveSetGroup<matrix> set_ ; // Active set of variable and data
+    double gamma_   ; // overall amount of l2 penalty
+    vector<uvec> group_     ; // vector of current parameters
+    uvec grp_sizes_ ; // vector of current parameters
+    vec beta_       ; // vector of current parameters
+    vec grad_       ; // vector of current gradient (smooth part)
+    vec   nzeros_   ; // contains non-zero value of beta
+    vec   debiased_ ; // contains the debiased non-zero value of beta
+    vector<double >intercept_debiased_ ; // contains the debiased vector of intercept
+    urowvec iA_     ; // contains row indices of the non-zero values
+    urowvec jA_     ; // contains column indices of the non-zero values
+    
+    // Compute degrees of freedom for the current estimate
+    double get_df() ;
+    
 };
 
 template <typename matrix>
 GroupLassoL1L2<matrix>::GroupLassoL1L2(
-  const RegressionData<matrix>& data, const uvec& group, const List& regParam, const List& control) :
-  GenericRegularizer<matrix,Norm::L1L2>::GenericRegularizer(data, regParam), group_(group) {
+  const RegressionData<matrix>& data, const uvec& group_ind, const List& regParam, const List& control) :
+  GenericRegularizer<matrix,Norm::L1L2>::GenericRegularizer(data, regParam) {
     
-    // set the penalty to l1
+    // Vector of group and group sizes
+    uword nb_grp = group_ind.max() ;
+    grp_sizes_.zeros(nb_grp-1) ;
+    for (auto it = group_ind.begin(); it != group_ind.end(); it++) {
+      grp_sizes_[*it - 1]++;
+    }
+    uword current_elt = 0 ;
+    for (auto it = grp_sizes_.begin(); it != grp_sizes_.end(); it++) {
+      group_.push_back(regspace<uvec>(current_elt, current_elt + *it - 1)) ;
+      current_elt = current_elt + *it ;
+    }
+
+    // set the penalty to l1/l2
     penalty_ = Penalty<Norm::L1L2>() ;
     lambda_factor_ = as<vec>(regParam["lambda_factor"]) ;
     get_lambda_seq(regParam) ;
-
+  
     // Set up the optimizer
     solver_ ;
     
@@ -85,21 +101,21 @@ GroupLassoL1L2<matrix>::GroupLassoL1L2(
     
     // Initialize the active set, beta_ and gradient with starting coefficient
     vec beta0 = control["beta0"] ;
-    uvec A0 = find(beta0) ;
-    if (A0.is_empty()) {
-      set_  = ActiveSet(data_, as<bool>(control["usechol"])) ;
-      grad_ = - data_.XTy_ ;
-    } else {
-      set_  = ActiveSet(data_, A0, as<bool>(control["usechol"])) ;
-      beta_ = beta0(A0) ;
-      grad_ = - data_.XTy_ + set_.XTXA_ * beta_  ;
-    }
+    // uvec A0 = find(beta0) ;
+    // if (A0.is_empty()) {
+    this->set_ = ActiveSetGroup(data_, grp_sizes_, as<bool>(control["usechol"])) ;
+    grad_ = - data_.XTy_ ;
+    // } else {
+    //   set_  = ActiveSet(data_, A0, as<bool>(control["usechol"])) ;
+    //   beta_ = beta0(A0) ;
+    //   grad_ = - data_.XTy_ + set_.XTXA_ * beta_  ;
+    // }
   }
 
 template <typename matrix>
 double GroupLassoL1L2<matrix>::get_df() {
   
-  double df = set_.size() + data_.centered_ ;
+  double df = set_.size_grp() + data_.centered_ ;
   if (gamma_ > 0) {
     // loop due to sparse encoding. should iterate over the n_zeros only...
     mat SAA(set_.size(),set_.size()) ;
@@ -142,13 +158,14 @@ List GroupLassoL1L2<matrix>::solution_path(const List& control) {
     }
     
     // OPTIMIZER LOOP (FIX-LAMBDA VALUE): IDENTIFY THE ACTIVE SET AND SOLVE
-    
+
     // dual norm of the gradient
-    vec grd_norm = abs(grad_) - lambda_ ;
-    grd_norm(set_.A_) = abs(grad_(set_.A_) + lambda_ * sign(beta_)) ;
+    vec grd_norm = penalty_.elt_norm(grad_, grp_sizes_) - lambda_ ;
+    grd_norm(set_.G_) = penalty_.elt_norm(grad_(set_.A_) + lambda_ * beta_, grp_sizes_) ;
+    
     // variable associated with the highest violation of KKT conditions 
-    uword var_in = grd_norm.index_max() ;
-    double current_gap = std::max(0.0, grd_norm(var_in)) ;
+    uword grp_in = grd_norm.index_max() ;
+    double current_gap = std::max(0.0, grd_norm(grp_in)) ;
     uvec zeroed ;
     
     uword current_it = 0 ; bool success = true ; 
@@ -159,39 +176,39 @@ List GroupLassoL1L2<matrix>::solution_path(const List& control) {
       // ________________________________________________________________________
       // VARIABLE ACTIVATION IF APPLICABLE
       //
-      if (set_.is_in_[var_in] == 0) { // Is var_in already in the active set?
-        set_.add_var(var_in, data_) ;
-        beta_.resize(beta_.size()+1) ; // update the vector of active parameters
-        beta_.tail(1) = - 1e-3 * sign(grad_(var_in)) ;
-        if (verbose) {Rprintf("\tnewly added variable %i\n",var_in);}
-      } else if (verbose) {Rprintf("\talready in %i\n",var_in);}
+      if (set_.is_grp_in_[grp_in] == 0) { // Is var_in already in the active set?
+        set_.add_group(grp_in, group_, data_) ;
+        beta_.resize(beta_.size()+grp_sizes_(grp_in)) ; // update the vector of active parameters
+        beta_.tail(grp_sizes_(grp_in)) = - 1e-3 * sign(grad_(group_[grp_in])) ;
+        if (verbose) {Rprintf("\tnewly added group %i\n",grp_in);}
+      } else if (verbose) {Rprintf("\talready in %i\n",grp_in);}
       
       // ________________________________________________________________________
       // OPTIMIZATION OVER THE CURRENTLY ACTIVATED VARIABLES
       //
       if (algorithm == FISTA) {
         ioptim.push_back(
-          solver_.fista(beta_, lambda_, data_, set_, 1e-10, 10000)
+          solver_.fista_groupwise(beta_, lambda_, data_, set_, 1e-10, 10000)
         );
       } else { // QUADRA solver
-        try {
-          ioptim.push_back(
-            solver_.quadratic_enet(beta_, lambda_, data_, set_, 1e-5, 10000)
-          );
-        } catch (std::runtime_error& error) {
-          if (verbose > 0) {
-            Rprintf("\nWarning: singular system at this stage of the solution path, cutting here.\n");
-          }
-          success = false ;
-        }
+        // try {
+        //   ioptim.push_back(
+        //     solver_.quadratic_enet(beta_, lambda_, data_, set_, 1e-5, 10000)
+        //   );
+        // } catch (std::runtime_error& error) {
+        //   if (verbose > 0) {
+        //     Rprintf("\nWarning: singular system at this stage of the solution path, cutting here.\n");
+        //   }
+        //   success = false ;
+        // }
       }
       
       // OPTIMALITY TESTING
       grad_ = - data_.XTy_ + set_.XTXA_ * beta_ ;
-      grd_norm = penalty_.elt_norm(grad_) - lambda_ ;
-      grd_norm(set_.A_) = abs(grad_(set_.A_) + lambda_ * sign(beta_)) ;
-      var_in = grd_norm.index_max() ;
-      current_gap = std::max(0.0, grd_norm(var_in)) ;
+      grd_norm = penalty_.elt_norm(grad_, grp_sizes_) - lambda_ ;
+      grd_norm(set_.G_) = penalty_.elt_norm(grad_(set_.A_) + lambda_ * beta_, grp_sizes_) ;
+      grp_in = grd_norm.index_max() ;
+      current_gap = std::max(0.0, grd_norm(grp_in)) ;
       
     }
     if (verbose) Rprintf("\tcurrent gap = %f\n",current_gap) ;

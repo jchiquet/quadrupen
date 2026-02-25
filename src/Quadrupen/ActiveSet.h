@@ -9,7 +9,8 @@ using namespace arma;
 
 #include "RegressionData.h"
 
-template <typename matrix> class ActiveSet {
+template <typename matrix> 
+class ActiveSet {
 
 public:
   
@@ -29,7 +30,7 @@ public:
   void add_var(uword, const RegressionData<matrix> &) ; // add a variable in the active set
   void add_vars(uvec, const RegressionData<matrix> &) ; // add a list of variables in the active set
   void del_var(uword) ; // remove the variable activated in position ind_var_out
-  void del_vars(uvec) ; // remove a set of non contiguous varables
+  void del_vars(uvec) ; // remove a set of non contiguous variables
   void reset()        ; // empty the active set 
   const uword size() const { return A_.n_elem ; }
   
@@ -39,7 +40,7 @@ public:
   // Downdate Cholesky factorisation by removing the specified variables
   void downdate_Cholesky(uword j) ; 
   
-  // Inverse the currently activte Gram matrix
+  // Inverse the currently active Gram matrix
   void inverse_Gram() ; 
   
 };
