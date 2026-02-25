@@ -18,11 +18,11 @@ List group_lasso_l1l2_dense_cpp(
 ) {
   
   RegressionData<mat> data(dataModel, intercept, as<bool>(control["normalize"])) ;
-  
+
   GroupLassoL1L2<mat> grplasso(data, group, regParam, control);
   
   List results = grplasso.solution_path(control);
-  
+
   return List::create(
     Named("tuning_param") = List::create(
       Named("l1") = grplasso.path_tuning(),

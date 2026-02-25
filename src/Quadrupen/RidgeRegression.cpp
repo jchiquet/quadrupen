@@ -14,7 +14,7 @@ RidgeRegression::RidgeRegression(
 {
   penalty_ = Penalty<Norm::RIDGE>() ;
   lambda_factor_ = as<vec>(regParam["lambda_factor"]) ;
-  get_lambda_seq(regParam) ;
+  get_lambda_seq(get_lambda_max(), regParam) ;
 }
 
 List RidgeRegression::solution_path(const mat& C_inv) {

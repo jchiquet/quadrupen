@@ -15,7 +15,7 @@ BoundedRegression::BoundedRegression(
     // set the penalty to l infinity
     penalty_ = Penalty<Norm::LINF>() ;
     lambda_factor_ = as<vec>(regParam["lambda_factor"]) ;
-    get_lambda_seq(regParam) ;
+    get_lambda_seq(get_lambda_max(), regParam) ;
 
     // Set up the optimizer 
     solver_ = OptimizerLINF<mat>(penalty_) ;

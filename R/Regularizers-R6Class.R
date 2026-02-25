@@ -115,12 +115,13 @@ FusedLassoFit <- R6::R6Class(
 GroupLassoFit <- R6::R6Class(
   classname = "GroupLassoFit",
   inherit = QuadrupenFit,
+  private  = list(group_ = NA, type_ = NA),
   active  = list(
     #' @field penalty character describing the regularizer/penalty
     penalty = function(value) paste0("group.lasso l1/", private$type_),
     #' @field group vector of integers indicating group belonging
     group = function(value) private$group_,
-    #' @param type string indicating whether the \eqn{\ell_1/\ell_2}{l1/l2} or the
+    #' @field type string indicating whether the \eqn{\ell_1/\ell_2}{l1/l2} or the
     #' \eqn{\ell_1/\ell_\infty}{l1/linf} group-Lasso must be fitted.
     type = function(value) private$type_
   ),

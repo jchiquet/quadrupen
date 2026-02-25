@@ -39,6 +39,7 @@ public:
 template <typename matrix>
 ActiveSetGroup<matrix>::ActiveSetGroup(const RegressionData<matrix>& data, const uvec& grp_sizes, const bool use_chol) :
   ActiveSet<matrix>(data, use_chol), grp_sizes_(grp_sizes) {
+    is_grp_in_.zeros(grp_sizes_.n_elem) ;
 }
 
 template <typename matrix>

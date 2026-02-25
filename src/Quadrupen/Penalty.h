@@ -23,7 +23,7 @@ template <Norm norm>
 class Penalty {
 public: 
   
-  Penalty() ;
+  Penalty() {} ;
 
   double pen_norm  (vec x, uvec pk = zeros<uvec>(0)) ;
   vec    elt_norm  (vec x, uvec pk = zeros<uvec>(0)) ;
@@ -31,9 +31,5 @@ public:
   vec proximal(vec x, double lambda, uvec pk = zeros<uvec>(0)) ;
 
 };
-
-// Empty constructor
-template <Norm norm>
-Penalty<norm>::Penalty() {}
 
 #endif

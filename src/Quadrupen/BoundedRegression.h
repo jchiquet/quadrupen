@@ -21,6 +21,8 @@ public:
   
   BoundedRegression(RegressionData<mat>&, const List&, const List&);
   
+  double get_lambda_max() {return(penalty_.dual_norm(data_.XTy_));}
+  
   List solution_path(const List&);
 
   // Specific to Bounded regression

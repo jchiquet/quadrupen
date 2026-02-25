@@ -13,9 +13,11 @@ using namespace arma;
 using namespace std;
 
 class RidgeRegression : public GenericRegularizer<mat,Norm::RIDGE>{
- public:
-   RidgeRegression(RegressionData<mat>&, const List&);
-
+public:
+  RidgeRegression(RegressionData<mat>&, const List&);
+  
+  double get_lambda_max() {return(penalty_.dual_norm(data_.XTy_));}
+  
   List solution_path(const mat&);
   
 };

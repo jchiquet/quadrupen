@@ -20,11 +20,7 @@ public:
   GenericRegularizer() {} ;
   GenericRegularizer(const RegressionData<matrix>&, const List&);
   
-  double get_lambda_max() {
-    return(penalty_.dual_norm(data_.XTy_));
-  } ;
-  
-  void get_lambda_seq(const List&);
+  void get_lambda_seq(double, const List&);
   
   // Getter functions to access private members
   const RegressionData<matrix>& data()    const { return data_      ; }
@@ -51,11 +47,10 @@ GenericRegularizer<matrix, norm>::GenericRegularizer(
 }
 
 template <typename matrix, Norm norm>
-void GenericRegularizer<matrix,norm>::get_lambda_seq(const List& regParam) {
+void GenericRegularizer<matrix,norm>::get_lambda_seq(double lambda_max, const List& regParam) {
   if (regParam[0] != R_NilValue) {
     lambdas_  = as<vector<double>>(regParam["lambda"]) ;
   } else {
-    double lambda_max = this->get_lambda_max() ;
     lambdas_ = conv_to<vector<double>>::from(
       logspace(
         log10(lambda_max),

@@ -26,9 +26,11 @@ class ElasticNet :
     using GenericRegularizer<matrix,Norm::L1>::df_   ;
     using GenericRegularizer<matrix,Norm::L1>::lambda_factor_ ;
     using GenericRegularizer<matrix,Norm::L1>::get_lambda_seq ;
-  
+
   ElasticNet(const RegressionData<matrix>&, const List&, const List&);
-  
+
+  double get_lambda_max() {return(penalty_.dual_norm(data_.XTy_));}
+
   List solution_path(const List&);
 
   void optimality_gap(double lambda_, uword type) ;
@@ -74,7 +76,7 @@ ElasticNet<matrix>::ElasticNet(
     // set the penalty to l1
     penalty_ = Penalty<Norm::L1>() ;
     lambda_factor_ = as<vec>(regParam["lambda_factor"]) ;
-    get_lambda_seq(regParam) ;
+    get_lambda_seq(get_lambda_max(), regParam) ;
 
     // Set up the optimizer
     solver_ = OptimizerL1<matrix>(penalty_) ;
