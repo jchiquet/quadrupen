@@ -6,13 +6,13 @@
 #ifndef _quadrupen_RIDGE_H
 #define _quadrupen_RIDGE_H
 
-#include "GenericRegularizer.h"
+#include "Regularizer.h"
 
 using namespace Rcpp;
 using namespace arma;
 using namespace std;
 
-class RidgeRegression : public GenericRegularizer<mat,Norm::RIDGE>{
+class RidgeRegression : public SimpleRegularizer<mat,SimpleNorm::RIDGE>{
 public:
   RidgeRegression(RegressionData<mat>&, const List&);
   

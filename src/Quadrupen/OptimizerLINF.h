@@ -6,7 +6,7 @@
 #ifndef _quadrupen_OPTIMIZER_L1_H
 #define _quadrupen_OPTIMIZER_L1_H
 
-#include "GenericOptimizer.h"
+#include "Optimizer.h"
 
 using namespace Rcpp;
 using namespace arma;
@@ -14,14 +14,14 @@ using namespace std;
 
 template <typename matrix>
 class OptimizerLINF :
-  public GenericOptimizer<matrix,Norm::LINF> {
+  public SimpleOptimizer<matrix,SimpleNorm::LINF> {
   
-  using GenericOptimizer<matrix,Norm::LINF>::penalty_ ;
+  using SimpleOptimizer<matrix,SimpleNorm::LINF>::penalty_ ;
   
 public:
   
   OptimizerLINF() {} ;
-  OptimizerLINF(Penalty<Norm::LINF>&) ;
+  OptimizerLINF(SimplePenalty<SimpleNorm::LINF>&) ;
   
   uword quadratic_breg(
       vec& beta,
@@ -37,6 +37,11 @@ public:
 };
 
 template <typename matrix>
+inline OptimizerLINF<matrix>::OptimizerLINF(
+    SimplePenalty<SimpleNorm::LINF>& penalty) : SimpleOptimizer<matrix, SimpleNorm::LINF>(penalty) 
+    {}
+
+template <typename matrix>
 mat OptimizerLINF<matrix>::updateCholeskyFromExisting(const mat& R, const vec& b) {
   uword p = R.n_cols + 1;
   mat R_ ;
@@ -46,11 +51,6 @@ mat OptimizerLINF<matrix>::updateCholeskyFromExisting(const mat& R, const vec& b
   R_ = join_rows( join_cols(R_, zeros<mat>(1,p-1)) , rp);
   return(R_) ;
 }
-
-template <typename matrix>
-inline OptimizerLINF<matrix>::OptimizerLINF(
-    Penalty<Norm::LINF>& penalty) : GenericOptimizer<matrix, Norm::LINF>(penalty) 
-    {}
 
 template <typename matrix>
 uword OptimizerLINF<matrix>::quadratic_breg(

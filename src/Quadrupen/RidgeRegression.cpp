@@ -10,9 +10,9 @@ using namespace arma;
 
 RidgeRegression::RidgeRegression(
   RegressionData<mat>& data, const List& regParam) :
-  GenericRegularizer::GenericRegularizer(data, regParam) 
+  SimpleRegularizer::SimpleRegularizer(data, regParam) 
 {
-  penalty_ = Penalty<Norm::RIDGE>() ;
+  penalty_ = SimplePenalty<SimpleNorm::RIDGE>() ;
   lambda_factor_ = as<vec>(regParam["lambda_factor"]) ;
   get_lambda_seq(get_lambda_max(), regParam) ;
 }

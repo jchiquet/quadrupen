@@ -6,7 +6,7 @@
 #ifndef _quadrupen_OPTIMIZER_L1_H
 #define _quadrupen_OPTIMIZER_L1_H
 
-#include "GenericOptimizer.h"
+#include "Optimizer.h"
 
 using namespace Rcpp;
 using namespace arma;
@@ -14,14 +14,14 @@ using namespace std;
 
 template <typename matrix>
 class OptimizerL1 :
-  public GenericOptimizer<matrix,Norm::L1> {
+  public SimpleOptimizer<matrix,SimpleNorm::L1> {
 
-  using GenericOptimizer<matrix,Norm::L1>::penalty_ ;
+  using SimpleOptimizer<matrix,SimpleNorm::L1>::penalty_ ;
   
   public:
   
   OptimizerL1() {} ;
-  OptimizerL1(Penalty<Norm::L1>&) ;
+  OptimizerL1(SimplePenalty<SimpleNorm::L1>&) ;
 
   uword quadratic_enet(
       vec &beta0,
@@ -36,7 +36,7 @@ class OptimizerL1 :
 
 template <typename matrix>
 inline OptimizerL1<matrix>::OptimizerL1(
-    Penalty<Norm::L1>& penalty) : GenericOptimizer<matrix, Norm::L1>(penalty) 
+    SimplePenalty<SimpleNorm::L1>& penalty) : SimpleOptimizer<matrix, SimpleNorm::L1>(penalty) 
   {}
 
 template <typename matrix>

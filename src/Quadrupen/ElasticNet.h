@@ -6,7 +6,7 @@
 #ifndef _ElasticNet_H
 #define _ElasticNet_H
 
-#include "GenericRegularizer.h"
+#include "Regularizer.h"
 #include "ActiveSet.h"
 #include "OptimizerL1.h"
 
@@ -16,16 +16,16 @@ using namespace std;
 
 template <typename matrix>
 class ElasticNet : 
-  public GenericRegularizer<matrix,Norm::L1>{
+  public SimpleRegularizer<matrix,SimpleNorm::L1>{
   public:
     
-    using GenericRegularizer<matrix,Norm::L1>::intercept_ ;
-    using GenericRegularizer<matrix,Norm::L1>::lambdas_   ;
-    using GenericRegularizer<matrix,Norm::L1>::penalty_   ;
-    using GenericRegularizer<matrix,Norm::L1>::data_ ;
-    using GenericRegularizer<matrix,Norm::L1>::df_   ;
-    using GenericRegularizer<matrix,Norm::L1>::lambda_factor_ ;
-    using GenericRegularizer<matrix,Norm::L1>::get_lambda_seq ;
+    using SimpleRegularizer<matrix,SimpleNorm::L1>::intercept_ ;
+    using SimpleRegularizer<matrix,SimpleNorm::L1>::lambdas_   ;
+    using SimpleRegularizer<matrix,SimpleNorm::L1>::penalty_   ;
+    using SimpleRegularizer<matrix,SimpleNorm::L1>::data_ ;
+    using SimpleRegularizer<matrix,SimpleNorm::L1>::df_   ;
+    using SimpleRegularizer<matrix,SimpleNorm::L1>::lambda_factor_ ;
+    using SimpleRegularizer<matrix,SimpleNorm::L1>::get_lambda_seq ;
 
   ElasticNet(const RegressionData<matrix>&, const List&, const List&);
 
@@ -71,10 +71,10 @@ class ElasticNet :
 template <typename matrix>
 ElasticNet<matrix>::ElasticNet(
   const RegressionData<matrix>& data, const List& regParam, const List& control) :
-  GenericRegularizer<matrix,Norm::L1>::GenericRegularizer(data, regParam) {
+  SimpleRegularizer<matrix,SimpleNorm::L1>::SimpleRegularizer(data, regParam) {
     
     // set the penalty to l1
-    penalty_ = Penalty<Norm::L1>() ;
+    penalty_ = SimplePenalty<SimpleNorm::L1>() ;
     lambda_factor_ = as<vec>(regParam["lambda_factor"]) ;
     get_lambda_seq(get_lambda_max(), regParam) ;
 

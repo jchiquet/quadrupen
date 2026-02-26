@@ -13,23 +13,35 @@
 
 #define ZERO 2e-16 // practical zero
 
-enum class Norm {L1, LINF, RIDGE, L1L2, L1LINF, COOP};
+enum class SimpleNorm {L1, LINF, RIDGE};
+enum class MixedNorm {L1L2, L1LINF, COOP};
 
 using namespace Rcpp;
 using namespace arma;
 using namespace std;
 
-template <Norm norm>
-class Penalty {
+template <SimpleNorm norm> class SimplePenalty {
 public: 
   
-  Penalty() {} ;
+  SimplePenalty() {} ;
 
-  double pen_norm  (vec x, uvec pk = zeros<uvec>(0)) ;
-  vec    elt_norm  (vec x, uvec pk = zeros<uvec>(0)) ;
-  double dual_norm (vec x, uvec pk = zeros<uvec>(0)) ;
-  vec proximal(vec x, double lambda, uvec pk = zeros<uvec>(0)) ;
+  double pen_norm  (vec x) ;
+  vec    elt_norm  (vec x) ;
+  double dual_norm (vec x) ;
+  vec proximal(vec x, double lambda) ;
 
+};
+
+template <MixedNorm norm> class MixedPenalty {
+public: 
+  
+  MixedPenalty() {} ;
+  
+  double pen_norm  (vec x, uvec pk) ;
+  vec    elt_norm  (vec x, uvec pk) ;
+  double dual_norm (vec x, uvec pk) ;
+  vec proximal(vec x, double lambda, uvec pk) ;
+  
 };
 
 #endif

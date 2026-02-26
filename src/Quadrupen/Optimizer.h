@@ -19,12 +19,10 @@ using namespace Rcpp;
 using namespace arma;
 using namespace std;
 
-template <typename matrix, Norm norm>
-class GenericOptimizer {
+template <typename matrix> class Optimizer {
 public:
-
-  GenericOptimizer() {} ;
-  GenericOptimizer(Penalty<norm>&) ;
+  
+  Optimizer() {} ;
 
   uword conjugate_gradient(
       vec& x0,
@@ -32,45 +30,11 @@ public:
       const vec& b,
       const double& accuracy,
       const uword& max_iter) ;
-  
-  uword fista(
-      vec& beta,
-      vec& grad,
-      const double& lambda, 
-      RegressionData<matrix> &data,
-      ActiveSet<matrix>& set,
-      const double& accuracy, 
-      const uword& max_iter) ;
-
-  uword fista_groupwise(
-      vec& beta,
-      const double& lambda, 
-      RegressionData<matrix> &data,
-      ActiveSetGroup<matrix>& set,
-      const double& accuracy, 
-      const uword& max_iter) ;
-  
-  // uword coordinate_descent(
-  //     vec& beta,
-  //     const double& lambda,
-  //     ActiveSet<matrix>& set,
-  //     const double& accuracy,
-  //     const uword& max_iter) ;
-      
-protected:
-  Penalty<norm> penalty_ ;
 
 };
 
-template <typename matrix, Norm norm>
-inline GenericOptimizer<matrix, norm>::GenericOptimizer(
-  Penalty<norm>& penalty) :
-  penalty_ (penalty) {
-
-}
-
-template <typename matrix, Norm norm>
-uword GenericOptimizer<matrix,norm>::conjugate_gradient(
+template <typename matrix>
+uword Optimizer<matrix>::conjugate_gradient(
     vec& x0,
     const mat& A,
     const vec& b,
@@ -80,7 +44,7 @@ uword GenericOptimizer<matrix,norm>::conjugate_gradient(
   vec r = b - A * x0;
   vec p = r ;
   double rs_old = sum(square(r)) ;
-
+  
   double rs_new = rs_old ;
   uword i = 0;
   double alpha ;
@@ -104,8 +68,41 @@ uword GenericOptimizer<matrix,norm>::conjugate_gradient(
   return(i) ;
 }
 
-template <typename matrix, Norm norm>
-uword GenericOptimizer<matrix,norm>::fista(
+template <typename matrix, SimpleNorm norm> class SimpleOptimizer: public Optimizer<matrix> {
+public:
+
+  SimpleOptimizer() {} ;
+  SimpleOptimizer(SimplePenalty<norm>&) ;
+
+  uword fista(
+      vec& beta,
+      vec& grad,
+      const double& lambda, 
+      RegressionData<matrix> &data,
+      ActiveSet<matrix>& set,
+      const double& accuracy, 
+      const uword& max_iter) ;
+
+  uword fista_groupwise(
+      vec& beta,
+      const double& lambda, 
+      RegressionData<matrix> &data,
+      ActiveSetGroup<matrix>& set,
+      const double& accuracy, 
+      const uword& max_iter) ;
+  
+protected:
+  SimplePenalty<norm> penalty_ ;
+
+};
+
+template <typename matrix, SimpleNorm norm>
+inline SimpleOptimizer<matrix, norm>::SimpleOptimizer(
+  SimplePenalty<norm>& penalty) : 
+  penalty_ (penalty), Optimizer<matrix>() {}
+
+template <typename matrix, SimpleNorm norm>
+uword SimpleOptimizer<matrix,norm>::fista(
     vec& beta,
     vec& grad,
     const double& lambda,
@@ -168,8 +165,42 @@ uword GenericOptimizer<matrix,norm>::fista(
 
 }
 
-template <typename matrix, Norm norm>
-uword GenericOptimizer<matrix,norm>::fista_groupwise(
+
+
+template <typename matrix, MixedNorm norm> 
+class GroupOptimizer : public Optimizer<matrix >{
+public:
+  
+  GroupOptimizer() {} ;
+  GroupOptimizer(MixedPenalty<norm>&) ;
+  
+  uword conjugate_gradient(
+      vec& x0,
+      const mat& A,
+      const vec& b,
+      const double& accuracy,
+      const uword& max_iter) ;
+
+  uword fista(
+      vec& beta,
+      const double& lambda, 
+      RegressionData<matrix> &data,
+      ActiveSetGroup<matrix>& set,
+      const double& accuracy, 
+      const uword& max_iter) ;
+
+protected:
+  MixedPenalty<norm> penalty_ ;
+  
+};
+
+template <typename matrix, MixedNorm norm>
+inline GroupOptimizer<matrix, norm>::GroupOptimizer(
+    MixedPenalty<norm>& penalty) : 
+  penalty_ (penalty), Optimizer<matrix>() {}
+
+template <typename matrix, MixedNorm norm>
+uword GroupOptimizer<matrix,norm>::fista(
     vec& beta,
     const double& lambda,
     RegressionData<matrix> &data,

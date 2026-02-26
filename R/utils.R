@@ -63,6 +63,16 @@ optim_fused_default <- function(d)
        fusioncheck   = "all" ## c("all","active","none", "naive", "huber")
   )
 
+optim_grp_default <- function(d)
+  list(verbose     = 0, # default control options
+       timer       = FALSE,
+       maxiter     = max(50, d),
+       method      = "quadra",
+       threshold   = 1e-4,
+       monitor     = 0,
+       usechol     = TRUE
+  )
+
 status_to_message <- function(status) {
   message <- switch(as.character(status),
                     "0"  = "converged",

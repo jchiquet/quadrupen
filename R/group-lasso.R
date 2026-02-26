@@ -68,11 +68,12 @@ group.lasso <- function(x,
   ## ============================================
   ## RECOVER LOW LEVEL CONFIGURATION
   ##
-  ctrl <- optim_enet_default(ncol(x))
+  ctrl <- optim_grp_default(ncol(x))
   ctrl$maxfeat <- maxfeat
   if (!is.null(control$method)) if (control$method != "quadra") ctrl$threshold <- 1e-2
   ctrl[names(control)] <- control # default overwritten by user specifications
-  ctrl$method <- switch(ctrl$method, quadra = "QUADRA", fista = "FISTA", 0)
+  ctrl$method  <- switch(ctrl$method, quadra = "QUADRA", fista = "FISTA", 0)
+  ctrl$usechol <- FALSE
   ctrl$normalize <- normalize
   ctrl$beta0  <- beta0
   

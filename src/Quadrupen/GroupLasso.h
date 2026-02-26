@@ -6,7 +6,7 @@
 #ifndef _GroupLasso_H
 #define _GroupLasso_H
 
-#include "GenericRegularizer.h"
+#include "Regularizer.h"
 #include "OptimizerL1.h"
 
 using namespace Rcpp;
@@ -15,24 +15,22 @@ using namespace std;
 
 template <typename matrix>
 class GroupLassoL1L2 : 
-  public GenericRegularizer<matrix,Norm::L1L2>{
+  public GroupRegularizer<matrix,MixedNorm::L1L2>{
   public:
     
-    using GenericRegularizer<matrix,Norm::L1L2>::intercept_ ;
-    using GenericRegularizer<matrix,Norm::L1L2>::lambdas_   ;
-    using GenericRegularizer<matrix,Norm::L1L2>::penalty_   ;
-    using GenericRegularizer<matrix,Norm::L1L2>::data_ ;
-    using GenericRegularizer<matrix,Norm::L1L2>::df_   ;
-    using GenericRegularizer<matrix,Norm::L1L2>::lambda_factor_ ;
-    using GenericRegularizer<matrix,Norm::L1L2>::get_lambda_seq ;
+    using GroupRegularizer<matrix,MixedNorm::L1L2>::intercept_ ;
+    using GroupRegularizer<matrix,MixedNorm::L1L2>::lambdas_   ;
+    using GroupRegularizer<matrix,MixedNorm::L1L2>::penalty_   ;
+    using GroupRegularizer<matrix,MixedNorm::L1L2>::data_ ;
+    using GroupRegularizer<matrix,MixedNorm::L1L2>::df_   ;
+    using GroupRegularizer<matrix,MixedNorm::L1L2>::lambda_factor_ ;
+    using GroupRegularizer<matrix,MixedNorm::L1L2>::get_lambda_seq ;
     
     GroupLassoL1L2(const RegressionData<matrix>&, const uvec&, const List&, const List&);
   
     double get_lambda_max() {return(penalty_.dual_norm(data_.XTy_, grp_sizes_));}
   
     List solution_path(const List&);
-    
-    uword nb_group() const { return grp_sizes_.n_elem ; }
     
     const sp_mat coefficients() const {
       return sp_mat(join_cols(iA_, jA_), nzeros_, data_.p_, lambdas_.size()) ; 
@@ -49,7 +47,7 @@ class GroupLassoL1L2 :
     }
     
     // Specific to Elastic-Net regularization
-    GenericOptimizer<matrix,Norm::L1L2> solver_ ; // Solvers for L1 penalty
+    GroupOptimizer<matrix,MixedNorm::L1L2> solver_ ; // Solvers for L1 penalty
     ActiveSetGroup<matrix> set_ ; // Active set of variable and data
     double gamma_   ; // overall amount of l2 penalty
     vector<uvec> group_     ; // vector of current parameters
@@ -70,7 +68,7 @@ class GroupLassoL1L2 :
 template <typename matrix>
 GroupLassoL1L2<matrix>::GroupLassoL1L2(
   const RegressionData<matrix>& data, const uvec& group_ind, const List& regParam, const List& control) :
-  GenericRegularizer<matrix,Norm::L1L2>::GenericRegularizer(data, regParam) {
+  GroupRegularizer<matrix,MixedNorm::L1L2>::GroupRegularizer(data, regParam) {
 
     // Vector of group and group sizes
     uvec grp = unique(group_ind) ;
@@ -86,12 +84,12 @@ GroupLassoL1L2<matrix>::GroupLassoL1L2(
     }
     
     // set the penalty to l1/l2
-    penalty_ = Penalty<Norm::L1L2>() ;
+    penalty_ = MixedPenalty<MixedNorm::L1L2>() ;
     lambda_factor_ = as<vec>(regParam["lambda_factor"]) ;
     get_lambda_seq(get_lambda_max(), regParam) ;
 
     // Set up the optimizer
-    solver_ = GenericOptimizer<matrix,Norm::L1L2>(penalty_);
+    solver_ = GroupOptimizer<matrix,MixedNorm::L1L2>(penalty_);
     
     // Scale the structuring matrix according to main penalty factor and the amount of l2 penalty 
     gamma_   = as<double>(regParam["gamma"]) ;
@@ -185,7 +183,7 @@ List GroupLassoL1L2<matrix>::solution_path(const List& control) {
       //
       // if (algorithm == FISTA) {
         ioptim.push_back(
-          solver_.fista_groupwise(beta_, lambda_, data_, set_, 1e-10, 10000)
+          solver_.fista(beta_, lambda_, data_, set_, 1e-10, 10000)
         );
       // } else { // QUADRA solver
         // try {

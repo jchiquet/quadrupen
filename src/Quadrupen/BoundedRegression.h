@@ -6,7 +6,7 @@
 #ifndef _BoundedRegression_H
 #define _BoundedRegression_H
 
-#include "GenericRegularizer.h"
+#include "Regularizer.h"
 #include "ActiveSet.h"
 #include "OptimizerLINF.h"
 
@@ -16,7 +16,7 @@ using namespace Rcpp;
 using namespace arma;
 using namespace std;
 
-class BoundedRegression : public GenericRegularizer<mat,Norm::LINF> {
+class BoundedRegression : public SimpleRegularizer<mat,SimpleNorm::LINF> {
 public:
   
   BoundedRegression(RegressionData<mat>&, const List&, const List&);
