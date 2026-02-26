@@ -150,17 +150,14 @@ List ElasticNet<matrix>::solution_path(const List& control) {
     vec optimality = penalty_.elt_norm(grad_) - lambda_ ;
     uword var_in = optimality.index_max() ;
     double current_gap = std::max(0.0, optimality(var_in)) ;
-    uvec zeroed ;
-    
+
     uword current_it = 0 ; bool success = true ; 
     J_ = datum::inf ; D_ = datum::inf ;
     while ((current_gap > accuracy) && (current_it <= maxiter)) {
       R_CheckUserInterrupt();
       current_it++;
 
-      // ________________________________________________________________________
       // VARIABLE ACTIVATION IF APPLICABLE
-      //
       if (set_.is_in_[var_in] == 0) { // Is var_in already in the active set?
         set_.add_var(var_in, data_) ;
         beta_.resize(beta_.size()+1) ; // update the vector of active parameters
@@ -168,9 +165,7 @@ List ElasticNet<matrix>::solution_path(const List& control) {
         if (verbose) {Rprintf("\tnewly added variable %i\n",var_in);}
       } else if (verbose) {Rprintf("\talready in %i\n",var_in);}
       
-      // ________________________________________________________________________
       // OPTIMIZATION OVER THE CURRENTLY ACTIVATED VARIABLES
-      //
       if (algorithm == FISTA) {
         ioptim.push_back(
           solver_.fista(beta_, grad_, lambda_, data_, set_, 1e-10, 10000)
@@ -189,6 +184,7 @@ List ElasticNet<matrix>::solution_path(const List& control) {
       }
       
       // OPTIMALITY TESTING
+      grad_ = - data_.XTy_ + set_.XTXA_ * beta_ ;
       optimality = penalty_.elt_norm(grad_) - lambda_ ;
       var_in = optimality.index_max() ;
       current_gap = std::max(0.0, optimality(var_in)) ;

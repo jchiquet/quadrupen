@@ -105,7 +105,6 @@ uword OptimizerL1<matrix>::quadratic_enet(
       beta.shed_row(i_swap) ;
     }
   }
-  grad = - data.XTy_ + set.XTXA_ * beta ;
   
   if (set.use_chol_) {
     return(iter) ;

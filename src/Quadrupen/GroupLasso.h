@@ -164,8 +164,7 @@ List GroupLassoL1L2<matrix>::solution_path(const List& control) {
     vec optimality = penalty_.elt_norm(grad_, grp_sizes_) - lambda_;
     uword grp_in = optimality.index_max() ;
     double current_gap = std::max(0.0, optimality(grp_in)) ;
-    uvec zeroed ;
-    
+
     uword current_it = 0 ; bool success = true ; 
     while ((current_gap > accuracy) && (current_it <= maxiter)) {
       R_CheckUserInterrupt();
@@ -202,7 +201,9 @@ List GroupLassoL1L2<matrix>::solution_path(const List& control) {
       // }
       
       // OPTIMALITY TESTING
-      optimality(set_.G_) = penalty_.elt_norm(grad_(set_.A_), grp_sizes_(set_.G_)) - lambda_ ;
+      grad_ = - data_.XTy_ + set_.XTXA_ * beta_ ;
+      // optimality(set_.G_) = penalty_.elt_norm(grad_(set_.A_), grp_sizes_(set_.G_)) - lambda_ ;
+      optimality = penalty_.elt_norm(grad_, grp_sizes_) - lambda_ ;
       grp_in = optimality.index_max() ;
       current_gap = std::max(0.0, optimality(grp_in)) ;
       
