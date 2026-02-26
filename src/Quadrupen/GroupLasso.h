@@ -114,7 +114,9 @@ GroupLassoL1L2<matrix>::GroupLassoL1L2(
 
 template <typename matrix>
 double GroupLassoL1L2<matrix>::get_df() {
-  
+
+  // TODO not correct at the moment
+
   double df = set_.size_grp() + data_.centered_ ;
   if (gamma_ > 0) {
     // loop due to sparse encoding. should iterate over the n_zeros only...
@@ -153,18 +155,15 @@ List GroupLassoL1L2<matrix>::solution_path(const List& control) {
   for(auto lambda_ : lambdas_) {
     if (verbose) {
       Rprintf("\n lambda_l1l2 = %f",lambda_) ;
-      Rprintf("\n nb active variables = %i\n", set_.size()) ;
       Rprintf("\n nb active groups = %i\n", set_.size_grp()) ;
     }
     
     // OPTIMIZER LOOP (FIX-LAMBDA VALUE): IDENTIFY THE ACTIVE SET AND SOLVE
 
-    // norm of the gradient
-    vec grd_norm = penalty_.elt_norm(grad_, grp_sizes_)  ;
     // variable associated with the highest violation of KKT conditions 
-    vec dual_all = grd_norm - lambda_;
-    uword grp_in = dual_all.index_max() ;
-    double current_gap = std::max(0.0, dual_all(grp_in)) ;
+    vec optimality = penalty_.elt_norm(grad_, grp_sizes_) - lambda_;
+    uword grp_in = optimality.index_max() ;
+    double current_gap = std::max(0.0, optimality(grp_in)) ;
     uvec zeroed ;
     
     uword current_it = 0 ; bool success = true ; 
@@ -203,11 +202,9 @@ List GroupLassoL1L2<matrix>::solution_path(const List& control) {
       // }
       
       // OPTIMALITY TESTING
-      grad_(set_.A_) = - data_.XTy_(set_.A_) + set_.XATXA_ * beta_ ;
-      grd_norm(set_.G_) = penalty_.elt_norm(grad_(set_.A_), grp_sizes_(set_.G_)) ;
-      dual_all(set_.G_) = grd_norm(set_.G_) - lambda_ ;
-      grp_in = dual_all.index_max() ;
-      current_gap = std::max(0.0, dual_all(grp_in)) ;
+      optimality(set_.G_) = penalty_.elt_norm(grad_(set_.A_), grp_sizes_(set_.G_)) - lambda_ ;
+      grp_in = optimality.index_max() ;
+      current_gap = std::max(0.0, optimality(grp_in)) ;
       
     }
     if (verbose) Rprintf("\tcurrent gap = %f\n",current_gap) ;

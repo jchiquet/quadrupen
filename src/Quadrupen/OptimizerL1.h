@@ -25,6 +25,7 @@ class OptimizerL1 :
 
   uword quadratic_enet(
       vec &beta0,
+      vec &grad,
       const double &lambda ,
       RegressionData<matrix> &data,
       ActiveSet<matrix> &set,
@@ -40,7 +41,8 @@ inline OptimizerL1<matrix>::OptimizerL1(
 
 template <typename matrix>
 uword OptimizerL1<matrix>::quadratic_enet(
-    vec &beta0,
+    vec &beta,
+    vec &grad,
     const double &lambda ,
     RegressionData<matrix> &data,
     ActiveSet<matrix> &set,
@@ -50,8 +52,8 @@ uword OptimizerL1<matrix>::quadratic_enet(
   uword iter = 1, iter_in= 0 ; // count the number of systems solved
   
   // Solving the quadratic problem
-  vec betak = beta0;
-  vec theta = sign(beta0) ; // vector of sign of the solution
+  vec betak = beta;
+  vec theta = sign(beta) ; // vector of sign of the solution
   if (set.use_chol_) {
     betak =  set.Rinv_* set.Rinv_.t() * (data.XTy_(set.A_) - lambda * theta);
   } else {
@@ -64,20 +66,20 @@ uword OptimizerL1<matrix>::quadratic_enet(
   // Check for swapping variables
   uvec swap = find(abs(sign(betak) - theta) > ZERO);
   if (swap.is_empty()) {
-    beta0 = betak;
+    beta = betak;
   } else {
     iter++;
-    vec beta0_swap = beta0(swap); vec betak_swap = betak(swap);
+    vec beta_swap = beta(swap); vec betak_swap = betak(swap);
     
     // first, go to zero for the swapped variable which cost the minimum
-    vec eta = -beta0_swap / (betak_swap-beta0_swap);
+    vec eta = -beta_swap / (betak_swap-beta_swap);
     uword i_min = eta.index_min();
-    betak = beta0 + (betak-beta0) * eta(i_min) ;
+    betak = beta + (betak-beta) * eta(i_min) ;
     
     // second, solve the problem after swapping the signs of the incriminated variable
     uword i_swap = swap[i_min];
-    beta0 = betak;
-    beta0(i_swap) = -betak_swap[i_min];
+    beta = betak;
+    beta(i_swap) = -betak_swap[i_min];
     double grad_swap = - data.XTy_(set.A_(i_swap)) + 
       dot(set.XATXA_.row(i_swap), betak) ;
     theta(i_swap) = - sign(grad_swap) ;
@@ -95,15 +97,16 @@ uword OptimizerL1<matrix>::quadratic_enet(
     grad_swap = - data.XTy_(set.A_(i_swap)) + 
       dot(set.XATXA_.row(i_swap), betal) ;
     if (abs(grad_swap + lambda * sign(betal(i_swap))) <= ZERO) {
-        beta0 = betal ;
+        beta = betal ;
     } else {
-      beta0 = betak ; // otherwise, backtrack to betak
+      beta = betak ; // otherwise, backtrack to betak
       // if (verbose) Rprint("\tremoving variables %i", set.A_(i_swap)) ;
       set.del_var(i_swap) ; // and desactivate de zeroed variable
-      beta0.shed_row(i_swap) ;
+      beta.shed_row(i_swap) ;
     }
   }
-
+  grad = - data.XTy_ + set.XTXA_ * beta ;
+  
   if (set.use_chol_) {
     return(iter) ;
   } else return(iter_in) ;

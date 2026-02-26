@@ -35,6 +35,7 @@ public:
   
   uword fista(
       vec& beta,
+      vec& grad,
       const double& lambda, 
       RegressionData<matrix> &data,
       ActiveSet<matrix>& set,
@@ -106,6 +107,7 @@ uword GenericOptimizer<matrix,norm>::conjugate_gradient(
 template <typename matrix, Norm norm>
 uword GenericOptimizer<matrix,norm>::fista(
     vec& beta,
+    vec& grad,
     const double& lambda,
     RegressionData<matrix> &data,
     ActiveSet<matrix>& set,
@@ -125,17 +127,17 @@ uword GenericOptimizer<matrix,norm>::fista(
     double f0, fk ;
     vec XATXA_betal = set.XATXA_ * betal ;
     f0 = dot(betal, .5 * XATXA_betal  - data.XTy_(set.A_)) ;
-    vec grad = XATXA_betal - data.XTy_(set.A_);
+    grad((set.A_)) = - data.XTy_(set.A_) + XATXA_betal ;
     
     // Line search over L
     bool found=false;
     while(!found) {
       // Apply proximal operator (implemented in penalty object)
-      vec prox_arg = betal - grad/L;
+      vec prox_arg = betal - grad(set.A_)/L;
       betak = penalty_.proximal(prox_arg, lambda/L);
 
       fk = dot(betak, .5 * set.XATXA_ * betak - data.XTy_(set.A_)) ;
-      l_num = 2 * (fk - f0 - dot(grad, betak-betal));
+      l_num = 2 * (fk - f0 - dot(grad(set.A_), betak-betal));
       l_den = accu(pow(betak-betal,2));
       
       if ((L * l_den >= l_num) || (sqrt(l_den) < accuracy)) {

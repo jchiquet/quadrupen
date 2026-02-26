@@ -112,7 +112,8 @@ double ElasticNet<matrix>::get_df() {
         SAA(j,i) = SAA(i,j);
       }
     }
-    df -= trace(SAA * set_.XATXAinv_);
+    // note that XATXAinv_ is in fact (XATXA + lambda S)^-1
+    df -= trace(SAA * set_.XATXAinv_); 
   }
   
   return(df);
@@ -145,12 +146,10 @@ List ElasticNet<matrix>::solution_path(const List& control) {
     
     // OPTIMIZER LOOP (FIX-LAMBDA VALUE): IDENTIFY THE ACTIVE SET AND SOLVE
     
-    // dual norm of the gradient
-    vec grd_norm = abs(grad_) - lambda_ ;
-    grd_norm(set_.A_) = abs(grad_(set_.A_) + lambda_ * sign(beta_)) ;
     // variable associated with the highest violation of KKT conditions 
-    uword var_in = grd_norm.index_max() ;
-    double current_gap = std::max(0.0, grd_norm(var_in)) ;
+    vec optimality = penalty_.elt_norm(grad_) - lambda_ ;
+    uword var_in = optimality.index_max() ;
+    double current_gap = std::max(0.0, optimality(var_in)) ;
     uvec zeroed ;
     
     uword current_it = 0 ; bool success = true ; 
@@ -174,12 +173,12 @@ List ElasticNet<matrix>::solution_path(const List& control) {
       //
       if (algorithm == FISTA) {
         ioptim.push_back(
-          solver_.fista(beta_, lambda_, data_, set_, 1e-10, 10000)
+          solver_.fista(beta_, grad_, lambda_, data_, set_, 1e-10, 10000)
         );
       } else { // QUADRA solver
         try {
           ioptim.push_back(
-            solver_.quadratic_enet(beta_, lambda_, data_, set_, 1e-5, 10000)
+            solver_.quadratic_enet(beta_, grad_, lambda_, data_, set_, 1e-5, 10000)
           );
         } catch (std::runtime_error& error) {
           if (verbose > 0) {
@@ -190,11 +189,9 @@ List ElasticNet<matrix>::solution_path(const List& control) {
       }
       
       // OPTIMALITY TESTING
-      grad_ = - data_.XTy_ + set_.XTXA_ * beta_ ;
-      grd_norm = penalty_.elt_norm(grad_) - lambda_ ;
-      grd_norm(set_.A_) = abs(grad_(set_.A_) + lambda_ * sign(beta_)) ;
-      var_in = grd_norm.index_max() ;
-      current_gap = std::max(0.0, grd_norm(var_in)) ;
+      optimality = penalty_.elt_norm(grad_) - lambda_ ;
+      var_in = optimality.index_max() ;
+      current_gap = std::max(0.0, optimality(var_in)) ;
       
       if (monitoring > 0) {
         optimality_gap(lambda_, monitoring) ;
