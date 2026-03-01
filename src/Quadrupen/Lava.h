@@ -19,9 +19,9 @@ class Lava :
 
 public:
 
-  using SimpleRegularizer<matrix,SimpleNorm::L1>::coef_       ;
-  using SimpleRegularizer<matrix,SimpleNorm::L1>::intercept_  ;
-  using SimpleRegularizer<matrix,SimpleNorm::L1>::data_       ;
+  using Regularizer<matrix>::coef_       ;
+  using Regularizer<matrix>::intercept_  ;
+  using Regularizer<matrix>::data_       ;
   using ElasticNet<matrix>::set_      ;
   using ElasticNet<matrix>::debiased_ ;
   using ElasticNet<matrix>::intercept_debiased_ ;

@@ -10,18 +10,16 @@ using namespace arma;
 
 BoundedRegression::BoundedRegression(
   RegressionData<mat>& data, const List& regParam, const List& control) :
-  SimpleRegularizer<mat,SimpleNorm::LINF>::SimpleRegularizer(data, regParam) {
+  Regularizer<mat>::Regularizer(data, regParam) {
     
     // set the penalty to l infinity
     penalty_ = SimplePenalty<SimpleNorm::LINF>() ;
-    lambda_factor_ = as<vec>(regParam["lambda_factor"]) ;
     get_lambda_seq(get_lambda_max(), regParam) ;
 
     // Set up the optimizer 
     solver_ = OptimizerLINF<mat>(penalty_) ;
     
     // Scale the structuring matrix according to main penalty factor and the amount of l2 penalty 
-    gamma_   = as<double>(regParam["gamma"]) ;
     data_.scale_struct(sqrt(gamma_)*pow(lambda_factor_,-1/2)) ;
     
     // Initialize the active set with starting coefficient
@@ -132,8 +130,6 @@ List BoundedRegression::solution_path(const List& control) {
       coef_ = join_rows(coef_, beta_/(data_.norm_X_ % lambda_factor_)) ;
       intercept_.push_back(data_.y_bar_ - as_scalar(dot(beta_, data_.X_bar_)));
       df_.push_back(get_df()) ;
-      jA_ = join_rows(jA_, df_.size()*ones<urowvec>(set_.size()) );
-      iA_ = join_rows(iA_, set_.A_.t()) ;
     }
 
     timing.push_back(timer.toc()) ;

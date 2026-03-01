@@ -6,7 +6,7 @@
 #ifndef _ElasticNet_H
 #define _ElasticNet_H
 
-#include "Regularizer.h"
+#include "RegularizerSparse.h"
 #include "ActiveSet.h"
 #include "OptimizerL1.h"
 
@@ -16,53 +16,38 @@ using namespace std;
 
 template <typename matrix>
 class ElasticNet : 
-  public SimpleRegularizer<matrix,SimpleNorm::L1>{
+  public SimpleSparseRegularizer<matrix,SimpleNorm::L1>{
   public:
     
-    using SimpleRegularizer<matrix,SimpleNorm::L1>::intercept_ ;
-    using SimpleRegularizer<matrix,SimpleNorm::L1>::lambdas_   ;
-    using SimpleRegularizer<matrix,SimpleNorm::L1>::penalty_   ;
-    using SimpleRegularizer<matrix,SimpleNorm::L1>::data_ ;
-    using SimpleRegularizer<matrix,SimpleNorm::L1>::df_   ;
-    using SimpleRegularizer<matrix,SimpleNorm::L1>::lambda_factor_ ;
-    using SimpleRegularizer<matrix,SimpleNorm::L1>::get_lambda_seq ;
-
+    using Regularizer<matrix>::intercept_ ;
+    using Regularizer<matrix>::lambdas_   ;
+    using Regularizer<matrix>::gamma_   ;
+    using Regularizer<matrix>::data_ ;
+    using Regularizer<matrix>::df_   ;
+    using Regularizer<matrix>::beta_   ;
+    using Regularizer<matrix>::grad_   ;
+    using Regularizer<matrix>::lambda_factor_ ;
+    using Regularizer<matrix>::get_lambda_seq ;
+    using SparseRegularizer<matrix>::nzeros_   ;
+    using SparseRegularizer<matrix>::debiased_ ;
+    using SparseRegularizer<matrix>::intercept_debiased_   ;
+    using SparseRegularizer<matrix>::iA_   ;
+    using SparseRegularizer<matrix>::jA_   ;
+    using SimpleSparseRegularizer<matrix,SimpleNorm::L1>::penalty_   ;
+    using SimpleSparseRegularizer<matrix,SimpleNorm::L1>::set_ ;
+    using SimpleSparseRegularizer<matrix,SimpleNorm::L1>::get_lambda_max ;
+    
   ElasticNet(const RegressionData<matrix>&, const List&, const List&);
 
-  double get_lambda_max() {return(penalty_.dual_norm(data_.XTy_));}
-
+  // Specific to Elastic-Net regularization
+  OptimizerL1<matrix> solver_ ; // Solvers for L1 penalty
+  double J_ ; // current optimality gap
+  double D_ ; // current move in the optimality gap
+  
   List solution_path(const List&);
 
   void optimality_gap(double lambda_, uword type) ;
   
-  const sp_mat coefficients() const {
-    return sp_mat(join_cols(iA_, jA_), nzeros_, data_.p_, lambdas_.size()) ; 
-  }
-
-  const sp_mat debiased_coefficients() const { 
-    return sp_mat(join_cols(iA_, jA_), debiased_, data_.p_, lambdas_.size()) ; 
-  }
-
-  const vector<double>& intercept_debiased() const { return intercept_debiased_ ; }
-  
-  const sp_mat active_var() const { 
-    return sp_mat(join_cols(iA_, jA_), vec(iA_.n_elem, fill::ones), data_.p_, lambdas_.size()) ; 
-  }
-  
-  // Specific to Elastic-Net regularization
-  OptimizerL1<matrix> solver_ ; // Solvers for L1 penalty
-  ActiveSet<matrix> set_      ; // Active set of variable and data
-  double gamma_   ; // overall amount of l2 penalty
-  vec beta_       ; // vector of current parameters
-  vec grad_       ; // vector of current gradient (smooth part)
-  double J_       ; // current optimality gap
-  double D_       ; // current move in the optimality gap
-  vec   nzeros_   ; // contains non-zero value of beta
-  vec   debiased_ ; // contains the debiased non-zero value of beta
-  vector<double >intercept_debiased_ ; // contains the debiased vector of intercept
-  urowvec iA_     ; // contains row indices of the non-zero values
-  urowvec jA_     ; // contains column indices of the non-zero values
-
   // Compute degrees of freedom for the current estimate
   double get_df() ;
 
@@ -71,18 +56,16 @@ class ElasticNet :
 template <typename matrix>
 ElasticNet<matrix>::ElasticNet(
   const RegressionData<matrix>& data, const List& regParam, const List& control) :
-  SimpleRegularizer<matrix,SimpleNorm::L1>::SimpleRegularizer(data, regParam) {
+  SimpleSparseRegularizer<matrix,SimpleNorm::L1>::SimpleSparseRegularizer(data, regParam) {
     
     // set the penalty to l1
     penalty_ = SimplePenalty<SimpleNorm::L1>() ;
-    lambda_factor_ = as<vec>(regParam["lambda_factor"]) ;
     get_lambda_seq(get_lambda_max(), regParam) ;
 
     // Set up the optimizer
     solver_ = OptimizerL1<matrix>(penalty_) ;
     
     // Scale the structuring matrix according to main penalty factor and the amount of l2 penalty 
-    gamma_   = as<double>(regParam["gamma"]) ;
     data_.scale_struct(sqrt(gamma_)*pow(lambda_factor_,-1)) ;
     data_.scale_regressors(lambda_factor_) ;
     
@@ -202,9 +185,9 @@ List ElasticNet<matrix>::solution_path(const List& control) {
     gap.push_back(current_gap) ;
     iactive.push_back(current_it) ;
     status.push_back(0) ;
-    if (current_it >= maxiter)       { status.back() = 1 ; }
+    if (current_it >= maxiter) { status.back() = 1 ; }
     if (set_.size() > maxfeat) { status.back() = 2 ; }
-    if (!success)                    { status.back() = 3 ; }
+    if (!success)              { status.back() = 3 ; }
     
     // Preparing next value of the penalty
     if (status.back() >= 2) {
