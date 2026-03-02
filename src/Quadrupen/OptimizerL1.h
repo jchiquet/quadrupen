@@ -22,25 +22,31 @@ class OptimizerL1 :
   
   OptimizerL1() {} ;
   OptimizerL1(SimplePenalty<SimpleNorm::L1>&) ;
-
-  uword quadratic_enet(
-      vec &beta0,
+  OptimizerL1(SimplePenalty<SimpleNorm::L1>&, const List& control) ;
+  
+  uword quadratic(
+      vec &beta,
       vec &grad,
       const double &lambda ,
       RegressionData<matrix> &data,
       ActiveSet<matrix> &set,
       const double& accuracy,
-      const uword& max_iter) ;
+      const uword& max_iter) override ;
 
 };
 
 template <typename matrix>
-inline OptimizerL1<matrix>::OptimizerL1(
+OptimizerL1<matrix>::OptimizerL1(
     SimplePenalty<SimpleNorm::L1>& penalty) : SimpleOptimizer<matrix, SimpleNorm::L1>(penalty) 
   {}
 
 template <typename matrix>
-uword OptimizerL1<matrix>::quadratic_enet(
+OptimizerL1<matrix>::OptimizerL1(SimplePenalty<SimpleNorm::L1>& penalty, const List& control) : 
+  SimpleOptimizer<matrix, SimpleNorm::L1>(penalty, control) 
+  {}
+
+template <typename matrix>
+uword OptimizerL1<matrix>::quadratic(
     vec &beta,
     vec &grad,
     const double &lambda ,

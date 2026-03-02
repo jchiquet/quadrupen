@@ -25,9 +25,9 @@ BoundedRegression::BoundedRegression(
     // Initialize the active set with starting coefficient
     set_= ActiveSet(data, as<bool>(control["usechol"])) ;
     
-    // Compute the Gram matrix (+ S scaled)  
-    XTX = data_.X_.t() * data_.X_ - data_.n_ * data_.X_bar_ * data_.X_bar_.t() + data_.S_;
-    
+    // Compute the Gram matrix (+ S scaled)
+    data.precompute_XTX() ;
+
     beta_ = zeros<vec>(data_.p_) ; // vector of current parameters
     grad_ = -data_.XTy_          ; // vector of current gradient (smooth part)
   }
@@ -41,7 +41,7 @@ double BoundedRegression::get_df() {
   double df = A.size() ;
   
   if (gamma_ > 0) {
-    mat C = inv_sympd(XTX(A,A));
+    mat C = inv_sympd(data_.XTX_(A,A));
     // loop due to sparse encoding. should iterate over the n_zeros only...
     for (uword i=0;i<A.size();i++){
       for (uword j=i;j<A.size();j++){
@@ -96,7 +96,7 @@ List BoundedRegression::solution_path(const List& control) {
             throw std::runtime_error("Fail to converge...");
           } else {
             ioptim.push_back(
-              solver_.quadratic_breg(beta_, lambda_, data_, set_, XTX, accuracy, 10000)
+              solver_.quadratic(beta_, grad_, lambda_, data_, set_, accuracy, 10000)
             );
           }
         } catch (std::runtime_error& error) {
@@ -111,7 +111,7 @@ List BoundedRegression::solution_path(const List& control) {
       }
 
       // OPTIMALITY TESTING
-      grad_ = - data_.XTy_ + XTX * beta_ ;
+      grad_ = - data_.XTy_ + data_.XTX_ * beta_ ;
       current_gap = penalty_.dual_norm(grad_) - lambda_ ;
     } while ((current_gap > accuracy) && (current_it <= maxiter));
 

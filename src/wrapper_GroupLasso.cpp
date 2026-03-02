@@ -19,7 +19,7 @@ List group_lasso_l1l2_dense_cpp(
   
   RegressionData<mat> data(dataModel, intercept, as<bool>(control["normalize"])) ;
 
-  GroupLassoL1L2<mat> grplasso(data, group, regParam, control);
+  GroupElasticNet<mat> grplasso(data, group, regParam, control);
   
   List results = grplasso.solution_path(control);
 
@@ -51,7 +51,7 @@ List group_lasso_l1l2_sparse_cpp(
   
   RegressionData<sp_mat> data(dataModel, intercept, as<bool>(control["normalize"])) ;
   
-  GroupLassoL1L2<sp_mat> grplasso(data, group, regParam, control);
+  GroupElasticNet<sp_mat> grplasso(data, group, regParam, control);
   
   List results = grplasso.solution_path(control);
   

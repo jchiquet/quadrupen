@@ -23,14 +23,14 @@ public:
   OptimizerLINF() {} ;
   OptimizerLINF(SimplePenalty<SimpleNorm::LINF>&) ;
   
-  uword quadratic_breg(
+  uword quadratic(
       vec& beta,
+      vec &grad,
       const double& lambda,
       RegressionData<matrix> &data,
       ActiveSet<matrix>& set,
-      mat& XTX,
       const double& accuracy,
-      const uword& max_iter) ;
+      const uword& max_iter) override ;
 
   mat updateCholeskyFromExisting(const mat& R, const vec& b) ;
   
@@ -53,17 +53,17 @@ mat OptimizerLINF<matrix>::updateCholeskyFromExisting(const mat& R, const vec& b
 }
 
 template <typename matrix>
-uword OptimizerLINF<matrix>::quadratic_breg(
+uword OptimizerLINF<matrix>::quadratic(
     vec& beta,
+    vec &grad,
     const double& lambda,
     RegressionData<matrix> &data,
     ActiveSet<matrix>& set,
-    mat& XTX,
     const double& accuracy,
     const uword& max_iter) {
   
   uvec B = regspace<uvec>(0,beta.n_elem-1) ; B.shed_rows(set.A_) ;
-  vec grad = -data.XTy_ + XTX * beta ;
+  grad = -data.XTy_ + data.XTX_ * beta ;
   vec theta = -sign(grad(B)) ; // sign of the guys on the boundary
   
   uword iter = 0, iter_in= 0 ; // count the number of systems solved
@@ -73,7 +73,7 @@ uword OptimizerLINF<matrix>::quadratic_breg(
     iter++;
     
     // SOLVE THE QUADRATIC PROBLEM
-    vec XX_B = XTX.cols(B) * theta;
+    vec XX_B = data.XTX_.cols(B) * theta;
     if (set.A_.is_empty()) {
       double b  = (dot(theta, data.XTy_(B)) - lambda);
       beta(B) = theta * (b/sum(theta % XX_B(B),0)) ;
@@ -113,7 +113,7 @@ uword OptimizerLINF<matrix>::quadratic_breg(
   }
   
   // Guys leaving the boundary after optimization (activation)
-  grad = -data.XTy_ + XTX * beta ;
+  grad = -data.XTy_ + data.XTX_ * beta ;
   uvec ind_toA  = find(theta == sign(grad(B)));
   if (!ind_toA.is_empty()) {
     uvec toA = B(ind_toA) ;

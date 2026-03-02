@@ -36,6 +36,7 @@ public:
   vec    weights_  ; // observation weights
   bool   centered_ ; // should intercept be considered?
   bool   scaled_   ; // should predictors be standardized?
+  mat    XTX_      ; // Gram matrix
   vec    XTy_      ; // responses to predictors vector
   vec    X_bar_    ; // mean of the predictors
   vec    norm_X_   ; // norm of the predictors
@@ -50,6 +51,8 @@ public:
 
   void scale_struct(vec weights) ;
 
+  void precompute_XTX() ;
+    
   void scale_regressors(vec weights) ;
 
 };
@@ -90,6 +93,11 @@ template <typename matrix>
 void RegressionData<matrix>::scale_struct(vec weights) {
   sp_mat diag_S = spdiags(weights, ivec({0}), p_, p_) ;
   S_ = diag_S * S_ * diag_S  ; 
+};
+
+template <typename matrix>
+void RegressionData<matrix>::precompute_XTX() {
+  XTX_ = X_.t() * X_ - n_ * X_bar_ * X_bar_.t() + S_;
 };
 
 template <>

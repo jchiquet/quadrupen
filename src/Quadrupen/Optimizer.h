@@ -23,7 +23,15 @@ template <typename matrix> class Optimizer {
 public:
   
   Optimizer() {} ;
-
+  Optimizer(const List& control) ;
+  
+  SolverType algorithm_ ;
+  bool verbosity_       ;
+  uword iter_, maxiter_, maxfeat_, monitoring_ ;
+  double accuracy_, gap_, J_, D_ ; 
+  vector<uword> inner_iter_   ; 
+  vector<double> J_vec_, D_vec_ ;   
+  
   uword conjugate_gradient(
       vec& x0,
       const mat& A,
@@ -32,6 +40,19 @@ public:
       const uword& max_iter) ;
 
 };
+
+template <typename matrix>
+Optimizer<matrix>::Optimizer(const List& control) :
+  accuracy_(control["threshold"]),
+  verbosity_(control["verbose"]),
+  maxiter_(control["maxiter"]),
+  maxfeat_(control["maxfeat"]),
+  monitoring_(control["monitor"]) {
+  
+  if (as<std::string>(control["method"]) == "FISTA") algorithm_ = FISTA;
+  if (as<std::string>(control["method"]) == "QUADRA") algorithm_ = QUADRA;
+  
+}
 
 template <typename matrix>
 uword Optimizer<matrix>::conjugate_gradient(
@@ -73,7 +94,41 @@ public:
 
   SimpleOptimizer() {} ;
   SimpleOptimizer(SimplePenalty<norm>&) ;
+  SimpleOptimizer(SimplePenalty<norm>&, const List&) ;
+  
+  using Optimizer<matrix>::algorithm_  ;
+  using Optimizer<matrix>::accuracy_   ;
+  using Optimizer<matrix>::maxiter_    ;
+  using Optimizer<matrix>::maxfeat_    ;
+  using Optimizer<matrix>::verbosity_  ;
+  using Optimizer<matrix>::monitoring_ ;
+  using Optimizer<matrix>::iter_       ;
+  using Optimizer<matrix>::inner_iter_ ;
+  using Optimizer<matrix>::gap_        ;
+  using Optimizer<matrix>::J_          ;
+  using Optimizer<matrix>::D_          ;
+  using Optimizer<matrix>::J_vec_      ;
+  using Optimizer<matrix>::D_vec_      ;
+  
+  SimplePenalty<norm> penalty_ ;
 
+  void optimality_gap(
+    vec& beta,
+    vec& grad,
+    const double& lambda,
+    const double& gamma, 
+    RegressionData<matrix> &data,
+    ActiveSet<matrix>& set, uword type) ;
+    
+  uword solve(
+    vec& beta,
+    vec& grad,
+    const double& lambda, 
+    const double& gamma, 
+    RegressionData<matrix> &data,
+    ActiveSet<matrix>& set
+  ) ;
+  
   uword fista(
       vec& beta,
       vec& grad,
@@ -81,25 +136,29 @@ public:
       RegressionData<matrix> &data,
       ActiveSet<matrix>& set,
       const double& accuracy, 
-      const uword& max_iter) ;
-
-  uword fista_groupwise(
-      vec& beta,
-      const double& lambda, 
-      RegressionData<matrix> &data,
-      ActiveSetGroup<matrix>& set,
-      const double& accuracy, 
-      const uword& max_iter) ;
+      const uword& max_iter
+  ) ;
   
-protected:
-  SimplePenalty<norm> penalty_ ;
+  virtual uword quadratic(
+      vec &beta,
+      vec &grad,
+      const double &lambda ,
+      RegressionData<matrix> &data,
+      ActiveSet<matrix> &set,
+      const double& accuracy,
+      const uword& max_iter) = 0 ;
 
 };
 
 template <typename matrix, SimpleNorm norm>
-inline SimpleOptimizer<matrix, norm>::SimpleOptimizer(
+SimpleOptimizer<matrix, norm>::SimpleOptimizer(
   SimplePenalty<norm>& penalty) : 
   penalty_ (penalty), Optimizer<matrix>() {}
+
+template <typename matrix, SimpleNorm norm>
+SimpleOptimizer<matrix, norm>::SimpleOptimizer(
+    SimplePenalty<norm>& penalty, const List& control) : 
+  penalty_ (penalty), Optimizer<matrix>(control) {}
 
 template <typename matrix, SimpleNorm norm>
 uword SimpleOptimizer<matrix,norm>::fista(
@@ -165,7 +224,113 @@ uword SimpleOptimizer<matrix,norm>::fista(
 
 }
 
+template <typename matrix, SimpleNorm norm>
+void SimpleOptimizer<matrix,norm>::optimality_gap(
+    vec& beta,
+    vec& grad,
+    const double& lambda,
+    const double& gamma,
+    RegressionData<matrix> &data,
+    ActiveSet<matrix>& set, uword type) {
+  
+  // nu equals the max |gradient|
+  double nu = arma::norm(grad, "inf");
+  double loss = .5 * pow(data.norm_y_ ,2) + 
+    dot(beta, .5 * set.XATXA_ * beta - data.XTy_(set.A_)) ;
+  double old_J = J_, old_D = D_ ;
+  J_ = loss - dot(beta, grad(set.A_))  ;
+  uvec Ac ;
+  
+  switch (type) {
+  case 1: // Grandvalet's bound
+    Ac = find(grad > nu); // set of adversarial variables outside the boundary
+    D_ = J_ * (1 - lambda/nu) - 
+      (pow(lambda,2)/(2*gamma))*((lambda*(data.p_-Ac.n_elem))/nu + 
+      pow(arma::norm(grad(Ac),2)/nu,2)-data.p_);
+    break;
+  case 2: // Fenchel's bound
+    if (nu < lambda) nu = lambda;
+    D_ = loss * (1+pow(lambda/nu,2)) + sum(abs(lambda*beta)) + 
+      (lambda/nu)*(dot(beta,data.XTy_(set.A_))-pow(data.norm_y_,2));
+    break;
+  default: 
+    D_ = datum::inf ;
+  break;
+  }
+  
+  // keep the smallest bound reached so far for a given lambda value
+  if ((old_J < J_) && (old_D - D_) < (old_J - J_)) {D_ = old_D ; }
+  
+}
 
+template <typename matrix, SimpleNorm norm>
+uword SimpleOptimizer<matrix,norm>::solve(
+    vec& beta,
+    vec& grad,
+    const double& lambda,
+    const double& gamma, 
+    RegressionData<matrix> &data,
+    ActiveSet<matrix>& set) {
+  
+  // variable associated with the highest violation of KKT conditions 
+  vec optimality = penalty_.elt_norm(grad) - lambda ;
+  uword status = 0, var_in = optimality.index_max() ;
+  gap_ = std::max(0.0, optimality(var_in)) ;
+  
+  iter_ = 0 ; bool success = true ; 
+  J_ = datum::inf ; D_ = datum::inf ;
+  while ((gap_ > accuracy_) && (iter_ <= maxiter_)) {
+    R_CheckUserInterrupt();
+    iter_++;
+    
+    // VARIABLE ACTIVATION IF APPLICABLE
+    if (set.is_in_[var_in] == 0) { // Is var_in already in the active set?
+      set.add_var(var_in, data) ;
+      beta.resize(beta.size()+1) ; // update the vector of active parameters
+      beta.tail(1) = - 1e-3 * sign(grad(var_in)) ;
+      if (verbosity_) {Rprintf("\tnewly added variable %i\n",var_in);}
+    } else if (verbosity_) {Rprintf("\talready in %i\n",var_in);}
+    
+    // OPTIMIZATION OVER THE CURRENTLY ACTIVATED VARIABLES
+    if (algorithm_ == FISTA) {
+      inner_iter_.push_back(
+        fista(beta, grad, lambda, data, set, 1e-10, 10000)
+      );
+    } else { // QUADRA solver
+      try {
+        inner_iter_.push_back(
+          quadratic(beta, grad, lambda, data, set, 1e-5, 10000)
+        );
+      } catch (std::runtime_error& error) {
+        if (verbosity_ > 0) {
+          Rprintf("\nWarning: singular system at this stage of the solution path, cutting here.\n");
+        }
+        success = false ;
+      }
+    }
+    
+    // OPTIMALITY TESTING
+    grad = - data.XTy_ + set.XTXA_ * beta ;
+    optimality = penalty_.elt_norm(grad) - lambda ;
+    var_in = optimality.index_max() ;
+    gap_ = std::max(0.0, optimality(var_in)) ;
+    
+    if (monitoring_ > 0) {
+      optimality_gap(beta, grad, lambda, gamma, data, set, monitoring_) ;
+      J_vec_.push_back(J_) ;
+      D_vec_.push_back(D_) ;
+    }
+    
+  }
+  if (verbosity_) Rprintf("\tcurrent gap = %f\n",gap_) ;
+
+  // Checking convergence status
+  if (iter_ >= maxiter_)     { status = 1 ; }
+  if (set.size() > maxfeat_) { status = 2 ; }
+  if (!success)              { status = 3 ; }
+
+  return status ;
+}
 
 template <typename matrix, MixedNorm norm> 
 class GroupOptimizer : public Optimizer<matrix >{
@@ -173,13 +338,6 @@ public:
   
   GroupOptimizer() {} ;
   GroupOptimizer(MixedPenalty<norm>&) ;
-  
-  uword conjugate_gradient(
-      vec& x0,
-      const mat& A,
-      const vec& b,
-      const double& accuracy,
-      const uword& max_iter) ;
 
   uword fista(
       vec& beta,

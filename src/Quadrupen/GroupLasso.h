@@ -14,7 +14,7 @@ using namespace arma;
 using namespace std;
 
 template <typename matrix>
-class GroupLassoL1L2 : 
+class GroupElasticNet : 
   public GroupSparseRegularizer<matrix,MixedNorm::L1L2>{
   public:
     
@@ -38,7 +38,7 @@ class GroupLassoL1L2 :
     using GroupSparseRegularizer<matrix,MixedNorm::L1L2>::group_   ;
     using GroupSparseRegularizer<matrix,MixedNorm::L1L2>::grp_sizes_   ;
     
-    GroupLassoL1L2(const RegressionData<matrix>&, const uvec&, const List&, const List&);
+    GroupElasticNet(const RegressionData<matrix>&, const uvec&, const List&, const List&);
   
     List solution_path(const List&);
     
@@ -51,7 +51,7 @@ class GroupLassoL1L2 :
 };
 
 template <typename matrix>
-GroupLassoL1L2<matrix>::GroupLassoL1L2(
+GroupElasticNet<matrix>::GroupElasticNet(
   const RegressionData<matrix>& data, const uvec& group_ind, const List& regParam, const List& control) :
   GroupSparseRegularizer<matrix,MixedNorm::L1L2>::GroupSparseRegularizer(data, regParam) {
 
@@ -94,7 +94,7 @@ GroupLassoL1L2<matrix>::GroupLassoL1L2(
   }
 
 template <typename matrix>
-double GroupLassoL1L2<matrix>::get_df() {
+double GroupElasticNet<matrix>::get_df() {
 
   // TODO not correct at the moment
 
@@ -115,7 +115,7 @@ double GroupLassoL1L2<matrix>::get_df() {
 }
 
 template <typename matrix>
-List GroupLassoL1L2<matrix>::solution_path(const List& control) {
+List GroupElasticNet<matrix>::solution_path(const List& control) {
   
   // Parameters controlling the optimization
   const bool verbose(control["verbose"])      ; // verbosity level

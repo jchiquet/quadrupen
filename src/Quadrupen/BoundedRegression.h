@@ -30,7 +30,6 @@ public:
   SimplePenalty<SimpleNorm::LINF> penalty_ ; // main penalty object 
   OptimizerLINF<mat> solver_ ; // Solvers for LINF penalty
   ActiveSet<mat> set_       ; // Active set of variable and data
-  mat    XTX    ; // Gram matrix
 
   // Compute degrees of freedom for the current estimate
   double get_df() ; 
