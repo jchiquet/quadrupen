@@ -26,7 +26,7 @@ BoundedRegression::BoundedRegression(
     set_= ActiveSet(data, as<bool>(control["usechol"])) ;
     
     // Compute the Gram matrix (+ S scaled)
-    data.precompute_XTX() ;
+    data_.precompute_XTX() ;
 
     beta_ = zeros<vec>(data_.p_) ; // vector of current parameters
     grad_ = -data_.XTy_          ; // vector of current gradient (smooth part)
