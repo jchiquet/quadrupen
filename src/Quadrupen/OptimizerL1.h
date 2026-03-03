@@ -6,22 +6,20 @@
 #ifndef _quadrupen_OPTIMIZER_L1_H
 #define _quadrupen_OPTIMIZER_L1_H
 
-#include "Optimizer.h"
+#include "OptimizerSimple.h"
 
 using namespace Rcpp;
 using namespace arma;
 using namespace std;
 
 template <typename matrix>
-class OptimizerL1 :
-  public SimpleOptimizer<matrix,SimpleNorm::L1> {
-
+class OptimizerL1 : public SimpleOptimizer<matrix,SimpleNorm::L1> {
+  
+public:
+  
   using SimpleOptimizer<matrix,SimpleNorm::L1>::penalty_ ;
   
-  public:
-  
   OptimizerL1() {} ;
-  OptimizerL1(SimplePenalty<SimpleNorm::L1>&) ;
   OptimizerL1(SimplePenalty<SimpleNorm::L1>&, const List& control) ;
   
   uword quadratic(
@@ -32,13 +30,8 @@ class OptimizerL1 :
       ActiveSet<matrix> &set,
       const double& accuracy,
       const uword& max_iter) override ;
-
+  
 };
-
-template <typename matrix>
-OptimizerL1<matrix>::OptimizerL1(
-    SimplePenalty<SimpleNorm::L1>& penalty) : SimpleOptimizer<matrix, SimpleNorm::L1>(penalty) 
-  {}
 
 template <typename matrix>
 OptimizerL1<matrix>::OptimizerL1(SimplePenalty<SimpleNorm::L1>& penalty, const List& control) : 
@@ -98,12 +91,12 @@ uword OptimizerL1<matrix>::quadratic(
                                  data.XTy_(set.A_) - lambda*theta,
                                  accuracy, max_iter) ;
     }
-
+    
     // if the sign is coherent, keep that one...
     grad_swap = - data.XTy_(set.A_(i_swap)) + 
       dot(set.XATXA_.row(i_swap), betal) ;
     if (abs(grad_swap + lambda * sign(betal(i_swap))) <= ZERO) {
-        beta = betal ;
+      beta = betal ;
     } else {
       beta = betak ; // otherwise, backtrack to betak
       // if (verbose) Rprint("\tremoving variables %i", set.A_(i_swap)) ;
@@ -115,7 +108,7 @@ uword OptimizerL1<matrix>::quadratic(
   if (set.use_chol_) {
     return(iter) ;
   } else return(iter_in) ;
-
+  
 }
 
 #endif

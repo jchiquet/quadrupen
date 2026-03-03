@@ -7,15 +7,13 @@
 #define _Lava_H
 
 #include "ElasticNet.h"
-#include "OptimizerL1.h"
 
 using namespace Rcpp;
 using namespace arma;
 using namespace std;
 
 template <typename matrix>
-class Lava : 
-  public ElasticNet<matrix> {
+class Lava : public ElasticNet<matrix> {
 
 public:
 

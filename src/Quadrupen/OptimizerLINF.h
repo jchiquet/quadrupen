@@ -3,25 +3,24 @@
  *         MIA Paris-Saclay
  */
 
-#ifndef _quadrupen_OPTIMIZER_L1_H
-#define _quadrupen_OPTIMIZER_L1_H
+#ifndef _quadrupen_OPTIMIZER_LINF_H
+#define _quadrupen_OPTIMIZER_LINF_H
 
-#include "Optimizer.h"
+#include "OptimizerSimple.h"
 
 using namespace Rcpp;
 using namespace arma;
 using namespace std;
 
 template <typename matrix>
-class OptimizerLINF :
-  public SimpleOptimizer<matrix,SimpleNorm::LINF> {
-  
+class OptimizerLINF : public SimpleOptimizer<matrix,SimpleNorm::LINF> {
+
+public:
+
   using SimpleOptimizer<matrix,SimpleNorm::LINF>::penalty_ ;
   
-public:
-  
   OptimizerLINF() {} ;
-  OptimizerLINF(SimplePenalty<SimpleNorm::LINF>&) ;
+  OptimizerLINF(SimplePenalty<SimpleNorm::LINF>&, const List& control) ;
   
   uword quadratic(
       vec& beta,
@@ -37,8 +36,9 @@ public:
 };
 
 template <typename matrix>
-inline OptimizerLINF<matrix>::OptimizerLINF(
-    SimplePenalty<SimpleNorm::LINF>& penalty) : SimpleOptimizer<matrix, SimpleNorm::LINF>(penalty) 
+OptimizerLINF<matrix>::OptimizerLINF(
+    SimplePenalty<SimpleNorm::LINF>& penalty, const List& control) : 
+  SimpleOptimizer<matrix, SimpleNorm::LINF>(penalty, control) 
     {}
 
 template <typename matrix>

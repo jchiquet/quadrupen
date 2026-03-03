@@ -7,7 +7,7 @@
 #define _GroupLasso_H
 
 #include "RegularizerSparse.h"
-#include "OptimizerL1.h"
+#include "OptimizerGroup.h"
 
 using namespace Rcpp;
 using namespace arma;
@@ -43,7 +43,7 @@ class GroupElasticNet :
     List solution_path(const List&);
     
     // Specific to Group Lasso regularization
-    GroupOptimizer<matrix,MixedNorm::L1L2> solver_ ; // Solvers for L1 penalty
+    GroupOptimizer<matrix,MixedNorm::L1L2> solver_ ; // Solvers for Group L1 penalty
 
     // Compute degrees of freedom for the current estimate
     double get_df() ;

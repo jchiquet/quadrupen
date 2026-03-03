@@ -41,9 +41,7 @@ class ElasticNet :
 
   // Specific to Elastic-Net regularization
   OptimizerL1<matrix> solver_ ; // Solvers for L1 penalty
-  double J_ ; // current optimality gap
-  double D_ ; // current move in the optimality gap
-  
+
   List solution_path(const List&);
 
   void optimality_gap(double lambda_, uword type) ;
@@ -105,91 +103,22 @@ double ElasticNet<matrix>::get_df() {
 template <typename matrix>
 List ElasticNet<matrix>::solution_path(const List& control) {
   
-  // Parameters controlling the optimization
-  const bool verbose(control["verbose"])      ; // verbosity level
-  // const double accuracy(control["threshold"]) ; // precision required
-  // const uword maxiter(control["maxiter"])     ; // max # of passes in the active set
-  // const uword maxfeat(control["maxfeat"])     ; // max # of variables activated
-  // const uword monitoring(control["monitor"])  ; // optimality monitor (0=none; 1=Grandvalet; 2=Fenchel)
-  // 
-  // SolverType algorithm = QUADRA; // Optimizer (default to QUADRA)
-  // if (as<std::string>(control["method"]) == "FISTA") algorithm = FISTA;
-
   // Variables monitoring the algorithm
-  vector<double> gap, timing, J_hat, D_hat ; // timings and optimality measures
-  vector<uword> status, iactive, ioptim    ; // convergence and # of inner/outer iterates
+  vector<double> gap, timing ; // timings and optimality measures
+  vector<uword> status, iactive ; // convergence and # of inner/outer iterates
 
   // LAMBDA LOOP
   wall_clock timer ; timer.tic(); // clock
   for(auto lambda_ : lambdas_) {
-    if (verbose) {
+    if (solver_.verbosity_) {
       Rprintf("\n lambda_l1 = %f",lambda_) ;
       Rprintf("\n nb active variables = %i\n", set_.size()) ;
     }
     
     // OPTIMIZER LOOP (FIX-LAMBDA VALUE): IDENTIFY THE ACTIVE SET AND SOLVE
-    status.push_back(solver_.solve(beta_, grad_, lambda_, gamma_, data_, set_)) ;
-      
-    // variable associated with the highest violation of KKT conditions 
-    // vec optimality = penalty_.elt_norm(grad_) - lambda_ ;
-    // uword var_in = optimality.index_max() ;
-    // double current_gap = std::max(0.0, optimality(var_in)) ;
-    // 
-    // uword current_it = 0 ; bool success = true ; 
-    // J_ = datum::inf ; D_ = datum::inf ;
-    // while ((current_gap > accuracy) && (current_it <= maxiter)) {
-    //   R_CheckUserInterrupt();
-    //   current_it++;
-    // 
-    //   // VARIABLE ACTIVATION IF APPLICABLE
-    //   if (set_.is_in_[var_in] == 0) { // Is var_in already in the active set?
-    //     set_.add_var(var_in, data_) ;
-    //     beta_.resize(beta_.size()+1) ; // update the vector of active parameters
-    //     beta_.tail(1) = - 1e-3 * sign(grad_(var_in)) ;
-    //     if (verbose) {Rprintf("\tnewly added variable %i\n",var_in);}
-    //   } else if (verbose) {Rprintf("\talready in %i\n",var_in);}
-    //   
-    //   // OPTIMIZATION OVER THE CURRENTLY ACTIVATED VARIABLES
-    //   if (algorithm == FISTA) {
-    //     ioptim.push_back(
-    //       solver_.fista(beta_, grad_, lambda_, data_, set_, 1e-10, 10000)
-    //     );
-    //   } else { // QUADRA solver
-    //     try {
-    //       ioptim.push_back(
-    //         solver_.quadratic_enet(beta_, grad_, lambda_, data_, set_, 1e-5, 10000)
-    //       );
-    //     } catch (std::runtime_error& error) {
-    //       if (verbose > 0) {
-    //         Rprintf("\nWarning: singular system at this stage of the solution path, cutting here.\n");
-    //       }
-    //       success = false ;
-    //     }
-    //   }
-    //   
-    //   // OPTIMALITY TESTING
-    //   grad_ = - data_.XTy_ + set_.XTXA_ * beta_ ;
-    //   optimality = penalty_.elt_norm(grad_) - lambda_ ;
-    //   var_in = optimality.index_max() ;
-    //   current_gap = std::max(0.0, optimality(var_in)) ;
-    //   
-    //   if (monitoring > 0) {
-    //     optimality_gap(lambda_, monitoring) ;
-    //     J_hat.push_back(J_) ;
-    //     D_hat.push_back(D_) ;
-    //   }
-    //   
-    // }
-    // if (verbose) Rprintf("\tcurrent gap = %f\n",current_gap) ;
-    // 
-    // // Checking convergence status
-    // gap.push_back(current_gap) ;
-    // iactive.push_back(current_it) ;
-    // status.push_back(0) ;
-    // if (current_it >= maxiter) { status.back() = 1 ; }
-    // if (set_.size() > maxfeat) { status.back() = 2 ; }
-    // if (!success)              { status.back() = 3 ; }
-
+    status.push_back(
+      solver_.solve(beta_, grad_, lambda_, gamma_, data_, set_)
+    ) ;
     gap.push_back(solver_.gap_) ;
     iactive.push_back(solver_.iter_) ;
     
@@ -198,7 +127,7 @@ List ElasticNet<matrix>::solution_path(const List& control) {
       break;
     } else {
       set_.inverse_Gram() ;
-      nzeros_   = join_cols(nzeros_, beta_/(data_.norm_X_(set_.A_) % lambda_factor_(set_.A_)));
+      nzeros_ = join_cols(nzeros_, beta_/(data_.norm_X_(set_.A_) % lambda_factor_(set_.A_)));
       vec beta_debiased = set_.XATXAinv_ * (data_.XTy_(set_.A_) - data_.X_bar_(set_.A_) * accu(data_.y_)) ;
       debiased_ = join_cols(debiased_, beta_debiased/(data_.norm_X_(set_.A_) % lambda_factor_(set_.A_)));
       intercept_.push_back(data_.y_bar_ - dot(beta_, data_.X_bar_(set_.A_)));
@@ -217,46 +146,13 @@ List ElasticNet<matrix>::solution_path(const List& control) {
     List::create(
       Named("it_active")      = iactive,
       Named("it_optim")       = solver_.inner_iter_ ,
-      Named("max_grd")        = gap    ,
-      Named("gap_hat")        = solver_.J_vec_  ,
-      Named("delta_hat")      = solver_.D_vec_  ,
+      Named("max_grd")        = gap,
+      Named("gap_hat")        = solver_.J_vec_,
+      Named("delta_hat")      = solver_.D_vec_,
       Named("convergence")    = status ,
       Named("pensteps_timer") = timing
     )
   );
-}
-
-template <typename matrix>
-void ElasticNet<matrix>::optimality_gap(double lambda, uword type) {
-
-  // gamma equals the max |gradient|
-  double nu = norm(grad_, "inf");
-  double loss = .5 * pow(data_.norm_y_ ,2) + 
-    dot(beta_, .5 * set_.XATXA_ * beta_ - data_.XTy_(set_.A_)) ;
-  double old_J = J_, old_D = D_ ;
-  J_ = loss - dot(beta_, grad_(set_.A_))  ;
-  uvec Ac ;
-  
-  switch (type) {
-  case 1: // Grandvalet's bound
-    Ac = find(grad_ > nu); // set of adversarial variables outside the boundary
-    D_ = J_ * (1 - lambda/nu) - 
-      (pow(lambda,2)/(2*gamma_))*((lambda*(data_.p_-Ac.n_elem))/nu + 
-      pow(norm(grad_(Ac),2)/nu,2)-data_.p_);
-    break;
-  case 2: // Fenchel's bound
-    if (nu < lambda) nu = lambda;
-    D_ = loss * (1+pow(lambda/nu,2)) + sum(abs(lambda*beta_)) + 
-      (lambda/nu)*(dot(beta_,data_.XTy_(set_.A_))-pow(data_.norm_y_,2));
-    break;
-  default: 
-    D_ = datum::inf ;
-    break;
-  }
-  
-  // keep the smallest bound reached so far for a given lambda value
-  if ((old_J < J_) && (old_D - D_) < (old_J - J_)) {D_ = old_D ; }
-  
 }
 
 #endif

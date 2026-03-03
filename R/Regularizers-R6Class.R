@@ -138,7 +138,7 @@ GroupLassoFit <- R6::R6Class(
       private$group_ <- group
       private$type_  <- type
       private$optimizer <- 
-        ifelse(data$sparse_encoding, group_lasso_l1l2_sparse_cpp, group_lasso_l1l2_dense_cpp)
+        ifelse(data$sparse_encoding, group_enet_l1l2_sparse_cpp, group_enet_l1l2_dense_cpp)
     },
     #' @description function performing the optimization
     #' @param control list controlling the optimization process

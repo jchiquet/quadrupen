@@ -1,6 +1,16 @@
 /*
  * Author: Julien CHIQUET
  *         MIA Paris-Saclay
+ *         
+ *  3 Classes for Sparse regularization:
+ *  - SparseRegularizer
+ *  - SimpleSparseRegularizer
+ *  - GroupSparseRegularizer
+ *  
+ *  Inheritance:
+ *  
+ *  Regularizer-> SparseRegularizer -> SimpleSparseRegularizers
+ *  Regularizer-> SparseRegularizer -> GroupSparseRegularizers
  */
 
 #ifndef _RegularizerSparse_H
@@ -15,6 +25,10 @@
 using namespace Rcpp;
 using namespace arma;
 using namespace std;
+
+// ====================================================
+// Sparse Regularizers 
+// base class, common to SimpleSparse and GroupSparse
 
 template <typename matrix>
 class SparseRegularizer : public Regularizer<matrix> {
@@ -48,6 +62,9 @@ public:
 
 };
 
+// ====================================================
+// Simple Sparse Regularizers
+
 template <typename matrix>
 SparseRegularizer<matrix>::SparseRegularizer(
   const RegressionData<matrix>& data, const List& regParam) : 
@@ -73,6 +90,9 @@ template <typename matrix, SimpleNorm norm>
 SimpleSparseRegularizer<matrix, norm>::SimpleSparseRegularizer(
     const RegressionData<matrix>& data, const List& regParam) : 
   SparseRegularizer<matrix>::SparseRegularizer(data, regParam) {}
+
+// ====================================================
+// Group-Sparse Regularizers       
 
 template <typename matrix, MixedNorm norm>
 class GroupSparseRegularizer : public SparseRegularizer<matrix> {

@@ -17,7 +17,7 @@ BoundedRegression::BoundedRegression(
     get_lambda_seq(get_lambda_max(), regParam) ;
 
     // Set up the optimizer 
-    solver_ = OptimizerLINF<mat>(penalty_) ;
+    solver_ = OptimizerLINF<mat>(penalty_, control) ;
     
     // Scale the structuring matrix according to main penalty factor and the amount of l2 penalty 
     data_.scale_struct(sqrt(gamma_)*pow(lambda_factor_,-1/2)) ;
