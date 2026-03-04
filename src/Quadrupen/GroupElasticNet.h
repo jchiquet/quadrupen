@@ -73,7 +73,7 @@ GroupElasticNet<matrix>::GroupElasticNet(
     get_lambda_seq(get_lambda_max(), regParam) ;
 
     // Set up the optimizer
-    solver_ = GroupOptimizer<matrix,MixedNorm::L1L2>(penalty_);
+    solver_ = GroupOptimizer<matrix,MixedNorm::L1L2>(penalty_, control);
     
     // Scale the structuring matrix according to main penalty factor and the amount of l2 penalty 
     data_.scale_struct(sqrt(gamma_)*pow(lambda_factor_,-1)) ;
@@ -83,7 +83,7 @@ GroupElasticNet<matrix>::GroupElasticNet(
     vec beta0 = control["beta0"] ;
     // uvec A0 = find(beta0) ;
     // if (A0.is_empty()) {
-    set_ = ActiveSetGroup(data_, grp_sizes_, as<bool>(control["usechol"])) ;
+    set_ = ActiveSetGroup(data_, group_, grp_sizes_, as<bool>(control["usechol"])) ;
     grad_ = - data_.XTy_ ;
     // } else {
     //   set_  = ActiveSet(data_, A0, as<bool>(control["usechol"])) ;
@@ -117,94 +117,27 @@ double GroupElasticNet<matrix>::get_df() {
 template <typename matrix>
 List GroupElasticNet<matrix>::solution_path(const List& control) {
   
-  // Parameters controlling the optimization
-  const bool verbose(control["verbose"])      ; // verbosity level
-  const double accuracy(control["threshold"]) ; // precision required
-  const uword maxiter(control["maxiter"])     ; // max # of passes in the active set
-  const uword maxfeat(control["maxfeat"])     ; // max # of variables activated
-  const uword monitoring(control["monitor"])  ; // optimality monitor (0=none; 1=Grandvalet; 2=Fenchel)
-  
-  SolverType algorithm = FISTA; // Optimizer (default to FISTA)
-  // if (as<std::string>(control["method"]) == "FISTA") algorithm = FISTA;
-
-  // Variables monitoring the algorithm
   vector<double> gap, timing ; // timings and optimality measures
-  vector<uword> status, iactive, ioptim    ; // convergence and # of inner/outer iterates
-
+  vector<uword> status, iter ; // convergence and # of inner/outer iterates
+  
   // LAMBDA LOOP
   wall_clock timer ; timer.tic(); // clock
   for(auto lambda_ : lambdas_) {
-    if (verbose) {
-      Rprintf("\n lambda_l1l2 = %f",lambda_) ;
-      Rprintf("\n nb active groups = %i\n", set_.size_grp()) ;
-    }
-    
+    if (solver_.verbosity_) Rprintf("\n current penalty = %f",lambda_) ;
+
     // OPTIMIZER LOOP (FIX-LAMBDA VALUE): IDENTIFY THE ACTIVE SET AND SOLVE
+    status.push_back(
+      solver_.solve(beta_, grad_, lambda_, gamma_, data_, set_)
+    ) ;
+    gap.push_back(solver_.gap_) ;
+    iter.push_back(solver_.iter_) ;
 
-    // variable associated with the highest violation of KKT conditions 
-    vec optimality = penalty_.elt_norm(grad_, grp_sizes_) - lambda_;
-    uword grp_in = optimality.index_max() ;
-    double current_gap = std::max(0.0, optimality(grp_in)) ;
-
-    uword current_it = 0 ; bool success = true ; 
-    while ((current_gap > accuracy) && (current_it <= maxiter)) {
-      R_CheckUserInterrupt();
-      current_it++;
-
-      // ________________________________________________________________________
-      // VARIABLE ACTIVATION IF APPLICABLE
-      //
-      if (set_.is_grp_in_[grp_in] == 0) { // Is var_in already in the active set?
-        set_.add_group(grp_in, group_, data_) ;
-        beta_.resize(beta_.size()+grp_sizes_(grp_in)) ; // update the vector of active parameters
-        beta_.tail(grp_sizes_(grp_in)) = - 1e-3 * sign(grad_(group_[grp_in])) ;
-        if (verbose) {Rprintf("\tnewly added group %i\n",grp_in);}
-      } else if (verbose) {Rprintf("\talready in %i\n",grp_in);}
-
-      // ________________________________________________________________________
-      // OPTIMIZATION OVER THE CURRENTLY ACTIVATED VARIABLES
-      //
-      // if (algorithm == FISTA) {
-        ioptim.push_back(
-          solver_.fista(beta_, lambda_, data_, set_, 1e-10, 10000)
-        );
-      // } else { // QUADRA solver
-        // try {
-        //   ioptim.push_back(
-        //     solver_.quadratic_enet(beta_, lambda_, data_, set_, 1e-5, 10000)
-        //   );
-        // } catch (std::runtime_error& error) {
-        //   if (verbose > 0) {
-        //     Rprintf("\nWarning: singular system at this stage of the solution path, cutting here.\n");
-        //   }
-        //   success = false ;
-        // }
-      // }
-      
-      // OPTIMALITY TESTING
-      grad_ = - data_.XTy_ + set_.XTXA_ * beta_ ;
-      // optimality(set_.G_) = penalty_.elt_norm(grad_(set_.A_), grp_sizes_(set_.G_)) - lambda_ ;
-      optimality = penalty_.elt_norm(grad_, grp_sizes_) - lambda_ ;
-      grp_in = optimality.index_max() ;
-      current_gap = std::max(0.0, optimality(grp_in)) ;
-      
-    }
-    if (verbose) Rprintf("\tcurrent gap = %f\n",current_gap) ;
-
-    // Checking convergence status
-    gap.push_back(current_gap) ;
-    iactive.push_back(current_it) ;
-    status.push_back(0) ;
-    if (current_it >= maxiter) { status.back() = 1 ; }
-    if (set_.size() > maxfeat) { status.back() = 2 ; }
-    if (!success)              { status.back() = 3 ; }
-    
     // Preparing next value of the penalty
     if (status.back() >= 2) {
       break;
     } else {
       set_.inverse_Gram() ;
-      nzeros_   = join_cols(nzeros_, beta_/(data_.norm_X_(set_.A_) % lambda_factor_(set_.A_)));
+      nzeros_ = join_cols(nzeros_, beta_/(data_.norm_X_(set_.A_) % lambda_factor_(set_.A_)));
       vec beta_debiased = set_.XATXAinv_ * (data_.XTy_(set_.A_) - data_.X_bar_(set_.A_) * accu(data_.y_)) ;
       debiased_ = join_cols(debiased_, beta_debiased/(data_.norm_X_(set_.A_) % lambda_factor_(set_.A_)));
       intercept_.push_back(data_.y_bar_ - dot(beta_, data_.X_bar_(set_.A_)));
@@ -221,9 +154,11 @@ List GroupElasticNet<matrix>::solution_path(const List& control) {
   
   return(
     List::create(
-      Named("it_active")      = iactive,
-      Named("it_optim")       = ioptim ,
-      Named("max_grd")        = gap    ,
+      Named("it_active")      = iter,
+      Named("it_optim")       = solver_.inner_iter_ ,
+      Named("max_grd")        = gap,
+      Named("gap_hat")        = solver_.J_vec_,
+      Named("delta_hat")      = solver_.D_vec_,
       Named("convergence")    = status ,
       Named("pensteps_timer") = timing
     )

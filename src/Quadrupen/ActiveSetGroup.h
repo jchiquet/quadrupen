@@ -23,33 +23,34 @@ public:
   uvec G_             ; // set of currently activated groups
   uvec is_grp_in_     ; // indicator of active groups (0/1)
   uvec grp_sizes_     ; // vector of group sizes
-
+  vector<uvec> group_ ; // vector of current parameters
+  
 public:
   
   ActiveSetGroup() {} ;
-  ActiveSetGroup(const RegressionData<matrix> &data, const uvec&, const bool use_chol) ;
+  ActiveSetGroup(const RegressionData<matrix> &data, const vector<uvec>&, const uvec&, const bool use_chol) ;
 
   // ACTIVE SET HANDLING
-  void add_group(uword, const vector<uvec>&, const RegressionData<matrix> &) ; // add a group of variables in the active set
+  void add_group(uword, const RegressionData<matrix> &) ; // add a group of variables in the active set
   void del_group(uword) ; // remove the group of variable activated in position ind_grp_class
   const uword size_grp() const { return G_.n_elem ; }
 
 };
 
 template <typename matrix>
-ActiveSetGroup<matrix>::ActiveSetGroup(const RegressionData<matrix>& data, const uvec& grp_sizes, const bool use_chol) :
-  ActiveSet<matrix>(data, use_chol), grp_sizes_(grp_sizes) {
+ActiveSetGroup<matrix>::ActiveSetGroup(const RegressionData<matrix>& data, const vector<uvec>& group, const uvec& grp_sizes, const bool use_chol) :
+  ActiveSet<matrix>(data, use_chol), group_(group), grp_sizes_(grp_sizes) {
     is_grp_in_.zeros(grp_sizes_.n_elem) ;
 }
 
 template <typename matrix>
-void ActiveSetGroup<matrix>::add_group(uword grp_in, const vector<uvec>& group, const RegressionData<matrix>& data) {
+void ActiveSetGroup<matrix>::add_group(uword grp_in, const RegressionData<matrix>& data) {
   
   G_.resize(size_grp() + 1) ;
   G_.tail(1) = grp_in       ;
   is_grp_in_[grp_in] = 1    ;
 
-  ActiveSet<matrix>::add_vars(group[grp_in], data) ;
+  ActiveSet<matrix>::add_vars(group_[grp_in], data) ;
 }
 
 template <typename matrix>

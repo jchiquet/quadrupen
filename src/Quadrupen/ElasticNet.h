@@ -103,24 +103,20 @@ double ElasticNet<matrix>::get_df() {
 template <typename matrix>
 List ElasticNet<matrix>::solution_path(const List& control) {
   
-  // Variables monitoring the algorithm
   vector<double> gap, timing ; // timings and optimality measures
-  vector<uword> status, iactive ; // convergence and # of inner/outer iterates
+  vector<uword> status, iter ; // convergence and # of inner/outer iterates
 
   // LAMBDA LOOP
   wall_clock timer ; timer.tic(); // clock
   for(auto lambda_ : lambdas_) {
-    if (solver_.verbosity_) {
-      Rprintf("\n lambda_l1 = %f",lambda_) ;
-      Rprintf("\n nb active variables = %i\n", set_.size()) ;
-    }
-    
+    if (solver_.verbosity_) Rprintf("\n current penalty = %f",lambda_) ;
+
     // OPTIMIZER LOOP (FIX-LAMBDA VALUE): IDENTIFY THE ACTIVE SET AND SOLVE
     status.push_back(
       solver_.solve(beta_, grad_, lambda_, gamma_, data_, set_)
     ) ;
     gap.push_back(solver_.gap_) ;
-    iactive.push_back(solver_.iter_) ;
+    iter.push_back(solver_.iter_) ;
     
     // Preparing next value of the penalty
     if (status.back() >= 2) {
@@ -144,7 +140,7 @@ List ElasticNet<matrix>::solution_path(const List& control) {
   
   return(
     List::create(
-      Named("it_active")      = iactive,
+      Named("it_active")      = iter,
       Named("it_optim")       = solver_.inner_iter_ ,
       Named("max_grd")        = gap,
       Named("gap_hat")        = solver_.J_vec_,

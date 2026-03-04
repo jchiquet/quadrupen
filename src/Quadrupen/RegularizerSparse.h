@@ -62,14 +62,14 @@ public:
 
 };
 
-// ====================================================
-// Simple Sparse Regularizers
-
 template <typename matrix>
 SparseRegularizer<matrix>::SparseRegularizer(
   const RegressionData<matrix>& data, const List& regParam) : 
   Regularizer<matrix>(data, regParam)
   {}
+
+// ====================================================
+// Simple Sparse Regularizers
 
 template <typename matrix, SimpleNorm norm>
 class SimpleSparseRegularizer : public SparseRegularizer<matrix> {
