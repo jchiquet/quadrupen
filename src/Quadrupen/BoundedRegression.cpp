@@ -73,6 +73,10 @@ List BoundedRegression::solution_path(const List& control) {
   // Variables monitoring the algorithm
   vector<double> gap, timing ; // timings and optimality measures
   vector<uword> status, iactive, ioptim ; // convergence and # of inner/outer iterates
+
+  auto prox = [this](vec x, double L) {
+    return(penalty_.proximal(x, L));
+  } ;
   
   // LAMBDA LOOP
   wall_clock timer ; timer.tic(); // clock
@@ -87,7 +91,7 @@ List BoundedRegression::solution_path(const List& control) {
       current_it++;
       if (algorithm == FISTA) {
         ioptim.push_back(
-          solver_.fista(beta_, grad_, lambda_, data_, set_, 1e-3, 10000)
+          solver_.fista(beta_, grad_, lambda_, data_, set_, prox, 1e-3, 10000)
         );
         break;
       } else { // QUADRA solver
