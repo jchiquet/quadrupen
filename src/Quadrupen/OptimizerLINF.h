@@ -21,7 +21,7 @@ public:
   
   OptimizerLINF() {} ;
   OptimizerLINF(SimplePenalty<SimpleNorm::LINF>&, const List& control) ;
-  
+
   uword quadratic(
       vec& beta,
       vec &grad,
@@ -46,7 +46,7 @@ mat OptimizerLINF<matrix>::updateCholeskyFromExisting(const mat& R, const vec& b
   uword p = R.n_cols + 1;
   mat R_ ;
   colvec rp  = zeros<colvec>(p,1);
-  rp.subvec(0,p-2) = solve (trimatl(strans(R)), b.subvec(0,p-2));
+  rp.subvec(0,p-2) = arma::solve (trimatl(strans(R)), b.subvec(0,p-2));
   rp(p-1) = sqrt(b(p-1) - dot(rp,rp));
   R_ = join_rows( join_cols(R_, zeros<mat>(1,p-1)) , rp);
   return(R_) ;
@@ -86,7 +86,7 @@ uword OptimizerLINF<matrix>::quadratic(
       if (set.use_chol_) {
         // Solving via Cholesky factorization...
         mat R = updateCholeskyFromExisting(set.R_, tmp) ;
-        tmp = solve(trimatu(R), solve(trimatl(strans(R)), b)) ;
+        tmp = arma::solve(trimatu(R), arma::solve(trimatl(strans(R)), b)) ;
       } else {
         vec pen_arg = beta(B);
         double bound = penalty_.pen_norm(pen_arg) ;

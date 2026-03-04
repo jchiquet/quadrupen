@@ -102,13 +102,11 @@ public:
   
   GroupSparseRegularizer() {} ;
   GroupSparseRegularizer(const RegressionData<matrix>&, const List&);
-  double get_lambda_max() {return(penalty_.dual_norm(data_.XTy_, grp_sizes_));}
+  double get_lambda_max() {return(penalty_.dual_norm(data_.XTy_, set_.grp_sizes_));}
   
   ActiveSetGroup<matrix> set_ ; // Active set of variable and data
   MixedPenalty<norm> penalty_ ; // main penalty object 
-  vector<uvec> group_     ; // vector of current parameters
-  uvec grp_sizes_ ; // vector of current parameters
-  
+
 };
 
 template <typename matrix, MixedNorm norm>

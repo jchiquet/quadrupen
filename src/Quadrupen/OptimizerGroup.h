@@ -33,6 +33,8 @@ public:
   using Optimizer<matrix>::J_vec_      ;
   using Optimizer<matrix>::D_vec_      ;
   MixedPenalty<norm> penalty_ ;
+
+  using Optimizer<matrix>::optimality_gap ;
   
   uword solve(
       vec& beta,
@@ -52,14 +54,7 @@ public:
       const double& accuracy, 
       const uword& max_iter
   ) ;
-  
-  void optimality_gap(
-      vec& beta,
-      vec& grad,
-      const double& lambda,
-      const double& gamma,
-      RegressionData<matrix> &data,
-      ActiveSetGroup<matrix>& set, uword type)  ;
+
 };
 
 template <typename matrix, MixedNorm norm>
@@ -76,6 +71,7 @@ uword GroupOptimizer<matrix,norm>::solve(
     RegressionData<matrix> &data,
     ActiveSetGroup<matrix>& set) {
   
+  if (verbosity_) Rprintf("\n current penalty = %f",lambda) ;
   if (verbosity_) Rprintf("\n nb active groups = %i\n", set.size_grp()) ;
   
   vec optimality = penalty_.elt_norm(grad, set.grp_sizes_) - lambda;
@@ -187,45 +183,6 @@ uword GroupOptimizer<matrix,norm>::fista(
   }
   
   return(iter) ;
-  
-}
-
-template <typename matrix, MixedNorm norm>
-void GroupOptimizer<matrix,norm>::optimality_gap(
-    vec& beta,
-    vec& grad,
-    const double& lambda,
-    const double& gamma,
-    RegressionData<matrix> &data,
-    ActiveSetGroup<matrix>& set, uword type) {
-  
-  // nu equals the max |gradient|
-  double nu = arma::norm(grad, "inf");
-  double loss = .5 * pow(data.norm_y_ ,2) + 
-    dot(beta, .5 * set.XATXA_ * beta - data.XTy_(set.A_)) ;
-  double old_J = J_, old_D = D_ ;
-  J_ = loss - dot(beta, grad(set.A_))  ;
-  uvec Ac ;
-  
-  switch (type) {
-  case 1: // Grandvalet's bound
-    Ac = find(grad > nu); // set of adversarial variables outside the boundary
-    D_ = J_ * (1 - lambda/nu) - 
-      (pow(lambda,2)/(2*gamma))*((lambda*(data.p_-Ac.n_elem))/nu + 
-      pow(arma::norm(grad(Ac),2)/nu,2)-data.p_);
-    break;
-  case 2: // Fenchel's bound
-    if (nu < lambda) nu = lambda;
-    D_ = loss * (1+pow(lambda/nu,2)) + sum(abs(lambda*beta)) + 
-      (lambda/nu)*(dot(beta,data.XTy_(set.A_))-pow(data.norm_y_,2));
-    break;
-  default: 
-    D_ = datum::inf ;
-  break;
-  }
-  
-  // keep the smallest bound reached so far for a given lambda value
-  if ((old_J < J_) && (old_D - D_) < (old_J - J_)) {D_ = old_D ; }
   
 }
 

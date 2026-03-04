@@ -55,14 +55,7 @@ template <typename matrix>
 ElasticNet<matrix>::ElasticNet(
   const RegressionData<matrix>& data, const List& regParam, const List& control) :
   SimpleSparseRegularizer<matrix,SimpleNorm::L1>::SimpleSparseRegularizer(data, regParam) {
-    
-    // set the penalty to l1
-    penalty_ = SimplePenalty<SimpleNorm::L1>() ;
-    get_lambda_seq(get_lambda_max(), regParam) ;
 
-    // Set up the optimizer
-    solver_ = OptimizerL1<matrix>(penalty_, control) ;
-    
     // Scale the structuring matrix according to main penalty factor and the amount of l2 penalty 
     data_.scale_struct(sqrt(gamma_)*pow(lambda_factor_,-1)) ;
     data_.scale_regressors(lambda_factor_) ;
@@ -78,6 +71,14 @@ ElasticNet<matrix>::ElasticNet(
       beta_ = beta0(A0) ;
       grad_ = - data_.XTy_ + set_.XTXA_ * beta_  ;
     }
+    
+    // set the penalty to l1
+    penalty_ = SimplePenalty<SimpleNorm::L1>() ;
+    get_lambda_seq(get_lambda_max(), regParam) ;
+    
+    // Set up the optimizer
+    solver_ = OptimizerL1<matrix>(penalty_, control) ;
+    
   }
 
 template <typename matrix>
@@ -109,8 +110,7 @@ List ElasticNet<matrix>::solution_path(const List& control) {
   // LAMBDA LOOP
   wall_clock timer ; timer.tic(); // clock
   for(auto lambda_ : lambdas_) {
-    if (solver_.verbosity_) Rprintf("\n current penalty = %f",lambda_) ;
-
+    
     // OPTIMIZER LOOP (FIX-LAMBDA VALUE): IDENTIFY THE ACTIVE SET AND SOLVE
     status.push_back(
       solver_.solve(beta_, grad_, lambda_, gamma_, data_, set_)

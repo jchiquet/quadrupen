@@ -28,7 +28,7 @@ public:
 public:
   
   ActiveSetGroup() {} ;
-  ActiveSetGroup(const RegressionData<matrix> &data, const vector<uvec>&, const uvec&, const bool use_chol) ;
+  ActiveSetGroup(const RegressionData<matrix> &data, const uvec& group_ind, const bool use_chol) ;
 
   // ACTIVE SET HANDLING
   void add_group(uword, const RegressionData<matrix> &) ; // add a group of variables in the active set
@@ -38,8 +38,22 @@ public:
 };
 
 template <typename matrix>
-ActiveSetGroup<matrix>::ActiveSetGroup(const RegressionData<matrix>& data, const vector<uvec>& group, const uvec& grp_sizes, const bool use_chol) :
-  ActiveSet<matrix>(data, use_chol), group_(group), grp_sizes_(grp_sizes) {
+ActiveSetGroup<matrix>::ActiveSetGroup(const RegressionData<matrix>& data, const uvec& group_ind, const bool use_chol) :
+  ActiveSet<matrix>(data, use_chol) {
+
+    // Vector of group and group sizes
+    uvec grp = unique(group_ind) ;
+    uword nb_grp =  grp.n_elem ;
+    grp_sizes_.zeros(nb_grp-1) ;
+    for (auto it = group_ind.begin(); it != group_ind.end(); it++) {
+      grp_sizes_[*it - 1]++;
+    }
+    uword current_elt = 0 ;
+    for (auto it = grp_sizes_.begin(); it != grp_sizes_.end(); it++) {
+      group_.push_back(regspace<uvec>(current_elt, current_elt + *it - 1)) ;
+      current_elt = current_elt + *it ;
+    }
+
     is_grp_in_.zeros(grp_sizes_.n_elem) ;
 }
 

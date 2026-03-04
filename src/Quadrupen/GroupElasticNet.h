@@ -35,9 +35,7 @@ class GroupElasticNet :
     using GroupSparseRegularizer<matrix,MixedNorm::L1L2>::penalty_   ;
     using GroupSparseRegularizer<matrix,MixedNorm::L1L2>::set_  ;
     using GroupSparseRegularizer<matrix,MixedNorm::L1L2>::get_lambda_max ;
-    using GroupSparseRegularizer<matrix,MixedNorm::L1L2>::group_   ;
-    using GroupSparseRegularizer<matrix,MixedNorm::L1L2>::grp_sizes_   ;
-    
+
     GroupElasticNet(const RegressionData<matrix>&, const uvec&, const List&, const List&);
   
     List solution_path(const List&);
@@ -55,26 +53,6 @@ GroupElasticNet<matrix>::GroupElasticNet(
   const RegressionData<matrix>& data, const uvec& group_ind, const List& regParam, const List& control) :
   GroupSparseRegularizer<matrix,MixedNorm::L1L2>::GroupSparseRegularizer(data, regParam) {
 
-    // Vector of group and group sizes
-    uvec grp = unique(group_ind) ;
-    uword nb_grp =  grp.n_elem ;
-    grp_sizes_.zeros(nb_grp-1) ;
-    for (auto it = group_ind.begin(); it != group_ind.end(); it++) {
-      grp_sizes_[*it - 1]++;
-    }
-    uword current_elt = 0 ;
-    for (auto it = grp_sizes_.begin(); it != grp_sizes_.end(); it++) {
-      group_.push_back(regspace<uvec>(current_elt, current_elt + *it - 1)) ;
-      current_elt = current_elt + *it ;
-    }
-    
-    // set the penalty to l1/l2
-    penalty_ = MixedPenalty<MixedNorm::L1L2>() ;
-    get_lambda_seq(get_lambda_max(), regParam) ;
-
-    // Set up the optimizer
-    solver_ = GroupOptimizer<matrix,MixedNorm::L1L2>(penalty_, control);
-    
     // Scale the structuring matrix according to main penalty factor and the amount of l2 penalty 
     data_.scale_struct(sqrt(gamma_)*pow(lambda_factor_,-1)) ;
     data_.scale_regressors(lambda_factor_) ;
@@ -83,14 +61,21 @@ GroupElasticNet<matrix>::GroupElasticNet(
     vec beta0 = control["beta0"] ;
     // uvec A0 = find(beta0) ;
     // if (A0.is_empty()) {
-    set_ = ActiveSetGroup(data_, group_, grp_sizes_, as<bool>(control["usechol"])) ;
+    set_ = ActiveSetGroup(data_, group_ind, as<bool>(control["usechol"])) ;
     grad_ = - data_.XTy_ ;
     // } else {
     //   set_  = ActiveSet(data_, A0, as<bool>(control["usechol"])) ;
     //   beta_ = beta0(A0) ;
     //   grad_ = - data_.XTy_ + set_.XTXA_ * beta_  ;
     // }
-  
+
+    // set the penalty to l1/l2
+    penalty_ = MixedPenalty<MixedNorm::L1L2>() ;
+    get_lambda_seq(get_lambda_max(), regParam) ;
+    
+    // Set up the optimizer
+    solver_ = GroupOptimizer<matrix,MixedNorm::L1L2>(penalty_, control);
+    
   }
 
 template <typename matrix>
@@ -123,7 +108,6 @@ List GroupElasticNet<matrix>::solution_path(const List& control) {
   // LAMBDA LOOP
   wall_clock timer ; timer.tic(); // clock
   for(auto lambda_ : lambdas_) {
-    if (solver_.verbosity_) Rprintf("\n current penalty = %f",lambda_) ;
 
     // OPTIMIZER LOOP (FIX-LAMBDA VALUE): IDENTIFY THE ACTIVE SET AND SOLVE
     status.push_back(
