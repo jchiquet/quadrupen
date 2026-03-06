@@ -154,7 +154,7 @@ vec MixedPenalty<MixedNorm::L1LINF>::elt_norm(vec x, uvec pk) {
   uword ind = 0 ; // index to go through the groups
   
   for (uword k=0; k<pk.n_elem; k++) {
-    res(k) = norm(x.subvec(ind, ind + pk(k) - 1), "inf");
+    res(k) = max(abs(x.subvec(ind, ind + pk(k) - 1)));
     ind += pk(k);
   }
   
@@ -173,7 +173,7 @@ double MixedPenalty<MixedNorm::L1LINF>::dual_norm(vec x, uvec pk) {
   uword ind = 0 ; // index to go through the groups
   
   for (uword k=0; k<pk.n_elem; k++) {
-    res(k) = norm(x.subvec(ind, ind + pk(k) - 1), 1);
+    res(k) = sum(abs(x.subvec(ind, ind + pk(k) - 1)));
     ind += pk(k);
   }
   
@@ -182,14 +182,14 @@ double MixedPenalty<MixedNorm::L1LINF>::dual_norm(vec x, uvec pk) {
 
 template<>
 vec MixedPenalty<MixedNorm::L1LINF>::proximal(vec x, double lambda, uvec pk) {
-  
+
   uword ind = 0 ;
   vec u, v, proj;
-  vec res = zeros<vec>(sum(pk));
+  vec res = zeros<vec>(x.n_elem);
   
   for (uword k=0; k<pk.n_elem; k++) {
-    v = x.subvec(ind,ind+pk(k)-1) ;
-    uword p = v.n_elem ;
+    uword p = pk(k) ;
+    v = x.subvec(ind,ind+p-1) ;
     
     // proximal l-inf
     if ( as_scalar(sum(abs(v) / lambda)) >= 1) {
@@ -214,8 +214,8 @@ vec MixedPenalty<MixedNorm::L1LINF>::proximal(vec x, double lambda, uvec pk) {
       }
     }
     
-    res.subvec(ind,ind+pk(k)-1) =  v ;
-    ind += pk(k);
+    res.subvec(ind,ind+p-1) =  v ;
+    ind += p;
   }
   return(res);
 }

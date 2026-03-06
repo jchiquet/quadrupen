@@ -13,9 +13,9 @@ using namespace Rcpp;
 using namespace arma;
 using namespace std;
 
-template <typename matrix>
+template <typename matrix, MixedNorm norm>
 class GroupElasticNet : 
-  public GroupSparseRegularizer<matrix,MixedNorm::L1L2>{
+  public GroupSparseRegularizer<matrix,norm>{
   public:
     
     using Regularizer<matrix>::intercept_ ;
@@ -32,26 +32,26 @@ class GroupElasticNet :
     using SparseRegularizer<matrix>::intercept_debiased_   ;
     using SparseRegularizer<matrix>::iA_   ;
     using SparseRegularizer<matrix>::jA_   ;
-    using GroupSparseRegularizer<matrix,MixedNorm::L1L2>::penalty_   ;
-    using GroupSparseRegularizer<matrix,MixedNorm::L1L2>::set_  ;
-    using GroupSparseRegularizer<matrix,MixedNorm::L1L2>::get_lambda_max ;
+    using GroupSparseRegularizer<matrix,norm>::penalty_   ;
+    using GroupSparseRegularizer<matrix,norm>::set_  ;
+    using GroupSparseRegularizer<matrix,norm>::get_lambda_max ;
 
     GroupElasticNet(const RegressionData<matrix>&, const uvec&, const List&, const List&);
   
     List solution_path(const List&);
     
     // Specific to Group Lasso regularization
-    GroupOptimizer<matrix,MixedNorm::L1L2> solver_ ; // Solvers for Group L1 penalty
+    GroupOptimizer<matrix,norm> solver_ ; // Solvers for Group L1 penalty
 
     // Compute degrees of freedom for the current estimate
     double get_df() ;
     
 };
 
-template <typename matrix>
-GroupElasticNet<matrix>::GroupElasticNet(
+template <typename matrix, MixedNorm norm>
+GroupElasticNet<matrix,norm>::GroupElasticNet(
   const RegressionData<matrix>& data, const uvec& group_ind, const List& regParam, const List& control) :
-  GroupSparseRegularizer<matrix,MixedNorm::L1L2>::GroupSparseRegularizer(data, regParam) {
+  GroupSparseRegularizer<matrix,norm>::GroupSparseRegularizer(data, regParam) {
 
     // Scale the structuring matrix according to main penalty factor and the amount of l2 penalty 
     data_.scale_struct(sqrt(gamma_)*pow(lambda_factor_,-1)) ;
@@ -70,16 +70,16 @@ GroupElasticNet<matrix>::GroupElasticNet(
     // }
 
     // set the penalty to l1/l2
-    penalty_ = MixedPenalty<MixedNorm::L1L2>() ;
+    penalty_ = MixedPenalty<norm>() ;
     get_lambda_seq(get_lambda_max(), regParam) ;
     
     // Set up the optimizer
-    solver_ = GroupOptimizer<matrix,MixedNorm::L1L2>(penalty_, control);
+    solver_ = GroupOptimizer<matrix,norm>(penalty_, control);
     
   }
 
-template <typename matrix>
-double GroupElasticNet<matrix>::get_df() {
+template <typename matrix, MixedNorm norm>
+double GroupElasticNet<matrix,norm>::get_df() {
 
   // TODO not correct at the moment
 
@@ -99,8 +99,8 @@ double GroupElasticNet<matrix>::get_df() {
   return(df);
 }
 
-template <typename matrix>
-List GroupElasticNet<matrix>::solution_path(const List& control) {
+template <typename matrix, MixedNorm norm>
+List GroupElasticNet<matrix,norm>::solution_path(const List& control) {
   
   vector<double> gap, timing ; // timings and optimality measures
   vector<uword> status, iter ; // convergence and # of inner/outer iterates
