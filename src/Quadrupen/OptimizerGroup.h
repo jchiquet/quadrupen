@@ -94,9 +94,6 @@ uword GroupOptimizer<matrix,norm>::solve(
     );
     // }
   
-    // vec out = penalty_.proximal(beta-grad(set.A_), 1e-3, set.grp_sizes_(set.G_)) ;
-    // out.print() ;
-  
     // OPTIMALITY TESTING
     grad = - data.XTy_ + set.XTXA_ * beta ;
     optimality = penalty_.elt_norm(grad, set.grp_sizes_) - lambda ;
