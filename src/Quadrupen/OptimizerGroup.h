@@ -80,6 +80,7 @@ uword GroupOptimizer<matrix,norm>::solve(
       set.add_group(grp_in, data) ;
       beta.resize(beta.size()+set.grp_sizes_(grp_in)) ; // update the vector of active parameters
       beta.tail(set.grp_sizes_(grp_in)) = - 1e-3 * sign(grad(set.group_[grp_in])) ;
+      // beta.tail(set.grp_sizes_(grp_in)) = zeros(set.grp_sizes_(grp_in)) ;
       if (verbosity_) {Rprintf("\tnewly added group %i\n",grp_in);}
     } else if (verbosity_) {Rprintf("\talready in %i\n",grp_in);}
     
@@ -88,11 +89,14 @@ uword GroupOptimizer<matrix,norm>::solve(
     auto prox = [this, set](vec x, double L) {
       return(penalty_.proximal(x, L, set.grp_sizes_(set.G_)));
     } ;
-      inner_iter_.push_back(
-        fista(beta, grad, lambda, data, set, prox, 1e-10, 10000)
-      );
+    inner_iter_.push_back(
+      fista(beta, grad, lambda, data, set, prox, 1e-10, 10000)
+    );
     // }
-    
+  
+    // vec out = penalty_.proximal(beta-grad(set.A_), 1e-3, set.grp_sizes_(set.G_)) ;
+    // out.print() ;
+  
     // OPTIMALITY TESTING
     grad = - data.XTy_ + set.XTXA_ * beta ;
     optimality = penalty_.elt_norm(grad, set.grp_sizes_) - lambda ;

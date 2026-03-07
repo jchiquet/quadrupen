@@ -86,7 +86,7 @@ List group_enet_l1linf_dense_cpp(
   GroupElasticNet<mat,MixedNorm::L1LINF> grpenet(data, group, regParam, control);
   
   List results = grpenet.solution_path(control);
-  
+
   return List::create(
     Named("tuning_param") = List::create(
       Named("l1") = grpenet.path_tuning(),
@@ -147,22 +147,22 @@ List group_enet_coop_dense_cpp(
   
   RegressionData<mat> data(dataModel, intercept, as<bool>(control["normalize"])) ;
   
-  GroupElasticNet<mat,MixedNorm::COOP> grpenet(data, group, regParam, control);
+  GroupElasticNet<mat,MixedNorm::COOP> coop(data, group, regParam, control);
   
-  List results = grpenet.solution_path(control);
+  List results = coop.solution_path(control);
   
   return List::create(
     Named("tuning_param") = List::create(
-      Named("l1") = grpenet.path_tuning(),
-      Named("l2") = grpenet.gamma_
+      Named("l1") = coop.path_tuning(),
+      Named("l2") = coop.gamma_
     ),
-    Named("coef")               = grpenet.coefficients(),
-    Named("coef_debiased")      = grpenet.debiased_coefficients(),
-    Named("active")             = grpenet.active_var(),
-    Named("intercept")          = grpenet.intercept_,
-    Named("intercept_debiased") = grpenet.intercept_debiased_,
-    Named("normx")              = grpenet.data_.norm_X_,
-    Named("df")                 = grpenet.df_,
+    Named("coef")               = coop.coefficients(),
+    Named("coef_debiased")      = coop.debiased_coefficients(),
+    Named("active")             = coop.active_var(),
+    Named("intercept")          = coop.intercept_,
+    Named("intercept_debiased") = coop.intercept_debiased_,
+    Named("normx")              = coop.data_.norm_X_,
+    Named("df")                 = coop.df_,
     Named("monitoring")         = results
   );
   
@@ -179,22 +179,22 @@ List group_enet_coop_sparse_cpp(
   
   RegressionData<sp_mat> data(dataModel, intercept, as<bool>(control["normalize"])) ;
   
-  GroupElasticNet<sp_mat,MixedNorm::COOP> grpenet(data, group, regParam, control);
+  GroupElasticNet<sp_mat,MixedNorm::COOP> coop(data, group, regParam, control);
   
-  List results = grpenet.solution_path(control);
+  List results = coop.solution_path(control);
   
   return List::create(
     Named("tuning_param") = List::create(
-      Named("l1") = grpenet.path_tuning(),
-      Named("l2") = grpenet.gamma_
+      Named("l1") = coop.path_tuning(),
+      Named("l2") = coop.gamma_
     ),
-    Named("coef")               = grpenet.coefficients(),
-    Named("coef_debiased")      = grpenet.debiased_coefficients(),
-    Named("active")             = grpenet.active_var(),
-    Named("intercept")          = grpenet.intercept_,
-    Named("intercept_debiased") = grpenet.intercept_debiased_,
-    Named("normx")              = grpenet.data_.norm_X_,
-    Named("df")                 = grpenet.df_,
+    Named("coef")               = coop.coefficients(),
+    Named("coef_debiased")      = coop.debiased_coefficients(),
+    Named("active")             = coop.active_var(),
+    Named("intercept")          = coop.intercept_,
+    Named("intercept_debiased") = coop.intercept_debiased_,
+    Named("normx")              = coop.data_.norm_X_,
+    Named("df")                 = coop.df_,
     Named("monitoring")         = results
   );
   

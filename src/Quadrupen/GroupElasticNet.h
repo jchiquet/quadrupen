@@ -75,7 +75,7 @@ GroupElasticNet<matrix,norm>::GroupElasticNet(
     
     // Set up the optimizer
     solver_ = GroupOptimizer<matrix,norm>(penalty_, control);
-    
+
   }
 
 template <typename matrix, MixedNorm norm>

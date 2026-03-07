@@ -17,7 +17,7 @@ vec SimplePenalty<SimpleNorm::L1>::elt_norm(vec x) {
 
 template<>
 double SimplePenalty<SimpleNorm::L1>::pen_norm(vec x) {
-  return(sum(elt_norm(x)));
+  return(accu(elt_norm(x)));
 }
 
 template<>
@@ -73,32 +73,23 @@ double SimplePenalty<SimpleNorm::LINF>::dual_norm(vec x) {
 template<>
 vec SimplePenalty<SimpleNorm::LINF>::proximal(vec x, double lambda) {
   uword p = x.n_elem;
-  vec u, proj;
   vec res = zeros<vec>(p);
   
-  if ( as_scalar(sum(abs(x) / lambda)) >= 1) {
-    
+  // Project onto the l1 ball
+  if ( accu(abs(x)) > lambda) {
+    // Project onto the l1 ball
+
     // Reordering absolute values
-    u = sort(abs(x), "descend");
+    vec u = sort(abs(x), "descend");
     
     // values of the projected coordinate if non zero (dual problem)
-    proj = (cumsum(u) - lambda)/linspace<vec>(1,p,p);
+    vec proj = (cumsum(u) - lambda)/linspace<vec>(1,p,p);
     
-    // selecting nonnull entries (dual)
-    uvec maxs = sort(find(u-proj>ZERO), "descend") ;
-    double thresh = proj[maxs[0]];
+    // find critical index
+    uword i = max(find(u - proj >= 0)) ;
     
-    // solving primal problem
-    // We keep the smallest values and threshold the common values to +- thresh
-    for (uword k=0; k < p;k++) {
-      if (fabs(x(k)) > ZERO) {
-        if (x(k) > 0) {
-          res(k) = fmin(fabs(x(k)),thresh);
-        } else {
-          res(k) = -fmin(fabs(x(k)),thresh);
-        }
-      }
-    }
+    // res = max(zeros(x.n_elem), abs(x) - proj[i]) ;
+    res = sign(x) % min(abs(x), proj(i) * ones(x.n_elem) );
   }
   return(res);  
 }
@@ -184,37 +175,29 @@ template<>
 vec MixedPenalty<MixedNorm::L1LINF>::proximal(vec x, double lambda, uvec pk) {
 
   uword ind = 0 ;
-  vec u, v, proj;
   vec res = zeros<vec>(x.n_elem);
   
   for (uword k=0; k<pk.n_elem; k++) {
-    uword p = pk(k) ;
-    v = x.subvec(ind,ind+p-1) ;
-    
-    // proximal l-inf
-    if ( as_scalar(sum(abs(v) / lambda)) >= 1) {
+    uword p = pk(k);
+    vec x_g = x.subvec(ind,ind+p-1) ;
+
+    if ( accu(abs(x_g)) > lambda) {
+      // Project onto the l1 ball
+      
       // Reordering absolute values
-      u = sort(abs(v), "descend");
+      vec u = sort(abs(x_g), "descend");
       
       // values of the projected coordinate if non zero (dual problem)
-      proj = (cumsum(u) - lambda)/linspace<vec>(1,p,p);
+      vec proj = (cumsum(u) - lambda)/linspace<vec>(1,p,p);
       
-      // selecting nonnull entries (dual)
-      uvec maxs = sort(find(u-proj>ZERO), "descend") ;
-      double thresh = proj[maxs[0]];
+      // find critical index
+      uword i = max(find(u - proj >= 0)) ;
       
-      // solving primal problem
-      // We keep the smallest values and threshold the common values to +- thresh
-      for (uword j=0; j<p ;j++) {
-        if (fabs(v(j)) > ZERO) {
-          v(j) = fmin(fabs(v(j)),thresh);
-        } else {
-          v(j) = -fmin(fabs(v(j)),thresh);
-        }
-      }
+      // res = max(zeros(x.n_elem), abs(x) - proj[i]) ;
+      x_g = sign(x_g) % min(abs(x_g), proj(i) * ones(p) );
     }
     
-    res.subvec(ind,ind+p-1) =  v ;
+    res.subvec(ind,ind+p-1) = x_g ;
     ind += p;
   }
   return(res);
