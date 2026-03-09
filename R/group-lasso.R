@@ -43,10 +43,22 @@
 #' ## and with structuring prior
 #' labels <- rep("irrelevant", length(beta))
 #' labels[beta != 0] <- "relevant"
+#' 
+#' ## Standard Group-Lasso
 #' plot(group.lasso(x,y,grp), label=labels)
 #' plot(group.lasso(x,y,grp, lambda2=10), label=labels)
 #' plot(group.lasso(x,y,grp, lambda2=10,struct=solve(Sigma)), label=labels)
-#'
+#' 
+#' ## L1/LINF Group-Lasso
+#' plot(group.lasso(x, y, grp, type = "linf"), label=labels)
+#' plot(group.lasso(x, y, grp, type = "linf", lambda2=10), label=labels)
+#' plot(group.lasso(x, y, grp, type = "linf", lambda2=10,struct=solve(Sigma)), label=labels)
+#' 
+#' ## Cooperative-Lasso
+#' plot(group.lasso(x, y, grp, type = "coop"), label=labels)
+#' plot(group.lasso(x, y, grp, type = "coop", lambda2=10), label=labels)
+#' plot(group.lasso(x, y, grp, type = "coop", lambda2=10,struct=solve(Sigma)), label=labels)
+#' 
 #' @export
 group.lasso <- function(x,
                         y,

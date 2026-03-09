@@ -1,11 +1,12 @@
 NEWS/Changelog
 
-# quadrupen dev version	(2026-02-xx)
+# quadrupen dev version	(2026-03-xx)
 
 - major updates
   - complete rewriting of R code using R6 classes
   - complete rewriting of C++ code using template and OO style programing
   - included 'FusedLasso' from the archived package by Holger Hoefling (fixed CRAN's complaints)
+  - added group-lasso/ group-elastic and variant (group penalty: l1/l2, l1/linf, cooperative Lasso) 
   - added lava/post-lava (combination of sparse and dense regularization, Chernozukov et al, 2017)
   - added refit version of Lasso/Elastic-Net ("relaxed" Lasso/Enet)
   - changing many parameters (badly) named, do not expect backward compatibility

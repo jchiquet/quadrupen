@@ -8,7 +8,7 @@ group.lasso(
   x,
   y,
   group,
-  type = c("l2", "linf"),
+  type = c("l2", "coop", "linf"),
   lambda1 = NULL,
   lambda2 = 0.01,
   penscale = rep(1, ncol(x)),

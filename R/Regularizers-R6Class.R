@@ -137,37 +137,22 @@ GroupLassoFit <- R6::R6Class(
       super$initialize(data, intercept, regParam)
       private$group_ <- group
       private$type_  <- type
-      private$optimizer <- 
-        switch(private$type_,
-         "linf" = ifelse(data$sparse_encoding, group_enet_l1linf_sparse_cpp, group_enet_l1linf_dense_cpp),
-         "coop" = ifelse(data$sparse_encoding, group_enet_coop_sparse_cpp, group_enet_coop_dense_cpp),
-         ifelse(data$sparse_encoding, group_enet_l1l2_sparse_cpp, group_enet_l1l2_dense_cpp)
-        )
-    },
-    #' @description function performing the optimization
-    #' @param control list controlling the optimization process
-    fit = function(control) {
-      ## ======================================================
-      ## C++ CALL OPTIMIZER
-      ## 
-      if (control$timer) {cpp.start <- proc.time()}
-      private$stored_fit <- private$optimizer(
-        private$data_,
-        private$has_intercept_, 
-        private$group_,
-        private$tuning,
-        control
-      )
-      timer <- ifelse(control$timer, (proc.time() - cpp.start)[3], NA)
-      ## END OF CALL
-      ## ======================================================
-      private$tuning[[1]] <- private$stored_fit$tuning_param[[1]]
-      private$intercept_  <- drop(private$stored_fit$intercept)
-      private$coef_       <- private$stored_fit$coef
-      private$df_         <- drop(private$stored_fit$df)
-      private$monitoring  <- private$stored_fit$monitoring
-      private$monitoring$timer <- timer
-      private$control     <- control
+      private$optimizer <- function(dataModel, intercept, regParam, control) {
+        if (data$sparse_encoding) {
+          out <- switch(private$type_,
+                 "linf" = group_enet_l1linf_sparse_cpp(dataModel, intercept, private$group_, regParam, control),
+                 "coop" = group_enet_coop_sparse_cpp(dataModel, intercept, private$group_, regParam, control),
+                 group_enet_l1l2_sparse_cpp(dataModel, intercept, private$group_, regParam, control)
+          )
+        } else {
+          out <- switch(private$type_,
+                 "linf" = group_enet_l1linf_dense_cpp(dataModel, intercept, private$group_, regParam, control),
+                 "coop" = group_enet_coop_dense_cpp(dataModel, intercept, private$group_, regParam, control),
+                        group_enet_l1l2_dense_cpp(dataModel, intercept, private$group_, regParam, control)
+          )
+        }
+        out
+      }
     }
   )
 )
