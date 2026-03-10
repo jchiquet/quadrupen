@@ -34,12 +34,10 @@ BoundedRegression::BoundedRegression(
 
 double BoundedRegression::get_df() {
 
-  double bound = max(abs(beta_)) ;
-  uvec U = find(abs(beta_) < bound) ;
+  uvec U = find(abs(beta_) < max(abs(beta_))) ;
+  double df = data_.centered_ + U.size();
   
   mat SUU(U.size(), U.size()) ;
-  double df = U.size() ;
-  
   if (gamma_ > 0) {
     mat C = inv_sympd(data_.XTX_(U,U));
     // loop due to sparse encoding. should iterate over the n_zeros only...
