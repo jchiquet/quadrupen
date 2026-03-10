@@ -35,21 +35,21 @@ BoundedRegression::BoundedRegression(
 double BoundedRegression::get_df() {
 
   double bound = max(abs(beta_)) ;
-  uvec A = find(abs(beta_) >= bound) ;
+  uvec U = find(abs(beta_) < bound) ;
   
-  mat SAA(A.size(),A.size()) ;
-  double df = A.size() ;
+  mat SUU(U.size(), U.size()) ;
+  double df = U.size() ;
   
   if (gamma_ > 0) {
-    mat C = inv_sympd(data_.XTX_(A,A));
+    mat C = inv_sympd(data_.XTX_(U,U));
     // loop due to sparse encoding. should iterate over the n_zeros only...
-    for (uword i=0;i<A.size();i++){
-      for (uword j=i;j<A.size();j++){
-        SAA(i,j) = data_.S_.at(A(i),A(j));
-        SAA(j,i) = SAA(i,j);
+    for (uword i=0;i<U.size();i++){
+      for (uword j=i;j<U.size();j++){
+        SUU(i,j) = data_.S_.at(U(i),U(j));
+        SUU(j,i) = SUU(i,j);
       }
     }
-    df -= trace(SAA * C);
+    df -= trace(SUU * C);
   }
   
   return(df);

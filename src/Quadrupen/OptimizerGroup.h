@@ -80,7 +80,6 @@ uword GroupOptimizer<matrix,norm>::solve(
       set.add_group(grp_in, data) ;
       beta.resize(beta.size()+set.grp_sizes_(grp_in)) ; // update the vector of active parameters
       beta.tail(set.grp_sizes_(grp_in)) = - 1e-3 * sign(grad(set.group_[grp_in])) ;
-      // beta.tail(set.grp_sizes_(grp_in)) = zeros(set.grp_sizes_(grp_in)) ;
       if (verbosity_) {Rprintf("\tnewly added group %i\n",grp_in);}
     } else if (verbosity_) {Rprintf("\talready in %i\n",grp_in);}
     

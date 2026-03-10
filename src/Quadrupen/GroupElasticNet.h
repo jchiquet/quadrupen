@@ -29,6 +29,7 @@ class GroupElasticNet :
     using Regularizer<matrix>::get_lambda_seq ;
     using SparseRegularizer<matrix>::nzeros_   ;
     using SparseRegularizer<matrix>::debiased_ ;
+    using SparseRegularizer<matrix>::beta_debiased_ ;
     using SparseRegularizer<matrix>::intercept_debiased_   ;
     using SparseRegularizer<matrix>::iA_   ;
     using SparseRegularizer<matrix>::jA_   ;
@@ -81,21 +82,17 @@ GroupElasticNet<matrix,norm>::GroupElasticNet(
 template <typename matrix, MixedNorm norm>
 double GroupElasticNet<matrix,norm>::get_df() {
 
-  // TODO not correct at the moment
+  double df = data_.centered_ ;
 
-  double df = set_.size_grp() + data_.centered_ ;
-  if (gamma_ > 0) {
-    // loop due to sparse encoding. should iterate over the n_zeros only...
-    mat SAA(set_.size(),set_.size()) ;
-    for (uword i=0;i<set_.size();i++){
-      for (uword j=i;j<set_.size();j++){
-        SAA(i,j) = data_.S_.at(set_.A_(i),set_.A_(j));
-        SAA(j,i) = SAA(i,j);
-      }
-    }
-    df -= trace(SAA * set_.XATXAinv_);
-  }
-  
+  if (set_.size_grp() > 0) {
+    // approximate degrees of freedom
+    vec active_grp_norm = penalty_.elt_norm(beta_, set_.grp_sizes_(set_.G_)) ;
+    vec active_grp_norm_ols = penalty_.elt_norm(beta_debiased_, set_.grp_sizes_(set_.G_)) / (1 + gamma_) ;
+    
+    df = df + 
+      accu(1 + (active_grp_norm / active_grp_norm_ols) % (set_.grp_sizes_(set_.G_) - 1)) ;
+  }  
+
   return(df);
 }
 
@@ -121,11 +118,12 @@ List GroupElasticNet<matrix,norm>::solution_path(const List& control) {
       break;
     } else {
       set_.inverse_Gram() ;
+      beta_debiased_ = set_.XATXAinv_ * (data_.XTy_(set_.A_) - data_.X_bar_(set_.A_) * accu(data_.y_)) ;
+      beta_debiased_ = beta_debiased_/(data_.norm_X_(set_.A_) % lambda_factor_(set_.A_)) ;
       nzeros_ = join_cols(nzeros_, beta_/(data_.norm_X_(set_.A_) % lambda_factor_(set_.A_)));
-      vec beta_debiased = set_.XATXAinv_ * (data_.XTy_(set_.A_) - data_.X_bar_(set_.A_) * accu(data_.y_)) ;
-      debiased_ = join_cols(debiased_, beta_debiased/(data_.norm_X_(set_.A_) % lambda_factor_(set_.A_)));
+      debiased_ = join_cols(debiased_, beta_debiased_);
       intercept_.push_back(data_.y_bar_ - dot(beta_, data_.X_bar_(set_.A_)));
-      intercept_debiased_.push_back(data_.y_bar_ - dot(beta_debiased, data_.X_bar_(set_.A_))) ;
+      intercept_debiased_.push_back(data_.y_bar_ - dot(beta_debiased_, data_.X_bar_(set_.A_))) ;
       iA_ = join_rows(iA_, set_.A_.t()) ;
       jA_ = join_rows(jA_, df_.size()*ones<urowvec>(set_.size()) );
       df_.push_back(get_df()) ;

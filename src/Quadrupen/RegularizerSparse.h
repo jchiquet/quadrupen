@@ -40,9 +40,10 @@ public:
   SparseRegularizer() {} ;
   SparseRegularizer(const RegressionData<matrix>&, const List&);
   
-  vec   nzeros_ ; // contains non-zero value of beta
-  vec debiased_ ; // contains the debiased non-zero value of beta
+  vec   nzeros_ ; // contains non-zero value of all betas
+  vec debiased_ ; // contains the debiased non-zero value of all betas
   vector<double >intercept_debiased_ ; // contains the debiased vector of intercept
+  vec beta_debiased_ ; // vector of current active beta debiased
   urowvec iA_   ; // contains row indices of the non-zero values
   urowvec jA_   ; // contains column indices of the non-zero values
   
