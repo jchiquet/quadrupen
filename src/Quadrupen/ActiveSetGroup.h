@@ -32,7 +32,7 @@ public:
 
   // ACTIVE SET HANDLING
   void add_group(uword, const RegressionData<matrix> &) ; // add a group of variables in the active set
-  void del_group(uword) ; // remove the group of variable activated in position ind_grp_class
+  void del_group(uword, vec&) ; // remove the group of variable activated in position ind_grp_class
   const uword size_grp() const { return G_.n_elem ; }
 
 };
@@ -68,18 +68,18 @@ void ActiveSetGroup<matrix>::add_group(uword grp_in, const RegressionData<matrix
 }
 
 template <typename matrix>
-void ActiveSetGroup<matrix>::del_group(uword igrp_out) {
+void ActiveSetGroup<matrix>::del_group(uword igrp_out, vec& beta) {
 
   uword ifirst_var_in = 0 ;
   for (uword i=0; i < igrp_out; i++) ifirst_var_in += grp_sizes_(G_[i]) ;
   uvec ivars_out = regspace<uvec>(
     ifirst_var_in + grp_sizes_(G_[igrp_out]) - 1, ifirst_var_in
   ) ;
-  ActiveSet<matrix>::del_vars(ivars_out, data) ;
+  ActiveSet<matrix>::del_vars(ivars_out) ;
   
   is_grp_in_[G_[igrp_out]] = 0 ;
   G_.shed_row(igrp_out)        ;
-
+  beta.shed_rows(ivars_out)    ;
 }
 
 

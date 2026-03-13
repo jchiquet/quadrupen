@@ -36,6 +36,7 @@ public:
 
   using Optimizer<matrix>::optimality_gap ;
   using Optimizer<matrix>::fista ;
+  using Optimizer<matrix>::fista_LM ;
   
   uword solve(
       vec& beta,
@@ -76,12 +77,12 @@ uword GroupOptimizer<matrix,norm>::solve(
     iter_++;
     
     // VARIABLE ACTIVATION IF APPLICABLE
-    if (set.is_grp_in_[grp_in] == 0) { // Is var_in already in the active set?
+    if (set.is_grp_in_[grp_in] == 0 && optimality(grp_in) > 0) { // Is var_in already in the active set?
       set.add_group(grp_in, data) ;
       beta.resize(beta.size()+set.grp_sizes_(grp_in)) ; // update the vector of active parameters
       beta.tail(set.grp_sizes_(grp_in)) = - 1e-3 * sign(grad(set.group_[grp_in])) ;
       if (verbosity_) {Rprintf("\tnewly added group %i\n",grp_in);}
-    } else if (verbosity_) {Rprintf("\talready in %i\n",grp_in);}
+    } 
     
     // OPTIMIZATION OVER THE CURRENTLY ACTIVATED VARIABLES
     // if (algorithm_ == FISTA) {
@@ -89,10 +90,20 @@ uword GroupOptimizer<matrix,norm>::solve(
       return(penalty_.proximal(x, L, set.grp_sizes_(set.G_)));
     } ;
     inner_iter_.push_back(
-      fista(beta, grad, lambda, data, set, prox, 1e-10, 10000)
+      fista_LM(beta, grad, lambda, data, set, prox, 1e-8, 10000)
     );
     // }
-  
+
+    // VARIABLE DELETION IF APPLICABLE
+    uvec vanish = find(
+      penalty_.elt_norm(grad(set.A_), set.grp_sizes_(set.G_)) < lambda + ZERO &&
+      penalty_.elt_norm(beta, set.grp_sizes_(set.G_)) < ZERO
+    ) ;
+    if (!vanish.is_empty()) { // Is var_in already in the active set?
+      set.del_group(vanish(0), beta) ;
+      if (verbosity_) {Rprintf("\tremoved group %i\n",set.G_(vanish(0)));}
+    } 
+
     // OPTIMALITY TESTING
     grad = - data.XTy_ + set.XTXA_ * beta ;
     optimality = penalty_.elt_norm(grad, set.grp_sizes_) - lambda ;

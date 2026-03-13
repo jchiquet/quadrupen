@@ -18,7 +18,8 @@ class OptimizerL1 : public SimpleOptimizer<matrix,SimpleNorm::L1> {
 public:
   
   using SimpleOptimizer<matrix,SimpleNorm::L1>::penalty_ ;
-  
+  using Optimizer<matrix>::verbosity_ ;
+    
   OptimizerL1() {} ;
   OptimizerL1(SimplePenalty<SimpleNorm::L1>&, const List& control) ;
   
@@ -99,7 +100,7 @@ uword OptimizerL1<matrix>::quadratic(
       beta = betal ;
     } else {
       beta = betak ; // otherwise, backtrack to betak
-      // if (verbose) Rprint("\tremoving variables %i", set.A_(i_swap)) ;
+      if (verbosity_) Rprintf("\tremoving variables %i", set.A_(i_swap)) ;
       set.del_var(i_swap) ; // and desactivate de zeroed variable
       beta.shed_row(i_swap) ;
     }

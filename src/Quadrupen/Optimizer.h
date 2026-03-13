@@ -51,6 +51,16 @@ public:
       const uword& max_iter
   ) ;
   
+  uword fista_LM(
+      vec& beta,
+      vec& grad,
+      const double& lambda, 
+      RegressionData<matrix> &data,
+      ActiveSet<matrix>& set,
+      std::function<vec(vec, double)> proximal_operator, 
+      const double& accuracy, 
+      const uword& max_iter
+  ) ;
   
   void optimality_gap(
       vec& beta,
@@ -88,8 +98,8 @@ uword Optimizer<matrix>::fista(
   vec betak = beta  ; // output vector
   vec betal = beta  ;
   double delta = 2*accuracy  ; // change in beta
-  double L = max( set.XATXA_.diag()) ; // Lipchitz constant
-  
+  double L = eig_sym( set.XATXA_ ).max() ;
+
   double t0 = 1.0, tk ; // auxiliary variables in FISTA 
   uword iter = 0      ; // current iterate
   while ((delta > accuracy/beta.n_elem ) && (iter < max_iter)) {
@@ -128,6 +138,50 @@ uword Optimizer<matrix>::fista(
     
     // preparing next iterate
     delta = sqrt(l_num);
+    beta = betak;
+    t0 = tk;
+    iter++;
+    
+    R_CheckUserInterrupt();
+  }
+  
+  return(iter) ;
+  
+}
+
+template <typename matrix>
+uword Optimizer<matrix>::fista_LM(
+    vec& beta,
+    vec& grad,
+    const double& lambda,
+    RegressionData<matrix> &data,
+    ActiveSet<matrix>& set,
+    std::function<vec(vec, double)> proximal_operator, 
+    const double& accuracy,
+    const uword& max_iter) {
+  
+  vec betak ; // output vector
+  vec betal = beta  ;
+  double delta = 2*accuracy  ; // change in beta
+  double L = eig_sym( set.XATXA_ ).max() ;
+  // max( set.XATXA_.diag()) ; // Lipchitz constant
+  
+  double t0 = 1.0, tk ; // auxiliary variables in FISTA 
+  uword iter = 0      ; // current iterate
+  while ((delta > accuracy/beta.n_elem ) && (iter < max_iter)) {
+
+    // Apply proximal operator (implemented in penalty object)
+    grad(set.A_) = - data.XTy_(set.A_) + set.XATXA_ * betal ;
+    betak = proximal_operator(betal - grad(set.A_)/L, lambda/L);
+    
+    // updating t
+    tk = 0.5 * (1+sqrt(1+4*t0*t0));
+    
+    // updating s
+    betal = betak + (t0-1)/tk * ( betak - beta );
+    
+    // preparing next iterate
+    delta = sqrt(accu(pow(beta-betak,2)));
     beta = betak;
     t0 = tk;
     iter++;

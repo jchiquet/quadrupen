@@ -66,7 +66,7 @@ optim_fused_default <- function(d)
 optim_grp_default <- function(d)
   list(verbose     = 0, # default control options
        timer       = FALSE,
-       maxiter     = max(50, d),
+       maxiter     = max(50, 2*d),
        method      = "quadra",
        threshold   = 1e-4,
        monitor     = 0,
