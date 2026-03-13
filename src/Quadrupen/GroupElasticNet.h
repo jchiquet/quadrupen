@@ -55,8 +55,8 @@ GroupElasticNet<matrix,norm>::GroupElasticNet(
   GroupSparseRegularizer<matrix,norm>::GroupSparseRegularizer(data, regParam) {
 
     // Scale the structuring matrix according to main penalty factor and the amount of l2 penalty 
-    data_.scale_struct(sqrt(gamma_)*pow(lambda_factor_,-1)) ;
-    data_.scale_regressors(lambda_factor_) ;
+    data_.scale_struct(sqrt(gamma_)*ones(data_.p_)) ;
+    // data_.scale_regressors(lambda_factor_) ;
     
     // Initialize the active set, beta_ and gradient with starting coefficient
     vec beta0 = control["beta0"] ;
@@ -108,10 +108,11 @@ List GroupElasticNet<matrix,norm>::solution_path(const List& control) {
 
     // OPTIMIZER LOOP (FIX-LAMBDA VALUE): IDENTIFY THE ACTIVE SET AND SOLVE
     status.push_back(
-      solver_.solve(beta_, grad_, lambda_, gamma_, data_, set_)
+      solver_.solve(beta_, grad_, lambda_, lambda_factor_, gamma_, data_, set_)
     ) ;
     gap.push_back(solver_.gap_) ;
     iter.push_back(solver_.iter_) ;
+    
 
     // Preparing next value of the penalty
     if (status.back() >= 2) {
@@ -119,8 +120,8 @@ List GroupElasticNet<matrix,norm>::solution_path(const List& control) {
     } else {
       set_.inverse_Gram() ;
       beta_debiased_ = set_.XATXAinv_ * (data_.XTy_(set_.A_) - data_.X_bar_(set_.A_) * accu(data_.y_)) ;
-      beta_debiased_ = beta_debiased_/(data_.norm_X_(set_.A_) % lambda_factor_(set_.A_)) ;
-      nzeros_ = join_cols(nzeros_, beta_/(data_.norm_X_(set_.A_) % lambda_factor_(set_.A_)));
+      beta_debiased_ = beta_debiased_/data_.norm_X_(set_.A_) ;
+      nzeros_ = join_cols(nzeros_, beta_/data_.norm_X_(set_.A_));
       debiased_ = join_cols(debiased_, beta_debiased_);
       intercept_.push_back(data_.y_bar_ - dot(beta_, data_.X_bar_(set_.A_)));
       intercept_debiased_.push_back(data_.y_bar_ - dot(beta_debiased_, data_.X_bar_(set_.A_))) ;
@@ -128,7 +129,7 @@ List GroupElasticNet<matrix,norm>::solution_path(const List& control) {
       jA_ = join_rows(jA_, df_.size()*ones<urowvec>(set_.size()) );
       df_.push_back(get_df()) ;
     }
-    
+
     timing.push_back(timer.toc()) ;
   } // END OF THE LOOP OVER LAMBDA
   

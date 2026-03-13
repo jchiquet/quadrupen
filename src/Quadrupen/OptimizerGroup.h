@@ -42,6 +42,7 @@ public:
       vec& beta,
       vec& grad,
       const double& lambda,
+      const vec& weights,
       const double& gamma, 
       RegressionData<matrix> &data,
       ActiveSetGroup<matrix>& set
@@ -59,6 +60,7 @@ uword GroupOptimizer<matrix,norm>::solve(
     vec& beta,
     vec& grad,
     const double& lambda,
+    const vec& weights,
     const double& gamma, 
     RegressionData<matrix> &data,
     ActiveSetGroup<matrix>& set) {
@@ -66,7 +68,8 @@ uword GroupOptimizer<matrix,norm>::solve(
   if (verbosity_) Rprintf("\n current penalty = %f",lambda) ;
   if (verbosity_) Rprintf("\n nb active groups = %i\n", set.size_grp()) ;
   
-  vec optimality = penalty_.elt_norm(grad, set.grp_sizes_) - lambda;
+  vec lambda_w = lambda * weights ;
+  vec optimality = penalty_.elt_norm(grad, set.grp_sizes_) - lambda_w;
   uword grp_in = optimality.index_max() ; // highest violation of KKT conditions 
   uword status = 0 ; iter_ = 0 ; bool success = true ; 
   gap_ = std::max(0.0, optimality(grp_in)) ;
@@ -86,17 +89,17 @@ uword GroupOptimizer<matrix,norm>::solve(
     
     // OPTIMIZATION OVER THE CURRENTLY ACTIVATED VARIABLES
     // if (algorithm_ == FISTA) {
-    auto prox = [this, set](vec x, double L) {
+    auto prox = [this, set](vec x, vec L) {
       return(penalty_.proximal(x, L, set.grp_sizes_(set.G_)));
     } ;
     inner_iter_.push_back(
-      fista_LM(beta, grad, lambda, data, set, prox, 1e-8, 10000)
+      fista_LM(beta, grad, lambda_w(set.G_), data, set, prox, 1e-6, 10000)
     );
     // }
 
     // VARIABLE DELETION IF APPLICABLE
     uvec vanish = find(
-      penalty_.elt_norm(grad(set.A_), set.grp_sizes_(set.G_)) < lambda + ZERO &&
+      penalty_.elt_norm(grad(set.A_), set.grp_sizes_(set.G_)) < lambda_w(set.G_) + ZERO &&
       penalty_.elt_norm(beta, set.grp_sizes_(set.G_)) < ZERO
     ) ;
     if (!vanish.is_empty()) { // Is var_in already in the active set?
@@ -106,7 +109,7 @@ uword GroupOptimizer<matrix,norm>::solve(
 
     // OPTIMALITY TESTING
     grad = - data.XTy_ + set.XTXA_ * beta ;
-    optimality = penalty_.elt_norm(grad, set.grp_sizes_) - lambda ;
+    optimality = penalty_.elt_norm(grad, set.grp_sizes_) - lambda_w ;
     grp_in = optimality.index_max() ;
     gap_ = std::max(0.0, optimality(grp_in)) ;
     

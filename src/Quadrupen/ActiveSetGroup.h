@@ -44,7 +44,7 @@ ActiveSetGroup<matrix>::ActiveSetGroup(const RegressionData<matrix>& data, const
     // Vector of group and group sizes
     uvec grp = unique(group_ind) ;
     uword nb_grp =  grp.n_elem ;
-    grp_sizes_.zeros(nb_grp-1) ;
+    grp_sizes_.zeros(nb_grp) ;
     for (auto it = group_ind.begin(); it != group_ind.end(); it++) {
       grp_sizes_[*it - 1]++;
     }

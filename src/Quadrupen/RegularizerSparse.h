@@ -100,10 +100,11 @@ class GroupSparseRegularizer : public SparseRegularizer<matrix> {
 public:
   
   using Regularizer<matrix>::data_ ;
+  using Regularizer<matrix>::lambda_factor_ ;
   
   GroupSparseRegularizer() {} ;
   GroupSparseRegularizer(const RegressionData<matrix>&, const List&);
-  double get_lambda_max() {return(penalty_.dual_norm(data_.XTy_, set_.grp_sizes_));}
+  double get_lambda_max() {return(penalty_.dual_norm(data_.XTy_, set_.grp_sizes_, lambda_factor_));}
   
   ActiveSetGroup<matrix> set_ ; // Active set of variable and data
   MixedPenalty<norm> penalty_ ; // main penalty object 

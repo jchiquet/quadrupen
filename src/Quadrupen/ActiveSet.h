@@ -18,7 +18,7 @@ public:
   uvec A_           ; // set of currently activated variables
   uvec is_in_       ; // indicator of active variables (0/1)
   mat XATXA_, XTXA_ ; // matrices of currently activated variables
-  mat XATXAinv_     ;
+  mat XATXAinv_     ; 
   bool use_chol_    ; // Maintain a Cholesky factorization along the active set algorithm
   mat R_, Rinv_     ; // Cholesky decomposition of XATXA
   

@@ -135,6 +135,8 @@ GroupLassoFit <- R6::R6Class(
     #' @param regParam a list with two elements, a vector and a scalar, for the regularization
     initialize =  function(data, intercept, group, type, regParam) {
       super$initialize(data, intercept, regParam)
+      stopifnot("The groups must be provided as a sorted vector of integers" = !is.unsorted(group))
+      stopifnot("The group indices must start from 1" = min(group) == 1)
       private$group_ <- group
       private$type_  <- type
       private$optimizer <- function(dataModel, intercept, regParam, control) {
