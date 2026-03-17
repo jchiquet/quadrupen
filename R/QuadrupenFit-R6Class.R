@@ -590,7 +590,7 @@ QuadrupenFit <- R6::R6Class(
       rownames(coef) <- NULL ## avoid warning message in ggplot2
       
       if (standardize) {
-        normx <- sqrt(drop(colSums(x^2)) - nrow(x) * colMeans(x)^2)
+        normx <- sqrt(drop(colSums(private$data_$X^2)) - nrow(private$data_$X) * colMeans(private$data_$X)^2)
         coef <- scale(coef, FALSE, 1/normx[nzeros])
       }
 
