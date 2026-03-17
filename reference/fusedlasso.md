@@ -166,7 +166,7 @@ res <- fusedlasso(x, y, lambda2=5)
 G <- igraph::make_ring(ncol(x)) |> igraph::as_adjacency_matrix(sparse = FALSE)
 resG <- fusedlasso(x, y, lambda2=5, struct = G)
 plot(res)
-#> Error in h(simpleError(msg, call)): error in evaluating the argument 'x' in selecting a method for function 'drop': error in evaluating the argument 'x' in selecting a method for function 'colSums': object 'x' not found
+
 plot(resG)
-#> Error in h(simpleError(msg, call)): error in evaluating the argument 'x' in selecting a method for function 'drop': error in evaluating the argument 'x' in selecting a method for function 'colSums': object 'x' not found
+
 ```

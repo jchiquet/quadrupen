@@ -181,9 +181,9 @@ y <- 10 + x %*% beta + rnorm(n,0,10)
 labels <- rep("irrelevant", length(beta))
 labels[beta != 0] <- "relevant"
 plot(lasso(x,y), label=labels) ## a mess
-#> Error in h(simpleError(msg, call)): error in evaluating the argument 'x' in selecting a method for function 'drop': error in evaluating the argument 'x' in selecting a method for function 'colSums': object 'x' not found
+
 plot(elastic.net(x,y,lambda2=10), label=labels) ## good guys are selected first
-#> Error in h(simpleError(msg, call)): error in evaluating the argument 'x' in selecting a method for function 'drop': error in evaluating the argument 'x' in selecting a method for function 'colSums': object 'x' not found
+
 plot(elastic.net(x,y,lambda2=10,struct=solve(Sigma)), label=labels) ## even better
-#> Error in h(simpleError(msg, call)): error in evaluating the argument 'x' in selecting a method for function 'drop': error in evaluating the argument 'x' in selecting a method for function 'colSums': object 'x' not found
+
 ```
