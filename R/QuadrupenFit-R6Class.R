@@ -229,13 +229,19 @@ QuadrupenFit <- R6::R6Class(
                         sep = "\n"))
         }
       }
-      res <- switch(
-        match.arg(type), 
-        "index"        = index,
-        "penalty"      = lambda[index],
-        setNames(c(private$intercept_[index], private$coef_[,index]), private$data_$varnames)
-        )
-      res
+      type <- match.arg(type)
+      if (type == "index")
+        return(index)
+      else if (type == "penalty")
+        return(lambda[index])
+      else {
+        if (private$has_intercept_) {
+          res <- setNames(c(private$intercept_[index], private$coef_[,index]), c("Intercept", private$data_$varnames))
+        } else {
+          res <- setNames(private$coef_[,index], private$data_$varnames)
+        }
+        return(res)
+      }
     },
     #' @description Predict response for new sample based on the current model
     #' @param newx matrix of new values for the regressor with which to predict. If omitted, the fitted values are used.
