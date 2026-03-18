@@ -22,10 +22,10 @@ public:
   RegressionData<matrix> data_ ; // data structure
   double gamma_                ; // overall amount of minor penalty (not leading the path)
   vector<double> lambdas_      ; // vector of parameters tuning the main penalty
-  vec lambda_factor_           ; // main penalty factors
+  vec lambda_factor_           ; // weights for the main penalty
   vector<double> intercept_    ; // vector of intercept term
   matrix coef_                 ; // matrix of coefficients
-  vec beta_                    ; // vector of current parameters
+  vec beta_                    ; // vector of current parameters (for fix lambda value)
   vec grad_                    ; // vector of current gradient (smooth part)
   vector<double> df_           ; // degrees of freedom along the path
   uvec all                     ; // a vector with all variable indices

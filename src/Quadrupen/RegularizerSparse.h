@@ -40,12 +40,12 @@ public:
   SparseRegularizer() {} ;
   SparseRegularizer(const RegressionData<matrix>&, const List&);
   
-  vec   nzeros_ ; // contains non-zero value of all betas
-  vec debiased_ ; // contains the debiased non-zero value of all betas
-  vector<double >intercept_debiased_ ; // contains the debiased vector of intercept
-  vec beta_debiased_ ; // vector of current active beta debiased
+  vec   nzeros_ ; // contains non-zero values of all betas (for all lambda values)
+  vec debiased_ ; // contains debiased non-zero values of all betas (for all lambda values)
   urowvec iA_   ; // contains row indices of the non-zero values
   urowvec jA_   ; // contains column indices of the non-zero values
+  vector<double >intercept_debiased_ ; // debiased vector of intercept values (for all lambda values)
+  vec beta_debiased_ ; // vector of current active beta debiased (for the current lambda)
   
   const sp_mat coefficients() const {
     return sp_mat(join_cols(iA_, jA_), nzeros_, data_.p_, lambdas_.size()) ; 
@@ -104,7 +104,12 @@ public:
   
   GroupSparseRegularizer() {} ;
   GroupSparseRegularizer(const RegressionData<matrix>&, const List&);
-  double get_lambda_max() {return(penalty_.dual_norm(data_.XTy_, set_.grp_sizes_, lambda_factor_));}
+  double get_lambda_max() 
+  {
+    return(
+      penalty_.dual_norm(data_.XTy_, set_.grp_sizes_, lambda_factor_)
+    );
+  }
   
   ActiveSetGroup<matrix> set_ ; // Active set of variable and data
   MixedPenalty<norm> penalty_ ; // main penalty object 
