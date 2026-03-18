@@ -30,11 +30,12 @@ Imports:
     scales,
     tidyr
 Suggests:
-    testthat,
     elasticnet,
-    igraph,
     glmnet,
-    lars
+    igraph,
+    lars,
+    MASS,
+    testthat
 LinkingTo: 
     Rcpp,
     RcppArmadillo

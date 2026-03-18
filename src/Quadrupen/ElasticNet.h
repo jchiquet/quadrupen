@@ -126,7 +126,7 @@ List ElasticNet<matrix>::solution_path(const List& control) {
       nzeros_ = join_cols(nzeros_, beta_/(data_.norm_X_(set_.A_) % lambda_factor_(set_.A_)));
       vec beta_debiased = set_.XATXAinv_ * (data_.XTy_(set_.A_) - data_.X_bar_(set_.A_) * accu(data_.y_)) ;
       debiased_ = join_cols(debiased_, beta_debiased/(data_.norm_X_(set_.A_) % lambda_factor_(set_.A_)));
-      intercept_.push_back(data_.y_bar_ - dot(beta_, data_.X_bar_(set_.A_)));
+      intercept_.push_back(data_.y_bar_ - dot(beta_, data_.X_bar_(set_.A_))); // X_bar is scaled
       intercept_debiased_.push_back(data_.y_bar_ - dot(beta_debiased, data_.X_bar_(set_.A_))) ;
       iA_ = join_rows(iA_, set_.A_.t()) ;
       jA_ = join_rows(jA_, df_.size()*ones<urowvec>(set_.size()) );
