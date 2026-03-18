@@ -62,7 +62,7 @@ DataModel <- R6::R6Class(
     #' @description Compute Cholesky factorization of the Structuring matrix 
     CholStruct = function() {
       stopifnot(inherits(self$S, "sparseMatrix"))
-      self$C_inv <- as.matrix(solve(Matrix::chol(self$S)))
+      self$C_inv <- as.matrix(solve(t(Matrix::chol(self$S))))
     },
     #' @description a function splitting the data into train and test folds
     #' @param nfolds the number of folds
