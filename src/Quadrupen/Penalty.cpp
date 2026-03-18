@@ -76,7 +76,7 @@ vec SimplePenalty<SimpleNorm::LINF>::proximal(vec x, double lambda) {
   vec res = zeros<vec>(p);
   
   // Project onto the l1 ball
-  if ( accu(abs(x)) > lambda) {
+  if (accu(abs(x)) > lambda) {
     // Project onto the l1 ball
 
     // Reordering absolute values
