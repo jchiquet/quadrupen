@@ -29,11 +29,10 @@ public:
   
   Lava(const RegressionData<matrix>&, const mat&, const List&, const List&);
 
-  void post_treatment(const RegressionData<matrix>& data,
-                      const mat& U, const mat& V, const vec& D, const mat& C_inv) ;
+  void post_treatment(const RegressionData<matrix>& data, const mat& b) ;
 
-  // Specific to Elastic-Net regularization
-  sp_mat sparse_coef_ ; // matrix of dense coefficients
+  // Specific to LAVA
+  sp_mat sparse_coef_ ; // matrix of sparse coefficients
   mat Proj_           ; // Lava projector matrix
 
   // Compute degrees of freedom for the current estimate
@@ -63,33 +62,34 @@ double Lava<matrix>::get_df() {
 }
 
 template <typename matrix>
-void Lava<matrix>::post_treatment(const RegressionData<matrix>& data,
-                                  const mat& U, const mat& V, const vec& D, const mat& C_inv) {
+void Lava<matrix>::post_treatment(const RegressionData<matrix>& data, const mat& b) {
   
   sp_mat beta = this->coefficients() ;
+
+  mat Xs = data.X_ ; Xs.each_row() -= data.X_bar_.t() ;
   
-  mat M = C_inv * V * diagmat(D/(square(D) + 1)) ;
-  mat UTy = U.t() * (data.y_ - data.y_bar_) ;
-  mat DVT = diagmat(D) * V.t();
-  mat X = data.X_ ;
-  X.each_row() -= data.X_bar_.t() ;
-  coef_.reset() ;
+  // Scale coefficients (theta = beta + b) to original
+  coef_ = diagmat(1/data.norm_X_) * (b + beta.as_dense()) ; 
+  
   debiased_.reset() ;
   intercept_.clear() ;
   intercept_debiased_.clear() ;
   
-  for (uword i=0;i< beta.n_cols ;i++){
-    // Rescale sparse and dense coefficient to original scaling factors
-    beta.col(i) /= data.norm_X_ ;
-    vec b = M * (UTy - DVT * beta.col(i)) / data.norm_X_ ;
-    coef_ = join_rows(coef_, b + beta.col(i).as_dense()) ;
-    intercept_.push_back(data.y_bar_ - dot(beta.col(i) - b, data.X_bar_));
+  for (uword i=0; i< this->lambdas_.size() ;i++){
+    
+    intercept_.push_back(data.y_bar_ - dot(beta.col(i) + b.col(i), data.X_bar_));
+
     // Refit the sparse coefficient to remove bias due to sparse shrinkage
     uvec A = find(beta.col(i)) ;
-    vec w = data.y_ - data.X_ * b  - dot(data.X_bar_,b) * ones(data.n_);
-    vec beta_debiased = solve(X.cols(A).t() * X.cols(A), X.cols(A).t() * w) ;
+    vec w = (data.y_ - data_.y_bar_) - Xs * b.col(i) ;
+    vec beta_debiased = solve(Xs.cols(A).t() * Xs.cols(A), Xs.cols(A).t() * w) ;
     debiased_ = join_cols(debiased_, beta_debiased/(data_.norm_X_(A) % lambda_factor_(A)));
-    intercept_debiased_.push_back(data_.y_bar_ - dot(beta_debiased, data_.X_bar_(A))) ;
+    intercept_debiased_.push_back(
+      data_.y_bar_ -
+        dot(beta_debiased, data_.X_bar_(A)) - dot(b.col(i), data_.X_bar_)) ;
+    
+    // Scale the sparse coefficients to original
+    beta.col(i) /= data.norm_X_ ;
   }
 
   sparse_coef_ = beta ;

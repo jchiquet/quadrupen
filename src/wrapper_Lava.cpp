@@ -21,15 +21,15 @@ List lava_dense_cpp(
   // Scale the structuring matrix according to main penalty factor and the amount of l2 penalty 
   vec lambda_factor = as<vec>(regParam["lambda_factor"]) ;
   double gamma = as<double>(regParam["gamma"]) ;
-  data.scale_struct(sqrt(data.n_*gamma)*pow(lambda_factor,-1)) ;
+  data.scale_struct(sqrt(gamma)*pow(lambda_factor,-1)) ;
   data.scale_regressors(lambda_factor) ;
   
   // Create the scaled/transformed data
   mat C_inv = solve(trimatu(chol(data.S_.as_dense())), eye(data.p_, data.p_)) ;
   mat U, V ; vec D ; // U D V = X C^-1
   svd_econ(U, D, V, (data.X_.each_row() - data.X_bar_.t())*C_inv) ;
-  mat Proj = U * diagmat(square(D)/(square(D) + 1)) * U.t()  ;
-  mat K12 = sqrtmat_sympd(diagmat(ones(data.n_)) - Proj) ;
+  mat Proj = U * diagmat(square(D)/(square(D) + 1)) * U.t() ;
+  mat K12 = U * diagmat(1/sqrt(square(D) + 1)) * U.t() ;
   mat X_tilde = K12 * (data.X_.each_row() - data.X_bar_.t()) ;
   vec y_tilde = K12 * (data.y_ - data.y_bar_) ;
   
@@ -44,7 +44,12 @@ List lava_dense_cpp(
 
   List results = lava.solution_path(control);
 
-  lava.post_treatment(data, U, V, D, C_inv) ;
+  // Un-normalized vector of dense coefficients
+  mat b = (C_inv * V * diagmat(D/(square(D) + 1)) * U.t()) * ( 
+    (data.y_ - data.y_bar_) * ones(1, lava.lambdas_.size()) - 
+      (data.X_.each_row() - data.X_bar_.t()) * lava.coefficients()
+  ) ;
+  lava.post_treatment(data, b) ;
   
   return List::create(
     Named("tuning_param") = List::create(
@@ -53,7 +58,7 @@ List lava_dense_cpp(
     ),
     
     Named("coef")          = lava.coef_,
-    Named("coef_debiased") = lava.coef_ + lava.debiased_coefficients(),
+    Named("coef_debiased") = diagmat(1/data.norm_X_) * b + lava.debiased_coefficients(),
     Named("sparse_coef")   = lava.sparse_coef_,
     Named("sparse_coef_debiased") = lava.debiased_coefficients(),
     Named("active")        = lava.active_var(),
