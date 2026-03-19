@@ -12,6 +12,7 @@ NEWS/Changelog
 - minor updates
   - Integration of changes from CRAN versions from 0.2-4 to 0.2-13  
   - set up github workflow for pkgdown page
+  - various fixes, more testing
   
 # quadrupen 0.3-0	(2013-11)
 
