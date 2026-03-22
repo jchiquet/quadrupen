@@ -48,6 +48,8 @@ Inherits fields and methods of
 
 - [`LavaFit$fit()`](#method-LavaFit-fit)
 
+- [`LavaFit$plot_path()`](#method-LavaFit-plot_path)
+
 - [`LavaFit$clone()`](#method-LavaFit-clone)
 
 Inherited methods
@@ -56,7 +58,6 @@ Inherited methods
 - [`quadrupen::QuadrupenFit$cross_validate()`](https://jchiquet.github.io/quadrupen/reference/QuadrupenFit.html#method-cross_validate)
 - [`quadrupen::QuadrupenFit$get_model()`](https://jchiquet.github.io/quadrupen/reference/QuadrupenFit.html#method-get_model)
 - [`quadrupen::QuadrupenFit$plot()`](https://jchiquet.github.io/quadrupen/reference/QuadrupenFit.html#method-plot)
-- [`quadrupen::QuadrupenFit$plot_path()`](https://jchiquet.github.io/quadrupen/reference/QuadrupenFit.html#method-plot_path)
 - [`quadrupen::QuadrupenFit$predict()`](https://jchiquet.github.io/quadrupen/reference/QuadrupenFit.html#method-predict)
 - [`quadrupen::QuadrupenFit$print()`](https://jchiquet.github.io/quadrupen/reference/QuadrupenFit.html#method-print)
 - [`quadrupen::QuadrupenFit$show()`](https://jchiquet.github.io/quadrupen/reference/QuadrupenFit.html#method-show)
@@ -103,7 +104,65 @@ function performing the optimization
 
 - `control`:
 
-  list controlling the optimization process
+  list controlling the optimization process Plot method for lava
+  regularization path
+
+------------------------------------------------------------------------
+
+### Method `plot_path()`
+
+Produce a plot of the solution path of a LavaFit object.
+
+#### Usage
+
+    LavaFit$plot_path(
+      xvar = c("lambda", "fraction", "df"),
+      log_scale = TRUE,
+      component = "both",
+      title = paste("Lava path:", component, "component(s)"),
+      standardize = TRUE,
+      labels = NULL
+    )
+
+#### Arguments
+
+- `xvar`:
+
+  variable to plot on the X-axis: either `"lambda"` (\\\ell_1\\ penalty
+  level, or \\\ell_2\\ for ridge and \\\ell\_\infty\\) or `"fraction"`
+  (\\\ell_1\\-norm of the coefficients) or `df` for estimated degrees of
+  freedom. Default is set to `"lambda"`.
+
+- `log_scale`:
+
+  logical; indicates if a log-scale should be used when `xvar="lambda"`.
+  Default is `TRUE`.
+
+- `component`:
+
+  a character indicating the component to plot: both (sum of sparse and
+  dense), sparse or dense. Default to both.
+
+- `title`:
+
+  the title. Default is set to the model name followed by what is on the
+  Y-axis.
+
+- `standardize`:
+
+  logical; standardize the coefficients before plotting (with the norm
+  of the predictor). Default is `TRUE`.
+
+- `labels`:
+
+  vector indicating the names associated to the plotted variables. When
+  specified, a legend is drawn in order to identify each variable. Only
+  relevant when the number of predictor is small. Remind that the
+  intercept does not count. Default is `NULL`.
+
+#### Returns
+
+a ggplot2 object .
 
 ------------------------------------------------------------------------
 

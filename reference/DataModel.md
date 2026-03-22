@@ -42,6 +42,10 @@ Class for storing data and various fixed quantity
 
   character, the names of the covariates/regressors
 
+- `normx`:
+
+  norm of each column of X
+
 ## Methods
 
 ### Public methods

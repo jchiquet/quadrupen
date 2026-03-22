@@ -117,6 +117,21 @@ plot(bounded.reg(x,y, lambda2=5, intercept=FALSE), labels=labels)
 
 ![](reference/figures/bregridge_nostruct-1.png)
 
+#### Lava (sparse + dense signal decomposition)
+
+``` r
+out_lava <- lava(x,y, lambda2=1, intercept=FALSE)
+out_lava$plot_path(component = "sparse", labels=labels)
+```
+
+![](reference/figures/lava_nostruct-1.png)
+
+``` r
+out_lava$plot_path(component = "dense", labels=labels)
+```
+
+![](reference/figures/lava_nostruct-2.png)
+
 ### Regularization with prior knowledge
 
 Now let use define the graph associated with the groups of the regressor
@@ -157,6 +172,21 @@ plot(bounded.reg(x,y, struct = L, lambda2=5, intercept=FALSE), labels=labels)
 ```
 
 ![](reference/figures/bregridge_struct-1.png)
+
+#### Lava (sparse + structured dense)
+
+``` r
+out_lava <- lava(x,y, lambda2=1, struct = L, intercept=FALSE)
+out_lava$plot_path(component = "sparse", labels=labels)
+```
+
+![](reference/figures/lava_struct-1.png)
+
+``` r
+out_lava$plot_path(component = "dense", labels=labels)
+```
+
+![](reference/figures/lava_struct-2.png)
 
 ## Appendix: functions for data generation
 
