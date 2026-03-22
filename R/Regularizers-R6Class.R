@@ -164,6 +164,16 @@ GroupLassoFit <- R6::R6Class(
 #' Class of object returned by the fitting function [lava()]. Inherits fields
 #' and methods of [QuadrupenFit]
 #' 
+#' @param log_scale logical; indicates if a log-scale should be used
+#' when `xvar="lambda"`. Default is `TRUE`.
+#' @param standardize logical; standardize the coefficients before
+#' plotting (with the norm of the predictor). Default is `TRUE`.
+#' @param labels vector indicating the names associated to the plotted
+#' variables. When specified, a legend is drawn in order to identify
+#' each variable. Only relevant when the number of predictor is
+#' small. Remind that the intercept does not count. Default is
+#' \code{NULL}.
+#' 
 #' @seealso [QuadrupenFit], [lava()]
 #' 
 #' @export
@@ -212,6 +222,57 @@ LavaFit <- R6::R6Class(
     fit = function(control) {
       super$fit(control)
       private$sparse_coef_ <- private$stored_fit$sparse_coef
+    },
+    #' Plot method for lava regularization path
+    #' 
+    #' @description Produce a plot of the solution path of a [LavaFit] object.
+    #'
+    #' @param xvar variable to plot on the X-axis: either `"lambda"`
+    #' (\eqn{\ell_1}{l1} penalty level, or
+    #' \eqn{\ell_2}{l2} for ridge  and \eqn{\ell_\infty}{l_inf}) or
+    #' `"fraction"` (\eqn{\ell_1}{l1}-norm
+    #' of the coefficients) or `df` for estimated degrees of freedom. 
+    #' Default is set to `"lambda"`.
+    #' @param component a character indicating the component to plot: both 
+    #' (sum of sparse and dense), sparse or dense. Default to both.
+    #' @param title the title. Default is set to the model name followed
+    #' by what is on the Y-axis.
+    #'
+    #' @return a \pkg{ggplot2} object .
+    plot_path = function(xvar = c("lambda", "fraction", "df"), log_scale = TRUE,
+                         component = "both",
+                         title = paste("Lava path:", component, "component(s)"),
+                         standardize = TRUE, labels = NULL) {
+
+      stopifnot(component %in% c("both", "sparse", "dense"))
+      comp <- switch(component,
+        "sparse" = self$sparse_coef, "dense" = self$dense_coef, private$coef_
+        )
+
+      xvar <- match.arg(xvar)      
+      stopifnot("Not available when the leading vector of tuning parameters boild down to a scalar." 
+                = length(self$major_tuning) > 1)
+      
+      nzeros <- which(rowSums(comp) != 0)
+      stopifnot("Nothing to plot: all coefficients are zero." = length(nzeros) > 0)
+      
+      coef  <- t(as.matrix(comp[nzeros, , drop = FALSE]))
+      rownames(coef) <- NULL ## avoid warning message in ggplot2
+      attr(coef, "nzeros") <- nzeros
+      
+      if (standardize) coef <- scale(coef, FALSE, 1/private$data_$normx[nzeros])
+      
+      xv <- switch(xvar,
+                   "fraction" = apply(abs(coef),1,sum)/max(apply(abs(coef),1,sum)),
+                   "df"       = private$df_,
+                   self$major_tuning
+      )
+      attr(xv, "type") <- xvar
+      
+      d <- .plot_regpath(xv, coef, standardize, log_scale, labels)
+      d <- d + ggtitle(title) + theme_bw()
+      if (is.null(labels)) d <- d + theme(legend.position = "none") 
+      d
     }
   )
 )

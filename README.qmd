@@ -149,6 +149,14 @@ plot(bounded.reg(x,y, lambda2=0, intercept=FALSE), labels=labels)
 plot(bounded.reg(x,y, lambda2=5, intercept=FALSE), labels=labels)
 ```
 
+#### Lava (sparse + dense signal decomposition)
+
+```{r lava_nostruct}
+out_lava <- lava(x,y, lambda2=1, intercept=FALSE)
+out_lava$plot_path(component = "sparse", labels=labels)
+out_lava$plot_path(component = "dense", labels=labels)
+```
+
 ### Regularization with prior knowledge
 
 Now let use define the graph associated with the groups of the regressor and compute the Graph Laplacian. We add a small value on the diagonal ton ensure strict positive definiteness (in he future, this matrix should preferentially be defined with a graph).
@@ -177,6 +185,14 @@ plot(elastic.net(x,y, struct = L, lambda2=1, intercept=FALSE), labels=labels)
 
 ```{r bregridge_struct}
 plot(bounded.reg(x,y, struct = L, lambda2=5, intercept=FALSE), labels=labels)
+```
+
+#### Lava (sparse + structured dense)
+
+```{r lava_struct}
+out_lava <- lava(x,y, lambda2=1, struct = L, intercept=FALSE)
+out_lava$plot_path(component = "sparse", labels=labels)
+out_lava$plot_path(component = "dense", labels=labels)
 ```
 
 ## Appendix: functions for data generation

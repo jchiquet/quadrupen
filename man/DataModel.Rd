@@ -31,6 +31,8 @@ Class for storing data and various fixed quantity
 \item{\code{sparse_encoding}}{logical indicating if the matrix of regressor is sparsely encoded}
 
 \item{\code{varnames}}{character, the names of the covariates/regressors}
+
+\item{\code{normx}}{norm of each column of X}
 }
 \if{html}{\out{</div>}}
 }

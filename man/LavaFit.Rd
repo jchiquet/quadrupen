@@ -36,6 +36,7 @@ and methods of \link{QuadrupenFit}
 \itemize{
 \item \href{#method-LavaFit-new}{\code{LavaFit$new()}}
 \item \href{#method-LavaFit-fit}{\code{LavaFit$fit()}}
+\item \href{#method-LavaFit-plot_path}{\code{LavaFit$plot_path()}}
 \item \href{#method-LavaFit-clone}{\code{LavaFit$clone()}}
 }
 }
@@ -46,7 +47,6 @@ and methods of \link{QuadrupenFit}
 <li><span class="pkg-link" data-pkg="quadrupen" data-topic="QuadrupenFit" data-id="cross_validate"><a href='../../quadrupen/html/QuadrupenFit.html#method-QuadrupenFit-cross_validate'><code>quadrupen::QuadrupenFit$cross_validate()</code></a></span></li>
 <li><span class="pkg-link" data-pkg="quadrupen" data-topic="QuadrupenFit" data-id="get_model"><a href='../../quadrupen/html/QuadrupenFit.html#method-QuadrupenFit-get_model'><code>quadrupen::QuadrupenFit$get_model()</code></a></span></li>
 <li><span class="pkg-link" data-pkg="quadrupen" data-topic="QuadrupenFit" data-id="plot"><a href='../../quadrupen/html/QuadrupenFit.html#method-QuadrupenFit-plot'><code>quadrupen::QuadrupenFit$plot()</code></a></span></li>
-<li><span class="pkg-link" data-pkg="quadrupen" data-topic="QuadrupenFit" data-id="plot_path"><a href='../../quadrupen/html/QuadrupenFit.html#method-QuadrupenFit-plot_path'><code>quadrupen::QuadrupenFit$plot_path()</code></a></span></li>
 <li><span class="pkg-link" data-pkg="quadrupen" data-topic="QuadrupenFit" data-id="predict"><a href='../../quadrupen/html/QuadrupenFit.html#method-QuadrupenFit-predict'><code>quadrupen::QuadrupenFit$predict()</code></a></span></li>
 <li><span class="pkg-link" data-pkg="quadrupen" data-topic="QuadrupenFit" data-id="print"><a href='../../quadrupen/html/QuadrupenFit.html#method-QuadrupenFit-print'><code>quadrupen::QuadrupenFit$print()</code></a></span></li>
 <li><span class="pkg-link" data-pkg="quadrupen" data-topic="QuadrupenFit" data-id="show"><a href='../../quadrupen/html/QuadrupenFit.html#method-QuadrupenFit-show'><code>quadrupen::QuadrupenFit$show()</code></a></span></li>
@@ -87,9 +87,60 @@ function performing the optimization
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{control}}{list controlling the optimization process}
+\item{\code{control}}{list controlling the optimization process
+Plot method for lava regularization path}
 }
 \if{html}{\out{</div>}}
+}
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-LavaFit-plot_path"></a>}}
+\if{latex}{\out{\hypertarget{method-LavaFit-plot_path}{}}}
+\subsection{Method \code{plot_path()}}{
+Produce a plot of the solution path of a \link{LavaFit} object.
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{LavaFit$plot_path(
+  xvar = c("lambda", "fraction", "df"),
+  log_scale = TRUE,
+  component = "both",
+  title = paste("Lava path:", component, "component(s)"),
+  standardize = TRUE,
+  labels = NULL
+)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{xvar}}{variable to plot on the X-axis: either \code{"lambda"}
+(\eqn{\ell_1}{l1} penalty level, or
+\eqn{\ell_2}{l2} for ridge  and \eqn{\ell_\infty}{l_inf}) or
+\code{"fraction"} (\eqn{\ell_1}{l1}-norm
+of the coefficients) or \code{df} for estimated degrees of freedom.
+Default is set to \code{"lambda"}.}
+
+\item{\code{log_scale}}{logical; indicates if a log-scale should be used
+when \code{xvar="lambda"}. Default is \code{TRUE}.}
+
+\item{\code{component}}{a character indicating the component to plot: both
+(sum of sparse and dense), sparse or dense. Default to both.}
+
+\item{\code{title}}{the title. Default is set to the model name followed
+by what is on the Y-axis.}
+
+\item{\code{standardize}}{logical; standardize the coefficients before
+plotting (with the norm of the predictor). Default is \code{TRUE}.}
+
+\item{\code{labels}}{vector indicating the names associated to the plotted
+variables. When specified, a legend is drawn in order to identify
+each variable. Only relevant when the number of predictor is
+small. Remind that the intercept does not count. Default is
+\code{NULL}.}
+}
+\if{html}{\out{</div>}}
+}
+\subsection{Returns}{
+a \pkg{ggplot2} object .
 }
 }
 \if{html}{\out{<hr>}}

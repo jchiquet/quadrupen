@@ -109,6 +109,8 @@ DataModel <- R6::R6Class(
     #' @field sparse_encoding logical indicating if the matrix of regressor is sparsely encoded
     sparse_encoding = function() {inherits(self$X, "sparseMatrix")},
     #' @field varnames character, the names of the covariates/regressors
-    varnames = function() {colnames(self$X)}
+    varnames = function() {colnames(self$X)},
+    #' @field normx norm of each column of X
+    normx = function() {sqrt(drop(colSums(self$X^2)) - self$n * colMeans(self$X)^2)}
   )
 )

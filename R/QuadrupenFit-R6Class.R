@@ -504,7 +504,7 @@ QuadrupenFit <- R6::R6Class(
       invisible(private$infocrit)
     },
     #' @description Plot method for QuadrupenFit
-    
+    #' 
     #' @param type the type of plot, either `"path"` for regularization path; 
     #' `"criteria"` for BIC-like  information criteria ; `"crossval"` for 
     #' cross-validation plot ; and `"stability"` for stability path.
@@ -581,67 +581,30 @@ QuadrupenFit <- R6::R6Class(
     plot_path = function(xvar = c("lambda", "fraction", "df"), log_scale = TRUE,
                     title = paste(self$penalty," path", sep = ""),
                     standardize = TRUE, labels = NULL) {
-      
-      if (length(self$major_tuning) == 1) {
-        stop("Not available when the leading vector of tuning parameters boild down to a scalar.")
-      }
-      xvar <- match.arg(xvar)
-      
+
+      xvar <- match.arg(xvar)      
+      stopifnot("Not available when the leading vector of tuning parameters boild down to a scalar." 
+                = length(self$major_tuning) > 1)
+
       nzeros <- which(rowSums(private$coef_) != 0)
-      if (length(nzeros) == 0) {
-        stop("Nothing to plot: all coefficients are zero.")
-      }
+      stopifnot("Nothing to plot: all coefficients are zero." = length(nzeros) > 0)
       
       coef  <- t(as.matrix(private$coef_[nzeros, , drop = FALSE]))
       rownames(coef) <- NULL ## avoid warning message in ggplot2
+      attr(coef, "nzeros") <- nzeros
       
-      if (standardize) {
-        normx <- sqrt(drop(colSums(private$data_$X^2)) - nrow(private$data_$X) * colMeans(private$data_$X)^2)
-        coef <- scale(coef, FALSE, 1/normx[nzeros])
-      }
+      if (standardize) coef <- scale(coef, FALSE, 1/private$data_$normx[nzeros])
 
       xv <- switch(xvar,
         "fraction" = apply(abs(coef),1,sum)/max(apply(abs(coef),1,sum)),
         "df"       = private$df_,
          self$major_tuning
       )
+      attr(xv, "type") <- xvar
       
-      dplot <- data.frame(xvar = xv, coef = coef) |> 
-         tidyr::pivot_longer(cols = -xvar, names_to = "var", values_to = "coef")
-      if (is.null(labels)) {
-        dplot$labels <- factor(rep(nzeros, length(xv)))
-      } else {
-        if (sum(is.na(labels[nzeros])) > 0 ) {
-          labels <- NULL
-          warning("The number of label is wrong, ignoring them.")
-          dplot$labels <- factor(rep(nzeros, length(xv)))
-        } else {
-          dplot$labels <- factor(rep(labels[nzeros], length(xv)))
-        }
-      }
-
-      d <- ggplot(dplot) + aes(x = xvar,y = coef, color = labels, group = var) + 
-        geom_line() +  geom_hline(yintercept = 0, alpha = 0.5, linetype = "dotted") +
-        ylab(ifelse(standardize, "standardized coefficients","coefficients")) + 
-          ggtitle(title) + theme_bw()
-      
-      if (is.null(labels)) {
-        d <- d + theme(legend.position = "none") 
-      } else {
-        if (length(labels[nzeros]) != length(nzeros)) {
-          d <- d + theme(legend.position = "none")
-        }
-      }
-      
-      if (xvar == "lambda") {
-        d <- d + xlab(ifelse(log_scale,expression(log[10](lambda)),expression(lambda)))
-        if (log_scale)
-          d <- d + scale_x_log10() + annotation_logticks(sides = "b")
-      } else if (xvar == "fraction") {
-        d <- d + xlab(expression(paste("|",beta[lambda],"|",{}[1]/max[lambda],"|",beta[lambda],"|",{}[1],sep = "")))
-      } else {
-        d <- d + xlab("Degrees of freedom")
-      }
+      d <- .plot_regpath(xv, coef, standardize, log_scale, labels)
+      d <- d + ggtitle(title) + theme_bw()
+      if (is.null(labels)) d <- d + theme(legend.position = "none") 
       d
     }
   )

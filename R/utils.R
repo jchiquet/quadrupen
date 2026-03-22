@@ -84,3 +84,37 @@ status_to_message <- function(status) {
   message
 }
 
+.plot_regpath <- function(xv, coef, standardize, log_scale, labs) {
+
+  nzeros <- attr(coef, "nzeros")  
+  
+  dplot <- data.frame(xvar = xv, coef = coef) |> 
+    tidyr::pivot_longer(cols = -xvar, names_to = "var", values_to = "coef")
+  
+  if (is.null(labs)) {
+    dplot$labs <- factor(rep(nzeros, length(xv)))
+  } else {
+    if (sum(is.na(labs[nzeros])) > 0 ) {
+      labs <- NULL
+      warning("The number of label is wrong, ignoring them.")
+      dplot$labs <- factor(rep(nzeros, length(xv)))
+    } else {
+      dplot$labs <- factor(rep(labs[nzeros], length(xv)))
+    }
+  }
+  
+  d <- ggplot(dplot) + aes(x = xvar, y = coef, color = labs, group = var) + 
+    geom_line() +  geom_hline(yintercept = 0, alpha = 0.5, linetype = "dotted") +
+    ylab(ifelse(standardize, "standardized coefficients","coefficients"))
+
+  if (attr(xv, "type") == "lambda") {
+    d <- d + xlab(ifelse(log_scale,expression(log[10](lambda)),expression(lambda)))
+    if (log_scale)
+      d <- d + scale_x_log10() + annotation_logticks(sides = "b")
+  } else if (attr(xv, "type") == "fraction") {
+    d <- d + xlab(expression(paste("|",beta[lambda],"|",{}[1]/max[lambda],"|",beta[lambda],"|",{}[1],sep = "")))
+  } else {
+    d <- d + xlab("Degrees of freedom")
+  }
+  d
+}
