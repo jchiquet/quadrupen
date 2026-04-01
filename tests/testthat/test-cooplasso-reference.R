@@ -29,7 +29,7 @@ get_cooplasso_scoop <- function(x,y,group,intercept,normalize=TRUE) {
 
 test_that("Coop-Lasso is correct w.r.t a reference solution", {
   
-  bardet <- readRDS("tests/testthat/bardet.rds")
+  bardet <- readRDS("bardet.rds")
   group <- rep(1:20, each = 5)
   
   tol <- 1e-2
@@ -42,51 +42,16 @@ test_that("Coop-Lasso is correct w.r.t a reference solution", {
   expect_equal(with.intercept$quadr,
                with.intercept$scoop, check.attributes = FALSE, tolerance = tol)
   
-  # without.intercept <- get_cooplasso_scoop(x,y,group,intercept=FALSE)
-  # expect_equal(without.intercept$quadr,
-  #             without.intercept$scoop, check.attributes = FALSE, tolerance = tol)
-  # 
-  # with.intercept <- get_cooplasso_scoop(x,y,group,intercept=TRUE,normalize=FALSE)
-  # expect_equal(with.intercept$quadr,
-  #             with.intercept$scoop, check.attributes = FALSE, tolerance = tol)
-  # 
-  # without.intercept <- get_cooplasso_scoop(x,y,group,intercept=FALSE,normalize=FALSE)
-  # expect_equal(without.intercept$quadr,
-  #             without.intercept$scoop, check.attributes = FALSE, tolerance = tol)
-  
-  ## RANDOM DATA
-  seed <- sample(1:10000,1)
-  ## cat(" #seed=",seed)
-  set.seed(seed)
-  
-  beta <- rep(c(0,1,0,-1,0), c(25,10,25,10,25))
-  group <- rep(1:5, c(25,10,25,10,25)) 
-  n <- 100
-  p <- length(beta)
-  
-  mu <- 3 # intercept
-  sigma <- 30 # huge noise
-  Sigma <- matrix(0.95,p,p) # huge correlation
-  diag(Sigma) <- 1
-  
-  x <- as.matrix(matrix(rnorm(95*n),n,95) %*% chol(Sigma))
-  y <- 10 + x %*% beta + rnorm(n,0,10)
-  
-  ## Run the tests...
-  with.intercept <- get_cooplasso_scoop(x,y,group,intercept=TRUE)
+  without.intercept <- get_cooplasso_scoop(x,y,group,intercept=FALSE)
+  expect_equal(without.intercept$quadr,
+              without.intercept$scoop, check.attributes = FALSE, tolerance = tol)
+
+  with.intercept <- get_cooplasso_scoop(x,y,group,intercept=TRUE,normalize=FALSE)
   expect_equal(with.intercept$quadr,
-               with.intercept$scoop, check.attributes = FALSE, tolerance = tol)
-  
-  # without.intercept <- get_cooplasso_scoop(x,y,group,intercept=FALSE)
-  # expect_equal(without.intercept$quadr,
-  #             without.intercept$scoop, check.attributes = FALSE, tolerance = tol)
-  # 
-  # with.intercept <- get_cooplasso_scoop(x,y,group,intercept=TRUE,normalize=FALSE)
-  # expect_equal(with.intercept$quadr,
-  #             with.intercept$scoop, check.attributes = FALSE, tolerance = tol)
-  # 
-  # without.intercept <- get_cooplasso_scoop(x,y,group,intercept=FALSE,normalize=FALSE)
-  # expect_equal(without.intercept$quadr,
-  #             without.intercept$scoop, check.attributes = FALSE, tolerance = tol)
+              with.intercept$scoop, check.attributes = FALSE, tolerance = tol)
+
+  without.intercept <- get_cooplasso_scoop(x,y,group,intercept=FALSE,normalize=FALSE)
+  expect_equal(without.intercept$quadr,
+              without.intercept$scoop, check.attributes = FALSE, tolerance = tol)
   
 })

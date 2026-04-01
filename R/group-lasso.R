@@ -76,7 +76,7 @@ group.lasso <- function(x,
                         normalize = TRUE,
                         refit     = FALSE,
                         nlambda1  = ifelse(is.null(lambda1),100,length(lambda1)),
-                        minratio  = ifelse(nrow(x) <= ncol(x), 1e-3, 1e-4),
+                        minratio  = 1e-3,
                         maxfeat   = ifelse(lambda2 < 1e-2, min(nrow(x),ncol(x)), min(4*nrow(x),ncol(x))),
                         beta0     = numeric(ncol(x)),
                         control   = list()) {

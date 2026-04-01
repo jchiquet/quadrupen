@@ -51,7 +51,7 @@ get_grplasso_scoop <- function(x,y,group,intercept,normalize=TRUE) {
 
 test_that("Group-Lasso is correct w.r.t a reference solution", {
 
-  bardet <- readRDS("tests/testthat/bardet.rds")
+  bardet <- readRDS("bardet.rds")
   group <- rep(1:20, each = 5)
   
   tol <- 1e-2
@@ -64,17 +64,17 @@ test_that("Group-Lasso is correct w.r.t a reference solution", {
   expect_equal(with.intercept$quadr,
               with.intercept$scoop, check.attributes = FALSE, tolerance = tol)
 
-  # without.intercept <- get_grplasso_scoop(x,y,group,intercept=FALSE)
-  # expect_equal(without.intercept$quadr,
-  #             without.intercept$scoop, check.attributes = FALSE, tolerance = tol)
-  # 
-  # with.intercept <- get_grplasso_scoop(x,y,group,intercept=TRUE,normalize=FALSE)
-  # expect_equal(with.intercept$quadr,
-  #             with.intercept$scoop, check.attributes = FALSE, tolerance = tol)
-  # 
-  # without.intercept <- get_grplasso_scoop(x,y,group,intercept=FALSE,normalize=FALSE)
-  # expect_equal(without.intercept$quadr,
-  #             without.intercept$scoop, check.attributes = FALSE, tolerance = tol)
+  without.intercept <- get_grplasso_scoop(x,y,group,intercept=FALSE)
+  expect_equal(without.intercept$quadr,
+               without.intercept$scoop, check.attributes = FALSE, tolerance = tol)
+   
+  with.intercept <- get_grplasso_scoop(x,y,group,intercept=TRUE,normalize=FALSE)
+  expect_equal(with.intercept$quadr,
+              with.intercept$scoop, check.attributes = FALSE, tolerance = tol)
+
+  without.intercept <- get_grplasso_scoop(x,y,group,intercept=FALSE,normalize=FALSE)
+  expect_equal(without.intercept$quadr,
+              without.intercept$scoop, check.attributes = FALSE, tolerance = tol)
 
   ## RANDOM DATA
   seed <- sample(1:10000,1)
@@ -99,16 +99,8 @@ test_that("Group-Lasso is correct w.r.t a reference solution", {
   expect_equal(with.intercept$quadr,
               with.intercept$scoop, check.attributes = FALSE, tolerance = tol)
 
-  # without.intercept <- get_grplasso_scoop(x,y,group,intercept=FALSE)
-  # expect_equal(without.intercept$quadr,
-  #             without.intercept$scoop, check.attributes = FALSE, tolerance = tol)
-  # 
-  # with.intercept <- get_grplasso_scoop(x,y,group,intercept=TRUE,normalize=FALSE)
-  # expect_equal(with.intercept$quadr,
-  #             with.intercept$scoop, check.attributes = FALSE, tolerance = tol)
-  # 
-  # without.intercept <- get_grplasso_scoop(x,y,group,intercept=FALSE,normalize=FALSE)
-  # expect_equal(without.intercept$quadr,
-  #             without.intercept$scoop, check.attributes = FALSE, tolerance = tol)
+  with.intercept <- get_grplasso_scoop(x,y,group,intercept=TRUE,normalize=FALSE)
+  expect_equal(with.intercept$quadr,
+              with.intercept$scoop, check.attributes = FALSE, tolerance = tol)
 
 })
