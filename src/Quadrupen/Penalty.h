@@ -37,10 +37,11 @@ public:
   
   MixedPenalty() {} ;
   
-  vec    elt_norm  (vec x, uvec pk) ;
+  vec    elt_norm  (vec x, uvec pk)         ;
+  vec    elt_dual_norm  (vec x, uvec pk)    ;
   double pen_norm  (vec x, uvec pk, vec wk) ;
   double dual_norm (vec x, uvec pk, vec wk) ;
-  vec proximal(vec x, vec lambda, uvec pk) ;
+  vec proximal(vec x, vec lambda, uvec pk)  ;
   
 };
 

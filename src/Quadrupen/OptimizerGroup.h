@@ -69,7 +69,7 @@ uword GroupOptimizer<matrix,norm>::solve(
   if (verbosity_) Rprintf("\n nb active groups = %i\n", set.size_grp()) ;
   
   vec lambda_w = lambda * weights ;
-  vec optimality = penalty_.elt_norm(grad, set.grp_sizes_) - lambda_w;
+  vec optimality = penalty_.elt_dual_norm(grad, set.grp_sizes_) - lambda_w;
   uword grp_in = optimality.index_max() ; // highest violation of KKT conditions 
   uword status = 0 ; iter_ = 0 ; bool success = true ; 
   gap_ = std::max(0.0, optimality(grp_in)) ;
@@ -109,7 +109,7 @@ uword GroupOptimizer<matrix,norm>::solve(
 
     // OPTIMALITY TESTING
     grad = - data.XTy_ + set.XTXA_ * beta ;
-    optimality = penalty_.elt_norm(grad, set.grp_sizes_) - lambda_w ;
+    optimality = penalty_.elt_dual_norm(grad, set.grp_sizes_) - lambda_w ;
     grp_in = optimality.index_max() ;
     gap_ = std::max(0.0, optimality(grp_in)) ;
     

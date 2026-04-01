@@ -116,8 +116,13 @@ double MixedPenalty<MixedNorm::L1L2>::pen_norm(vec x, uvec pk, vec wk) {
 }
 
 template<>
+vec MixedPenalty<MixedNorm::L1L2>::elt_dual_norm  (vec x, uvec pk) {
+  return(elt_norm(x, pk)) ;
+}
+
+template<>
 double MixedPenalty<MixedNorm::L1L2>::dual_norm(vec x, uvec pk, vec wk) {
-  return(max(elt_norm(x, pk) / wk)) ;
+  return(max(elt_dual_norm(x, pk) / wk)) ;
 }
 
 template<>
@@ -158,8 +163,8 @@ double MixedPenalty<MixedNorm::L1LINF>::pen_norm(vec x, uvec pk, vec wk) {
 }
 
 template<>
-double MixedPenalty<MixedNorm::L1LINF>::dual_norm(vec x, uvec pk, vec wk) {
-  
+vec MixedPenalty<MixedNorm::L1LINF>::elt_dual_norm  (vec x, uvec pk) {
+
   vec  res = zeros<vec> (pk.n_elem) ; // output with group norms
   uword ind = 0 ; // index to go through the groups
   
@@ -168,7 +173,13 @@ double MixedPenalty<MixedNorm::L1LINF>::dual_norm(vec x, uvec pk, vec wk) {
     ind += pk(k);
   }
   
-  return(max(res / wk)) ;
+  return(res) ;
+  
+}
+
+template<>
+double MixedPenalty<MixedNorm::L1LINF>::dual_norm(vec x, uvec pk, vec wk) {
+  return(max(elt_dual_norm(x, pk) / wk)) ;
 }
 
 template<>
@@ -212,7 +223,9 @@ vec MixedPenalty<MixedNorm::COOP>::elt_norm(vec x, uvec pk) {
   uword ind = 0 ; // index to go through the groups
   
   for (uword k=0; k<pk.n_elem; k++) {
-    res(k) = norm(max(zeros(pk(k)),x.subvec(ind, ind + pk(k) - 1)), 2) + norm(min(zeros(pk(k)),x.subvec(ind, ind + pk(k) - 1)),2);
+    res(k) = 
+      norm(max(zeros(pk(k)),   x.subvec(ind, ind + pk(k) - 1)), 2) + 
+      norm(max(zeros(pk(k)), - x.subvec(ind, ind + pk(k) - 1)), 2);
     ind += pk(k);
   }
   
@@ -225,20 +238,43 @@ double MixedPenalty<MixedNorm::COOP>::pen_norm(vec x, uvec pk, vec wk) {
 }
 
 template<>
+vec MixedPenalty<MixedNorm::COOP>::elt_dual_norm(vec x, uvec pk) {
+
+  vec  res = zeros<vec> (pk.n_elem) ;
+  uword ind = 0 ; // index to go through the groups
+
+  for (uword k=0; k<pk.n_elem; k++) {
+    double norm_pos = norm(max(zeros(pk(k)),   x.subvec(ind, ind + pk(k) - 1)), 2) ;
+    double norm_neg = norm(max(zeros(pk(k)), - x.subvec(ind, ind + pk(k) - 1)), 2) ;
+    res(k) = (norm_pos > norm_neg) ? norm_pos : norm_neg ;
+    ind += pk(k);
+  }
+
+  return(res);
+}
+  
+template<>
 double MixedPenalty<MixedNorm::COOP>::dual_norm(vec x, uvec pk, vec wk) {
-  return(max(elt_norm(x, pk) / wk));
+  return(max(elt_dual_norm(x, pk) / wk));
 }
 
 template<>
 vec MixedPenalty<MixedNorm::COOP>::proximal(vec x, vec lambda, uvec pk) {
   
-  vec res = zeros<vec>(x.n_elem);
-  uword ind = 0 ;
-  
-  vec tmp = max(zeros(pk.n_elem), 1-lambda/elt_norm(x,pk)) ;
+  vec res = x ;
+  uword ind = 0;
   
   for (uword k=0; k<pk.n_elem; k++) {
-    res.subvec(ind, ind + pk(k) - 1) = tmp(k) * x.subvec(ind, ind + pk(k) - 1);
+    double shrink_pos = fmax(0, 1 - lambda(k)/norm(max(zeros(pk(k)),   res.subvec(ind, ind + pk(k) - 1)), 2)) ;
+    double shrink_neg = fmax(0, 1 - lambda(k)/norm(max(zeros(pk(k)), - res.subvec(ind, ind + pk(k) - 1)), 2));
+    
+    for (uword j=ind; j<(ind+pk(k)); j++) {
+      if(res[j] > 0) {
+        res[j] *= shrink_pos ;
+      } else {
+        res[j] *= shrink_neg ;	
+      }
+    }
     ind += pk(k);
   }
   
