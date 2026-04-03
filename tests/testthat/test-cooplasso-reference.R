@@ -1,57 +1,46 @@
-context("Consistency of the Cooperative-Lasso solution path (package 'gglasso')")
+context("Consistency of the Cooperative-Lasso solution path")
 
-library(Matrix)
-library(scoop)
-# library(adelie)
+testData <- readRDS("dataTest-CoopLasso.rds")
 
-get_cooplasso_scoop <- function(x,y,group,intercept,normalize=TRUE) {
+tol <- 1e-3
+
+get_cooplasso <- function(x, y, group, lambda, intercept, normalize) {
   
-  out_scoop   <- scoop::coop.lasso(x, y, group, intercept = intercept, normalize = normalize, lambda.min = 1e-2, n.lambda = 50)
-  if (intercept) {
-    coef_scoop  <- t(as.matrix(out_scoop@coefficients[, -1]))
-    inter_scoop <- out_scoop@coefficients[, 1]
-  } else {
-    coef_scoop  <- t(as.matrix(out_scoop@coefficients))
-    inter_scoop <- rep(0,50)
-  }
-  group_scoop <- rowsum(coef_scoop^2, group)
-  
-  out_quadr   <- quadrupen::group.lasso(x, y, group, type = "coop", lambda1 = out_scoop@lambda, intercept = intercept, normalize = normalize, lambda2 = 0)
+  out_quadr   <- quadrupen::group.lasso(x, y, group, type = "coop", lambda1 = lambda, 
+                                        intercept = intercept, normalize = normalize, lambda2 = 0,
+                                        control = list(maxfeat = ncol(x)))
   coef_quadr  <-  as.matrix(out_quadr$coefficients)
   group_quadr <- rowsum(coef_quadr^2, group)
   inter_quadr <- out_quadr$intercept
   
-  return(
-    list(quadr = list(coef = coef_quadr, group = group_quadr, intercept = inter_quadr), 
-         scoop = list(coef = coef_scoop, group = group_scoop, intercept = inter_scoop))
-  )
+  res <- list(coef = coef_quadr, group = group_quadr, intercept = inter_quadr, lambda = lambda)
+  res
 }
 
-test_that("Coop-Lasso is correct w.r.t a reference solution", {
+test_that("Coop-Lasso with lambda2 = 0, intercept and normalization, FISTA - test on the documentation example", {
+  quad <- get_cooplasso(testData$x, testData$y, testData$group, testData$cooplasso_inter_norm$lambda, TRUE, TRUE)
   
-  bardet <- readRDS("bardet.rds")
-  group <- rep(1:20, each = 5)
-  
-  tol <- 1e-2
-  
-  x <- as.matrix(bardet$x)
-  y <- bardet$y
-  
-  ## Run the tests...
-  with.intercept <- get_cooplasso_scoop(x,y,group,intercept=TRUE)
-  expect_equal(with.intercept$quadr,
-               with.intercept$scoop, check.attributes = FALSE, tolerance = tol)
-  
-  without.intercept <- get_cooplasso_scoop(x,y,group,intercept=FALSE)
-  expect_equal(without.intercept$quadr,
-              without.intercept$scoop, check.attributes = FALSE, tolerance = tol)
+  expect_equal(quad, testData$cooplasso_inter_norm, check.attributes = FALSE, tolerance = tol)
+  }
+)
 
-  with.intercept <- get_cooplasso_scoop(x,y,group,intercept=TRUE,normalize=FALSE)
-  expect_equal(with.intercept$quadr,
-              with.intercept$scoop, check.attributes = FALSE, tolerance = tol)
-
-  without.intercept <- get_cooplasso_scoop(x,y,group,intercept=FALSE,normalize=FALSE)
-  expect_equal(without.intercept$quadr,
-              without.intercept$scoop, check.attributes = FALSE, tolerance = tol)
+test_that("Coop-Lasso with lambda2 = 0, intercept and no normalization - FISTA - test on the documentation example", {
+  quad <- get_cooplasso(testData$x, testData$y, testData$group, testData$cooplasso_inter_nonorm$lambda, TRUE, FALSE)
   
-})
+  expect_equal(quad, testData$cooplasso_inter_nonorm, check.attributes = FALSE, tolerance = tol)
+  }
+)
+
+test_that("Coop-Lasso with lambda2 = 0, no intercept and normalization - FISTA - test on the documentation example", {
+  quad <- get_cooplasso(testData$x, testData$y, testData$group, testData$cooplasso_nointer_norm$lambda, FALSE, TRUE)
+  
+  expect_equal(quad, testData$cooplasso_nointer_norm, check.attributes = FALSE, tolerance = tol)
+}
+)
+
+test_that("Coop-Lasso with lambda2 = 0, no intercept and no normalization - FISTA - test on the documentation example", {
+  quad <- get_cooplasso(testData$x, testData$y, testData$group, testData$cooplasso_nointer_nonorm$lambda, FALSE, FALSE)
+  
+  expect_equal(quad, testData$cooplasso_nointer_nonorm, check.attributes = FALSE, tolerance = tol)
+}
+)

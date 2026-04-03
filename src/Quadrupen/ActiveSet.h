@@ -162,7 +162,7 @@ void ActiveSet<matrix>::inverse_Gram() {
   if (use_chol_) {
     XATXAinv_ = Rinv_ * Rinv_.t();
   } else {
-    XATXAinv_ = inv_sympd(XATXA_);
+    XATXAinv_ = inv_sympd(XATXA_, inv_opts::allow_approx);
   }
 }
 
