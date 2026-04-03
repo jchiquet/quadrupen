@@ -19,6 +19,7 @@ public:
   GroupOptimizer() {} ;
   GroupOptimizer(MixedPenalty<norm>&, const List&) ;
   
+  MixedPenalty<norm> penalty_ ;
   using Optimizer<matrix>::algorithm_  ;
   using Optimizer<matrix>::accuracy_   ;
   using Optimizer<matrix>::maxiter_    ;
@@ -32,7 +33,6 @@ public:
   using Optimizer<matrix>::D_          ;
   using Optimizer<matrix>::J_vec_      ;
   using Optimizer<matrix>::D_vec_      ;
-  MixedPenalty<norm> penalty_ ;
 
   using Optimizer<matrix>::optimality_gap ;
   using Optimizer<matrix>::fista ;

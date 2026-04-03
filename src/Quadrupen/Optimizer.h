@@ -27,9 +27,9 @@ public:
   Optimizer(const List& control) ;
   
   SolverType algorithm_ ;
-  bool verbosity_       ;
-  uword iter_, maxiter_, maxfeat_, monitoring_ ;
   double accuracy_, gap_, J_, D_ ; 
+  uword iter_, maxiter_, maxfeat_, monitoring_ ;
+  bool verbosity_       ;
   vector<uword> inner_iter_   ; 
   vector<double> J_vec_, D_vec_ ;   
   
