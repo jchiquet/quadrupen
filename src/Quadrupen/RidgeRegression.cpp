@@ -26,8 +26,7 @@ List RidgeRegression::solution_path(const mat& C_inv) {
   
   mat C_invV = C_inv * V ;
   mat Uty = trans(U) * (data_.y_ - data_.y_bar_) ;
-  uword n = U.n_rows ;
-  
+
   vector<double> timing ; // successive timing for solving for each lambda value
   wall_clock timer ; timer.tic(); // clock
   for(auto lambda : lambdas_) {

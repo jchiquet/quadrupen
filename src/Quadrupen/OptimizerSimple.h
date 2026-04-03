@@ -60,7 +60,9 @@ public:
 template <typename matrix, SimpleNorm norm>
 SimpleOptimizer<matrix, norm>::SimpleOptimizer(
     SimplePenalty<norm>& penalty, const List& control) : 
-  penalty_ (penalty), Optimizer<matrix>(control) {}
+  Optimizer<matrix>(control) {
+    penalty_ = penalty ;
+  }
 
 template <typename matrix, SimpleNorm norm>
 uword SimpleOptimizer<matrix,norm>::solve(

@@ -53,7 +53,9 @@ public:
 template <typename matrix, MixedNorm norm>
 GroupOptimizer<matrix, norm>::GroupOptimizer(
     MixedPenalty<norm>& penalty, const List& control) : 
-  penalty_ (penalty), Optimizer<matrix>(control) {}
+  Optimizer<matrix>(control) {
+    penalty_  = penalty ;
+  }
 
 template <typename matrix, MixedNorm norm>
 uword GroupOptimizer<matrix,norm>::solve(
