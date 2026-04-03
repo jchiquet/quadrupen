@@ -27,6 +27,7 @@ Imports:
     parallel,
     R6,
     Rcpp,
+    rlang,
     scales,
     tidyr
 Suggests:

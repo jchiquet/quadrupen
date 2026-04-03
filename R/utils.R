@@ -84,12 +84,14 @@ status_to_message <- function(status) {
   message
 }
 
+
+#' @importFrom rlang .data
 .plot_regpath <- function(xv, coef, standardize, log_scale, labs) {
 
   nzeros <- attr(coef, "nzeros")  
   
   dplot <- data.frame(xvar = xv, coef = coef) |> 
-    tidyr::pivot_longer(cols = -xvar, names_to = "var", values_to = "coef")
+    tidyr::pivot_longer(cols = -.data$xvar, names_to = "var", values_to = "coef")
   
   if (is.null(labs)) {
     dplot$labs <- factor(rep(nzeros, length(xv)))
@@ -103,7 +105,7 @@ status_to_message <- function(status) {
     }
   }
   
-  d <- ggplot(dplot) + aes(x = xvar, y = coef, color = labs, group = var) + 
+  d <- ggplot(dplot) + aes(x = .data$xvar, y = coef, color = labs, group = .data$var) + 
     geom_line() +  geom_hline(yintercept = 0, alpha = 0.5, linetype = "dotted") +
     ylab(ifelse(standardize, "standardized coefficients","coefficients"))
 
