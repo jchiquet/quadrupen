@@ -10,48 +10,44 @@ using namespace arma;
 
 BoundedRegression::BoundedRegression(
   RegressionData<mat>& data, const List& regParam, const List& control) :
-  GenericRegularizer<mat,Norm::LINF>::GenericRegularizer(data, regParam) {
+  Regularizer<mat>::Regularizer(data, regParam) {
     
     // set the penalty to l infinity
-    penalty_ = Penalty<Norm::LINF>() ;
-    lambda_factor_ = as<vec>(regParam["lambda_factor"]) ;
-    get_lambda_seq(regParam) ;
+    penalty_ = SimplePenalty<SimpleNorm::LINF>() ;
+    get_lambda_seq(get_lambda_max(), regParam) ;
 
     // Set up the optimizer 
-    solver_ = OptimizerLINF<mat>(penalty_) ;
+    solver_ = OptimizerLINF<mat>(penalty_, control) ;
     
     // Scale the structuring matrix according to main penalty factor and the amount of l2 penalty 
-    gamma_   = as<double>(regParam["gamma"]) ;
     data_.scale_struct(sqrt(gamma_)*pow(lambda_factor_,-1/2)) ;
     
     // Initialize the active set with starting coefficient
     set_= ActiveSet(data, as<bool>(control["usechol"])) ;
     
-    // Compute the Gram matrix (+ S scaled)  
-    XTX = data_.X_.t() * data_.X_ - data_.n_ * data_.X_bar_ * data_.X_bar_.t() + data_.S_;
-    
+    // Compute the Gram matrix (+ S scaled)
+    data_.precompute_XTX() ;
+
     beta_ = zeros<vec>(data_.p_) ; // vector of current parameters
     grad_ = -data_.XTy_          ; // vector of current gradient (smooth part)
   }
 
 double BoundedRegression::get_df() {
 
-  double bound = max(abs(beta_)) ;
-  uvec A = find(abs(beta_) >= bound) ;
+  uvec U = find(abs(beta_) < max(abs(beta_))) ;
+  double df = data_.centered_ + U.size();
   
-  mat SAA(A.size(),A.size()) ;
-  double df = A.size() ;
-  
+  mat SUU(U.size(), U.size()) ;
   if (gamma_ > 0) {
-    mat C = inv_sympd(XTX(A,A));
+    mat C = inv_sympd(data_.XTX_(U,U));
     // loop due to sparse encoding. should iterate over the n_zeros only...
-    for (uword i=0;i<A.size();i++){
-      for (uword j=i;j<A.size();j++){
-        SAA(i,j) = data_.S_.at(A(i),A(j));
-        SAA(j,i) = SAA(i,j);
+    for (uword i=0;i<U.size();i++){
+      for (uword j=i;j<U.size();j++){
+        SUU(i,j) = data_.S_.at(U(i),U(j));
+        SUU(j,i) = SUU(i,j);
       }
     }
-    df -= trace(SAA * C);
+    df -= trace(SUU * C);
   }
   
   return(df);
@@ -75,6 +71,10 @@ List BoundedRegression::solution_path(const List& control) {
   // Variables monitoring the algorithm
   vector<double> gap, timing ; // timings and optimality measures
   vector<uword> status, iactive, ioptim ; // convergence and # of inner/outer iterates
+
+  auto prox = [this](vec x, double L) {
+    return(penalty_.proximal(x, L));
+  } ;
   
   // LAMBDA LOOP
   wall_clock timer ; timer.tic(); // clock
@@ -89,7 +89,7 @@ List BoundedRegression::solution_path(const List& control) {
       current_it++;
       if (algorithm == FISTA) {
         ioptim.push_back(
-          solver_.fista(beta_, lambda_, data_, set_, 1e-3, 10000)
+          solver_.fista(beta_, grad_, lambda_, data_, set_, prox, 1e-3, 10000)
         );
         break;
       } else { // QUADRA solver
@@ -98,7 +98,7 @@ List BoundedRegression::solution_path(const List& control) {
             throw std::runtime_error("Fail to converge...");
           } else {
             ioptim.push_back(
-              solver_.quadratic_breg(beta_, lambda_, data_, set_, XTX, accuracy, 10000)
+              solver_.quadratic(beta_, grad_, lambda_, data_, set_, accuracy, 10000)
             );
           }
         } catch (std::runtime_error& error) {
@@ -113,7 +113,7 @@ List BoundedRegression::solution_path(const List& control) {
       }
 
       // OPTIMALITY TESTING
-      grad_ = - data_.XTy_ + XTX * beta_ ;
+      grad_ = - data_.XTy_ + data_.XTX_ * beta_ ;
       current_gap = penalty_.dual_norm(grad_) - lambda_ ;
     } while ((current_gap > accuracy) && (current_it <= maxiter));
 
@@ -132,8 +132,6 @@ List BoundedRegression::solution_path(const List& control) {
       coef_ = join_rows(coef_, beta_/(data_.norm_X_ % lambda_factor_)) ;
       intercept_.push_back(data_.y_bar_ - as_scalar(dot(beta_, data_.X_bar_)));
       df_.push_back(get_df()) ;
-      jA_ = join_rows(jA_, df_.size()*ones<urowvec>(set_.size()) );
-      iA_ = join_rows(iA_, set_.A_.t()) ;
     }
 
     timing.push_back(timer.toc()) ;

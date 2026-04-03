@@ -109,7 +109,7 @@ StabilityPath <- R6::R6Class(
     #' beta <- rep(c(0,1,0,-1,0), c(25,10,25,10,25))
     #' Soo  <- matrix(0.75,25,25) ## bloc correlation between zero variables
     #' Sww  <- matrix(0.75,10,10) ## bloc correlation between active variables
-    #' Sigma <- bdiag(Soo,Sww,Soo,Sww,Soo) + 0.2
+    #' Sigma <- Matrix::bdiag(Soo,Sww,Soo,Sww,Soo) + 0.2
     #' diag(Sigma) <- 1
     #' n <- 100
     #' x <- as.matrix(matrix(rnorm(95*n),n,95) %*% chol(Sigma))
@@ -120,12 +120,15 @@ StabilityPath <- R6::R6Class(
     #' labels[beta != 0] <- c("relevant")
     #' labels <- factor(labels, ordered=TRUE, levels=c("relevant","irrelevant"))
     #'
-    #' ## Call to stability selection function, 200 subsampling
-    #' stab <- stability(x,y, subsamples=200, lambda2=1, minratio=1e-2)
-    #' 
+    #' enet <- elastic.net(x, y, lambda2 = 10, struct = solve(Sigma), minratio = 1e-2)
+    #' stab <- stability(enet, n_subsamples = 200)
+    #'
     #' ## Build the plot an recover the selected variable
     #' plot(stab, labels=labels)
-    #' plot(stab, xvar="fraction", labels=labels, sel_mode="PFER", cutoff=0.75, PFER=2)
+    #' 
+    #' cat("\nFalse positives for the randomized Elastic-net with stability selection: ",
+    #'      sum(labels[stab$selection()] != "relevant"))
+    #' cat("\nDONE.\n")
     #' }
     #' @importFrom graphics plot
     #' @import ggplot2 scales grid
@@ -135,7 +138,7 @@ StabilityPath <- R6::R6Class(
       sel_mode = c("rank", "PFER"), cutoff=0.75, PFER=2, nvarsel=floor(self$nobs/log(self$nvar))) {
 
       sel_mode <- match.arg(sel_mode)
-      selection <- rep("unselected",self$nvar)
+      selection <- rep("unselected",length(self$nonzero))
       selected <- self$selection(sel_mode, cutoff, PFER, nvarsel)
       selection[selected] <- "selected"
       
@@ -147,7 +150,7 @@ StabilityPath <- R6::R6Class(
       ## the x-axis variable
       xv <- switch(xvar,"fraction" = self$regParam[[1]]/max(self$regParam[[1]]), self$regParam[[1]])
       if (xvar == "lambda") xv <- log10(xv)
-      
+
       ## Build the data frame for ggploting
       dplot <- data.frame(xvar=xv, prob=prob) |> 
         tidyr::pivot_longer(cols = -xvar, names_to = "var", values_to = "prob") |>
@@ -155,7 +158,7 @@ StabilityPath <- R6::R6Class(
       
       # dplot$selection <- factor(rep(selection, length(xv)))
       if (is.null(labels)) {
-        dplot$labels <- factor(rep(1:self$nvar, length(xv)))
+        dplot$labels <- factor(rep(1:length(self$nonzero), length(xv)))
       } else {
         if (sum(is.na(labels[self$nonzero])) > 0 ) {
           labels <- NULL

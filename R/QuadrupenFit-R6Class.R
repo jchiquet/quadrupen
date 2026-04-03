@@ -125,7 +125,10 @@ QuadrupenFit <- R6::R6Class(
     #' @field degrees_freedom Estimated degree of freedoms for the successive `lambda1`.
     degrees_freedom = function(value) {private$df_},
     #' @field r_squared vector giving the coefficient of determination as a function of lambda1.
-    r_squared       = function(value) {1 - colSums(self$residuals^2) / private$data_$rss},
+    r_squared       = function(value) {
+      rss <- sum((private$data_$y - ifelse(private$has_intercept_, mean(private$data_$y), 0))^2)
+      1 - colSums(self$residuals^2) / rss
+    },
     #' @field information_criteria object with class [`InformationCriteria`] storing various information criteria 
     #' (AIC, BIC, GCV, etc) for the current fit.
     information_criteria = function(value) {private$infocrit},

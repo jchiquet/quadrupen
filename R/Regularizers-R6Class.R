@@ -103,6 +103,62 @@ FusedLassoFit <- R6::R6Class(
   )
 )
 
+#' Class "GroupLassoFit"
+#' 
+#' Class of object returned by the fitting function [group.lasso()]. Inherits fields
+#' and methods of [QuadrupenFit]
+#' 
+#' @seealso [QuadrupenFit], [group.lasso()]
+#' 
+#' @export
+#' 
+GroupLassoFit <- R6::R6Class(
+  classname = "GroupLassoFit",
+  inherit = QuadrupenFit,
+  private  = list(group_ = NA, type_ = NA),
+  active  = list(
+    #' @field penalty character describing the regularizer/penalty
+    penalty = function(value) paste0("group.lasso l1/", private$type_),
+    #' @field group vector of integers indicating group belonging
+    group = function(value) private$group_,
+    #' @field type string indicating whether the \eqn{\ell_1/\ell_2}{l1/l2} or the
+    #' \eqn{\ell_1/\ell_\infty}{l1/linf} group-Lasso must be fitted.
+    type = function(value) private$type_
+  ),
+  public  = list(
+    #' @description Initialize a [`ElasticNetFit`] model
+    #' @param data a [`DataModel`] object
+    #' @param intercept a logical; should an intercept be included in the mode?
+    #' @param group vector of integers indicating group belonging.
+    #' @param type string indicating whether the \eqn{\ell_1/\ell_2}{l1/l2} or the
+    #' \eqn{\ell_1/\ell_\infty}{l1/linf} group-Lasso must be fitted.
+    #' @param regParam a list with two elements, a vector and a scalar, for the regularization
+    initialize =  function(data, intercept, group, type, regParam) {
+      super$initialize(data, intercept, regParam)
+      stopifnot("The groups must be provided as a sorted vector of integers" = !is.unsorted(group))
+      stopifnot("The group indices must start from 1" = min(group) == 1)
+      private$group_ <- group
+      private$type_  <- type
+      private$optimizer <- function(dataModel, intercept, regParam, control) {
+        if (data$sparse_encoding) {
+          out <- switch(private$type_,
+                 "linf" = group_enet_l1linf_sparse_cpp(dataModel, intercept, private$group_, regParam, control),
+                 "coop" = group_enet_coop_sparse_cpp(dataModel, intercept, private$group_, regParam, control),
+                 group_enet_l1l2_sparse_cpp(dataModel, intercept, private$group_, regParam, control)
+          )
+        } else {
+          out <- switch(private$type_,
+                 "linf" = group_enet_l1linf_dense_cpp(dataModel, intercept, private$group_, regParam, control),
+                 "coop" = group_enet_coop_dense_cpp(dataModel, intercept, private$group_, regParam, control),
+                        group_enet_l1l2_dense_cpp(dataModel, intercept, private$group_, regParam, control)
+          )
+        }
+        out
+      }
+    }
+  )
+)
+
 #' Class "LavaFit"
 #' 
 #' Class of object returned by the fitting function [lava()]. Inherits fields

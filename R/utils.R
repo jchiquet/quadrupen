@@ -63,6 +63,16 @@ optim_fused_default <- function(d)
        fusioncheck   = "all" ## c("all","active","none", "naive", "huber")
   )
 
+optim_grp_default <- function(d)
+  list(verbose     = 0, # default control options
+       timer       = FALSE,
+       maxiter     = max(50, 2*d),
+       method      = "quadra",
+       threshold   = 1e-4,
+       monitor     = 0,
+       usechol     = TRUE
+  )
+
 status_to_message <- function(status) {
   message <- switch(as.character(status),
                     "0"  = "converged",
@@ -74,12 +84,14 @@ status_to_message <- function(status) {
   message
 }
 
+
+#' @importFrom rlang .data
 .plot_regpath <- function(xv, coef, standardize, log_scale, labs) {
 
   nzeros <- attr(coef, "nzeros")  
   
   dplot <- data.frame(xvar = xv, coef = coef) |> 
-    tidyr::pivot_longer(cols = -xvar, names_to = "var", values_to = "coef")
+    tidyr::pivot_longer(cols = -.data$xvar, names_to = "var", values_to = "coef")
   
   if (is.null(labs)) {
     dplot$labs <- factor(rep(nzeros, length(xv)))
@@ -93,7 +105,7 @@ status_to_message <- function(status) {
     }
   }
   
-  d <- ggplot(dplot) + aes(x = xvar, y = coef, color = labs, group = var) + 
+  d <- ggplot(dplot) + aes(x = .data$xvar, y = coef, color = labs, group = .data$var) + 
     geom_line() +  geom_hline(yintercept = 0, alpha = 0.5, linetype = "dotted") +
     ylab(ifelse(standardize, "standardized coefficients","coefficients"))
 

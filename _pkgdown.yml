@@ -10,6 +10,7 @@ reference:
   - bounded.reg
   - elastic.net
   - fusedlasso
+  - group.lasso
   - lava
   - lasso
   - ridge
@@ -19,6 +20,7 @@ reference:
   - QuadrupenFit
   - ElasticNetFit
   - FusedLassoFit
+  - GroupLassoFit
   - LavaFit
   - BoundedRegressionFit
   - RidgeRegressionFit

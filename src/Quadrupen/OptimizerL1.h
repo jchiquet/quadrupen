@@ -6,41 +6,43 @@
 #ifndef _quadrupen_OPTIMIZER_L1_H
 #define _quadrupen_OPTIMIZER_L1_H
 
-#include "GenericOptimizer.h"
+#include "OptimizerSimple.h"
 
 using namespace Rcpp;
 using namespace arma;
 using namespace std;
 
 template <typename matrix>
-class OptimizerL1 :
-  public GenericOptimizer<matrix,Norm::L1> {
-
-  using GenericOptimizer<matrix,Norm::L1>::penalty_ ;
+class OptimizerL1 : public SimpleOptimizer<matrix,SimpleNorm::L1> {
   
-  public:
+public:
   
+  using SimpleOptimizer<matrix,SimpleNorm::L1>::penalty_ ;
+  using Optimizer<matrix>::verbosity_ ;
+    
   OptimizerL1() {} ;
-  OptimizerL1(Penalty<Norm::L1>&) ;
-
-  uword quadratic_enet(
-      vec &beta0,
+  OptimizerL1(SimplePenalty<SimpleNorm::L1>&, const List& control) ;
+  
+  uword quadratic(
+      vec &beta,
+      vec &grad,
       const double &lambda ,
       RegressionData<matrix> &data,
       ActiveSet<matrix> &set,
       const double& accuracy,
-      const uword& max_iter) ;
-
+      const uword& max_iter) override ;
+  
 };
 
 template <typename matrix>
-inline OptimizerL1<matrix>::OptimizerL1(
-    Penalty<Norm::L1>& penalty) : GenericOptimizer<matrix, Norm::L1>(penalty) 
+OptimizerL1<matrix>::OptimizerL1(SimplePenalty<SimpleNorm::L1>& penalty, const List& control) : 
+  SimpleOptimizer<matrix, SimpleNorm::L1>(penalty, control) 
   {}
 
 template <typename matrix>
-uword OptimizerL1<matrix>::quadratic_enet(
-    vec &beta0,
+uword OptimizerL1<matrix>::quadratic(
+    vec &beta,
+    vec &grad,
     const double &lambda ,
     RegressionData<matrix> &data,
     ActiveSet<matrix> &set,
@@ -50,8 +52,8 @@ uword OptimizerL1<matrix>::quadratic_enet(
   uword iter = 1, iter_in= 0 ; // count the number of systems solved
   
   // Solving the quadratic problem
-  vec betak = beta0;
-  vec theta = sign(beta0) ; // vector of sign of the solution
+  vec betak = beta;
+  vec theta = sign(beta) ; // vector of sign of the solution
   if (set.use_chol_) {
     betak =  set.Rinv_* set.Rinv_.t() * (data.XTy_(set.A_) - lambda * theta);
   } else {
@@ -64,20 +66,20 @@ uword OptimizerL1<matrix>::quadratic_enet(
   // Check for swapping variables
   uvec swap = find(abs(sign(betak) - theta) > ZERO);
   if (swap.is_empty()) {
-    beta0 = betak;
+    beta = betak;
   } else {
     iter++;
-    vec beta0_swap = beta0(swap); vec betak_swap = betak(swap);
+    vec beta_swap = beta(swap); vec betak_swap = betak(swap);
     
     // first, go to zero for the swapped variable which cost the minimum
-    vec eta = -beta0_swap / (betak_swap-beta0_swap);
+    vec eta = -beta_swap / (betak_swap-beta_swap);
     uword i_min = eta.index_min();
-    betak = beta0 + (betak-beta0) * eta(i_min) ;
+    betak = beta + (betak-beta) * eta(i_min) ;
     
     // second, solve the problem after swapping the signs of the incriminated variable
     uword i_swap = swap[i_min];
-    beta0 = betak;
-    beta0(i_swap) = -betak_swap[i_min];
+    beta = betak;
+    beta(i_swap) = -betak_swap[i_min];
     double grad_swap = - data.XTy_(set.A_(i_swap)) + 
       dot(set.XATXA_.row(i_swap), betak) ;
     theta(i_swap) = - sign(grad_swap) ;
@@ -90,24 +92,24 @@ uword OptimizerL1<matrix>::quadratic_enet(
                                  data.XTy_(set.A_) - lambda*theta,
                                  accuracy, max_iter) ;
     }
-
+    
     // if the sign is coherent, keep that one...
     grad_swap = - data.XTy_(set.A_(i_swap)) + 
       dot(set.XATXA_.row(i_swap), betal) ;
     if (abs(grad_swap + lambda * sign(betal(i_swap))) <= ZERO) {
-        beta0 = betal ;
+      beta = betal ;
     } else {
-      beta0 = betak ; // otherwise, backtrack to betak
-      // if (verbose) Rprint("\tremoving variables %i", set.A_(i_swap)) ;
+      beta = betak ; // otherwise, backtrack to betak
+      if (verbosity_) Rprintf("\tremoving variables %i", set.A_(i_swap)) ;
       set.del_var(i_swap) ; // and desactivate de zeroed variable
-      beta0.shed_row(i_swap) ;
+      beta.shed_row(i_swap) ;
     }
   }
-
+  
   if (set.use_chol_) {
     return(iter) ;
   } else return(iter_in) ;
-
+  
 }
 
 #endif

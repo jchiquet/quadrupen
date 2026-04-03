@@ -3,67 +3,67 @@
  *         MIA Paris-Saclay
  */
 
-#ifndef _quadrupen_OPTIMIZER_L1_H
-#define _quadrupen_OPTIMIZER_L1_H
+#ifndef _quadrupen_OPTIMIZER_LINF_H
+#define _quadrupen_OPTIMIZER_LINF_H
 
-#include "GenericOptimizer.h"
+#include "OptimizerSimple.h"
 
 using namespace Rcpp;
 using namespace arma;
 using namespace std;
 
 template <typename matrix>
-class OptimizerLINF :
-  public GenericOptimizer<matrix,Norm::LINF> {
-  
-  using GenericOptimizer<matrix,Norm::LINF>::penalty_ ;
-  
+class OptimizerLINF : public SimpleOptimizer<matrix,SimpleNorm::LINF> {
+
 public:
+
+  using SimpleOptimizer<matrix,SimpleNorm::LINF>::penalty_ ;
   
   OptimizerLINF() {} ;
-  OptimizerLINF(Penalty<Norm::LINF>&) ;
-  
-  uword quadratic_breg(
+  OptimizerLINF(SimplePenalty<SimpleNorm::LINF>&, const List& control) ;
+
+  uword quadratic(
       vec& beta,
+      vec &grad,
       const double& lambda,
       RegressionData<matrix> &data,
       ActiveSet<matrix>& set,
-      mat& XTX,
       const double& accuracy,
-      const uword& max_iter) ;
+      const uword& max_iter) override ;
 
   mat updateCholeskyFromExisting(const mat& R, const vec& b) ;
   
 };
 
 template <typename matrix>
+OptimizerLINF<matrix>::OptimizerLINF(
+    SimplePenalty<SimpleNorm::LINF>& penalty, const List& control) : 
+  SimpleOptimizer<matrix, SimpleNorm::LINF>(penalty, control) 
+    {}
+
+template <typename matrix>
 mat OptimizerLINF<matrix>::updateCholeskyFromExisting(const mat& R, const vec& b) {
   uword p = R.n_cols + 1;
   mat R_ ;
   colvec rp  = zeros<colvec>(p,1);
-  rp.subvec(0,p-2) = solve (trimatl(strans(R)), b.subvec(0,p-2));
+  rp.subvec(0,p-2) = arma::solve (trimatl(strans(R)), b.subvec(0,p-2));
   rp(p-1) = sqrt(b(p-1) - dot(rp,rp));
   R_ = join_rows( join_cols(R_, zeros<mat>(1,p-1)) , rp);
   return(R_) ;
 }
 
 template <typename matrix>
-inline OptimizerLINF<matrix>::OptimizerLINF(
-    Penalty<Norm::LINF>& penalty) : GenericOptimizer<matrix, Norm::LINF>(penalty) 
-    {}
-
-template <typename matrix>
-uword OptimizerLINF<matrix>::quadratic_breg(
+uword OptimizerLINF<matrix>::quadratic(
     vec& beta,
+    vec &grad,
     const double& lambda,
     RegressionData<matrix> &data,
     ActiveSet<matrix>& set,
-    mat& XTX,
     const double& accuracy,
     const uword& max_iter) {
   
   uvec B = regspace<uvec>(0,beta.n_elem-1) ; B.shed_rows(set.A_) ;
-  vec grad = -data.XTy_ + XTX * beta ;
+  grad = -data.XTy_ + data.XTX_ * beta ;
   vec theta = -sign(grad(B)) ; // sign of the guys on the boundary
   
   uword iter = 0, iter_in= 0 ; // count the number of systems solved
@@ -73,7 +73,7 @@ uword OptimizerLINF<matrix>::quadratic_breg(
     iter++;
     
     // SOLVE THE QUADRATIC PROBLEM
-    vec XX_B = XTX.cols(B) * theta;
+    vec XX_B = data.XTX_.cols(B) * theta;
     if (set.A_.is_empty()) {
       double b  = (dot(theta, data.XTy_(B)) - lambda);
       beta(B) = theta * (b/sum(theta % XX_B(B),0)) ;
@@ -86,9 +86,10 @@ uword OptimizerLINF<matrix>::quadratic_breg(
       if (set.use_chol_) {
         // Solving via Cholesky factorization...
         mat R = updateCholeskyFromExisting(set.R_, tmp) ;
-        tmp = solve(trimatu(R), solve(trimatl(strans(R)), b)) ;
+        tmp = arma::solve(trimatu(R), arma::solve(trimatl(strans(R)), b)) ;
       } else {
-        double bound = penalty_.pen_norm(beta(B)) ;
+        vec pen_arg = beta(B);
+        double bound = penalty_.pen_norm(pen_arg) ;
         tmp = join_cols(beta(set.A_), ones(1) * bound);
         iter_in = this->conjugate_gradient(tmp, XX, b, accuracy, max_iter) ;
       }
@@ -97,7 +98,8 @@ uword OptimizerLINF<matrix>::quadratic_breg(
     }
     
     // Handling guys reaching the boundary (leaving the active set)
-    double bound = penalty_.pen_norm(beta(B)) ; // current boundary
+    vec pen_arg = beta(B);
+    double bound = penalty_.pen_norm(pen_arg) ; // current boundary
     uvec ind_toB = find(abs(beta(set.A_)) > bound) ;
     if (!ind_toB.is_empty()) {
       uvec toB = set.A_(ind_toB) ;
@@ -111,7 +113,7 @@ uword OptimizerLINF<matrix>::quadratic_breg(
   }
   
   // Guys leaving the boundary after optimization (activation)
-  grad = -data.XTy_ + XTX * beta ;
+  grad = -data.XTy_ + data.XTX_ * beta ;
   uvec ind_toA  = find(theta == sign(grad(B)));
   if (!ind_toA.is_empty()) {
     uvec toA = B(ind_toA) ;

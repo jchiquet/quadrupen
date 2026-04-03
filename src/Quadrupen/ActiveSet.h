@@ -9,7 +9,8 @@ using namespace arma;
 
 #include "RegressionData.h"
 
-template <typename matrix> class ActiveSet {
+template <typename matrix> 
+class ActiveSet {
 
 public:
   
@@ -17,7 +18,7 @@ public:
   uvec A_           ; // set of currently activated variables
   uvec is_in_       ; // indicator of active variables (0/1)
   mat XATXA_, XTXA_ ; // matrices of currently activated variables
-  mat XATXAinv_     ;
+  mat XATXAinv_     ; 
   bool use_chol_    ; // Maintain a Cholesky factorization along the active set algorithm
   mat R_, Rinv_     ; // Cholesky decomposition of XATXA
   
@@ -29,7 +30,7 @@ public:
   void add_var(uword, const RegressionData<matrix> &) ; // add a variable in the active set
   void add_vars(uvec, const RegressionData<matrix> &) ; // add a list of variables in the active set
   void del_var(uword) ; // remove the variable activated in position ind_var_out
-  void del_vars(uvec) ; // remove a set of non contiguous varables
+  void del_vars(uvec) ; // remove a set of non contiguous variables
   void reset()        ; // empty the active set 
   const uword size() const { return A_.n_elem ; }
   
@@ -39,7 +40,7 @@ public:
   // Downdate Cholesky factorisation by removing the specified variables
   void downdate_Cholesky(uword j) ; 
   
-  // Inverse the currently activte Gram matrix
+  // Inverse the currently active Gram matrix
   void inverse_Gram() ; 
   
 };
@@ -161,7 +162,7 @@ void ActiveSet<matrix>::inverse_Gram() {
   if (use_chol_) {
     XATXAinv_ = Rinv_ * Rinv_.t();
   } else {
-    XATXAinv_ = inv_sympd(XATXA_);
+    XATXAinv_ = inv_sympd(XATXA_, inv_opts::allow_approx);
   }
 }
 

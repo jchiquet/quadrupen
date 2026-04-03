@@ -7,22 +7,20 @@
 #define _Lava_H
 
 #include "ElasticNet.h"
-#include "OptimizerL1.h"
 
 using namespace Rcpp;
 using namespace arma;
 using namespace std;
 
 template <typename matrix>
-class Lava : 
-  public ElasticNet<matrix> {
+class Lava : public ElasticNet<matrix> {
 
 public:
 
-  using GenericRegularizer<matrix,Norm::L1>::coef_       ;
-  using GenericRegularizer<matrix,Norm::L1>::intercept_  ;
-  using GenericRegularizer<matrix,Norm::L1>::set_        ;
-  using GenericRegularizer<matrix,Norm::L1>::data_       ;
+  using Regularizer<matrix>::coef_       ;
+  using Regularizer<matrix>::intercept_  ;
+  using Regularizer<matrix>::data_       ;
+  using ElasticNet<matrix>::set_      ;
   using ElasticNet<matrix>::debiased_ ;
   using ElasticNet<matrix>::intercept_debiased_ ;
   using ElasticNet<matrix>::lambda_factor_ ;

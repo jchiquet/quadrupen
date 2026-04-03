@@ -13,33 +13,36 @@
 
 #define ZERO 2e-16 // practical zero
 
-enum class Norm {L1, LINF, RIDGE, L1L2, L1LINF, COOP, FUSED};
+enum class SimpleNorm {L1, LINF, RIDGE};
+enum class MixedNorm {L1L2, L1LINF, COOP};
 
 using namespace Rcpp;
 using namespace arma;
 using namespace std;
 
-template <Norm norm>
-class Penalty {
+template <SimpleNorm norm> class SimplePenalty {
 public: 
   
-  Penalty() ;
-  Penalty(SEXP PK) ;
+  SimplePenalty() {} ;
 
-  vec    elt_norm  (vec x) ;
   double pen_norm  (vec x) ;
+  vec    elt_norm  (vec x) ;
   double dual_norm (vec x) ;
   vec proximal(vec x, double lambda) ;
 
-  uvec pk ;
 };
 
-// Empty constructor
-template <Norm norm>
-Penalty<norm>::Penalty() {}
-
-// Constructor requiring group information
-template <Norm norm>
-Penalty<norm>::Penalty(SEXP PK) : pk (as<uvec>(PK)){}
+template <MixedNorm norm> class MixedPenalty {
+public: 
+  
+  MixedPenalty() {} ;
+  
+  vec    elt_norm  (vec x, uvec pk)         ;
+  vec    elt_dual_norm  (vec x, uvec pk)    ;
+  double pen_norm  (vec x, uvec pk, vec wk) ;
+  double dual_norm (vec x, uvec pk, vec wk) ;
+  vec proximal(vec x, vec lambda, uvec pk)  ;
+  
+};
 
 #endif
