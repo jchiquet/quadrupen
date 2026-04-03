@@ -9,7 +9,7 @@ Class StabilityPath"></head><body>
 
     <a class="navbar-brand me-2" href="../index.html">quadrupen</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3-9752</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3-9852</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -265,7 +265,7 @@ corresponding to method of choice (<code>"rank"</code> or
 beta &lt;- rep(c(0,1,0,-1,0), c(25,10,25,10,25))
 Soo  &lt;- matrix(0.75,25,25) ## bloc correlation between zero variables
 Sww  &lt;- matrix(0.75,10,10) ## bloc correlation between active variables
-Sigma &lt;- bdiag(Soo,Sww,Soo,Sww,Soo) + 0.2
+Sigma &lt;- Matrix::bdiag(Soo,Sww,Soo,Sww,Soo) + 0.2
 diag(Sigma) &lt;- 1
 n &lt;- 100
 x &lt;- as.matrix(matrix(rnorm(95*n),n,95) %*% chol(Sigma))
@@ -276,12 +276,15 @@ labels &lt;- rep("irrelevant", length(beta))
 labels[beta != 0] &lt;- c("relevant")
 labels &lt;- factor(labels, ordered=TRUE, levels=c("relevant","irrelevant"))
 
-## Call to stability selection function, 200 subsampling
-stab &lt;- stability(x,y, subsamples=200, lambda2=1, minratio=1e-2)
+enet &lt;- elastic.net(x, y, lambda2 = 10, struct = solve(Sigma), minratio = 1e-2)
+stab &lt;- stability(enet, n_subsamples = 200)
 
 ## Build the plot an recover the selected variable
 plot(stab, labels=labels)
-plot(stab, xvar="fraction", labels=labels, sel_mode="PFER", cutoff=0.75, PFER=2)
+
+cat("\nFalse positives for the randomized Elastic-net with stability selection: ",
+     sum(labels[stab$selection()] != "relevant"))
+cat("\nDONE.\n")
 }
 </code></pre></div><p></p></div>
 </div>
@@ -320,7 +323,7 @@ plot(stab, xvar="fraction", labels=labels, sel_mode="PFER", cutoff=0.75, PFER=2)
 <span class="r-in"><span><span class="va">beta</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>,<span class="fl">1</span>,<span class="fl">0</span>,<span class="op">-</span><span class="fl">1</span>,<span class="fl">0</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">25</span>,<span class="fl">10</span>,<span class="fl">25</span>,<span class="fl">10</span>,<span class="fl">25</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">Soo</span>  <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">matrix</a></span><span class="op">(</span><span class="fl">0.75</span>,<span class="fl">25</span>,<span class="fl">25</span><span class="op">)</span> <span class="co">## bloc correlation between zero variables</span></span></span>
 <span class="r-in"><span><span class="va">Sww</span>  <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">matrix</a></span><span class="op">(</span><span class="fl">0.75</span>,<span class="fl">10</span>,<span class="fl">10</span><span class="op">)</span> <span class="co">## bloc correlation between active variables</span></span></span>
-<span class="r-in"><span><span class="va">Sigma</span> <span class="op">&lt;-</span> <span class="fu">bdiag</span><span class="op">(</span><span class="va">Soo</span>,<span class="va">Sww</span>,<span class="va">Soo</span>,<span class="va">Sww</span>,<span class="va">Soo</span><span class="op">)</span> <span class="op">+</span> <span class="fl">0.2</span></span></span>
+<span class="r-in"><span><span class="va">Sigma</span> <span class="op">&lt;-</span> <span class="fu">Matrix</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/Matrix/man/bdiag.html" class="external-link">bdiag</a></span><span class="op">(</span><span class="va">Soo</span>,<span class="va">Sww</span>,<span class="va">Soo</span>,<span class="va">Sww</span>,<span class="va">Soo</span><span class="op">)</span> <span class="op">+</span> <span class="fl">0.2</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/diag.html" class="external-link">diag</a></span><span class="op">(</span><span class="va">Sigma</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="fl">1</span></span></span>
 <span class="r-in"><span><span class="va">n</span> <span class="op">&lt;-</span> <span class="fl">100</span></span></span>
 <span class="r-in"><span><span class="va">x</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">as.matrix</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">matrix</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="fl">95</span><span class="op">*</span><span class="va">n</span><span class="op">)</span>,<span class="va">n</span>,<span class="fl">95</span><span class="op">)</span> <span class="op"><a href="https://rdrr.io/r/base/matmult.html" class="external-link">%*%</a></span> <span class="fu"><a href="https://rdrr.io/r/base/chol.html" class="external-link">chol</a></span><span class="op">(</span><span class="va">Sigma</span><span class="op">)</span><span class="op">)</span></span></span>
@@ -331,12 +334,15 @@ plot(stab, xvar="fraction", labels=labels, sel_mode="PFER", cutoff=0.75, PFER=2)
 <span class="r-in"><span><span class="va">labels</span><span class="op">[</span><span class="va">beta</span> <span class="op">!=</span> <span class="fl">0</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"relevant"</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">labels</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html" class="external-link">factor</a></span><span class="op">(</span><span class="va">labels</span>, ordered<span class="op">=</span><span class="cn">TRUE</span>, levels<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"relevant"</span>,<span class="st">"irrelevant"</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co">## Call to stability selection function, 200 subsampling</span></span></span>
-<span class="r-in"><span><span class="va">stab</span> <span class="op">&lt;-</span> <span class="fu"><a href="stability.html">stability</a></span><span class="op">(</span><span class="va">x</span>,<span class="va">y</span>, subsamples<span class="op">=</span><span class="fl">200</span>, lambda2<span class="op">=</span><span class="fl">1</span>, minratio<span class="op">=</span><span class="fl">1e-2</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">enet</span> <span class="op">&lt;-</span> <span class="fu"><a href="elastic.net.html">elastic.net</a></span><span class="op">(</span><span class="va">x</span>, <span class="va">y</span>, lambda2 <span class="op">=</span> <span class="fl">10</span>, struct <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/solve.html" class="external-link">solve</a></span><span class="op">(</span><span class="va">Sigma</span><span class="op">)</span>, minratio <span class="op">=</span> <span class="fl">1e-2</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">stab</span> <span class="op">&lt;-</span> <span class="fu"><a href="stability.html">stability</a></span><span class="op">(</span><span class="va">enet</span>, n_subsamples <span class="op">=</span> <span class="fl">200</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co">## Build the plot an recover the selected variable</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">stab</span>, labels<span class="op">=</span><span class="va">labels</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">stab</span>, xvar<span class="op">=</span><span class="st">"fraction"</span>, labels<span class="op">=</span><span class="va">labels</span>, sel_mode<span class="op">=</span><span class="st">"PFER"</span>, cutoff<span class="op">=</span><span class="fl">0.75</span>, PFER<span class="op">=</span><span class="fl">2</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"\nFalse positives for the randomized Elastic-net with stability selection: "</span>,</span></span>
+<span class="r-in"><span>     <span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="va">labels</span><span class="op">[</span><span class="va">stab</span><span class="op">$</span><span class="fu">selection</span><span class="op">(</span><span class="op">)</span><span class="op">]</span> <span class="op">!=</span> <span class="st">"relevant"</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"\nDONE.\n"</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="op">}</span> <span class="co"># }</span></span></span>
 </code></pre></div>
     </div>

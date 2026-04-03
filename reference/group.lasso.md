@@ -1,26 +1,29 @@
-# Fit a linear model with elastic-net regularization
+# Fit a linear model with group-lasso (either l1/l2 or l1/l-inf) regularization
 
-Adjust a linear model with elastic-net regularization, mixing a
-(possibly weighted) \\\ell_1\\-norm (LASSO) and a (possibly structured)
+Adjust a linear model with group-lasso regularization, that is a mixture
+of either a (possibly weighted) \\\ell_1/\ell_2\\- or
+\\\ell_1/\ell\_\infty\\-norm, and a (possibly structured)
 \\\ell_2\\-norm (ridge-like). The solution path is computed at a grid of
-values for the \\\ell_1\\-penalty, fixing the amount of \\\ell_2\\
-regularization. See details for the criterion optimized.
+values for the \\\ell_1/\ell_q\\-penalty. See details for the criterion
+optimized.
 
 ## Usage
 
 ``` r
-elastic.net(
+group.lasso(
   x,
   y,
+  group,
+  type = c("l2", "coop", "linf"),
   lambda1 = NULL,
   lambda2 = 0.01,
-  penscale = rep(1, ncol(x)),
+  penscale = sqrt(tabulate(group)),
   struct = Matrix::Diagonal(ncol(x), 1),
   intercept = TRUE,
   normalize = TRUE,
   refit = FALSE,
   nlambda1 = ifelse(is.null(lambda1), 100, length(lambda1)),
-  minratio = ifelse(nrow(x) <= ncol(x), 0.01, 1e-04),
+  minratio = 0.001,
   maxfeat = ifelse(lambda2 < 0.01, min(nrow(x), ncol(x)), min(4 * nrow(x), ncol(x))),
   beta0 = numeric(ncol(x)),
   control = list()
@@ -38,6 +41,17 @@ elastic.net(
 - y:
 
   response vector.
+
+- group:
+
+  vector of integers indicating group belonging. Must match the number
+  fo column in `x`. Must be SORTED integers starting from 1.
+
+- type:
+
+  string indicating whether the \\\ell_1/\ell_2\\ or the
+  \\\ell_1/\ell\_\infty\\ group-Lasso must be fitted. Could be "linf" or
+  "l2", default is "l2"
 
 - lambda1:
 
@@ -140,21 +154,9 @@ elastic.net(
 ## Value
 
 an object with class
-[ElasticNetFit](https://jchiquet.github.io/quadrupen/reference/ElasticNetFit.md),
+[GroupLassoFit](https://jchiquet.github.io/quadrupen/reference/GroupLassoFit.md),
 inheriting from
 [QuadrupenFit](https://jchiquet.github.io/quadrupen/reference/QuadrupenFit.md).
-
-## Details
-
-The optimized criterion is the following:
-
-β^(hat)_(λ₁,λ₂) = argmin_(β) 1/2 RSS(&beta) + λ₁ \| D β \|₁ + λ/2 ₂
-β^(T) S β,
-
-where \\D\\ is a diagonal matrix, whose diagonal terms are provided as a
-vector by the `penscale` argument. The \\\ell_2\\ structuring matrix
-\\S\\ is provided via the `struct` argument, a positive semidefinite
-matrix (possibly of class `Matrix`).
 
 ## See also
 
@@ -167,6 +169,7 @@ See also
 ## Simulating multivariate Gaussian with blockwise correlation
 ## and piecewise constant vector of parameters
 beta <- rep(c(0,1,0,-1,0), c(25,10,25,10,25))
+grp  <- rep(1:5, c(25,10,25,10,25)) 
 cor <- 0.75
 Soo <- toeplitz(cor^(0:(25-1))) ## Toeplitz correlation for irrelevant variables
 Sww  <- matrix(cor,10,10) ## bloc correlation between active variables
@@ -176,14 +179,28 @@ n <- 50
 x <- as.matrix(matrix(rnorm(95*n),n,95) %*% chol(Sigma))
 y <- 10 + x %*% beta + rnorm(n,0,10)
 
-## Structured Elastic.net without/with an additional l2 regularization term
+## Group-Lasso without/with an additional l2 regularization term
 ## and with structuring prior
 labels <- rep("irrelevant", length(beta))
 labels[beta != 0] <- "relevant"
-plot(lasso(x,y), label=labels) ## a mess
 
-plot(elastic.net(x,y,lambda2=10), label=labels) ## good guys are selected first
+if (FALSE) { # \dontrun{
+## Standard Group-Lasso
+plot(group.lasso(x,y,grp), label=labels)
+plot(group.lasso(x,y,grp, lambda2=.5), label=labels)
+plot(group.lasso(x,y,grp, lambda2=10), label=labels)
+plot(group.lasso(x,y,grp, lambda2=10,struct=solve(Sigma)), label=labels)
 
-plot(elastic.net(x,y,lambda2=10,struct=solve(Sigma)), label=labels) ## even better
+## L1/LINF Group-Lasso
+plot(group.lasso(x, y, grp, type = "linf"), label=labels)
+plot(group.lasso(x, y, grp, type = "linf", lambda2=.5), label=labels)
+plot(group.lasso(x, y, grp, type = "linf", lambda2=10), label=labels)
+plot(group.lasso(x, y, grp, type = "linf", lambda2=10,struct=solve(Sigma)), label=labels)
 
+## Cooperative-Lasso
+plot(group.lasso(x, y, grp, type = "coop"), label=labels)
+plot(group.lasso(x, y, grp, type = "coop", lambda2=.5), label=labels)
+plot(group.lasso(x, y, grp, type = "coop", lambda2=10), label=labels)
+plot(group.lasso(x, y, grp, type = "coop", lambda2=10,struct=solve(Sigma)), label=labels)
+} # }
 ```

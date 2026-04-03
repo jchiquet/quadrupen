@@ -123,14 +123,15 @@ labels <- rep("irrelevant", length(beta))
 labels[beta != 0] <- c("relevant")
 labels <- factor(labels, ordered=TRUE, levels=c("relevant","irrelevant"))
 
-## Call to stability selection function, 200 subsampling
-stab <- stability(x,y, subsamples=200, lambda2=1, minratio=1e-2)
-## Recover the selected variables for a given cutoff
-## and per-family error rate, without producing any plot
-stabpath <- plot(stab, cutoff=0.75, PFER=1, plot=FALSE)
+enet <- elastic.net(x, y, lambda2 = 10, struct = solve(Sigma), minratio = 1e-2)
+stab <- stability(enet, n_subsamples = 200)
+
+## Build the plot an recover the selected variable
+plot(stab, labels=labels)
+stabpath <- plot(stab, xvar="fraction", labels=labels, sel_mode="PFER", cutoff=0.75, PFER=1)
 
 cat("\nFalse positives for the randomized Elastic-net with stability selection: ",
-     sum(labels[stabpath$selected] != "relevant"))
+     sum(labels[stab$selection()] != "relevant"))
 cat("\nDONE.\n")
 } # }
 ```

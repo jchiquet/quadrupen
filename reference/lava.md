@@ -181,5 +181,5 @@ labels <- rep("irrelevant", length(beta))
 labels[beta != 0] <- "relevant"
 ## The solution path of the LASSO
 plot(lava(x,y), label=labels)
-
+#> Error: solve(): solution not found
 ```
