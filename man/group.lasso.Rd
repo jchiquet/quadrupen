@@ -11,13 +11,13 @@ group.lasso(
   type = c("l2", "coop", "linf"),
   lambda1 = NULL,
   lambda2 = 0.01,
-  penscale = rep(1, ncol(x)),
+  penscale = sqrt(tabulate(group)),
   struct = Matrix::Diagonal(ncol(x), 1),
   intercept = TRUE,
   normalize = TRUE,
   refit = FALSE,
   nlambda1 = ifelse(is.null(lambda1), 100, length(lambda1)),
-  minratio = ifelse(nrow(x) <= ncol(x), 0.01, 1e-04),
+  minratio = 0.001,
   maxfeat = ifelse(lambda2 < 0.01, min(nrow(x), ncol(x)), min(4 * nrow(x), ncol(x))),
   beta0 = numeric(ncol(x)),
   control = list()
@@ -146,10 +146,26 @@ y <- 10 + x \%*\% beta + rnorm(n,0,10)
 ## and with structuring prior
 labels <- rep("irrelevant", length(beta))
 labels[beta != 0] <- "relevant"
+
+\dontrun{
+## Standard Group-Lasso
 plot(group.lasso(x,y,grp), label=labels)
+plot(group.lasso(x,y,grp, lambda2=.5), label=labels)
 plot(group.lasso(x,y,grp, lambda2=10), label=labels)
 plot(group.lasso(x,y,grp, lambda2=10,struct=solve(Sigma)), label=labels)
 
+## L1/LINF Group-Lasso
+plot(group.lasso(x, y, grp, type = "linf"), label=labels)
+plot(group.lasso(x, y, grp, type = "linf", lambda2=.5), label=labels)
+plot(group.lasso(x, y, grp, type = "linf", lambda2=10), label=labels)
+plot(group.lasso(x, y, grp, type = "linf", lambda2=10,struct=solve(Sigma)), label=labels)
+
+## Cooperative-Lasso
+plot(group.lasso(x, y, grp, type = "coop"), label=labels)
+plot(group.lasso(x, y, grp, type = "coop", lambda2=.5), label=labels)
+plot(group.lasso(x, y, grp, type = "coop", lambda2=10), label=labels)
+plot(group.lasso(x, y, grp, type = "coop", lambda2=10,struct=solve(Sigma)), label=labels)
+}
 }
 \seealso{
 See also \link{QuadrupenFit}
