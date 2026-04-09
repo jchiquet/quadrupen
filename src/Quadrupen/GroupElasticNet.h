@@ -127,12 +127,12 @@ List GroupElasticNet<matrix,norm>::solution_path(const List& control) {
       intercept_debiased_.push_back(data_.y_bar_ - dot(beta_debiased_, data_.X_bar_(set_.A_))) ;
       iA_ = join_rows(iA_, set_.A_.t()) ;
       jA_ = join_rows(jA_, df_.size()*ones<urowvec>(set_.size()) );
-      df_.push_back(get_df()) ;
+      df_.push_back(this->get_df()) ;
     }
 
     timing.push_back(timer.toc()) ;
   } // END OF THE LOOP OVER LAMBDA
-  
+
   lambdas_.resize(df_.size()) ;
   
   return(

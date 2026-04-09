@@ -41,6 +41,18 @@ group_enet_coop_sparse_cpp <- function(dataModel, intercept, group, regParam, co
     .Call(`_quadrupen_group_enet_coop_sparse_cpp`, dataModel, intercept, group, regParam, control)
 }
 
+group_lava_l1l2_dense_cpp <- function(dataModel, intercept, group, regParam, control) {
+    .Call(`_quadrupen_group_lava_l1l2_dense_cpp`, dataModel, intercept, group, regParam, control)
+}
+
+group_lava_l1linf_dense_cpp <- function(dataModel, intercept, group, regParam, control) {
+    .Call(`_quadrupen_group_lava_l1linf_dense_cpp`, dataModel, intercept, group, regParam, control)
+}
+
+group_lava_coop_dense_cpp <- function(dataModel, intercept, group, regParam, control) {
+    .Call(`_quadrupen_group_lava_coop_dense_cpp`, dataModel, intercept, group, regParam, control)
+}
+
 lava_dense_cpp <- function(dataModel, intercept, regParam, control) {
     .Call(`_quadrupen_lava_dense_cpp`, dataModel, intercept, regParam, control)
 }
