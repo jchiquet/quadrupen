@@ -42,21 +42,46 @@ public:
   
   vec   nzeros_ ; // contains non-zero values of all betas (for all lambda values)
   vec debiased_ ; // contains debiased non-zero values of all betas (for all lambda values)
+  vector<uvec> active_ ; // successively activated variable (for all lambda values)
   urowvec iA_   ; // contains row indices of the non-zero values
   urowvec jA_   ; // contains column indices of the non-zero values
   vector<double >intercept_debiased_ ; // debiased vector of intercept values (for all lambda values)
   vec beta_debiased_ ; // vector of current active beta debiased (for the current lambda)
   
   const sp_mat coefficients() const {
-    return sp_mat(join_cols(iA_, jA_), nzeros_, data_.p_, lambdas_.size()) ; 
+    vector<uword> rowA, colA ;
+    uword current_col = 0;
+    for (const auto& a : active_) {
+      rowA.insert(rowA.end(), a.begin(), a.end()) ;
+      colA.insert(colA.end(), a.n_elem, current_col) ;
+      current_col++;
+    }
+    return sp_mat(join_cols(urowvec(rowA), urowvec(colA)),
+                  nzeros_, data_.p_, active_.size(), true, false) ;
   }
   
   const sp_mat debiased_coefficients() const { 
-    return sp_mat(join_cols(iA_, jA_), debiased_, data_.p_, lambdas_.size()) ; 
+    vector<uword> rowA, colA ;
+    uword current_col = 0;
+    for (const auto& a : active_) {
+      rowA.insert(rowA.end(), a.begin(), a.end()) ;
+      colA.insert(colA.end(), a.n_elem, current_col) ;
+      current_col++;
+    }
+    return sp_mat(join_cols(urowvec(rowA), urowvec(colA)),
+                  debiased_, data_.p_, active_.size(), true, false) ;
   }
   
   const sp_mat active_var() const { 
-    return sp_mat(join_cols(iA_, jA_), vec(iA_.n_elem, fill::ones), data_.p_, lambdas_.size()) ; 
+    vector<uword> rowA, colA ;
+    uword current_col = 0;
+    for (const auto& a : active_) {
+      rowA.insert(rowA.end(), a.begin(), a.end()) ;
+      colA.insert(colA.end(), a.n_elem, current_col) ;
+      current_col++;
+    }
+    return sp_mat(join_cols(urowvec(rowA), urowvec(colA)),
+                  vec(rowA.size(), fill::ones), data_.p_, active_.size(), true, false) ;
   }
 
   const vector<double>& intercept_debiased() const { return intercept_debiased_ ; }

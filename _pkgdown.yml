@@ -11,6 +11,7 @@ reference:
   - elastic.net
   - fusedlasso
   - group.lasso
+  - group.lava
   - lava
   - lasso
   - ridge
@@ -21,6 +22,7 @@ reference:
   - ElasticNetFit
   - FusedLassoFit
   - GroupLassoFit
+  - GroupLavaFit
   - LavaFit
   - BoundedRegressionFit
   - RidgeRegressionFit

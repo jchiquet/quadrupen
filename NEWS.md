@@ -8,6 +8,7 @@ NEWS/Changelog
   - included 'FusedLasso' from the archived package by Holger Hoefling (fixed CRAN's complaints)
   - added group-lasso/ group-elastic and variant (group penalty: l1/l2, l1/linf, cooperative Lasso) 
   - added lava/post-lava (combination of sparse and dense regularization, Chernozukov et al, 2017)
+  - extended to group-lava (group penalty: l1/l2, l1/linf, cooperative Lasso) 
   - added refit version of Lasso/Elastic-Net ("relaxed" Lasso/Enet)
   - changing many parameters (badly) named, do not expect backward compatibility
 - minor updates
