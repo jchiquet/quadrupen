@@ -21,6 +21,7 @@ public:
   using Regularizer<matrix>::intercept_  ;
   using Regularizer<matrix>::data_       ;
   using ElasticNet<matrix>::set_      ;
+  using ElasticNet<matrix>::active_  ;
   using ElasticNet<matrix>::debiased_ ;
   using ElasticNet<matrix>::intercept_debiased_ ;
   using ElasticNet<matrix>::lambda_factor_ ;
@@ -78,7 +79,7 @@ void Lava<matrix>::post_treatment(const RegressionData<matrix>& data, const mat&
     intercept_.push_back(data.y_bar_ - dot(beta.col(i) + b.col(i), data.X_bar_));
 
     // Refit the sparse coefficient to remove bias due to sparse shrinkage
-    uvec A = find(beta.col(i)) ;
+    uvec A = active_[i] ;
     vec w = (data.y_ - data_.y_bar_) - Xs * b.col(i) ;
     vec beta_debiased = solve(Xs.cols(A).t() * Xs.cols(A), Xs.cols(A).t() * w) ;
     debiased_ = join_cols(debiased_, beta_debiased/(data_.norm_X_(A) % lambda_factor_(A)));

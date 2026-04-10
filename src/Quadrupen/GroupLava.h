@@ -20,7 +20,8 @@ public:
   using Regularizer<matrix>::coef_       ;
   using Regularizer<matrix>::intercept_  ;
   using Regularizer<matrix>::data_       ;
-  using GroupElasticNet<matrix,norm>::set_      ;
+  using GroupElasticNet<matrix,norm>::set_     ;
+  using GroupElasticNet<matrix,norm>::active_  ;
   using GroupElasticNet<matrix,norm>::debiased_ ;
   using GroupElasticNet<matrix,norm>::intercept_debiased_ ;
   using GroupElasticNet<matrix,norm>::lambda_factor_ ;
@@ -79,7 +80,7 @@ void GroupLava<matrix,norm>::post_treatment(const RegressionData<matrix>& data, 
     intercept_.push_back(data.y_bar_ - dot(beta.col(i) + b.col(i), data.X_bar_));
     
     // Refit the sparse coefficient to remove bias due to sparse shrinkage
-    uvec A = find(beta.col(i)) ;
+    uvec A = active_[i] ;
     vec w = (data.y_ - data_.y_bar_) - Xs * b.col(i) ;
     vec beta_debiased = solve(Xs.cols(A).t() * Xs.cols(A), Xs.cols(A).t() * w) ;
     debiased_ = join_cols(debiased_, beta_debiased/(data_.norm_X_(A)));

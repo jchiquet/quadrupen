@@ -31,6 +31,7 @@ class GroupElasticNet :
     using SparseRegularizer<matrix>::debiased_ ;
     using SparseRegularizer<matrix>::beta_debiased_ ;
     using SparseRegularizer<matrix>::intercept_debiased_   ;
+    using SparseRegularizer<matrix>::active_ ;
     using SparseRegularizer<matrix>::iA_   ;
     using SparseRegularizer<matrix>::jA_   ;
     using GroupSparseRegularizer<matrix,norm>::penalty_   ;
@@ -112,12 +113,12 @@ List GroupElasticNet<matrix,norm>::solution_path(const List& control) {
     ) ;
     gap.push_back(solver_.gap_) ;
     iter.push_back(solver_.iter_) ;
-    
 
     // Preparing next value of the penalty
     if (status.back() >= 2) {
       break;
     } else {
+      active_.push_back(set_.A_) ;
       set_.inverse_Gram() ;
       beta_debiased_ = set_.XATXAinv_ * (data_.XTy_(set_.A_) - data_.X_bar_(set_.A_) * accu(data_.y_)) ;
       beta_debiased_ = beta_debiased_/data_.norm_X_(set_.A_) ;
@@ -125,8 +126,6 @@ List GroupElasticNet<matrix,norm>::solution_path(const List& control) {
       debiased_ = join_cols(debiased_, beta_debiased_);
       intercept_.push_back(data_.y_bar_ - dot(beta_, data_.X_bar_(set_.A_)));
       intercept_debiased_.push_back(data_.y_bar_ - dot(beta_debiased_, data_.X_bar_(set_.A_))) ;
-      iA_ = join_rows(iA_, set_.A_.t()) ;
-      jA_ = join_rows(jA_, df_.size()*ones<urowvec>(set_.size()) );
       df_.push_back(this->get_df()) ;
     }
 
