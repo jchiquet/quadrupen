@@ -8,16 +8,17 @@ group.lava(
   x,
   y,
   group,
+  type = c("l2", "coop", "linf"),
   lambda1 = NULL,
   lambda2 = 1,
-  penscale = rep(1, ncol(x)),
+  penscale = sqrt(tabulate(group)),
   struct = Matrix::Diagonal(ncol(x), 1),
   intercept = TRUE,
   normalize = TRUE,
   refit = FALSE,
   nlambda1 = ifelse(is.null(lambda1), 100, length(lambda1)),
   minratio = 0.01,
-  maxfeat = min(nrow(x), ncol(x)),
+  maxfeat = ifelse(lambda2 < 0.01, min(nrow(x), ncol(x)), min(4 * nrow(x), ncol(x))),
   beta0 = numeric(ncol(x)),
   control = list()
 )
@@ -33,6 +34,10 @@ scale.}
 \item{group}{vector of integers indicating group belonging. Must
 match the number fo column in \code{x}. Must be SORTED integers
 starting from 1.}
+
+\item{type}{string indicating whether the \eqn{\ell_1/\ell_2}{l1/l2} or the
+\eqn{\ell_1/\ell_\infty}{l1/linf} group-Lasso must be fitted. Could be "linf" or
+"l2", default is "l2"}
 
 \item{lambda1}{sequence of decreasing \eqn{\ell_1}{l1}-penalty
 levels. If \code{NULL} (the default), a vector is generated with
@@ -109,10 +114,6 @@ the optimum: when \code{'0'} (the default), no monitoring is provided;
 when \code{'1'}, the bound derived in Grandvalet et al. is computed; when
 \code{'>1'}, the Fenchel duality gap is computed along the algorithm.
 }}
-
-\item{type}{string indicating whether the \eqn{\ell_1/\ell_2}{l1/l2} or the
-\eqn{\ell_1/\ell_\infty}{l1/linf} group-Lasso must be fitted. Could be "linf" or
-"l2", default is "l2"}
 }
 \value{
 an object with class \link{GroupLavaFit}, inheriting from \link{QuadrupenFit}.
