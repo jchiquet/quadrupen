@@ -1,25 +1,28 @@
-# Class "GroupLassoFit"
+# Class "GroupLavaFit"
 
-Class "GroupLassoFit"
+Class "GroupLavaFit"
 
-Class "GroupLassoFit"
+Class "GroupLavaFit"
 
 ## Details
 
 Class of object returned by the fitting function
-[`group.lasso()`](https://jchiquet.github.io/quadrupen/reference/group.lasso.md).
+[`group.lava()`](https://jchiquet.github.io/quadrupen/reference/group.lava.md).
 Inherits fields and methods of
 [QuadrupenFit](https://jchiquet.github.io/quadrupen/reference/QuadrupenFit.md)
+and [LavaFit](https://jchiquet.github.io/quadrupen/reference/LavaFit.md)
 
 ## See also
 
 [QuadrupenFit](https://jchiquet.github.io/quadrupen/reference/QuadrupenFit.md),
-[`group.lasso()`](https://jchiquet.github.io/quadrupen/reference/group.lasso.md)
+[`group.lava()`](https://jchiquet.github.io/quadrupen/reference/group.lava.md)
 
-## Super class
+## Super classes
 
 [`quadrupen::QuadrupenFit`](https://jchiquet.github.io/quadrupen/reference/QuadrupenFit.md)
--\> `GroupLassoFit`
+-\>
+[`quadrupen::LavaFit`](https://jchiquet.github.io/quadrupen/reference/LavaFit.md)
+-\> `GroupLavaFit`
 
 ## Active bindings
 
@@ -40,32 +43,32 @@ Inherits fields and methods of
 
 ### Public methods
 
-- [`GroupLassoFit$new()`](#method-GroupLassoFit-new)
+- [`GroupLavaFit$new()`](#method-GroupLavaFit-new)
 
-- [`GroupLassoFit$clone()`](#method-GroupLassoFit-clone)
+- [`GroupLavaFit$clone()`](#method-GroupLavaFit-clone)
 
 Inherited methods
 
 - [`quadrupen::QuadrupenFit$criteria()`](https://jchiquet.github.io/quadrupen/reference/QuadrupenFit.html#method-criteria)
 - [`quadrupen::QuadrupenFit$cross_validate()`](https://jchiquet.github.io/quadrupen/reference/QuadrupenFit.html#method-cross_validate)
-- [`quadrupen::QuadrupenFit$fit()`](https://jchiquet.github.io/quadrupen/reference/QuadrupenFit.html#method-fit)
 - [`quadrupen::QuadrupenFit$get_model()`](https://jchiquet.github.io/quadrupen/reference/QuadrupenFit.html#method-get_model)
 - [`quadrupen::QuadrupenFit$plot()`](https://jchiquet.github.io/quadrupen/reference/QuadrupenFit.html#method-plot)
-- [`quadrupen::QuadrupenFit$plot_path()`](https://jchiquet.github.io/quadrupen/reference/QuadrupenFit.html#method-plot_path)
 - [`quadrupen::QuadrupenFit$predict()`](https://jchiquet.github.io/quadrupen/reference/QuadrupenFit.html#method-predict)
 - [`quadrupen::QuadrupenFit$print()`](https://jchiquet.github.io/quadrupen/reference/QuadrupenFit.html#method-print)
 - [`quadrupen::QuadrupenFit$show()`](https://jchiquet.github.io/quadrupen/reference/QuadrupenFit.html#method-show)
 - [`quadrupen::QuadrupenFit$stability()`](https://jchiquet.github.io/quadrupen/reference/QuadrupenFit.html#method-stability)
+- [`quadrupen::LavaFit$fit()`](https://jchiquet.github.io/quadrupen/reference/LavaFit.html#method-fit)
+- [`quadrupen::LavaFit$plot_path()`](https://jchiquet.github.io/quadrupen/reference/LavaFit.html#method-plot_path)
 
 ------------------------------------------------------------------------
 
 ### Method `new()`
 
-Initialize a `GroupLassoFit` model
+Initialize a `GroupLavaFit` model
 
 #### Usage
 
-    GroupLassoFit$new(data, intercept, group, type, regParam)
+    GroupLavaFit$new(data, intercept, group, type, regParam)
 
 #### Arguments
 
@@ -101,7 +104,7 @@ The objects of this class are cloneable with this method.
 
 #### Usage
 
-    GroupLassoFit$clone(deep = FALSE)
+    GroupLavaFit$clone(deep = FALSE)
 
 #### Arguments
 

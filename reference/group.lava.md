@@ -1,26 +1,30 @@
-# Fit a linear model with lava regularization
+# Fit a linear model with group-lava regularization
 
-Adjust a the lava regularized linear models, that is a lava
-trasnformation of the data followed by a (possibly weighted)
-\\\ell_1\\-norm. The solution path is computed at a grid of values for
-the \\\ell_1\\-penalty. See details for the criterion optimized.
+Adjust a the group-lava regularized linear models, that is a lava
+transformation of the data plus a mixture of either a (possibly
+weighted) \\\ell_1/\ell_2\\- or \\\ell_1/\ell\_\infty\\-norm, and a
+(possibly structured) \\\ell_2\\-norm (ridge-like). The solution path is
+computed at a grid of values for the \\\ell_1/\ell_q\\-penalty. See
+details for the criterion optimized.
 
 ## Usage
 
 ``` r
-lava(
+group.lava(
   x,
   y,
+  group,
+  type = c("l2", "coop", "linf"),
   lambda1 = NULL,
   lambda2 = 1,
-  penscale = rep(1, ncol(x)),
+  penscale = sqrt(tabulate(group)),
   struct = Matrix::Diagonal(ncol(x), 1),
   intercept = TRUE,
   normalize = TRUE,
   refit = FALSE,
   nlambda1 = ifelse(is.null(lambda1), 100, length(lambda1)),
   minratio = 0.01,
-  maxfeat = min(nrow(x), ncol(x)),
+  maxfeat = ifelse(lambda2 < 0.01, min(nrow(x), ncol(x)), min(4 * nrow(x), ncol(x))),
   beta0 = numeric(ncol(x)),
   control = list()
 )
@@ -37,6 +41,17 @@ lava(
 - y:
 
   response vector.
+
+- group:
+
+  vector of integers indicating group belonging. Must match the number
+  fo column in `x`. Must be SORTED integers starting from 1.
+
+- type:
+
+  string indicating whether the \\\ell_1/\ell_2\\ or the
+  \\\ell_1/\ell\_\infty\\ group-Lasso must be fitted. Could be "linf" or
+  "l2", default is "l2"
 
 - lambda1:
 
@@ -139,10 +154,7 @@ lava(
 ## Value
 
 an object with class
-[QuadrupenFit](https://jchiquet.github.io/quadrupen/reference/QuadrupenFit.md).
-
-an object with class
-[LavaFit](https://jchiquet.github.io/quadrupen/reference/LavaFit.md),
+[GroupLavaFit](https://jchiquet.github.io/quadrupen/reference/GroupLavaFit.md),
 inheriting from
 [QuadrupenFit](https://jchiquet.github.io/quadrupen/reference/QuadrupenFit.md).
 
@@ -168,6 +180,7 @@ Statistics (2017): 39-76. <doi:10.1214/16-AOS1434>
 ## and piecewise constant vector of parameters
 beta  <- rep(c(0,1,0,-1,0), c(25,10,25,10,25))
 delta <- runif(sum(c(25,10,25,10,25)),-.1,.1)
+grp  <- rep(1:5, c(25,10,25,10,25)) 
 cor <- 0.75
 Soo <- toeplitz(cor^(0:(25-1))) ## Toeplitz correlation for irrelevant variables
 Sww  <- matrix(cor,10,10) ## bloc correlation between active variables
@@ -179,7 +192,24 @@ y <- 10 + x %*% beta + rnorm(n,0,10)
 
 labels <- rep("irrelevant", length(beta))
 labels[beta != 0] <- "relevant"
-## The solution path of the LAVA
-plot(lava(x,y), label=labels)
 
+if (FALSE) { # \dontrun{
+## Standard Group-Lasso
+plot(group.lava(x,y,grp), label=labels)
+plot(group.lava(x,y,grp, lambda2=.5), label=labels)
+plot(group.lava(x,y,grp, lambda2=10), label=labels)
+plot(group.lava(x,y,grp, lambda2=10,struct=solve(Sigma)), label=labels)
+
+## L1/LINF Group-Lasso
+plot(group.lava(x, y, grp, type = "linf"), label=labels)
+plot(group.lava(x, y, grp, type = "linf", lambda2=.5), label=labels)
+plot(group.lava(x, y, grp, type = "linf", lambda2=10), label=labels)
+plot(group.lava(x, y, grp, type = "linf", lambda2=10,struct=solve(Sigma)), label=labels)
+
+## Cooperative-Lasso
+plot(group.lava(x, y, grp, type = "coop"), label=labels)
+plot(group.lava(x, y, grp, type = "coop", lambda2=.5), label=labels)
+plot(group.lava(x, y, grp, type = "coop", lambda2=10), label=labels)
+plot(group.lava(x, y, grp, type = "coop", lambda2=10,struct=solve(Sigma)), label=labels)
+} # }
 ```

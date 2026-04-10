@@ -13,6 +13,8 @@ Functions for fitting various structured regularization models
 - [`group.lasso()`](https://jchiquet.github.io/quadrupen/reference/group.lasso.md)
   : Fit a linear model with group-lasso (either l1/l2 or l1/l-inf)
   regularization
+- [`group.lava()`](https://jchiquet.github.io/quadrupen/reference/group.lava.md)
+  : Fit a linear model with group-lava regularization
 - [`lava()`](https://jchiquet.github.io/quadrupen/reference/lava.md) :
   Fit a linear model with lava regularization
 - [`lasso()`](https://jchiquet.github.io/quadrupen/reference/lasso.md) :
@@ -32,6 +34,8 @@ R6 Classes for the user to manipulate the ouput of the main functions
   : Class "FusedLassoFit"
 - [`GroupLassoFit`](https://jchiquet.github.io/quadrupen/reference/GroupLassoFit.md)
   : Class "GroupLassoFit"
+- [`GroupLavaFit`](https://jchiquet.github.io/quadrupen/reference/GroupLavaFit.md)
+  : Class "GroupLavaFit"
 - [`LavaFit`](https://jchiquet.github.io/quadrupen/reference/LavaFit.md)
   : Class "LavaFit"
 - [`BoundedRegressionFit`](https://jchiquet.github.io/quadrupen/reference/BoundedRegressionFit.md)
