@@ -36,11 +36,13 @@ public:
 
   using Optimizer<matrix>::optimality_gap ;
   using Optimizer<matrix>::fista ;
+  using Optimizer<matrix>::fista_LM ;
   
   uword solve(
       vec& beta,
       vec& grad,
       const double& lambda, 
+      const vec& weights,
       const double& gamma, 
       RegressionData<matrix> &data,
       ActiveSet<matrix>& set
@@ -69,20 +71,22 @@ uword SimpleOptimizer<matrix,norm>::solve(
     vec& beta,
     vec& grad,
     const double& lambda,
+    const vec& weights,
     const double& gamma, 
     RegressionData<matrix> &data,
     ActiveSet<matrix>& set) {
   
   if (verbosity_) Rprintf("\n current penalty = %f",lambda) ;
   if (verbosity_) Rprintf("\n nb active variables = %i\n", set.size()) ;
-  
-  vec optimality = penalty_.elt_norm(grad) - lambda ;
+
+  vec lambda_w = lambda * weights ;
+  vec optimality = penalty_.elt_dual_norm(grad) - lambda_w;
   uword var_in = optimality.index_max() ; // highest violation of KKT conditions 
   uword status = 0 ; iter_ = 0 ; bool success = true ; 
   gap_ = std::max(0.0, optimality(var_in)) ;
   J_ = datum::inf ; D_ = datum::inf ;
 
-  auto prox = [this](vec x, double L) {
+  auto prox = [this](vec x, vec L) {
     return(penalty_.proximal(x, L));
   } ;
   
@@ -96,12 +100,13 @@ uword SimpleOptimizer<matrix,norm>::solve(
       beta.resize(beta.size()+1) ; // update the vector of active parameters
       beta.tail(1) = - 1e-3 * sign(grad(var_in)) ;
       if (verbosity_) {Rprintf("\tnewly added variable %i\n",var_in);}
-    } else if (verbosity_) {Rprintf("\talready in %i\n",var_in);}
+    }
     
     // OPTIMIZATION OVER THE CURRENTLY ACTIVATED VARIABLES
     if (algorithm_ == FISTA) {
       inner_iter_.push_back(
-        fista(beta, grad, lambda, data, set, prox, 1e-10, 10000)
+        // fista(beta, grad, lambda, data, set, prox, 1e-10, 10000)
+        fista_LM(beta, grad, lambda_w(set.A_), data, set, prox, 1e-10, 10000)
       );
     } else { // QUADRA solver
       try {
@@ -118,7 +123,7 @@ uword SimpleOptimizer<matrix,norm>::solve(
     
     // OPTIMALITY TESTING
     grad = - data.XTy_ + set.XTXA_ * beta ;
-    optimality = penalty_.elt_norm(grad) - lambda ;
+    optimality = penalty_.elt_dual_norm(grad) - lambda ;
     var_in = optimality.index_max() ;
     gap_ = std::max(0.0, optimality(var_in)) ;
     

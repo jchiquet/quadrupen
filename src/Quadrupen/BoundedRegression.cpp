@@ -72,7 +72,7 @@ List BoundedRegression::solution_path(const List& control) {
   vector<double> gap, timing ; // timings and optimality measures
   vector<uword> status, iactive, ioptim ; // convergence and # of inner/outer iterates
 
-  auto prox = [this](vec x, double L) {
+  auto prox = [this](vec x, vec L) {
     return(penalty_.proximal(x, L));
   } ;
   
@@ -80,7 +80,9 @@ List BoundedRegression::solution_path(const List& control) {
   wall_clock timer ; timer.tic(); // clock
   for(auto lambda_ : lambdas_) {
     if (verbose) {Rprintf("\n lambda_linf = %f",lambda_) ;}
-
+    
+    vec lambda_w = lambda_ * lambda_factor_ ;
+    
     // OPTIMIZER LOOP (FIX-LAMBDA VALUE): IDENTIFY THE ACTIVE SET AND SOLVE
     uword current_it = 0 ;
     double current_gap = datum::inf ;
@@ -89,7 +91,7 @@ List BoundedRegression::solution_path(const List& control) {
       current_it++;
       if (algorithm == FISTA) {
         ioptim.push_back(
-          solver_.fista(beta_, grad_, lambda_, data_, set_, prox, 1e-3, 10000)
+          solver_.fista_LM(beta_, grad_, lambda_w, data_, set_, prox, 1e-3, 10000)
         );
         break;
       } else { // QUADRA solver
@@ -114,11 +116,11 @@ List BoundedRegression::solution_path(const List& control) {
 
       // OPTIMALITY TESTING
       grad_ = - data_.XTy_ + data_.XTX_ * beta_ ;
-      current_gap = penalty_.dual_norm(grad_) - lambda_ ;
+      current_gap = penalty_.dual_norm(grad_, lambda_factor_) - lambda_ ;
     } while ((current_gap > accuracy) && (current_it <= maxiter));
 
     // Checking convergence status
-    gap.push_back(fmax(0.0, penalty_.dual_norm(grad_) - lambda_)) ;
+    gap.push_back(fmax(0.0, penalty_.dual_norm(grad_, lambda_factor_) - lambda_)) ;
     iactive.push_back(current_it) ;
     status.push_back(0) ;
     if (current_it >= maxiter) { status.back() = 1 ; }

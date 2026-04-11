@@ -89,7 +89,7 @@ uword OptimizerLINF<matrix>::quadratic(
         tmp = arma::solve(trimatu(R), arma::solve(trimatl(strans(R)), b)) ;
       } else {
         vec pen_arg = beta(B);
-        double bound = penalty_.pen_norm(pen_arg) ;
+        double bound = max(abs(pen_arg)) ;
         tmp = join_cols(beta(set.A_), ones(1) * bound);
         iter_in = this->conjugate_gradient(tmp, XX, b, accuracy, max_iter) ;
       }
@@ -99,7 +99,7 @@ uword OptimizerLINF<matrix>::quadratic(
     
     // Handling guys reaching the boundary (leaving the active set)
     vec pen_arg = beta(B);
-    double bound = penalty_.pen_norm(pen_arg) ; // current boundary
+    double bound = max(abs(pen_arg)) ; // current boundary
     uvec ind_toB = find(abs(beta(set.A_)) > bound) ;
     if (!ind_toB.is_empty()) {
       uvec toB = set.A_(ind_toB) ;

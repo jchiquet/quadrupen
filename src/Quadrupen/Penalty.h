@@ -25,10 +25,11 @@ public:
   
   SimplePenalty() {} ;
 
-  double pen_norm  (vec x) ;
   vec    elt_norm  (vec x) ;
-  double dual_norm (vec x) ;
-  vec proximal(vec x, double lambda) ;
+  vec    elt_dual_norm  (vec x) ;
+  double pen_norm  (vec x, vec wk) ;
+  double dual_norm (vec x, vec wk) ;
+  vec proximal(vec x, vec lambda) ;
 
 };
 

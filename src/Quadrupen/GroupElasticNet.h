@@ -32,8 +32,6 @@ class GroupElasticNet :
     using SparseRegularizer<matrix>::beta_debiased_ ;
     using SparseRegularizer<matrix>::intercept_debiased_   ;
     using SparseRegularizer<matrix>::active_ ;
-    using SparseRegularizer<matrix>::iA_   ;
-    using SparseRegularizer<matrix>::jA_   ;
     using GroupSparseRegularizer<matrix,norm>::penalty_   ;
     using GroupSparseRegularizer<matrix,norm>::set_  ;
     using GroupSparseRegularizer<matrix,norm>::get_lambda_max ;
@@ -55,7 +53,7 @@ GroupElasticNet<matrix,norm>::GroupElasticNet(
   const RegressionData<matrix>& data, const uvec& group_ind, const List& regParam, const List& control) :
   GroupSparseRegularizer<matrix,norm>::GroupSparseRegularizer(data, regParam) {
 
-    // Scale the structuring matrix according to main penalty factor and the amount of l2 penalty 
+    // Scale the structuring matrix according to the amount of l2 penalty 
     data_.scale_struct(sqrt(gamma_)*ones(data_.p_)) ;
     // data_.scale_regressors(lambda_factor_) ;
     
@@ -118,15 +116,17 @@ List GroupElasticNet<matrix,norm>::solution_path(const List& control) {
     if (status.back() >= 2) {
       break;
     } else {
-      active_.push_back(set_.A_) ;
+      // store current coefficients
+      nzeros_ = join_cols(nzeros_, beta_/data_.norm_X_(set_.A_));
+      intercept_.push_back(data_.y_bar_ - dot(beta_, data_.X_bar_(set_.A_))); // X_bar is scaled
+      // compute and store debiased coefficients
       set_.inverse_Gram() ;
       beta_debiased_ = set_.XATXAinv_ * (data_.XTy_(set_.A_) - data_.X_bar_(set_.A_) * accu(data_.y_)) ;
-      beta_debiased_ = beta_debiased_/data_.norm_X_(set_.A_) ;
-      nzeros_ = join_cols(nzeros_, beta_/data_.norm_X_(set_.A_));
-      debiased_ = join_cols(debiased_, beta_debiased_);
-      intercept_.push_back(data_.y_bar_ - dot(beta_, data_.X_bar_(set_.A_)));
-      intercept_debiased_.push_back(data_.y_bar_ - dot(beta_debiased_, data_.X_bar_(set_.A_))) ;
+      debiased_ = join_cols(debiased_, beta_debiased_/data_.norm_X_(set_.A_));
+      intercept_debiased_.push_back(data_.y_bar_ - dot(beta_debiased_, data_.X_bar_(set_.A_))) ; // X_bar is scaled
+      // store degrees fo freedom and current active set
       df_.push_back(this->get_df()) ;
+      active_.push_back(set_.A_) ;
     }
 
     timing.push_back(timer.toc()) ;
