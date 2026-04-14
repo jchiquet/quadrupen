@@ -27,9 +27,9 @@ public:
 
   vec    elt_norm  (vec x) ;
   vec    elt_dual_norm  (vec x) ;
-  double pen_norm  (vec x, vec wk) ;
-  double dual_norm (vec x, vec wk) ;
-  vec proximal(vec x, vec lambda) ;
+  double pen_norm  (vec x, vec w) ;
+  double dual_norm (vec x, vec w) ;
+  vec proximal(vec x, double lambda, vec w) ;
 
 };
 
@@ -42,7 +42,7 @@ public:
   vec    elt_dual_norm  (vec x, uvec pk)    ;
   double pen_norm  (vec x, uvec pk, vec wk) ;
   double dual_norm (vec x, uvec pk, vec wk) ;
-  vec proximal(vec x, vec lambda, uvec pk)  ;
+  vec proximal(vec x, double lambda, vec wk, uvec pk)  ;
   
 };
 

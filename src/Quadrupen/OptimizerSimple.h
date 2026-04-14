@@ -79,17 +79,12 @@ uword SimpleOptimizer<matrix,norm>::solve(
   if (verbosity_) Rprintf("\n current penalty = %f",lambda) ;
   if (verbosity_) Rprintf("\n nb active variables = %i\n", set.size()) ;
 
-  vec lambda_w = lambda * weights ;
-  vec optimality = penalty_.elt_dual_norm(grad) - lambda_w;
+  vec optimality = penalty_.elt_dual_norm(grad) - lambda * weights ;
   uword var_in = optimality.index_max() ; // highest violation of KKT conditions 
   uword status = 0 ; iter_ = 0 ; bool success = true ; 
   gap_ = std::max(0.0, optimality(var_in)) ;
   J_ = datum::inf ; D_ = datum::inf ;
 
-  auto prox = [this](vec x, vec L) {
-    return(penalty_.proximal(x, L));
-  } ;
-  
   while ((gap_ > accuracy_) && (iter_ <= maxiter_)) {
     R_CheckUserInterrupt();
     iter_++;
@@ -104,9 +99,11 @@ uword SimpleOptimizer<matrix,norm>::solve(
     
     // OPTIMIZATION OVER THE CURRENTLY ACTIVATED VARIABLES
     if (algorithm_ == FISTA) {
+      auto prox = [this, set, weights](vec x, double l) {
+        return(penalty_.proximal(x, l, weights(set.A_)));
+      } ;
       inner_iter_.push_back(
-        // fista(beta, grad, lambda, data, set, prox, 1e-10, 10000)
-        fista_LM(beta, grad, lambda_w(set.A_), data, set, prox, 1e-10, 10000)
+        fista_LM(beta, grad, lambda, data, set, prox, 1e-10, 10000)
       );
     } else { // QUADRA solver
       try {
@@ -123,7 +120,7 @@ uword SimpleOptimizer<matrix,norm>::solve(
     
     // OPTIMALITY TESTING
     grad = - data.XTy_ + set.XTXA_ * beta ;
-    optimality = penalty_.elt_dual_norm(grad) - lambda ;
+    optimality = penalty_.elt_dual_norm(grad) - lambda * weights;
     var_in = optimality.index_max() ;
     gap_ = std::max(0.0, optimality(var_in)) ;
     

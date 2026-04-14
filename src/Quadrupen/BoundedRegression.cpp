@@ -20,7 +20,8 @@ BoundedRegression::BoundedRegression(
     solver_ = OptimizerLINF<mat>(penalty_, control) ;
     
     // Scale the structuring matrix according to main penalty factor and the amount of l2 penalty 
-    data_.scale_struct(sqrt(gamma_)*pow(lambda_factor_,-1/2)) ;
+    data_.scale_struct(sqrt(gamma_)*ones(data_.p_)) ;
+    // data_.scale_struct(sqrt(gamma_)*pow(lambda_factor_,-1/2)) ;
     
     // Initialize the active set with starting coefficient
     set_= ActiveSet(data, as<bool>(control["usechol"])) ;
@@ -72,16 +73,14 @@ List BoundedRegression::solution_path(const List& control) {
   vector<double> gap, timing ; // timings and optimality measures
   vector<uword> status, iactive, ioptim ; // convergence and # of inner/outer iterates
 
-  auto prox = [this](vec x, vec L) {
-    return(penalty_.proximal(x, L));
+  auto prox = [this](vec x, double l) {
+    return(penalty_.proximal(x, l, this->lambda_factor_));
   } ;
-  
+
   // LAMBDA LOOP
   wall_clock timer ; timer.tic(); // clock
   for(auto lambda_ : lambdas_) {
     if (verbose) {Rprintf("\n lambda_linf = %f",lambda_) ;}
-    
-    vec lambda_w = lambda_ * lambda_factor_ ;
     
     // OPTIMIZER LOOP (FIX-LAMBDA VALUE): IDENTIFY THE ACTIVE SET AND SOLVE
     uword current_it = 0 ;
@@ -91,7 +90,7 @@ List BoundedRegression::solution_path(const List& control) {
       current_it++;
       if (algorithm == FISTA) {
         ioptim.push_back(
-          solver_.fista_LM(beta_, grad_, lambda_w, data_, set_, prox, 1e-3, 10000)
+          solver_.fista_LM(beta_, grad_, lambda_, data_, set_, prox, 1e-3, 10000)
         );
         break;
       } else { // QUADRA solver
@@ -131,7 +130,7 @@ List BoundedRegression::solution_path(const List& control) {
     if (status.back() >= 2) {
       break;
     } else {
-      coef_ = join_rows(coef_, beta_/(data_.norm_X_ % lambda_factor_)) ;
+      coef_ = join_rows(coef_, beta_/data_.norm_X_) ;
       intercept_.push_back(data_.y_bar_ - as_scalar(dot(beta_, data_.X_bar_)));
       df_.push_back(get_df()) ;
     }

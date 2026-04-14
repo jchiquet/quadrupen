@@ -54,10 +54,10 @@ public:
   uword fista_LM(
       vec& beta,
       vec& grad,
-      const vec& lambda, 
+      const double& lambda, 
       RegressionData<matrix> &data,
       ActiveSet<matrix>& set,
-      std::function<vec(vec, vec)> proximal_operator, 
+      std::function<vec(vec, double)> proximal_operator, 
       const double& accuracy, 
       const uword& max_iter
   ) ;
@@ -153,10 +153,10 @@ template <typename matrix>
 uword Optimizer<matrix>::fista_LM(
     vec& beta,
     vec& grad,
-    const vec& lambda,
+    const double& lambda,
     RegressionData<matrix> &data,
     ActiveSet<matrix>& set,
-    std::function<vec(vec, vec)> proximal_operator, 
+    std::function<vec(vec, double)> proximal_operator, 
     const double& accuracy,
     const uword& max_iter) {
   

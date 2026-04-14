@@ -21,18 +21,19 @@ vec SimplePenalty<SimpleNorm::L1>::elt_dual_norm(vec x) {
 }
 
 template<>
-double SimplePenalty<SimpleNorm::L1>::pen_norm(vec x, vec wk) {
-  return(accu(wk % elt_norm(x)));
+double SimplePenalty<SimpleNorm::L1>::pen_norm(vec x, vec w) {
+  return(accu(w % elt_norm(x)));
 }
 
 template<>
-double SimplePenalty<SimpleNorm::L1>::dual_norm(vec x, vec wk) {
-  return(max(elt_dual_norm(x) / wk)) ;
+double SimplePenalty<SimpleNorm::L1>::dual_norm(vec x, vec w) {
+  return(max(elt_dual_norm(x) / w)) ;
 }
 
 template<>
-vec SimplePenalty<SimpleNorm::L1>::proximal(vec x, vec lambda) {
-  return(max(zeros(x.n_elem), 1-lambda/elt_norm(x)) % x);
+vec SimplePenalty<SimpleNorm::L1>::proximal(vec x, double lambda, vec w) {
+  // return(max(zeros(x.n_elem), 1 - lambda * w/elt_norm(x)) % x);
+  return(x % clamp(1 - lambda * w/elt_norm(x), 0, datum::inf));
 }
 
 // ______________________________________________________
@@ -48,19 +49,19 @@ vec SimplePenalty<SimpleNorm::RIDGE>::elt_dual_norm(vec x) {
 }
 
 template<>
-double SimplePenalty<SimpleNorm::RIDGE>::pen_norm(vec x, vec wk) {
-  return(sum(wk % elt_norm(x)));
+double SimplePenalty<SimpleNorm::RIDGE>::pen_norm(vec x, vec w) {
+  return(sum(w % elt_norm(x)));
 }
 
-// Slight abuse: take the Fenchel conjuguate of L2^2
+// Slight abuse: take the Fenchel conjugate of L2^2
 template<>
-double SimplePenalty<SimpleNorm::RIDGE>::dual_norm(vec x, vec wk) {
-  return(.25*sum(elt_norm(x) / wk)) ;
+double SimplePenalty<SimpleNorm::RIDGE>::dual_norm(vec x, vec w) {
+  return(.25*sum(elt_norm(x) / w)) ;
 }
 
 template<>
-vec SimplePenalty<SimpleNorm::RIDGE>::proximal(vec x, vec lambda) {
-  return(x / (1+2*lambda));
+vec SimplePenalty<SimpleNorm::RIDGE>::proximal(vec x, double lambda, vec w) {
+  return(x / (1+2*lambda*w));
 }
 
 // ______________________________________________________
@@ -71,35 +72,33 @@ vec SimplePenalty<SimpleNorm::LINF>::elt_norm(vec x) {
 }
 
 template<>
-double SimplePenalty<SimpleNorm::LINF>::pen_norm(vec x, vec wk) {
-  return(max(elt_norm(x) % wk));
+double SimplePenalty<SimpleNorm::LINF>::pen_norm(vec x, vec w) {
+  return(max(elt_norm(x) % w));
 }
 
 template<>
-double SimplePenalty<SimpleNorm::LINF>::dual_norm(vec x, vec wk) {
-  return(sum(elt_norm(x) / wk)) ;
+double SimplePenalty<SimpleNorm::LINF>::dual_norm(vec x, vec w) {
+  return(sum(elt_norm(x) / w)) ;
 }
 
 template<>
-vec SimplePenalty<SimpleNorm::LINF>::proximal(vec x, vec lambda) {
+vec SimplePenalty<SimpleNorm::LINF>::proximal(vec x, double lambda, vec w) {
   uword p = x.n_elem;
   vec res = zeros<vec>(p);
-  
-  // Project onto the l1 ball
-  if (accu(abs(x)/lambda) > 1) {
-    // Project onto the l1 ball
 
+  // Project onto the l1 ball
+  if (accu(w % abs(x)) > lambda) {
+      
     // Reordering absolute values
-    vec u = sort(abs(x)/lambda, "descend");
-    
+    vec u = sort(abs(x) / w, "descend");
+
     // values of the projected coordinate if non zero (dual problem)
-    vec proj = (cumsum(u) - 1)/linspace<vec>(1,p,p);
+    vec proj = (cumsum(u) - lambda)/linspace<vec>(1,p,p);    
     
     // find critical index
     uword i = max(find(u - proj >= 0)) ;
     
-    // res = max(zeros(x.n_elem), abs(x) - proj[i]) ;
-    res = sign(x) % min(abs(x), proj(i) * ones(x.n_elem) );
+    res = sign(x) % min(abs(x) % w, proj(i) * ones(x.n_elem) );
   }
   return(res);  
 }
@@ -136,12 +135,12 @@ double MixedPenalty<MixedNorm::L1L2>::dual_norm(vec x, uvec pk, vec wk) {
 }
 
 template<>
-vec MixedPenalty<MixedNorm::L1L2>::proximal(vec x, vec lambda, uvec pk) {
+vec MixedPenalty<MixedNorm::L1L2>::proximal(vec x, double lambda, vec wk, uvec pk) {
   
   vec res = zeros<vec>(x.n_elem);
   uword ind = 0 ;
   
-  vec tmp = max(zeros(pk.n_elem), 1-lambda/elt_norm(x,pk)) ;
+  vec tmp = max(zeros(pk.n_elem), 1-lambda*wk/elt_norm(x,pk)) ;
   
   for (uword k=0; k<pk.n_elem; k++) {
     res.subvec(ind, ind + pk(k) - 1) = tmp(k) * x.subvec(ind, ind + pk(k) - 1);
@@ -193,7 +192,7 @@ double MixedPenalty<MixedNorm::L1LINF>::dual_norm(vec x, uvec pk, vec wk) {
 }
 
 template<>
-vec MixedPenalty<MixedNorm::L1LINF>::proximal(vec x, vec lambda, uvec pk) {
+vec MixedPenalty<MixedNorm::L1LINF>::proximal(vec x, double lambda, vec wk, uvec pk) {
 
   uword ind = 0 ;
   vec res = zeros<vec>(x.n_elem);
@@ -202,14 +201,14 @@ vec MixedPenalty<MixedNorm::L1LINF>::proximal(vec x, vec lambda, uvec pk) {
     uword p = pk(k);
     vec x_g = x.subvec(ind,ind+p-1) ;
 
-    if ( accu(abs(x_g)) > lambda(k)) {
+    if ( accu(abs(x_g)) > lambda * wk(k)) {
       // Project onto the l1 ball
       
       // Reordering absolute values
       vec u = sort(abs(x_g), "descend");
       
       // values of the projected coordinate if non zero (dual problem)
-      vec proj = (cumsum(u) - lambda(k))/linspace<vec>(1,p,p);
+      vec proj = (cumsum(u) - lambda * wk(k))/linspace<vec>(1,p,p);
       
       // find critical index
       uword i = max(find(u - proj >= 0)) ;
@@ -269,14 +268,14 @@ double MixedPenalty<MixedNorm::COOP>::dual_norm(vec x, uvec pk, vec wk) {
 }
 
 template<>
-vec MixedPenalty<MixedNorm::COOP>::proximal(vec x, vec lambda, uvec pk) {
+vec MixedPenalty<MixedNorm::COOP>::proximal(vec x, double lambda, vec wk, uvec pk) {
   
   vec res = x ;
   uword ind = 0;
   
   for (uword k=0; k<pk.n_elem; k++) {
-    double shrink_pos = fmax(0, 1 - lambda(k)/norm(max(zeros(pk(k)),   res.subvec(ind, ind + pk(k) - 1)), 2)) ;
-    double shrink_neg = fmax(0, 1 - lambda(k)/norm(max(zeros(pk(k)), - res.subvec(ind, ind + pk(k) - 1)), 2));
+    double shrink_pos = fmax(0, 1 - lambda * wk(k)/norm(max(zeros(pk(k)),   res.subvec(ind, ind + pk(k) - 1)), 2)) ;
+    double shrink_neg = fmax(0, 1 - lambda * wk(k)/norm(max(zeros(pk(k)), - res.subvec(ind, ind + pk(k) - 1)), 2));
     
     for (uword j=ind; j<(ind+pk(k)); j++) {
       if(res[j] > 0) {
