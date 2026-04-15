@@ -26,6 +26,7 @@ public:
       vec& beta,
       vec &grad,
       const double& lambda,
+      const vec& weights,
       RegressionData<matrix> &data,
       ActiveSet<matrix>& set,
       const double& accuracy,
@@ -57,6 +58,7 @@ uword OptimizerLINF<matrix>::quadratic(
     vec& beta,
     vec &grad,
     const double& lambda,
+    const vec& weights,
     RegressionData<matrix> &data,
     ActiveSet<matrix>& set,
     const double& accuracy,
@@ -75,14 +77,14 @@ uword OptimizerLINF<matrix>::quadratic(
     // SOLVE THE QUADRATIC PROBLEM
     vec XX_B = data.XTX_.cols(B) * theta;
     if (set.A_.is_empty()) {
-      double b  = (dot(theta, data.XTy_(B)) - lambda);
+      double b  = dot(theta, data.XTy_(B)) - lambda * mean(weights(B));
       beta(B) = theta * (b/sum(theta % XX_B(B),0)) ;
     } else {
       // Constructing the system (KKT)
       vec tmp = join_cols(XX_B(set.A_),sum(theta % XX_B(B),0)) ;
       mat XX = join_rows(join_cols(set.XATXA_, trans(XX_B(set.A_))), tmp);
       vec b = data.XTy_(set.A_) ; b.resize(b.n_elem + 1) ;
-      b.tail(1) = dot(theta, data.XTy_(B))-lambda;
+      b.tail(1) = dot(theta, data.XTy_(B)) - lambda * mean(weights(B));
       if (set.use_chol_) {
         // Solving via Cholesky factorization...
         mat R = updateCholeskyFromExisting(set.R_, tmp) ;

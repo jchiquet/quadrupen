@@ -52,6 +52,7 @@ public:
       vec &beta,
       vec &grad,
       const double &lambda ,
+      const vec &weights ,
       RegressionData<matrix> &data,
       ActiveSet<matrix> &set,
       const double& accuracy,
@@ -108,7 +109,7 @@ uword SimpleOptimizer<matrix,norm>::solve(
     } else { // QUADRA solver
       try {
         inner_iter_.push_back(
-          quadratic(beta, grad, lambda, data, set, 1e-5, 10000)
+          quadratic(beta, grad, lambda, weights(set.A_), data, set, 1e-5, 10000)
         );
       } catch (std::runtime_error& error) {
         if (verbosity_ > 0) {

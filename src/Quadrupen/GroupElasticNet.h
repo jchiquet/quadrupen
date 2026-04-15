@@ -54,8 +54,7 @@ GroupElasticNet<matrix,norm>::GroupElasticNet(
   GroupSparseRegularizer<matrix,norm>::GroupSparseRegularizer(data, regParam) {
 
     // Scale the structuring matrix according to the amount of l2 penalty 
-    data_.scale_struct(sqrt(gamma_)*ones(data_.p_)) ;
-    // data_.scale_regressors(lambda_factor_) ;
+    data_.scale_struct(gamma_) ;
     
     // Initialize the active set, beta_ and gradient with starting coefficient
     vec beta0 = control["beta0"] ;

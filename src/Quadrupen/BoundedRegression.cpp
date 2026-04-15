@@ -20,13 +20,12 @@ BoundedRegression::BoundedRegression(
     solver_ = OptimizerLINF<mat>(penalty_, control) ;
     
     // Scale the structuring matrix according to main penalty factor and the amount of l2 penalty 
-    data_.scale_struct(sqrt(gamma_)*ones(data_.p_)) ;
-    // data_.scale_struct(sqrt(gamma_)*pow(lambda_factor_,-1/2)) ;
-    
+    data_.scale_struct(gamma_) ;
+
     // Initialize the active set with starting coefficient
     set_= ActiveSet(data, as<bool>(control["usechol"])) ;
     
-    // Compute the Gram matrix (+ S scaled)
+    // Compute the Gram matrix (+ gamma * S)
     data_.precompute_XTX() ;
 
     beta_ = zeros<vec>(data_.p_) ; // vector of current parameters
@@ -99,7 +98,7 @@ List BoundedRegression::solution_path(const List& control) {
             throw std::runtime_error("Fail to converge...");
           } else {
             ioptim.push_back(
-              solver_.quadratic(beta_, grad_, lambda_, data_, set_, accuracy, 10000)
+              solver_.quadratic(beta_, grad_, lambda_, lambda_factor_, data_, set_, accuracy, 10000)
             );
           }
         } catch (std::runtime_error& error) {
@@ -131,7 +130,7 @@ List BoundedRegression::solution_path(const List& control) {
       break;
     } else {
       coef_ = join_rows(coef_, beta_/data_.norm_X_) ;
-      intercept_.push_back(data_.y_bar_ - as_scalar(dot(beta_, data_.X_bar_)));
+      intercept_.push_back(data_.y_bar_ - dot(beta_, data_.X_bar_));
       df_.push_back(get_df()) ;
     }
 

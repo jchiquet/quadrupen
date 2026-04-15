@@ -21,9 +21,8 @@ List lava_dense_cpp(
   // Scale the structuring matrix according to main penalty factor and the amount of l2 penalty 
   vec lambda_factor = as<vec>(regParam["lambda_factor"]) ;
   double gamma = as<double>(regParam["gamma"]) ;
-  data.scale_struct(sqrt(gamma)*pow(lambda_factor,-1)) ;
-  data.scale_regressors(lambda_factor) ;
-  
+  data.scale_struct(gamma) ;
+
   // Create the scaled/transformed data
   mat C_inv = solve(trimatu(chol(data.S_.as_dense())), eye(data.p_, data.p_)) ;
   mat U, V ; vec D ; // U D V = X C^-1
