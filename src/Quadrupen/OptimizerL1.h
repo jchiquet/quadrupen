@@ -27,6 +27,7 @@ public:
       vec &beta,
       vec &grad,
       const double &lambda ,
+      const vec &weights ,
       RegressionData<matrix> &data,
       ActiveSet<matrix> &set,
       const double& accuracy,
@@ -43,7 +44,8 @@ template <typename matrix>
 uword OptimizerL1<matrix>::quadratic(
     vec &beta,
     vec &grad,
-    const double &lambda ,
+    const double &lambda,
+    const vec &weights,
     RegressionData<matrix> &data,
     ActiveSet<matrix> &set,
     const double& accuracy,
@@ -55,11 +57,11 @@ uword OptimizerL1<matrix>::quadratic(
   vec betak = beta;
   vec theta = sign(beta) ; // vector of sign of the solution
   if (set.use_chol_) {
-    betak =  set.Rinv_* set.Rinv_.t() * (data.XTy_(set.A_) - lambda * theta);
+    betak =  set.Rinv_* set.Rinv_.t() * (data.XTy_(set.A_) - lambda * weights % theta);
   } else {
     iter_in = 
       this->conjugate_gradient(betak, set.XATXA_, 
-                               data.XTy_(set.A_) - lambda*theta,
+                               data.XTy_(set.A_) - lambda * weights % theta,
                                accuracy, max_iter) ;
   }
   
@@ -85,11 +87,11 @@ uword OptimizerL1<matrix>::quadratic(
     theta(i_swap) = - sign(grad_swap) ;
     vec betal = betak;
     if (set.use_chol_) {
-      betal =  set.Rinv_* set.Rinv_.t() * (data.XTy_(set.A_) - lambda * theta);
+      betal =  set.Rinv_* set.Rinv_.t() * (data.XTy_(set.A_) - lambda * weights % theta);
     } else {
       iter_in = 
         this->conjugate_gradient(betal, set.XATXA_, 
-                                 data.XTy_(set.A_) - lambda*theta,
+                                 data.XTy_(set.A_) - lambda * weights %theta,
                                  accuracy, max_iter) ;
     }
     

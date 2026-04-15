@@ -36,11 +36,13 @@ public:
 
   using Optimizer<matrix>::optimality_gap ;
   using Optimizer<matrix>::fista ;
+  using Optimizer<matrix>::fista_LM ;
   
   uword solve(
       vec& beta,
       vec& grad,
       const double& lambda, 
+      const vec& weights,
       const double& gamma, 
       RegressionData<matrix> &data,
       ActiveSet<matrix>& set
@@ -50,6 +52,7 @@ public:
       vec &beta,
       vec &grad,
       const double &lambda ,
+      const vec &weights ,
       RegressionData<matrix> &data,
       ActiveSet<matrix> &set,
       const double& accuracy,
@@ -69,23 +72,20 @@ uword SimpleOptimizer<matrix,norm>::solve(
     vec& beta,
     vec& grad,
     const double& lambda,
+    const vec& weights,
     const double& gamma, 
     RegressionData<matrix> &data,
     ActiveSet<matrix>& set) {
   
   if (verbosity_) Rprintf("\n current penalty = %f",lambda) ;
   if (verbosity_) Rprintf("\n nb active variables = %i\n", set.size()) ;
-  
-  vec optimality = penalty_.elt_norm(grad) - lambda ;
+
+  vec optimality = penalty_.elt_dual_norm(grad) - lambda * weights ;
   uword var_in = optimality.index_max() ; // highest violation of KKT conditions 
   uword status = 0 ; iter_ = 0 ; bool success = true ; 
   gap_ = std::max(0.0, optimality(var_in)) ;
   J_ = datum::inf ; D_ = datum::inf ;
 
-  auto prox = [this](vec x, double L) {
-    return(penalty_.proximal(x, L));
-  } ;
-  
   while ((gap_ > accuracy_) && (iter_ <= maxiter_)) {
     R_CheckUserInterrupt();
     iter_++;
@@ -96,17 +96,20 @@ uword SimpleOptimizer<matrix,norm>::solve(
       beta.resize(beta.size()+1) ; // update the vector of active parameters
       beta.tail(1) = - 1e-3 * sign(grad(var_in)) ;
       if (verbosity_) {Rprintf("\tnewly added variable %i\n",var_in);}
-    } else if (verbosity_) {Rprintf("\talready in %i\n",var_in);}
+    }
     
     // OPTIMIZATION OVER THE CURRENTLY ACTIVATED VARIABLES
     if (algorithm_ == FISTA) {
+      auto prox = [this, set, weights](vec x, double l) {
+        return(penalty_.proximal(x, l, weights(set.A_)));
+      } ;
       inner_iter_.push_back(
-        fista(beta, grad, lambda, data, set, prox, 1e-10, 10000)
+        fista_LM(beta, grad, lambda, data, set, prox, 1e-10, 10000)
       );
     } else { // QUADRA solver
       try {
         inner_iter_.push_back(
-          quadratic(beta, grad, lambda, data, set, 1e-5, 10000)
+          quadratic(beta, grad, lambda, weights(set.A_), data, set, 1e-5, 10000)
         );
       } catch (std::runtime_error& error) {
         if (verbosity_ > 0) {
@@ -118,7 +121,7 @@ uword SimpleOptimizer<matrix,norm>::solve(
     
     // OPTIMALITY TESTING
     grad = - data.XTy_ + set.XTXA_ * beta ;
-    optimality = penalty_.elt_norm(grad) - lambda ;
+    optimality = penalty_.elt_dual_norm(grad) - lambda * weights;
     var_in = optimality.index_max() ;
     gap_ = std::max(0.0, optimality(var_in)) ;
     

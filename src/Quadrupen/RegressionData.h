@@ -49,7 +49,7 @@ public:
 
   void standardize();
 
-  void scale_struct(vec weights) ;
+  void scale_struct(const double gamma) ;
 
   void precompute_XTX() ;
     
@@ -90,9 +90,8 @@ RegressionData<matrix>::RegressionData(
 }
 
 template <typename matrix>
-void RegressionData<matrix>::scale_struct(vec weights) {
-  sp_mat diag_S = spdiags(weights, ivec({0}), p_, p_) ;
-  S_ = diag_S * S_ * diag_S  ; 
+void RegressionData<matrix>::scale_struct(const double gamma) {
+  S_ *= gamma ; 
 };
 
 template <typename matrix>
@@ -100,29 +99,29 @@ void RegressionData<matrix>::precompute_XTX() {
   XTX_ = X_.t() * X_ - n_ * X_bar_ * X_bar_.t() + S_;
 };
 
-template <>
-inline void RegressionData<sp_mat>::scale_regressors(vec weights) {
-  
-  if (any(weights != 1)) {
-    for (uword i=0; i<n_; i++) {
-      X_.row(i) /= trans(weights) ;
-    }
-    X_bar_ /= weights ;
-  }
-  XTy_ = X_.t() * (y_-y_bar_) - sum(y_-y_bar_) * X_bar_ ;
-
-};
-
-template <>
-inline void RegressionData<mat>::scale_regressors(vec weights) {
-  
-  if (any(weights != 1)) {
-    X_.each_row() /= trans(weights) ;
-    X_bar_ /= weights ;
-  }
-  XTy_ = X_.t() * (y_-y_bar_) - sum(y_-y_bar_) * X_bar_ ;
-
-};
+// template <>
+// inline void RegressionData<sp_mat>::scale_regressors(vec weights) {
+//   
+//   if (any(weights != 1)) {
+//     for (uword i=0; i<n_; i++) {
+//       X_.row(i) /= trans(weights) ;
+//     }
+//     X_bar_ /= weights ;
+//   }
+//   XTy_ = X_.t() * (y_-y_bar_) - sum(y_-y_bar_) * X_bar_ ;
+// 
+// };
+// 
+// template <>
+// inline void RegressionData<mat>::scale_regressors(vec weights) {
+//   
+//   if (any(weights != 1)) {
+//     X_.each_row() /= trans(weights) ;
+//     X_bar_ /= weights ;
+//   }
+//   XTy_ = X_.t() * (y_-y_bar_) - sum(y_-y_bar_) * X_bar_ ;
+// 
+// };
 
 template <typename matrix>
 void RegressionData<matrix>::standardize() {

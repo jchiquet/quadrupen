@@ -13,7 +13,7 @@ stability(
     FALSE),
   weakness = 1,
   verbose = TRUE,
-  cores = parallel::detectCores() - 2
+  cores = 1
 )
 
 \method{stability}{QuadrupenFit}(
@@ -47,8 +47,8 @@ Default is 1` for no randomization. See details below.}
 \item{verbose}{logical; indicates if the progression should be
 displayed. Default is \code{TRUE}.}
 
-\item{cores}{the number of cores to use. The default uses all
-the cores available.}
+\item{cores}{the number of cores to use. The default uses 1 core
+(safer in case your BLAS/LAPACK libraries are multithreaded)}
 }
 \value{
 an object with class \code{\link{StabilityPath}} is sent back and stored as a

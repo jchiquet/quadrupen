@@ -30,10 +30,9 @@ class ElasticNet :
     using Regularizer<matrix>::get_lambda_seq ;
     using SparseRegularizer<matrix>::nzeros_   ;
     using SparseRegularizer<matrix>::debiased_ ;
+    using SparseRegularizer<matrix>::beta_debiased_ ;
     using SparseRegularizer<matrix>::intercept_debiased_   ;
     using SparseRegularizer<matrix>::active_ ;
-    using SparseRegularizer<matrix>::iA_   ;
-    using SparseRegularizer<matrix>::jA_   ;
     using SimpleSparseRegularizer<matrix,SimpleNorm::L1>::penalty_   ;
     using SimpleSparseRegularizer<matrix,SimpleNorm::L1>::set_ ;
     using SimpleSparseRegularizer<matrix,SimpleNorm::L1>::get_lambda_max ;
@@ -58,8 +57,7 @@ ElasticNet<matrix>::ElasticNet(
   SimpleSparseRegularizer<matrix,SimpleNorm::L1>::SimpleSparseRegularizer(data, regParam) {
 
     // Scale the structuring matrix according to main penalty factor and the amount of l2 penalty 
-    data_.scale_struct(sqrt(gamma_)*pow(lambda_factor_,-1)) ;
-    data_.scale_regressors(lambda_factor_) ;
+    data_.scale_struct(gamma_) ;
     
     // Initialize the active set, beta_ and gradient with starting coefficient
     vec beta0 = control["beta0"] ;
@@ -114,7 +112,7 @@ List ElasticNet<matrix>::solution_path(const List& control) {
     
     // OPTIMIZER LOOP (FIX-LAMBDA VALUE): IDENTIFY THE ACTIVE SET AND SOLVE
     status.push_back(
-      solver_.solve(beta_, grad_, lambda_, gamma_, data_, set_)
+      solver_.solve(beta_, grad_, lambda_, lambda_factor_, gamma_, data_, set_)
     ) ;
     gap.push_back(solver_.gap_) ;
     iter.push_back(solver_.iter_) ;
@@ -123,14 +121,17 @@ List ElasticNet<matrix>::solution_path(const List& control) {
     if (status.back() >= 2) {
       break;
     } else {
-      active_.push_back(set_.A_) ;
-      set_.inverse_Gram() ;
-      nzeros_ = join_cols(nzeros_, beta_/(data_.norm_X_(set_.A_) % lambda_factor_(set_.A_)));
-      vec beta_debiased = set_.XATXAinv_ * (data_.XTy_(set_.A_) - data_.X_bar_(set_.A_) * accu(data_.y_)) ;
-      debiased_ = join_cols(debiased_, beta_debiased/(data_.norm_X_(set_.A_) % lambda_factor_(set_.A_)));
+      // store current coefficients
+      nzeros_ = join_cols(nzeros_, beta_/(data_.norm_X_(set_.A_)));
       intercept_.push_back(data_.y_bar_ - dot(beta_, data_.X_bar_(set_.A_))); // X_bar is scaled
-      intercept_debiased_.push_back(data_.y_bar_ - dot(beta_debiased, data_.X_bar_(set_.A_))) ;
+      // compute and store debiased coefficients
+      set_.inverse_Gram() ;
+      beta_debiased_ = set_.XATXAinv_ * (data_.XTy_(set_.A_) - data_.X_bar_(set_.A_) * accu(data_.y_)) ;
+      debiased_ = join_cols(debiased_, beta_debiased_/(data_.norm_X_(set_.A_)));
+      intercept_debiased_.push_back(data_.y_bar_ - dot(beta_debiased_, data_.X_bar_(set_.A_))) ;
+      // store degrees fo freedom and current active set
       df_.push_back(get_df()) ;
+      active_.push_back(set_.A_) ;
     }
     
     timing.push_back(timer.toc()) ;

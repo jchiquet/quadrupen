@@ -91,11 +91,11 @@ uword GroupOptimizer<matrix,norm>::solve(
     
     // OPTIMIZATION OVER THE CURRENTLY ACTIVATED VARIABLES
     // if (algorithm_ == FISTA) {
-    auto prox = [this, set](vec x, vec L) {
-      return(penalty_.proximal(x, L, set.grp_sizes_(set.G_)));
+    auto prox = [this, set, weights](vec x, double l) {
+      return(penalty_.proximal(x, l, weights(set.G_), set.grp_sizes_(set.G_)));
     } ;
     inner_iter_.push_back(
-      fista_LM(beta, grad, lambda_w(set.G_), data, set, prox, 1e-6, 10000)
+      fista_LM(beta, grad, lambda, data, set, prox, 1e-6, 10000)
     );
     // }
 

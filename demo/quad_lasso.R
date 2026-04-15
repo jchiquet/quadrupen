@@ -34,7 +34,7 @@ cv.simple <- cross_validate(fit)
 plot(cv.simple)
 
 ## Call to stability selection function, 200 subsampling
-stab <- stability(fit, n_subsamples = 200, cores = 10)
+stab <- stability(fit, n_subsamples = 200, cores = 1)
 ## a quick summary of the fit
 print(stab)
 ## plot the stability path

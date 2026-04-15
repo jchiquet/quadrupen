@@ -285,8 +285,8 @@ QuadrupenFit <- R6::R6Class(
     #' @param verbose logical; indicates if the progression (the current
     #' `lambda2` should be displayed. Default is `TRUE.`
     #'
-    #' @param cores the number of cores to use. The default uses all
-    #' the cores available.
+    #' @param cores the number of cores to use. The default uses 1 core 
+    #' (safer in case your BLAS/LAPACK libraries are multithreaded)
     #'
     #' @return an object with class [CrossValidation] is sent back and stored as a 
     #' field of the original [QuadrupenFit] object.
@@ -296,7 +296,7 @@ QuadrupenFit <- R6::R6Class(
       function(
           K       = 10,
           folds   = split(sample(1:self$nobs), rep(1:K, length = self$nobs)),
-          lambda2 = self$minor_tuning, verbose = TRUE, cores = max(K, detectCores() - 2)) {
+          lambda2 = self$minor_tuning, verbose = TRUE, cores = 1) {
 
         ## Some variables and copies useful for CV work
         K <- length(folds)
@@ -336,6 +336,7 @@ QuadrupenFit <- R6::R6Class(
           }
           err
         }
+
         err <- do.call(rbind, 
           parallel::mcmapply(FUN = one_fold, fold = fold_id, lambda2 = lambda2_vec, 
                    mc.cores = cores,
@@ -383,8 +384,8 @@ QuadrupenFit <- R6::R6Class(
     #' @param verbose logical; indicates if the progression should be
     #' displayed. Default is `TRUE`.
     #'
-    #' @param cores the number of cores to use. The default uses all
-    #' the cores available.
+    #' @param cores the number of cores to use. The default uses 1 core 
+    #' (safer in case your BLAS/LAPACK libraries are multithreaded)
     #'
     #' @return an object with class [StabilityPath] is sent back and stored as a 
     #' field of the original [QuadrupenFit] object.
@@ -396,7 +397,7 @@ QuadrupenFit <- R6::R6Class(
           subsamples     = replicate(n_subsamples, sample(1:self$nobs, subsample_size), simplify = FALSE),
           weakness       = 1,
           verbose        = TRUE,
-          cores       = detectCores() - 2) {
+          cores          = 1) {
       
       ## =============================================================
       ## INITIALIZATION & PARAMETERS RECOVERY

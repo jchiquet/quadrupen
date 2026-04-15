@@ -43,8 +43,6 @@ public:
   vec   nzeros_ ; // contains non-zero values of all betas (for all lambda values)
   vec debiased_ ; // contains debiased non-zero values of all betas (for all lambda values)
   vector<uvec> active_ ; // successively activated variable (for all lambda values)
-  urowvec iA_   ; // contains row indices of the non-zero values
-  urowvec jA_   ; // contains column indices of the non-zero values
   vector<double >intercept_debiased_ ; // debiased vector of intercept values (for all lambda values)
   vec beta_debiased_ ; // vector of current active beta debiased (for the current lambda)
   
@@ -102,10 +100,14 @@ class SimpleSparseRegularizer : public SparseRegularizer<matrix> {
 public:
   
   using Regularizer<matrix>::data_ ;
+  using Regularizer<matrix>::lambda_factor_ ;
   
   SimpleSparseRegularizer() {} ;
   SimpleSparseRegularizer(const RegressionData<matrix>&, const List&);
-  double get_lambda_max() {return(penalty_.dual_norm(data_.XTy_));}
+  double get_lambda_max() 
+  {
+    return(penalty_.dual_norm(data_.XTy_, lambda_factor_));
+  }
   
   ActiveSet<matrix> set_       ; // Active set of variable and data
   SimplePenalty<norm> penalty_ ; // main penalty object 

@@ -11,7 +11,7 @@ cross_validate(
   folds = split(sample(1:object$nobs), rep(1:K, length = object$nobs)),
   lambda2 = object$minor_tuning,
   verbose = TRUE,
-  cores = parallel::detectCores() - 2
+  cores = 1
 )
 
 \method{cross_validate}{QuadrupenFit}(
@@ -41,8 +41,8 @@ using the same folds for each \code{lambda2}.}
 \item{verbose}{logical; indicates if the progression (the current
 \code{lambda2} should be displayed. Default is \code{TRUE.}}
 
-\item{cores}{the number of cores to use. The default uses all
-the cores available.}
+\item{cores}{the number of cores to use. The default uses 1 core
+(safer in case your BLAS/LAPACK libraries are multithreaded)}
 }
 \value{
 an object with class \code{\link{CrossValidation}} is sent back and stored as a
