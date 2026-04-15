@@ -256,7 +256,7 @@ Function that computes K-fold cross-validated error of a
   folds = split(sample(1:self$nobs), rep(1:K, length = self$nobs)),
   lambda2 = self$minor_tuning,
   verbose = TRUE,
-  cores = max(K, detectCores() - 2)
+  cores = 1
 )}\if{html}{\out{</div>}}
 }
 
@@ -278,8 +278,8 @@ using the same folds for each \code{lambda2}.}
 \item{\code{verbose}}{logical; indicates if the progression (the current
 \code{lambda2} should be displayed. Default is \code{TRUE.}}
 
-\item{\code{cores}}{the number of cores to use. The default uses all
-the cores available.}
+\item{\code{cores}}{the number of cores to use. The default uses 1 core
+(safer in case your BLAS/LAPACK libraries are multithreaded)}
 }
 \if{html}{\out{</div>}}
 }
@@ -302,7 +302,7 @@ procedure as introduced by Meinshausen and Buhlmann (2010).
     FALSE),
   weakness = 1,
   verbose = TRUE,
-  cores = detectCores() - 2
+  cores = 1
 )}\if{html}{\out{</div>}}
 }
 
@@ -326,8 +326,8 @@ Default is 1` for no randomization. See details below.}
 \item{\code{verbose}}{logical; indicates if the progression should be
 displayed. Default is \code{TRUE}.}
 
-\item{\code{cores}}{the number of cores to use. The default uses all
-the cores available.}
+\item{\code{cores}}{the number of cores to use. The default uses 1 core
+(safer in case your BLAS/LAPACK libraries are multithreaded)}
 }
 \if{html}{\out{</div>}}
 }

@@ -192,8 +192,8 @@ criteria.QuadrupenFit <-
 #' @param verbose logical; indicates if the progression (the current
 #' `lambda2` should be displayed. Default is `TRUE.`
 #'
-#' @param cores the number of cores to use. The default uses all
-#' the cores available.
+#' @param cores the number of cores to use. The default uses 1 core 
+#' (safer in case your BLAS/LAPACK libraries are multithreaded)
 #'
 #' @note If the user runs the fitting method with option
 #' \code{'bulletproof'} set to \code{FALSE}, the algorithm may stop
@@ -248,7 +248,7 @@ cross_validate <-
   function(object, 
            K       = 10,
            folds   = split(sample(1:object$nobs), rep(1:K, length=object$nobs)),
-           lambda2 = object$minor_tuning, verbose = TRUE, cores = parallel::detectCores() - 2
+           lambda2 = object$minor_tuning, verbose = TRUE, cores = 1
   ) {
     UseMethod("cross_validate", object)
   }
@@ -290,8 +290,8 @@ cross_validate.QuadrupenFit <-
 #' @param verbose logical; indicates if the progression should be
 #' displayed. Default is `TRUE`.
 #'
-#' @param cores the number of cores to use. The default uses all
-#' the cores available.
+#' @param cores the number of cores to use. The default uses 1 core 
+#' (safer in case your BLAS/LAPACK libraries are multithreaded)
 #'
 #' @return an object with class [`StabilityPath`] is sent back and stored as a 
 #' field of the original [QuadrupenFit] object.
@@ -356,7 +356,7 @@ stability <-
            subsamples     = replicate(n_subsamples, sample(1:object$nobs, subsample_size), simplify=FALSE),
            weakness       = 1,
            verbose        = TRUE,
-           cores          = parallel::detectCores() - 2) {
+           cores          = 1) {
     UseMethod("stability", object)
   }
 
