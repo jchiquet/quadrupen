@@ -9,7 +9,7 @@ procedure as introduced by Meinshausen and Buhlmann (2010)."></head><body>
 
     <a class="navbar-brand me-2" href="../index.html">quadrupen</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3-9900</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3-9920</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -50,7 +50,7 @@ procedure as introduced by Meinshausen and Buhlmann (2010).</p>
 <span>    <span class="cn">FALSE</span><span class="op">)</span>,</span>
 <span>  weakness <span class="op">=</span> <span class="fl">1</span>,</span>
 <span>  verbose <span class="op">=</span> <span class="cn">TRUE</span>,</span>
-<span>  cores <span class="op">=</span> <span class="fu">parallel</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/r/parallel/detectCores.html" class="external-link">detectCores</a></span><span class="op">(</span><span class="op">)</span> <span class="op">-</span> <span class="fl">2</span></span>
+<span>  cores <span class="op">=</span> <span class="fl">1</span></span>
 <span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># S3 method for class 'QuadrupenFit'</span></span>
@@ -102,8 +102,8 @@ displayed. Default is <code>TRUE</code>.</p></dd>
 
 
 <dt id="arg-cores">cores<a class="anchor" aria-label="anchor" href="#arg-cores"></a></dt>
-<dd><p>the number of cores to use. The default uses all
-the cores available.</p></dd>
+<dd><p>the number of cores to use. The default uses 1 core
+(safer in case your BLAS/LAPACK libraries are multithreaded)</p></dd>
 
 </dl></div>
     <div class="section level2">

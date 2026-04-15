@@ -306,7 +306,7 @@ fit, possibly on a grid of `lambda1`, `lambda2`.
       folds = split(sample(1:self$nobs), rep(1:K, length = self$nobs)),
       lambda2 = self$minor_tuning,
       verbose = TRUE,
-      cores = max(K, detectCores() - 2)
+      cores = 1
     )
 
 #### Arguments
@@ -335,7 +335,8 @@ fit, possibly on a grid of `lambda1`, `lambda2`.
 
 - `cores`:
 
-  the number of cores to use. The default uses all the cores available.
+  the number of cores to use. The default uses 1 core (safer in case
+  your BLAS/LAPACK libraries are multithreaded)
 
 #### Returns
 
@@ -359,7 +360,7 @@ as introduced by Meinshausen and Buhlmann (2010).
         FALSE),
       weakness = 1,
       verbose = TRUE,
-      cores = detectCores() - 2
+      cores = 1
     )
 
 #### Arguments
@@ -393,7 +394,8 @@ as introduced by Meinshausen and Buhlmann (2010).
 
 - `cores`:
 
-  the number of cores to use. The default uses all the cores available.
+  the number of cores to use. The default uses 1 core (safer in case
+  your BLAS/LAPACK libraries are multithreaded)
 
 #### Returns
 

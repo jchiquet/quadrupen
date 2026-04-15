@@ -14,7 +14,7 @@ stability(
     FALSE),
   weakness = 1,
   verbose = TRUE,
-  cores = parallel::detectCores() - 2
+  cores = 1
 )
 
 # S3 method for class 'QuadrupenFit'
@@ -66,7 +66,8 @@ stability(
 
 - cores:
 
-  the number of cores to use. The default uses all the cores available.
+  the number of cores to use. The default uses 1 core (safer in case
+  your BLAS/LAPACK libraries are multithreaded)
 
 ## Value
 

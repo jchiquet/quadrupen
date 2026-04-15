@@ -9,7 +9,7 @@ Class "QuadrupenFit"'></head><body>
 
     <a class="navbar-brand me-2" href="../index.html">quadrupen</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3-9900</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3-9920</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -289,7 +289,7 @@ Cross-validation for Quadrupen object</p>
 <span>  folds <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/split.html" class="external-link">split</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/sample.html" class="external-link">sample</a></span><span class="op">(</span><span class="fl">1</span><span class="op">:</span><span class="va">self</span><span class="op">$</span><span class="va">nobs</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fl">1</span><span class="op">:</span><span class="va">K</span>, length <span class="op">=</span> <span class="va">self</span><span class="op">$</span><span class="va">nobs</span><span class="op">)</span><span class="op">)</span>,</span>
 <span>  lambda2 <span class="op">=</span> <span class="va">self</span><span class="op">$</span><span class="va">minor_tuning</span>,</span>
 <span>  verbose <span class="op">=</span> <span class="cn">TRUE</span>,</span>
-<span>  cores <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Extremes.html" class="external-link">max</a></span><span class="op">(</span><span class="va">K</span>, <span class="fu">detectCores</span><span class="op">(</span><span class="op">)</span> <span class="op">-</span> <span class="fl">2</span><span class="op">)</span></span>
+<span>  cores <span class="op">=</span> <span class="fl">1</span></span>
 <span><span class="op">)</span></span></code></pre></div><p></p></div>
 </div>
 
@@ -319,8 +319,8 @@ using the same folds for each <code>lambda2</code>.</p></dd>
 
 
 <dt><code>cores</code></dt>
-<dd><p>the number of cores to use. The default uses all
-the cores available.</p></dd>
+<dd><p>the number of cores to use. The default uses 1 core
+(safer in case your BLAS/LAPACK libraries are multithreaded)</p></dd>
 
 
 </dl><p></p></div>
@@ -343,7 +343,7 @@ procedure as introduced by Meinshausen and Buhlmann (2010).</p><div class="secti
 <span>    <span class="cn">FALSE</span><span class="op">)</span>,</span>
 <span>  weakness <span class="op">=</span> <span class="fl">1</span>,</span>
 <span>  verbose <span class="op">=</span> <span class="cn">TRUE</span>,</span>
-<span>  cores <span class="op">=</span> <span class="fu">detectCores</span><span class="op">(</span><span class="op">)</span> <span class="op">-</span> <span class="fl">2</span></span>
+<span>  cores <span class="op">=</span> <span class="fl">1</span></span>
 <span><span class="op">)</span></span></code></pre></div><p></p></div>
 </div>
 
@@ -377,8 +377,8 @@ displayed. Default is <code>TRUE</code>.</p></dd>
 
 
 <dt><code>cores</code></dt>
-<dd><p>the number of cores to use. The default uses all
-the cores available.</p></dd>
+<dd><p>the number of cores to use. The default uses 1 core
+(safer in case your BLAS/LAPACK libraries are multithreaded)</p></dd>
 
 
 </dl><p></p></div>
