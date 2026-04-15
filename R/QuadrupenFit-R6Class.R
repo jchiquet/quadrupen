@@ -336,6 +336,7 @@ QuadrupenFit <- R6::R6Class(
           }
           err
         }
+
         err <- do.call(rbind, 
           parallel::mcmapply(FUN = one_fold, fold = fold_id, lambda2 = lambda2_vec, 
                    mc.cores = cores,

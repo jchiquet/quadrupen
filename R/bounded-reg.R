@@ -88,7 +88,7 @@ bounded.reg <- function(x,
   ## 
   ctrl <- optim_breg_default(ncol(x))
   ctrl$maxfeat <- maxfeat
-  if (!is.null(control$method)) if (control$method != "quadra") ctrl$threshold <- 1e-2
+  # if (!is.null(control$method)) if (control$method != "quadra") ctrl$threshold <- 1e-2
   ctrl[names(control)] <- control # default overwritten by user specifications
   ctrl$method <- switch(ctrl$method, quadra = "QUADRA", pathwise = "PATHWISE", fista = "FISTA", 0)
   ctrl$normalize <- normalize

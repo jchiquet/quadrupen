@@ -89,7 +89,7 @@ List BoundedRegression::solution_path(const List& control) {
       current_it++;
       if (algorithm == FISTA) {
         ioptim.push_back(
-          solver_.fista_LM(beta_, grad_, lambda_, data_, set_, prox, 1e-3, 10000)
+          solver_.fista_LM(beta_, grad_, lambda_, data_, set_, prox, 1e-5, 10000)
         );
         break;
       } else { // QUADRA solver
@@ -131,6 +131,7 @@ List BoundedRegression::solution_path(const List& control) {
     } else {
       coef_ = join_rows(coef_, beta_/data_.norm_X_) ;
       intercept_.push_back(data_.y_bar_ - dot(beta_, data_.X_bar_));
+      bounded_.push_back(find(abs(beta_) == max(abs(beta_)))) ;
       df_.push_back(get_df()) ;
     }
 

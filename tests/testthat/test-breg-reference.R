@@ -7,7 +7,8 @@ test_that("Bounded regression with lambda2 = 0, QUADRA - test on the documentati
   res <- bounded.reg(
     testDataBreg$x,
     testDataBreg$y,
-    lambda2 = 0
+    lambda2 = 0,
+    control = list(method = "quadra")
     )
   expect_equal(res$coefficients, t(testDataBreg$breg_lambda2_0$coefficients), tolerance = tol)
 
@@ -18,7 +19,8 @@ test_that("Bounded regression with lambda2 = 5, QUADRA - test on the documentati
   res <- bounded.reg(
     testDataBreg$x,
     testDataBreg$y,
-    lambda2 = 5
+    lambda2 = 5,
+    control = list(method = "quadra")
   )
   expect_equal(res$coefficients, t(testDataBreg$breg_lambda2_5$coefficients), tolerance = tol)
   
@@ -30,7 +32,8 @@ test_that("Bounded regression with lambda2 = 10 + S, QUADRA - test on the docume
     testDataBreg$x,
     testDataBreg$y,
     lambda2 = 10, 
-    struct = testDataBreg$S
+    struct = testDataBreg$S,
+    control = list(method = "quadra")
   )
   expect_equal(res$coefficients, t(testDataBreg$breg_lambda2_10_S$coefficients), tolerance = tol)
   
@@ -42,7 +45,7 @@ test_that("Bounded regression with lambda2 = 0, QUADRA with conjuguate gradient 
     testDataBreg$x,
     testDataBreg$y,
     lambda2 = 0,
-    control = list(usechol = FALSE)
+    control = list(usechol = FALSE, method = "quadra")
   )
   expect_equal(res$coefficients, t(testDataBreg$breg_lambda2_0$coefficients), tolerance = tol)
   
@@ -54,7 +57,7 @@ test_that("Bounded regression with lambda2 = 5, QUADRA with conjuguate gradient 
     testDataBreg$x,
     testDataBreg$y,
     lambda2 = 5,
-    control = list(usechol = FALSE)
+    control = list(usechol = FALSE, method = "quadra")
   )
   expect_equal(res$coefficients, t(testDataBreg$breg_lambda2_5$coefficients), tolerance = tol)
   
@@ -67,7 +70,7 @@ test_that("Bounded regression with lambda2 = 10 + S, QUADRA with conjuguate grad
     testDataBreg$y,
     lambda2 = 10, 
     struct = testDataBreg$S,
-    control = list(usechol = FALSE)
+    control = list(usechol = FALSE, method = "quadra")
   )
   expect_equal(res$coefficients, t(testDataBreg$breg_lambda2_10_S$coefficients), tolerance = tol)
   

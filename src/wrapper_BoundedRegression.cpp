@@ -28,6 +28,7 @@ List bounded_regression_cpp(
       Named("l2")   = bounded.gamma_
     ),
     Named("coef")        = bounded.coefficients(),
+    Named("active")      = bounded.unbounded_var(),
     Named("intercept")   = bounded.intercept_,
     Named("normx")       = bounded.data_.norm_X_,
     Named("df")          = bounded.df_,

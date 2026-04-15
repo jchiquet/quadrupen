@@ -46,7 +46,7 @@ optim_breg_default <- function(d)
   list(verbose     = 0, # default control options
        timer       = FALSE,
        maxiter     = 10,
-       method      = "quadra",
+       method      = "fista",
        threshold   = 1e-4,
        monitor     = 0,
        usechol     = FALSE

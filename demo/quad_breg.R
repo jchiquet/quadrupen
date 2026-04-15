@@ -1,7 +1,7 @@
 ## Mutivariate Gaussian data
 mu <- 3
 sigma <- 10
-n <- 100
+n <- 200
 beta <- rep(c(0,-2,2),c(40,10,10))
 cor <- 0.8
 eps <- 0.25 # correlation between relevant and irrelevant variable
