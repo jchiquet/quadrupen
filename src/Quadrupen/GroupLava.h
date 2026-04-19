@@ -12,7 +12,7 @@ using namespace Rcpp;
 using namespace arma;
 using namespace std;
 
-template <typename matrix, MixedNorm norm>
+template <typename matrix, GroupNorm norm>
 class GroupLava : public GroupElasticNet<matrix,norm> {
   
 public:
@@ -39,7 +39,7 @@ public:
   
 };
 
-template <typename matrix, MixedNorm norm>
+template <typename matrix, GroupNorm norm>
 GroupLava<matrix,norm>::GroupLava(
   const RegressionData<matrix>& data,
   const mat& Proj,
@@ -49,7 +49,7 @@ GroupLava<matrix,norm>::GroupLava(
   GroupElasticNet<matrix,norm>::GroupElasticNet(data, group_ind, regParam, control), 
   Proj_(Proj) {}
 
-template <typename matrix, MixedNorm norm>
+template <typename matrix, GroupNorm norm>
 double GroupLava<matrix,norm>::get_df() {
 
   double df = GroupElasticNet<matrix,norm>::get_df() ;
@@ -61,7 +61,7 @@ double GroupLava<matrix,norm>::get_df() {
   return(df);
 }
 
-template <typename matrix, MixedNorm norm>
+template <typename matrix, GroupNorm norm>
 void GroupLava<matrix,norm>::post_treatment(const RegressionData<matrix>& data, const mat& b) {
   
   sp_mat beta = this->coefficients() ;

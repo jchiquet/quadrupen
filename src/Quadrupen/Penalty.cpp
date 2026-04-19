@@ -106,7 +106,7 @@ vec SimplePenalty<SimpleNorm::LINF>::proximal(vec x, double lambda, vec w) {
 // ______________________________________________________
 // L1/L2 NORM A.K.A GROUP-LASSO
 template<>
-vec MixedPenalty<MixedNorm::L1L2>::elt_norm(vec x, uvec pk) {
+vec GroupPenalty<GroupNorm::L1L2>::elt_norm(vec x, uvec pk) {
   
   vec  res = zeros<vec> (pk.n_elem) ; // output with group norms
   uword ind = 0 ; // index to go through the groups
@@ -120,30 +120,35 @@ vec MixedPenalty<MixedNorm::L1L2>::elt_norm(vec x, uvec pk) {
 }
 
 template<>
-double MixedPenalty<MixedNorm::L1L2>::pen_norm(vec x, uvec pk, vec wk) {
+double GroupPenalty<GroupNorm::L1L2>::pen_norm(vec x, uvec pk, vec wk) {
   return(sum(wk % elt_norm(x, pk)));
 }
 
 template<>
-vec MixedPenalty<MixedNorm::L1L2>::elt_dual_norm  (vec x, uvec pk) {
+vec GroupPenalty<GroupNorm::L1L2>::elt_dual_norm  (vec x, uvec pk) {
   return(elt_norm(x, pk)) ;
 }
 
 template<>
-double MixedPenalty<MixedNorm::L1L2>::dual_norm(vec x, uvec pk, vec wk) {
+double GroupPenalty<GroupNorm::L1L2>::dual_norm(vec x, uvec pk, vec wk) {
   return(max(elt_dual_norm(x, pk) / wk)) ;
 }
 
 template<>
-vec MixedPenalty<MixedNorm::L1L2>::proximal(vec x, double lambda, vec wk, uvec pk) {
+vec GroupPenalty<GroupNorm::L1L2>::proximal(vec x, double lambda, vec wk, uvec pk) {
   
-  vec res = zeros<vec>(x.n_elem);
+  vec res = x ;
+  
+  // First apply Soft thresholding  
+  if (alpha_ > 0) {
+    res = res % clamp(1 - alpha_ / abs(res), 0, datum::inf);
+  }
+  
+  vec tmp = max(zeros(pk.n_elem), 1-lambda*wk/elt_norm(res,pk)) ;
+  
   uword ind = 0 ;
-  
-  vec tmp = max(zeros(pk.n_elem), 1-lambda*wk/elt_norm(x,pk)) ;
-  
   for (uword k=0; k<pk.n_elem; k++) {
-    res.subvec(ind, ind + pk(k) - 1) = tmp(k) * x.subvec(ind, ind + pk(k) - 1);
+    res.subvec(ind, ind + pk(k) - 1) = tmp(k) * res.subvec(ind, ind + pk(k) - 1);
     ind += pk(k);
   }
   
@@ -153,8 +158,8 @@ vec MixedPenalty<MixedNorm::L1L2>::proximal(vec x, double lambda, vec wk, uvec p
 // ______________________________________________________
 // L1/LINF NORM A.K.A GROUP-LASSO type 2
 template<>
-vec MixedPenalty<MixedNorm::L1LINF>::elt_norm(vec x, uvec pk) {
-  
+vec GroupPenalty<GroupNorm::L1LINF>::elt_norm(vec x, uvec pk) {
+
   vec  res = zeros<vec> (pk.n_elem) ; // output with group norms
   uword ind = 0 ; // index to go through the groups
   
@@ -167,12 +172,12 @@ vec MixedPenalty<MixedNorm::L1LINF>::elt_norm(vec x, uvec pk) {
 }
 
 template<>
-double MixedPenalty<MixedNorm::L1LINF>::pen_norm(vec x, uvec pk, vec wk) {
+double GroupPenalty<GroupNorm::L1LINF>::pen_norm(vec x, uvec pk, vec wk) {
   return(sum(wk % elt_norm(x, pk)));
 }
 
 template<>
-vec MixedPenalty<MixedNorm::L1LINF>::elt_dual_norm  (vec x, uvec pk) {
+vec GroupPenalty<GroupNorm::L1LINF>::elt_dual_norm  (vec x, uvec pk) {
 
   vec  res = zeros<vec> (pk.n_elem) ; // output with group norms
   uword ind = 0 ; // index to go through the groups
@@ -187,25 +192,30 @@ vec MixedPenalty<MixedNorm::L1LINF>::elt_dual_norm  (vec x, uvec pk) {
 }
 
 template<>
-double MixedPenalty<MixedNorm::L1LINF>::dual_norm(vec x, uvec pk, vec wk) {
+double GroupPenalty<GroupNorm::L1LINF>::dual_norm(vec x, uvec pk, vec wk) {
   return(max(elt_dual_norm(x, pk) / wk)) ;
 }
 
 template<>
-vec MixedPenalty<MixedNorm::L1LINF>::proximal(vec x, double lambda, vec wk, uvec pk) {
+vec GroupPenalty<GroupNorm::L1LINF>::proximal(vec x, double lambda, vec wk, uvec pk) {
 
   uword ind = 0 ;
-  vec res = zeros<vec>(x.n_elem);
+  vec res = x ;
   
+  // First apply Soft thresholding  
+  if (alpha_ > 0) {
+    res = res % clamp(1 - alpha_ / abs(res), 0, datum::inf);
+  }
+
   for (uword k=0; k<pk.n_elem; k++) {
     uword p = pk(k);
-    vec x_g = x.subvec(ind,ind+p-1) ;
+    vec res_g = res.subvec(ind,ind+p-1) ;
 
-    if ( accu(abs(x_g)) > lambda * wk(k)) {
+    if ( accu(abs(res_g)) > lambda * wk(k)) {
       // Project onto the l1 ball
       
       // Reordering absolute values
-      vec u = sort(abs(x_g), "descend");
+      vec u = sort(abs(res_g), "descend");
       
       // values of the projected coordinate if non zero (dual problem)
       vec proj = (cumsum(u) - lambda * wk(k))/linspace<vec>(1,p,p);
@@ -214,10 +224,10 @@ vec MixedPenalty<MixedNorm::L1LINF>::proximal(vec x, double lambda, vec wk, uvec
       uword i = max(find(u - proj >= 0)) ;
       
       // res = max(zeros(x.n_elem), abs(x) - proj[i]) ;
-      x_g = sign(x_g) % min(abs(x_g), proj(i) * ones(p) );
+      res_g = sign(res_g) % min(abs(res_g), proj(i) * ones(p) );
     }
 
-    res.subvec(ind,ind+p-1) = x_g ;
+    res.subvec(ind,ind+p-1) = res_g ;
     ind += p;
   }
   return(res);
@@ -226,7 +236,7 @@ vec MixedPenalty<MixedNorm::L1LINF>::proximal(vec x, double lambda, vec wk, uvec
 // ______________________________________________________
 // COOP(ERATIVE) NORM A.K.A COOPERATIVE-LASSO
 template<>
-vec MixedPenalty<MixedNorm::COOP>::elt_norm(vec x, uvec pk) {
+vec GroupPenalty<GroupNorm::COOP>::elt_norm(vec x, uvec pk) {
   
   vec  res = zeros<vec> (pk.n_elem) ; // output with group norms
   uword ind = 0 ; // index to go through the groups
@@ -242,12 +252,12 @@ vec MixedPenalty<MixedNorm::COOP>::elt_norm(vec x, uvec pk) {
 }
 
 template<>
-double MixedPenalty<MixedNorm::COOP>::pen_norm(vec x, uvec pk, vec wk) {
+double GroupPenalty<GroupNorm::COOP>::pen_norm(vec x, uvec pk, vec wk) {
   return(sum(wk % elt_norm(x, pk)));
 }
 
 template<>
-vec MixedPenalty<MixedNorm::COOP>::elt_dual_norm(vec x, uvec pk) {
+vec GroupPenalty<GroupNorm::COOP>::elt_dual_norm(vec x, uvec pk) {
 
   vec  res = zeros<vec> (pk.n_elem) ;
   uword ind = 0 ; // index to go through the groups
@@ -263,14 +273,21 @@ vec MixedPenalty<MixedNorm::COOP>::elt_dual_norm(vec x, uvec pk) {
 }
   
 template<>
-double MixedPenalty<MixedNorm::COOP>::dual_norm(vec x, uvec pk, vec wk) {
+double GroupPenalty<GroupNorm::COOP>::dual_norm(vec x, uvec pk, vec wk) {
   return(max(elt_dual_norm(x, pk) / wk));
 }
 
 template<>
-vec MixedPenalty<MixedNorm::COOP>::proximal(vec x, double lambda, vec wk, uvec pk) {
+vec GroupPenalty<GroupNorm::COOP>::proximal(vec x, double lambda, vec wk, uvec pk) {
+
   
   vec res = x ;
+  
+  // First apply Soft thresholding  
+  if (alpha_ > 0) {
+    res = res % clamp(1 - alpha_ / abs(res), 0, datum::inf);
+  }
+  
   uword ind = 0;
   
   for (uword k=0; k<pk.n_elem; k++) {
@@ -289,6 +306,4 @@ vec MixedPenalty<MixedNorm::COOP>::proximal(vec x, double lambda, vec wk, uvec p
   
   return(res);
 }
-
-
 

@@ -14,7 +14,7 @@
 #define ZERO 2e-16 // practical zero
 
 enum class SimpleNorm {L1, LINF, RIDGE};
-enum class MixedNorm {L1L2, L1LINF, COOP};
+enum class GroupNorm {L1L2, L1LINF, COOP};
 
 using namespace Rcpp;
 using namespace arma;
@@ -33,10 +33,12 @@ public:
 
 };
 
-template <MixedNorm norm> class MixedPenalty {
+template <GroupNorm norm> class GroupPenalty {
 public: 
   
-  MixedPenalty() {} ;
+  double alpha_ = 0 ; // Optional sparse factor 
+  GroupPenalty() {} ;
+  GroupPenalty(double alpha) : alpha_(alpha){} ;
   
   vec    elt_norm  (vec x, uvec pk)         ;
   vec    elt_dual_norm  (vec x, uvec pk)    ;

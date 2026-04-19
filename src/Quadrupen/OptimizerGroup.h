@@ -12,14 +12,14 @@ using namespace Rcpp;
 using namespace arma;
 using namespace std;
 
-template <typename matrix, MixedNorm norm> class GroupOptimizer : public Optimizer<matrix >{
+template <typename matrix, GroupNorm norm> class GroupOptimizer : public Optimizer<matrix >{
   
 public:
   
   GroupOptimizer() {} ;
-  GroupOptimizer(MixedPenalty<norm>&, const List&) ;
+  GroupOptimizer(GroupPenalty<norm>&, const List&) ;
   
-  MixedPenalty<norm> penalty_ ;
+  GroupPenalty<norm> penalty_ ;
   using Optimizer<matrix>::algorithm_  ;
   using Optimizer<matrix>::accuracy_   ;
   using Optimizer<matrix>::maxiter_    ;
@@ -50,14 +50,14 @@ public:
 
 };
 
-template <typename matrix, MixedNorm norm>
+template <typename matrix, GroupNorm norm>
 GroupOptimizer<matrix, norm>::GroupOptimizer(
-    MixedPenalty<norm>& penalty, const List& control) : 
+    GroupPenalty<norm>& penalty, const List& control) : 
   Optimizer<matrix>(control) {
     penalty_  = penalty ;
   }
 
-template <typename matrix, MixedNorm norm>
+template <typename matrix, GroupNorm norm>
 uword GroupOptimizer<matrix,norm>::solve(
     vec& beta,
     vec& grad,
