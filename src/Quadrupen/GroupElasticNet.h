@@ -85,8 +85,8 @@ double GroupElasticNet<matrix,norm>::get_df() {
 
   if (set_.size_grp() > 0) {
     // approximate degrees of freedom
-    vec active_grp_norm = penalty_.elt_norm(beta_, set_.grp_sizes_(set_.G_)) ;
-    vec active_grp_norm_ols = penalty_.elt_norm(beta_debiased_, set_.grp_sizes_(set_.G_)) / (1 + gamma_) ;
+    vec active_grp_norm = penalty_.elt_norm(beta_, set_.grp_sizes_(set_.G_), ones(set_.size_grp())) ;
+    vec active_grp_norm_ols = penalty_.elt_norm(beta_debiased_, set_.grp_sizes_(set_.G_), ones(set_.size_grp())) / (1 + gamma_) ;
     
     df = df + 
       accu(1 + (active_grp_norm / active_grp_norm_ols) % (set_.grp_sizes_(set_.G_) - 1)) ;

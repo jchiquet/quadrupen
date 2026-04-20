@@ -7,6 +7,7 @@
 #define _quadrupen_SIMPLE_OPTIMIZER_H
 
 #include "Optimizer.h"
+#include "PenaltySimple.h"
 
 using namespace Rcpp;
 using namespace arma;
@@ -100,7 +101,7 @@ uword SimpleOptimizer<matrix,norm>::solve(
     
     // OPTIMIZATION OVER THE CURRENTLY ACTIVATED VARIABLES
     if (algorithm_ == FISTA) {
-      auto prox = [this, set, weights](vec x, double l) {
+      auto prox = [this, set, weights](const vec& x, double l) {
         return(penalty_.proximal(x, l, weights(set.A_)));
       } ;
       inner_iter_.push_back(

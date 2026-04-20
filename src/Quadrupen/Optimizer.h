@@ -9,7 +9,6 @@
 #include "RegressionData.h"
 #include "ActiveSet.h"
 #include "ActiveSetGroup.h"
-#include "Penalty.h"
 #include <functional>
 
 enum SolverType {FISTA, QUADRA};
@@ -46,7 +45,7 @@ public:
       const double& lambda, 
       RegressionData<matrix> &data,
       ActiveSet<matrix>& set,
-      std::function<vec(vec, double)> proximal_operator, 
+      std::function<vec(const vec&, double)> proximal_operator, 
       const double& accuracy, 
       const uword& max_iter
   ) ;
@@ -57,7 +56,7 @@ public:
       const double& lambda, 
       RegressionData<matrix> &data,
       ActiveSet<matrix>& set,
-      std::function<vec(vec, double)> proximal_operator, 
+      std::function<vec(const vec&, double)> proximal_operator, 
       const double& accuracy, 
       const uword& max_iter
   ) ;
@@ -91,7 +90,7 @@ uword Optimizer<matrix>::fista(
     const double& lambda,
     RegressionData<matrix> &data,
     ActiveSet<matrix>& set,
-    std::function<vec(vec, double)> proximal_operator, 
+    std::function<vec(const vec&, double)> proximal_operator, 
     const double& accuracy,
     const uword& max_iter) {
   
@@ -156,7 +155,7 @@ uword Optimizer<matrix>::fista_LM(
     const double& lambda,
     RegressionData<matrix> &data,
     ActiveSet<matrix>& set,
-    std::function<vec(vec, double)> proximal_operator, 
+    std::function<vec(const vec&, double)> proximal_operator, 
     const double& accuracy,
     const uword& max_iter) {
   

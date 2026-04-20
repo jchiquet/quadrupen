@@ -20,7 +20,8 @@
 #include "RegressionData.h"
 #include "ActiveSet.h"
 #include "ActiveSetGroup.h"
-#include "Penalty.h"
+#include "PenaltySimple.h"
+#include "PenaltyGroup.h"
 
 using namespace Rcpp;
 using namespace arma;

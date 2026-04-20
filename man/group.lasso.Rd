@@ -2,7 +2,7 @@
 % Please edit documentation in R/group-lasso.R
 \name{group.lasso}
 \alias{group.lasso}
-\title{Fit a linear model with group-lasso (either l1/l2 or l1/l-inf) regularization}
+\title{Fit a linear model with (sparse) group regularisation (either l1/l2, l1/l-inf or cooperative variant)}
 \usage{
 group.lasso(
   x,
@@ -11,6 +11,7 @@ group.lasso(
   type = c("l2", "coop", "linf"),
   lambda1 = NULL,
   lambda2 = 0.01,
+  alpha = 0,
   penscale = sqrt(tabulate(group)),
   struct = Matrix::Diagonal(ncol(x), 1),
   intercept = TRUE,
@@ -47,6 +48,9 @@ shrunken to \code{minratio*lambda1.max}.}
 
 \item{lambda2}{real scalar; tunes the \eqn{\ell_2}{l2} penalty in
 the Elastic-net. Default is 0.01. Set to 0 to recover the Lasso.}
+
+\item{alpha}{real scalar in (0,1); tunes mixture between \eqn{\ell_1}{l1}
+group penalties. Default is 0.0 (standard group-lasso).}
 
 \item{penscale}{vector with real positive values that weight the
 \eqn{\ell_1}{l1}-penalty of each feature. Default set all weights
@@ -119,7 +123,7 @@ when \code{'1'}, the bound derived in Grandvalet et al. is computed; when
 an object with class \link{GroupLassoFit}, inheriting from \link{QuadrupenFit}.
 }
 \description{
-Adjust a linear model with group-lasso regularization, that is a
+Adjust a linear model with (sparse) group regularization, that is a
 mixture of either a (possibly weighted)
 \eqn{\ell_1/\ell_2}{l1/l2}- or
 \eqn{\ell_1/\ell_\infty}{l1/linf}-norm, and a (possibly
