@@ -31,7 +31,7 @@ public:
   void add_vars(uvec, const RegressionData<matrix> &) ; // add a list of variables in the active set
   void del_var(uword, vec&) ; // remove the variable activated in position ind_var_out
   void del_vars(uvec, vec&) ; // remove a set of non contiguous variables
-  void reset()        ; // empty the active set 
+  void reset() ; // empty the active set 
   const uword size() const { return A_.n_elem ; }
   
   // Update Cholesky factorisation by inserting the last activated variables

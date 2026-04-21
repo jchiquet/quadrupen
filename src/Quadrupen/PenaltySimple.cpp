@@ -1,5 +1,5 @@
 /*
-  * Author: Julien CHIQUET
+* Author: Julien CHIQUET
 *         MIA Paris-Saclay
 */
   

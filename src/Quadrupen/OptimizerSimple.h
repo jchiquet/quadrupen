@@ -13,7 +13,7 @@ using namespace Rcpp;
 using namespace arma;
 using namespace std;
 
-template <typename matrix, SimpleNorm norm> class SimpleOptimizer: public Optimizer<matrix> {
+template <typename matrix, SimpleNorm norm> class SimpleOptimizer: public Optimizer {
   
 public:
   
@@ -21,23 +21,22 @@ public:
   SimpleOptimizer(SimplePenalty<norm>&, const List&) ;
   
   SimplePenalty<norm> penalty_ ;
-  using Optimizer<matrix>::algorithm_  ;
-  using Optimizer<matrix>::accuracy_   ;
-  using Optimizer<matrix>::maxiter_    ;
-  using Optimizer<matrix>::maxfeat_    ;
-  using Optimizer<matrix>::verbosity_  ;
-  using Optimizer<matrix>::monitoring_ ;
-  using Optimizer<matrix>::iter_       ;
-  using Optimizer<matrix>::inner_iter_ ;
-  using Optimizer<matrix>::gap_        ;
-  using Optimizer<matrix>::J_          ;
-  using Optimizer<matrix>::D_          ;
-  using Optimizer<matrix>::J_vec_      ;
-  using Optimizer<matrix>::D_vec_      ;
-
-  using Optimizer<matrix>::optimality_gap ;
-  using Optimizer<matrix>::fista ;
-  using Optimizer<matrix>::pgd ;
+  using Optimizer::algorithm_  ;
+  using Optimizer::accuracy_   ;
+  using Optimizer::maxiter_    ;
+  using Optimizer::maxfeat_    ;
+  using Optimizer::verbosity_  ;
+  using Optimizer::monitoring_ ;
+  using Optimizer::iter_       ;
+  using Optimizer::inner_iter_ ;
+  using Optimizer::gap_        ;
+  using Optimizer::J_          ;
+  using Optimizer::D_          ;
+  using Optimizer::J_vec_      ;
+  using Optimizer::D_vec_      ;
+  using Optimizer::optimality_gap ;
+  using Optimizer::fista ;
+  using Optimizer::pgd ;
   
   uword solve(
       vec& beta,
@@ -64,7 +63,7 @@ public:
 template <typename matrix, SimpleNorm norm>
 SimpleOptimizer<matrix, norm>::SimpleOptimizer(
     SimplePenalty<norm>& penalty, const List& control) : 
-  Optimizer<matrix>(control) {
+    Optimizer(control) {
     penalty_ = penalty ;
   }
 
@@ -145,7 +144,7 @@ uword SimpleOptimizer<matrix,norm>::solve(
     gap_ = std::max(0.0, optimality(var_in)) ;
     
     if (monitoring_ > 0) {
-      optimality_gap(beta, grad, lambda, gamma, data, set, monitoring_) ;
+      optimality_gap(beta, grad, lambda, gamma, data.XTy_(set.A_), set.XATXA_, data.norm_y_, set.A_, monitoring_) ;
       J_vec_.push_back(J_) ;
       D_vec_.push_back(D_) ;
     }

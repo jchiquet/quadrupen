@@ -18,7 +18,7 @@ class OptimizerL1 : public SimpleOptimizer<matrix,SimpleNorm::L1> {
 public:
   
   using SimpleOptimizer<matrix,SimpleNorm::L1>::penalty_ ;
-  using Optimizer<matrix>::verbosity_ ;
+  using Optimizer::verbosity_ ;
     
   OptimizerL1() {} ;
   OptimizerL1(SimplePenalty<SimpleNorm::L1>&, const List& control) ;
