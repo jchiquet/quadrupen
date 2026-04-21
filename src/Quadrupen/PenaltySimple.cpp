@@ -32,7 +32,7 @@ double SimplePenalty<SimpleNorm::L1>::dual_norm(const vec& x, const vec& w) {
 
 template<>
 vec SimplePenalty<SimpleNorm::L1>::proximal(const vec& x, double lambda, const vec& w) {
-  return(x % clamp(1 - lambda * w/elt_norm(x), 0, datum::inf));
+  return(sign(x) % max(abs(x) - lambda * w, zeros<vec>(x.n_elem))) ;
 }
 
 // ______________________________________________________

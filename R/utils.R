@@ -31,7 +31,6 @@ model_default <- function()
        min_ratio   = 1e-2
   )
 
-
 optim_enet_default <- function(d)
   list(verbose     = 0, # default control options
        timer       = FALSE,
@@ -67,7 +66,7 @@ optim_grp_default <- function(d)
   list(verbose     = 0, # default control options
        timer       = FALSE,
        maxiter     = max(50, 2*d),
-       method      = "quadra",
+       method      = "pgd",
        threshold   = 1e-4,
        monitor     = 0,
        usechol     = TRUE

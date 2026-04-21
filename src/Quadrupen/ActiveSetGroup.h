@@ -75,11 +75,10 @@ void ActiveSetGroup<matrix>::del_group(uword igrp_out, vec& beta) {
   uvec ivars_out = regspace<uvec>(
     ifirst_var_in + grp_sizes_(G_[igrp_out]) - 1, ifirst_var_in
   ) ;
-  ActiveSet<matrix>::del_vars(ivars_out) ;
+  ActiveSet<matrix>::del_vars(ivars_out, beta) ;
   
   is_grp_in_[G_[igrp_out]] = 0 ;
   G_.shed_row(igrp_out)        ;
-  beta.shed_rows(ivars_out)    ;
 }
 
 

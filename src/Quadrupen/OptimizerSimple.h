@@ -37,7 +37,7 @@ public:
 
   using Optimizer<matrix>::optimality_gap ;
   using Optimizer<matrix>::fista ;
-  using Optimizer<matrix>::fista_LM ;
+  using Optimizer<matrix>::pgd ;
   
   uword solve(
       vec& beta,
@@ -105,7 +105,14 @@ uword SimpleOptimizer<matrix,norm>::solve(
         return(penalty_.proximal(x, l, weights(set.A_)));
       } ;
       inner_iter_.push_back(
-        fista_LM(beta, grad, lambda, data, set, prox, 1e-10, 10000)
+        fista(beta, lambda, data.XTy_(set.A_), set.XATXA_, prox, 1e-10, 10000)
+      );
+    } else if (algorithm_ == PGD) {
+      auto prox = [this, set, weights](const vec& x, double l) {
+        return(penalty_.proximal(x, l, weights(set.A_)));
+      } ;
+      inner_iter_.push_back(
+        pgd(beta, lambda, data.XTy_(set.A_), set.XATXA_, prox, 1e-10, 10000, 3)
       );
     } else { // QUADRA solver
       try {
@@ -120,6 +127,17 @@ uword SimpleOptimizer<matrix,norm>::solve(
       }
     }
     
+    // VARIABLE DELETION IF APPLICABLE
+    grad(set.A_) = - data.XTy_(set.A_) + set.XATXA_ * beta ;
+    uvec vanish = find(
+      penalty_.elt_norm(grad(set.A_)) < lambda * weights(set.A_) + ZERO &&
+        penalty_.elt_norm(beta) < ZERO
+    ) ;
+    if (!vanish.is_empty()) { // Is var_in already in the active set?
+      if (verbosity_) {set.A_(vanish).print("removed variables");}
+      set.del_vars(vanish, beta) ;
+    } 
+
     // OPTIMALITY TESTING
     grad = - data.XTy_ + set.XTXA_ * beta ;
     optimality = penalty_.elt_dual_norm(grad) - lambda * weights;

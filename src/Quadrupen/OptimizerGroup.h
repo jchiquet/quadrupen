@@ -37,7 +37,7 @@ public:
 
   using Optimizer<matrix>::optimality_gap ;
   using Optimizer<matrix>::fista ;
-  using Optimizer<matrix>::fista_LM ;
+  using Optimizer<matrix>::pgd ;
   
   uword solve(
       vec& beta,
@@ -93,11 +93,19 @@ uword GroupOptimizer<matrix,norm>::solve(
     auto prox = [this, set, weights](const vec& x, const double l) {
       return(penalty_.proximal(x, l, set.grp_sizes_(set.G_), weights(set.G_)));
     } ;
-    inner_iter_.push_back(
-      fista_LM(beta, grad, lambda, data, set, prox, 1e-6, 10000)
-    );
+    
+    if (algorithm_ == FISTA) {
+      inner_iter_.push_back(
+        fista(beta, lambda, data.XTy_(set.A_), set.XATXA_, prox, 1e-10, 10000)
+      );
+    } else if (algorithm_ == PGD) {
+      inner_iter_.push_back(
+        pgd(beta, lambda, data.XTy_(set.A_), set.XATXA_, prox, 1e-10, 10000, 3)
+      );
+    }    
 
     // VARIABLE DELETION IF APPLICABLE
+    grad(set.A_) = - data.XTy_(set.A_) + set.XATXA_ * beta ;
     uvec vanish = find(
       penalty_.elt_norm(grad(set.A_), set.grp_sizes_(set.G_), weights(set.G_)) < lambda + ZERO &&
       penalty_.elt_norm(beta, set.grp_sizes_(set.G_), ones(set.size_grp())) < ZERO

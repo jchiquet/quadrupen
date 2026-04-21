@@ -78,7 +78,7 @@
 #' * `maxiter` the maximal number of iteration used to solve the
 #'  problem for a given value of lambda1. Default is 500.
 #' * `method` a string for the underlying solver used. Either 
-#' `"quadra"` or `"fista"`. Default is `"quadra"`.
+#' `"quadra"`, `"fista"` or `"pgd"`. Default is `"quadra"`.
 #' * `threshold` a threshold for convergence. The algorithm stops 
 #' when the optimality conditions are fulfill up to this threshold.
 #' Default is `1e-7` for `"quadra"` and `1e-2` for the first order methods.
@@ -153,9 +153,9 @@ elastic.net <- function(x,
   ##
   ctrl <- optim_enet_default(ncol(x))
   ctrl$maxfeat <- maxfeat
-  if (!is.null(control$method)) if (control$method != "quadra") ctrl$threshold <- 1e-2
+  if (!is.null(control$method)) if (control$method != "quadra") ctrl$threshold <- 1e-4
   ctrl[names(control)] <- control # default overwritten by user specifications
-  ctrl$method <- switch(ctrl$method, quadra = "QUADRA", fista = "FISTA", 0)
+  ctrl$method <- switch(ctrl$method, quadra = "QUADRA", fista = "FISTA", pgd = "PGD", 0)
   ctrl$normalize <- normalize
   ctrl$beta0  <- beta0
   

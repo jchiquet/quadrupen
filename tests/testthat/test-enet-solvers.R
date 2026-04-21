@@ -11,16 +11,26 @@ test_that("dev_conjugate_gradient", {
     enet.cg  <- elastic.net(x,y,lambda1=lambda1, control=list(timer=TRUE,usechol=FALSE,threshold=1e-3))
     enet.cg.warm <- elastic.net(x,y,lambda1=lambda1, beta0 = as.numeric(enet.ref.bot$coefficients),
                                 control=list(timer=TRUE,usechol=FALSE))
+    
+    # enet.fista <- elastic.net(x,y,lambda1=lambda1, control=list(timer=TRUE,method = "fista", verbose=2))
+    # enet.pgd <- elastic.net(x,y,lambda1=lambda1, control=list(timer=TRUE,method = "pgd"))
 
     cat("\n\tTimings with warm-restart along the path")
-    cat("\n\t\tfrom stratch (Cholesky): ",enet.ref$optim_monitoring$timer)
-    cat("\n\t\tfrom stratch (Conjugate Gradient): ", enet.cg$optim_monitoring$timer)
-    cat("\n\t\tCG starting from sparser solution: ",enet.cg.warm$optim_monitoring$timer)
+    cat("\n\t\tQuadratic from stratch (Cholesky): ",enet.ref$optim_monitoring$timer)
+    cat("\n\t\tQuadratic from stratch (Conjugate Gradient): ", enet.cg$optim_monitoring$timer)
+    cat("\n\t\tQuadratic with CG starting from sparser solution: ",enet.cg.warm$optim_monitoring$timer)
+    # cat("\n\t\tFISTA from stratch: ", enet.fista$optim_monitoring$timer)
+    # cat("\n\t\tPGD + ANDERSON from stratch: ", enet.pgd$optim_monitoring$timer)
 
     return(list(
       coef.ref=as.matrix(enet.ref$coefficients),
       coef.cg.warm=as.matrix(enet.cg.warm$coefficients),
-      coef.cg =as.matrix(enet.cg$coefficients)))
+      coef.cg =as.matrix(enet.cg$coefficients)
+      # coef.fista =as.matrix(enet.fista$coefficients),
+      # coef.pgd =as.matrix(enet.pgd$coefficients)
+      )
+    )
+      
   }
 
   ## PROSTATE DATA SET
@@ -32,6 +42,8 @@ test_that("dev_conjugate_gradient", {
   out <- get.coef(x,y)
   expect_equal(out$coef.cg.warm,out$coef.ref,tolerance=1e-3)
   expect_equal(out$coef.cg ,out$coef.ref    ,tolerance=1e-3)
+  # expect_equal(out$coef.fista ,out$coef.ref    ,tolerance=1e-3)
+  # expect_equal(out$coef.pgd ,out$coef.ref    ,tolerance=1e-3)
 
   ## RANDOM DATA
   seed <- sample(1:10000,1)
@@ -52,9 +64,11 @@ test_that("dev_conjugate_gradient", {
 
   ## Run the tests...
   cat("\n  * small-size problem, with correlation...")
-  out <-get.coef(x,y)
+  out <- get.coef(x,y)
   expect_equal(out$coef.cg.warm,out$coef.ref,tolerance=1e-3)
   expect_equal(out$coef.cg     ,out$coef.ref,tolerance=1e-3)
+  # expect_equal(out$coef.fista ,out$coef.ref    ,tolerance=1e-3)
+  # expect_equal(out$coef.pgd ,out$coef.ref    ,tolerance=1e-3)
 
 })
 

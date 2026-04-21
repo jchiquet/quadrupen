@@ -57,7 +57,10 @@ uword OptimizerL1<matrix>::quadratic(
   vec betak = beta;
   vec theta = sign(beta) ; // vector of sign of the solution
   if (set.use_chol_) {
-    betak =  set.Rinv_* set.Rinv_.t() * (data.XTy_(set.A_) - lambda * weights % theta);
+    // Step 1 - Forward Substitution
+    vec tmp = solve(trimatl(set.R_.t()), data.XTy_(set.A_) - lambda * weights % theta);
+    // Step 2 - Backward Substitution
+    betak = solve(trimatu(set.R_), tmp);
   } else {
     iter_in = 
       this->conjugate_gradient(betak, set.XATXA_, 
@@ -87,7 +90,10 @@ uword OptimizerL1<matrix>::quadratic(
     theta(i_swap) = - sign(grad_swap) ;
     vec betal = betak;
     if (set.use_chol_) {
-      betal =  set.Rinv_* set.Rinv_.t() * (data.XTy_(set.A_) - lambda * weights % theta);
+      // Step 1 - Forward Substitution
+      vec tmp = solve(trimatl(set.R_.t()), data.XTy_(set.A_) - lambda * weights % theta);
+      // Step 2 - Backward Substitution
+      betal = solve(trimatu(set.R_), tmp);
     } else {
       iter_in = 
         this->conjugate_gradient(betal, set.XATXA_, 
@@ -103,8 +109,7 @@ uword OptimizerL1<matrix>::quadratic(
     } else {
       beta = betak ; // otherwise, backtrack to betak
       if (verbosity_) Rprintf("\tremoving variables %i", set.A_(i_swap)) ;
-      set.del_var(i_swap) ; // and desactivate de zeroed variable
-      beta.shed_row(i_swap) ;
+      set.del_var(i_swap, beta) ; // and desactivate de zeroed variable
     }
   }
   

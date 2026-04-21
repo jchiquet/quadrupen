@@ -11,7 +11,7 @@
 #include "ActiveSetGroup.h"
 #include <functional>
 
-enum SolverType {FISTA, QUADRA};
+enum SolverType {FISTA, QUADRA, PGD};
 
 #define ZERO 2e-16 // practical zero
 
@@ -39,28 +39,33 @@ public:
       const double& accuracy,
       const uword& max_iter) ;
 
+  double estimate_lipschitz(
+      const mat& XTX,
+      uword max_it = 15,
+      double tol = 1e-4
+  ) ;
+  
   uword fista(
       vec& beta,
-      vec& grad,
       const double& lambda, 
-      RegressionData<matrix> &data,
-      ActiveSet<matrix>& set,
+      const vec& XTy,
+      const mat& XTX,
       std::function<vec(const vec&, double)> proximal_operator, 
       const double& accuracy, 
       const uword& max_iter
   ) ;
-  
-  uword fista_LM(
+
+  uword pgd(
       vec& beta,
-      vec& grad,
-      const double& lambda, 
-      RegressionData<matrix> &data,
-      ActiveSet<matrix>& set,
+      const double& lambda,
+      const vec& XTy,
+      const mat& XTX,
       std::function<vec(const vec&, double)> proximal_operator, 
-      const double& accuracy, 
-      const uword& max_iter
+      const double& accuracy,
+      const uword& max_iter,
+      const uword m = 5
   ) ;
-  
+
   void optimality_gap(
       vec& beta,
       vec& grad,
@@ -80,151 +85,212 @@ Optimizer<matrix>::Optimizer(const List& control) :
 
   if (as<std::string>(control["method"]) == "FISTA") algorithm_ = FISTA;
   if (as<std::string>(control["method"]) == "QUADRA") algorithm_ = QUADRA;
+  if (as<std::string>(control["method"]) == "PGD") algorithm_ = PGD;
   
+}
+
+template <typename matrix>
+double Optimizer<matrix>::estimate_lipschitz(
+    const mat& XTX,
+    uword max_it,
+    double tol) {
+  
+  uword pk = XTX.n_rows;
+  if (pk == 0) return 1.0;
+  if (pk == 1) return as_scalar(XTX(0,0));
+  
+  vec q = randu<vec>(pk);
+  q /= norm(q, 2);
+  
+  double lambda = 0.0;
+  double lambda_old = 0.0;
+  
+  // 2. Power Iteration Loop
+  for (uword i = 0; i < max_it; ++i) {
+    vec z = XTX * q;
+    
+    // Largest Eigen Value (simplified Rayleigh quotien since ||q||=1)
+    lambda = dot(q, z);
+    if (i > 0 && std::abs(lambda - lambda_old) < tol * lambda) {
+      break;
+    }
+    lambda_old = lambda;
+    
+    // Normalising for next iterate
+    double n = norm(z, 2);
+    if (n > 1e-15) {
+      q = z / n;
+    } else {
+      break; 
+    }
+  }
+  
+  // Safety margin for 1/L
+  return lambda * 1.01; 
+}
+
+template <typename matrix>
+uword Optimizer<matrix>::pgd(
+    vec& beta,
+    const double& lambda,
+    const vec& XTy,
+    const mat& XTX,
+    std::function<vec(const vec&, double)> proximal_operator, 
+    const double& accuracy,
+    const uword& max_iter,
+    const uword m) { // m est la taille de la mémoire (typiquement 3 à 5)
+  
+  uword p = beta.n_elem;
+  vec betak = beta;
+  vec g_k, g_prev;
+  
+  // Historique pour Anderson
+  mat mat_F(p, m, fill::zeros); // Stocke les résidus de point fixe : f_i = G(x_i) - x_i
+  mat mat_X(p, m, fill::zeros); // Stocke les itérés : x_i
+  
+  // Estimation de L (Power Iteration comme vu précédemment)
+  double L = estimate_lipschitz(XTX); 
+  double invL = 1.0 / L;
+  
+  uword iter = 0;
+  double delta = 2.0 * accuracy;
+  
+  while (delta > accuracy && iter < max_iter) {
+    // Standard Proximal Gradient Descent (PGD)
+    vec beta_next = proximal_operator(beta - (XTX * beta -XTy) * invL, lambda * invL);
+    
+    // fix-point residual : f = prox(x - grad/L) - x
+    vec f_k = beta_next - beta;
+    
+    // Anderson Acceleration
+    if (iter == 0) {
+      beta = beta_next;
+    } else {
+      // Circular buffers
+      uword col_idx = iter % m;
+      mat_X.col(col_idx) = beta;
+      mat_F.col(col_idx) = f_k;
+      
+      // Nombre d'itérés disponibles dans l'historique
+      uword current_m = std::min(iter, m);
+      
+      // Solve for mixture parmaters
+      // minimise ||f_k - (F_k - f_k*1^T) * gamma||
+      mat F_delta = mat_F.cols(0, current_m - 1);
+      for(uword j=0; j<current_m; ++j) F_delta.col(j) -= f_k;
+      vec gamma;
+      bool success = solve(gamma, F_delta, -f_k);
+      
+      if (success) {
+        // Update accelerated estimate
+        vec beta_accel = beta_next;
+        for(uword j=0; j<current_m; ++j) {
+          beta_accel += gamma(j) * (mat_X.col(j) + mat_F.col(j) - beta_next);
+        }
+        beta = beta_accel;
+      } else {
+        beta = beta_next; // Fallback on standard PGD if failure
+      }
+    }
+    
+    delta = norm(f_k, 2); // fix-point residual at optimum
+    iter++;
+    
+    if (iter % 10 == 0) R_CheckUserInterrupt();
+  }
+  
+  return iter;
 }
 
 template <typename matrix>
 uword Optimizer<matrix>::fista(
     vec& beta,
-    vec& grad,
     const double& lambda,
-    RegressionData<matrix> &data,
-    ActiveSet<matrix>& set,
+    const vec& XTy,
+    const mat& XTX,
     std::function<vec(const vec&, double)> proximal_operator, 
     const double& accuracy,
     const uword& max_iter) {
   
-  vec betak = beta  ; // output vector
-  vec betal = beta  ;
-  double delta = 2*accuracy  ; // change in beta
-  double L = eig_sym( set.XATXA_ ).max() ;
+  // Computing Lipschitz constant (largest eigen value in XA^T XA)
+  double L = estimate_lipschitz(XTX); 
 
-  double t0 = 1.0, tk ; // auxiliary variables in FISTA 
-  uword iter = 0      ; // current iterate
-  while ((delta > accuracy/beta.n_elem ) && (iter < max_iter)) {
+  vec betak; 
+  vec betal = beta;
+  double delta = 2.0 * accuracy;
+  
+  double t0 = 1.0, tk;
+  uword iter = 0;
+  double invL = 1.0 / L;
+  
+  while ((delta > accuracy) && (iter < max_iter)) {
     
-    double l_num, l_den ;
-    double f0, fk ;
-    vec XATXA_betal = set.XATXA_ * betal ;
-    f0 = dot(betal, .5 * XATXA_betal  - data.XTy_(set.A_)) ;
-    grad(set.A_) = - data.XTy_(set.A_) + XATXA_betal ;
+    // Proximal step
+    betak = proximal_operator(betal - (XTX * betal - XTy) * invL, lambda * invL);
     
-    // Line search over L
-    bool found=false;
-    while(!found) {
-      // Apply proximal operator (implemented in penalty object)
-      vec prox_arg = betal - grad(set.A_)/L;
-      betak = proximal_operator(prox_arg, lambda/L);
-      
-      fk = dot(betak, .5 * set.XATXA_ * betak - data.XTy_(set.A_)) ;
-      l_num = 2 * (fk - f0 - dot(grad(set.A_), betak-betal));
-      l_den = accu(pow(betak-betal,2));
-      
-      if ((L * l_den >= l_num) || (sqrt(l_den) < accuracy)) {
-        found = true;
-      } else {
-        L = fmax(2*L, l_num/l_den);
-      }
-      
-      R_CheckUserInterrupt();
-    }
+    // FISTA update
+    tk = 0.5 * (1.0 + std::sqrt(1.0 + 4.0 * t0 * t0));
+    double weight = (t0 - 1.0) / tk;
     
-    // updating t
-    tk = 0.5 * (1+sqrt(1+4*t0*t0));
+    // Accelerating step
+    betal = betak + weight * (betak - beta);
     
-    // updating s
-    betal = betak + (t0-1)/tk * ( betak - beta );
+    // Assess convergence
+    delta = norm(beta - betak, 2);
     
-    // preparing next iterate
-    delta = sqrt(l_num);
     beta = betak;
     t0 = tk;
     iter++;
     
-    R_CheckUserInterrupt();
+    if (iter % 10 == 0) R_CheckUserInterrupt();
   }
   
-  return(iter) ;
-  
+  return iter;
 }
-
-template <typename matrix>
-uword Optimizer<matrix>::fista_LM(
-    vec& beta,
-    vec& grad,
-    const double& lambda,
-    RegressionData<matrix> &data,
-    ActiveSet<matrix>& set,
-    std::function<vec(const vec&, double)> proximal_operator, 
-    const double& accuracy,
-    const uword& max_iter) {
-  
-  vec betak ; // output vector
-  vec betal = beta  ;
-  double delta = 2*accuracy  ; // change in beta
-  double L = eig_sym( set.XATXA_ ).max() ;
-  // max( set.XATXA_.diag()) ; // Lipchitz constant
-  
-  double t0 = 1.0, tk ; // auxiliary variables in FISTA 
-  uword iter = 0      ; // current iterate
-  while ((delta > accuracy/beta.n_elem ) && (iter < max_iter)) {
-
-    // Apply proximal operator (implemented in penalty object)
-    grad(set.A_) = - data.XTy_(set.A_) + set.XATXA_ * betal ;
-    betak = proximal_operator(betal - grad(set.A_)/L, lambda/L);
-    
-    // updating t
-    tk = 0.5 * (1+sqrt(1+4*t0*t0));
-    
-    // updating s
-    betal = betak + (t0-1)/tk * ( betak - beta );
-    
-    // preparing next iterate
-    delta = sqrt(accu(pow(beta-betak,2)));
-    beta = betak;
-    t0 = tk;
-    iter++;
-    
-    R_CheckUserInterrupt();
-  }
-  
-  return(iter) ;
-  
-}
-
 template <typename matrix>
 uword Optimizer<matrix>::conjugate_gradient(
-    vec& x0,
+    vec& x,
     const mat& A,
     const vec& b,
     const double& accuracy,
     const uword& max_iter) {
   
-  vec r = b - A * x0;
-  vec p = r ;
-  double rs_old = sum(square(r)) ;
+  vec r = b - A * x;
+  vec p = r;
+  double rs_old = dot(r, r);
   
-  double rs_new = rs_old ;
+  if (sqrt(rs_old) < accuracy) return 0;
+  
   uword i = 0;
-  double alpha ;
-  mat Ap ;
-  
-  while ((sqrt(rs_new) > accuracy) & (i < max_iter)) {
-    Ap = A * p;
-    alpha = rs_old/dot(p,Ap) ;
-    if (std::isfinite(alpha)) {
-      x0 += alpha * p ;
-      r -= alpha * Ap ;
-      // Polak-Ribière update
-      rs_new = dot(r,-alpha * Ap);
-      p = r + rs_new/rs_old*p;
-      rs_old = rs_new;
+  for (i = 0; i < max_iter; ++i) {
+    vec Ap = A * p;
+    
+    double pAp = dot(p, Ap);
+    
+    // Handle cases when A is not positive definite
+    if (std::abs(pAp) < 1e-16) break;
+    
+    double alpha = rs_old / pAp;
+    
+    x += alpha * p;
+    r -= alpha * Ap;
+    
+    double rs_new = dot(r, r);
+    
+    // Stopping criterion on the residual norm
+    if (std::sqrt(rs_new) < accuracy) {
       i++;
-    } else {
-      break ;
+      break;
     }
+    
+    // Update search direction (Fletcher-Reeves)
+    p = r + (rs_new / rs_old) * p;
+    rs_old = rs_new;
+    
+    if (i % 50 == 0) R_CheckUserInterrupt();
   }
-  return(i) ;
+  
+  return i;
 }
 
 template <typename matrix> 
@@ -267,57 +333,3 @@ void Optimizer<matrix>::optimality_gap(
 }
 
 #endif
-
-// 
-// template <typename matrix>
-// uword Optimizer<matrix>::coordinate_descent(
-//     vec& beta,
-//     const double& lambda,
-//     ActiveSet<matrix>& set,
-//     mat& XTX,
-//     const double& accuracy,
-//     const uword& max_iter) {
-//   
-
-// int pathwise_enet(vec&  x0,
-//                   mat& xtx,
-//                   vec xty,
-//                   vec& xtxw,
-//                   double& pen,
-//                   uvec &null,
-//                   const double& gam   ,
-//                   const double eps    ) {
-
-//   double u, d               ; // temporary scalar
-//   vec betak = beta         ; // output vector
-//   double delta = 2*accuracy ; // change in beta
-// 
-//   double t0 = 1.0, tk ; // auxiliary variables in FISTA 
-//   uword iter = 0      ; // current iterate
-//   while ((delta > accuracy/beta.n_elem ) && (iter < max_iter)) {
-// 
-//     delta = 0;
-//     for (uword j=0; j<beta.n_elem; j++) {
-//       // Soft thresholding operator
-//       u = beta(j) * (1+gam) + xty(j) - xtxw(j) ;
-//       betak(j)  = fmax(1-pen/fabs(u),0) * u/(1+gam) ;
-// 
-//       // max(zeros(x.n_elem), 1-lambda/elt_norm(x)) % x;
-//       
-//       d = betak(j)-beta(j);
-//       delta += pow(d,2);
-//       xtxw  += d*xtx.col(j) ;
-//     }
-//     
-//     // preparing next iterate
-//     delta = sqrt(delta);
-//     beta = betak;
-//     iter++;
-//     
-//     R_CheckUserInterrupt();
-//   }
-//   
-//   // null = sort(find(abs(betak) + (abs(-xty + xtxw) - pen) < ZERO), "descend") ;
-//   return(iter);
-// }
-

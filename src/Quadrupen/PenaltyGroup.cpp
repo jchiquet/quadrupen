@@ -27,38 +27,51 @@ vec GroupPenalty<GroupNorm::L1L2>::elt_norm(const vec& x, const uvec& pk, const 
 
 template<>
 vec GroupPenalty<GroupNorm::L1L2>::elt_dual_norm  (const vec& x, const uvec& pk, const vec& wk) {
-  
-  vec x_st = x % clamp(1 - alpha_ / abs(x), 0, datum::inf) ;
-  
-  vec  res = zeros<vec> (pk.n_elem) ; // output with group norms
-  uword ind = 0 ; // index to go through the groups
-  for (uword k=0; k<pk.n_elem; k++) {
-    res(k) += norm(x_st.subvec(ind, ind + pk(k) - 1), 2);
-    ind += pk(k);
+
+  vec x_st = x;
+  if (alpha_ > 0) 
+    x_st = sign(x_st) % max(abs(x_st) - alpha_, zeros<vec>(x_st.n_elem)) ;
+
+  vec res = zeros<vec>(pk.n_elem);
+  uword ind = 0;
+  for (uword k = 0; k < pk.n_elem; k++) {
+    uword size = pk(k);
+    res(k) = norm(x_st.rows(ind, ind + size - 1), 2);
+    ind += size;
   }
-  
+
   return(res / (wk  * (1 - alpha_))) ;
 }
 
 template<>
 vec GroupPenalty<GroupNorm::L1L2>::proximal(const vec& x, double lambda, const uvec& pk, const vec& wk) {
+
+  vec res = x;
   
-  vec res ;
+  double l1_threshold = lambda * alpha_;
+  double l2_factor = lambda * (1.0 - alpha_);
   
-  if (alpha_ > 0) {
-    res = x % clamp(1 - lambda * alpha_ / abs(x), 0, datum::inf);
-  } else {
-    res = x ;
+  if (l1_threshold > 0) {
+    res = sign(x) % max(abs(x) - l1_threshold, zeros<vec>(x.n_elem));
   }
   
-  uword ind = 0 ;
-  for (uword k=0; k<pk.n_elem; k++) {
-    double shrink = fmax(0, 1 - lambda * (1-alpha_) * wk(k)/norm(res.subvec(ind, ind + pk(k) - 1), 2)) ;
-    res.subvec(ind, ind + pk(k) - 1) *= shrink ;
-    ind += pk(k);
+  uword ind = 0;
+  for (uword k = 0; k < pk.n_elem; k++) {
+    uword group_size = pk(k);
+    auto group_slice = res.subvec(ind, ind + group_size - 1);
+    
+    double group_norm = norm(group_slice, 2);
+    double threshold_g = l2_factor * wk(k);
+    if (group_norm > threshold_g && group_norm > 0) {
+      double shrink = 1.0 - (threshold_g / group_norm);
+      group_slice *= shrink;
+    } else {
+      group_slice.zeros();
+    }
+    ind += group_size;
   }
   
-  return(res);
+  return res;
 }
 
 // ______________________________________________________
@@ -81,9 +94,9 @@ vec GroupPenalty<GroupNorm::L1LINF>::elt_norm(const vec& x, const uvec& pk, cons
 template<>
 vec GroupPenalty<GroupNorm::L1LINF>::elt_dual_norm  (const vec& x, const uvec& pk, const vec& wk) {
   
+  vec x_st = sign(x) % max(abs(x) - alpha_, zeros<vec>(x.n_elem)) ;
+
   vec  res = zeros<vec> (pk.n_elem) ; // output with group norms
-  vec x_st = x % clamp(1 - alpha_ / abs(x), 0, datum::inf) ;
-  
   uword ind = 0 ; // index to go through the groups
   for (uword k=0; k<pk.n_elem; k++) {
     res(k) = sum(abs(x_st.subvec(ind, ind + pk(k) - 1))) ;
@@ -97,13 +110,14 @@ vec GroupPenalty<GroupNorm::L1LINF>::elt_dual_norm  (const vec& x, const uvec& p
 template<>
 vec GroupPenalty<GroupNorm::L1LINF>::proximal(const vec& x, double lambda, const uvec& pk, const vec& wk) {
   
-  uword ind = 0 ;
-  vec res = x ;
-  
+  vec res ;
   if (alpha_ > 0) {
-    res = res % clamp(1 - alpha_ / abs(res), 0, datum::inf);
+    res = sign(x) % max(abs(x) - alpha_, zeros<vec>(x.n_elem)) ;
+  } else {
+    res = x ;
   }
   
+  uword ind = 0 ;
   for (uword k=0; k<pk.n_elem; k++) {
     uword p = pk(k);
     vec res_g = res.subvec(ind,ind+p-1) ;
@@ -152,11 +166,10 @@ vec GroupPenalty<GroupNorm::COOP>::elt_norm(const vec& x, const uvec& pk, const 
 template<>
 vec GroupPenalty<GroupNorm::COOP>::elt_dual_norm(const vec& x, const uvec& pk, const vec& wk) {
   
+  vec x_st = sign(x) % max(abs(x) - alpha_, zeros<vec>(x.n_elem)) ;
+  
   vec  res = zeros<vec> (pk.n_elem) ;
   uword ind = 0 ; // index to go through the groups
-  
-  vec x_st = x % clamp(1 - alpha_ / abs(x), 0, datum::inf) ;
-  
   for (uword k=0; k<pk.n_elem; k++) {
     double norm_pos = norm(max(zeros(pk(k)),   x_st.subvec(ind, ind + pk(k) - 1)), 2) ;
     double norm_neg = norm(max(zeros(pk(k)), - x_st.subvec(ind, ind + pk(k) - 1)), 2) ;
@@ -172,15 +185,13 @@ template<>
 vec GroupPenalty<GroupNorm::COOP>::proximal(const vec& x, double lambda, const uvec& pk, const vec& wk) {
   
   vec res ;
-  
   if (alpha_ > 0) {
-    res = x % clamp(1 - lambda * alpha_ / abs(x), 0, datum::inf);
+    res = sign(x) % max(abs(x) - alpha_, zeros<vec>(x.n_elem)) ;
   } else {
     res = x ;
   }
   
   uword ind = 0;
-  
   for (uword k=0; k<pk.n_elem; k++) {
     double shrink_pos = fmax(0, 1 - lambda * (1-alpha_) * wk(k)/norm(max(zeros(pk(k)),   res.subvec(ind, ind + pk(k) - 1)), 2)) ;
     double shrink_neg = fmax(0, 1 - lambda * (1-alpha_) * wk(k)/norm(max(zeros(pk(k)), - res.subvec(ind, ind + pk(k) - 1)), 2));
