@@ -135,7 +135,7 @@ public:
   double get_lambda_max() 
   {
     return(
-      penalty_.dual_norm(data_.XTy_, set_.grp_sizes_, lambda_factor_)
+      penalty_.lambda_max(data_.XTy_, set_.grp_sizes_, lambda_factor_)
     );
   }
   

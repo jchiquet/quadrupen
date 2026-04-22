@@ -34,7 +34,7 @@ model_default <- function()
 optim_enet_default <- function(d)
   list(verbose     = 0, # default control options
        timer       = FALSE,
-       maxiter     = max(50, d),
+       maxiter     = 100,
        method      = "quadra",
        threshold   = 1e-6,
        monitor     = 0,
@@ -65,11 +65,11 @@ optim_fused_default <- function(d)
 optim_grp_default <- function(d)
   list(verbose     = 0, # default control options
        timer       = FALSE,
-       maxiter     = max(50, 2*d),
-       method      = "pgd",
-       threshold   = 1e-4,
+       maxiter     = 50,
+       method      = "fista",
+       threshold   = 1e-6,
        monitor     = 0,
-       usechol     = TRUE
+       usechol     = FALSE
   )
 
 status_to_message <- function(status) {

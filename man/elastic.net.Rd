@@ -94,7 +94,7 @@ algorithm. Default is \code{FALSE}.
 \item \code{maxiter} the maximal number of iteration used to solve the
 problem for a given value of lambda1. Default is 500.
 \item \code{method} a string for the underlying solver used. Either
-\code{"quadra"} or \code{"fista"}. Default is \code{"quadra"}.
+\code{"quadra"}, \code{"fista"} or \code{"pgd"}. Default is \code{"quadra"}.
 \item \code{threshold} a threshold for convergence. The algorithm stops
 when the optimality conditions are fulfill up to this threshold.
 Default is \code{1e-7} for \code{"quadra"} and \code{1e-2} for the first order methods.

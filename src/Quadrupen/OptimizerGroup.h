@@ -70,7 +70,7 @@ uword GroupOptimizer<matrix,norm>::solve(
   if (verbosity_) Rprintf("\n current penalty = %f",lambda) ;
   if (verbosity_) Rprintf("\n nb active groups = %i\n", set.size_grp()) ;
   
-  vec optimality = penalty_.elt_dual_norm(grad, set.grp_sizes_, weights) - lambda ;
+  vec optimality = penalty_.optimality(grad, lambda, set.grp_sizes_, weights) ;
   uword grp_in = optimality.index_max() ; // highest violation of KKT conditions 
   uword status = 0 ; iter_ = 0 ; bool success = true ; 
   gap_ = std::max(0.0, optimality(grp_in)) ;
@@ -89,19 +89,19 @@ uword GroupOptimizer<matrix,norm>::solve(
     } 
     
     // OPTIMIZATION OVER THE CURRENTLY ACTIVATED VARIABLES
-    auto prox = [this, set, weights](const vec& x, const double l) {
+    auto prox = [this, &set, &weights](const vec& x, const double l) {
       return(penalty_.proximal(x, l, set.grp_sizes_(set.G_), weights(set.G_)));
     } ;
     
     if (algorithm_ == FISTA) {
       inner_iter_.push_back(
-        fista(beta, lambda, data.XTy_(set.A_), set.XATXA_, prox, 1e-10, 10000)
+        fista(beta, lambda, data.XTy_(set.A_), set.XATXA_, prox, 1e-7, 3000)
       );
     } else if (algorithm_ == PGD) {
       inner_iter_.push_back(
-        pgd(beta, lambda, data.XTy_(set.A_), set.XATXA_, prox, 1e-10, 10000, 3)
+        pgd(beta, lambda, data.XTy_(set.A_), set.XATXA_, prox, 1e-7, 3000, 3)
       );
-    }    
+    }
 
     // VARIABLE DELETION IF APPLICABLE
     grad(set.A_) = - data.XTy_(set.A_) + set.XATXA_ * beta ;
@@ -110,13 +110,13 @@ uword GroupOptimizer<matrix,norm>::solve(
       penalty_.elt_norm(beta, set.grp_sizes_(set.G_), ones(set.size_grp())) < ZERO
     ) ;
     if (!vanish.is_empty()) { // Is var_in already in the active set?
-      if (verbosity_) {Rprintf("\tremoved group %i\n",set.G_(vanish(0)));}
-      set.del_group(vanish(0), beta) ;
+      if (verbosity_) set.G_(vanish).print("\tremoved group %i\n") ;
+      set.del_groups(vanish, beta) ;
     } 
 
     // OPTIMALITY TESTING
     grad = - data.XTy_ + set.XTXA_ * beta ;
-    optimality = penalty_.elt_dual_norm(grad, set.grp_sizes_, weights) - lambda ;
+    optimality = penalty_.optimality(grad, lambda, set.grp_sizes_, weights) ;
     grp_in = optimality.index_max() ;
     gap_ = std::max(0.0, optimality(grp_in)) ;
     
