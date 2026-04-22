@@ -105,8 +105,9 @@ uword OptimizerLINF<matrix>::quadratic(
     uvec ind_toB = find(abs(beta(set.A_)) > bound) ;
     if (!ind_toB.is_empty()) {
       uvec toB = set.A_(ind_toB) ;
-      set.del_vars(ind_toB) ;
-      B = join_cols(B,toB);
+      vec beta_mock= beta;
+      set.del_vars(ind_toB, beta_mock) ;
+      B = join_cols(B, toB);
       beta(B) = bound * sign(beta(B));
       theta = sign(beta(B));
     } else {

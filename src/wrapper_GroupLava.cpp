@@ -42,7 +42,7 @@ List group_lava_l1l2_dense_cpp(
       sp_mat(data.p_, data.p_),
       ones(data.p_), false, false) ;
   
-  GroupLava<mat,MixedNorm::L1L2> group_lava(scaled_data, Proj, group, regParam, control);
+  GroupLava<mat,GroupNorm::L1L2> group_lava(scaled_data, Proj, group, regParam, control);
 
   List results = group_lava.solution_path(control);
 
@@ -107,7 +107,7 @@ List group_lava_l1linf_dense_cpp(
       sp_mat(data.p_, data.p_),
       ones(data.p_), false, false) ;
   
-  GroupLava<mat,MixedNorm::L1LINF> group_lava(scaled_data, Proj, group, regParam, control);
+  GroupLava<mat,GroupNorm::L1LINF> group_lava(scaled_data, Proj, group, regParam, control);
   
   List results = group_lava.solution_path(control);
   
@@ -172,7 +172,7 @@ List group_lava_coop_dense_cpp(
       sp_mat(data.p_, data.p_),
       ones(data.p_), false, false) ;
   
-  GroupLava<mat,MixedNorm::COOP> group_lava(scaled_data, Proj, group, regParam, control);
+  GroupLava<mat,GroupNorm::COOP> group_lava(scaled_data, Proj, group, regParam, control);
   
   List results = group_lava.solution_path(control);
   

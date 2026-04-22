@@ -2,7 +2,7 @@
 % Please edit documentation in R/group-lasso.R
 \name{group.lasso}
 \alias{group.lasso}
-\title{Fit a linear model with group-lasso (either l1/l2 or l1/l-inf) regularization}
+\title{Fit a linear model with (sparse) group regularisation (either l1/l2, l1/l-inf or cooperative variant)}
 \usage{
 group.lasso(
   x,
@@ -11,6 +11,7 @@ group.lasso(
   type = c("l2", "coop", "linf"),
   lambda1 = NULL,
   lambda2 = 0.01,
+  alpha = 0,
   penscale = sqrt(tabulate(group)),
   struct = Matrix::Diagonal(ncol(x), 1),
   intercept = TRUE,
@@ -32,7 +33,7 @@ scale.}
 \item{y}{response vector.}
 
 \item{group}{vector of integers indicating group belonging. Must
-match the number fo column in \code{x}. Must be SORTED integers
+match the number of column in \code{x}. Must be SORTED integers
 starting from 1.}
 
 \item{type}{string indicating whether the \eqn{\ell_1/\ell_2}{l1/l2} or the
@@ -47,6 +48,9 @@ shrunken to \code{minratio*lambda1.max}.}
 
 \item{lambda2}{real scalar; tunes the \eqn{\ell_2}{l2} penalty in
 the Elastic-net. Default is 0.01. Set to 0 to recover the Lasso.}
+
+\item{alpha}{real scalar in (0,1); tunes mixture between \eqn{\ell_1}{l1}
+group penalties. Default is 0.0 (standard group-lasso).}
 
 \item{penscale}{vector with real positive values that weight the
 \eqn{\ell_1}{l1}-penalty of each feature. Default set all weights
@@ -74,7 +78,7 @@ provided.}
 
 \item{minratio}{minimal value of \eqn{\ell_1}{l1}-part of the
 penalty that will be tried, as a fraction of the maximal
-\code{lambda1} value. A too small value might lead to unstability
+\code{lambda1} value. A too small value might lead to instability
 at the end of the solution path corresponding to small
 \code{lambda1} combined with \eqn{\lambda_2=0}{lambda2=0}.  The
 default value tries to avoid this, adapting to the
@@ -104,7 +108,7 @@ algorithm. Default is \code{FALSE}.
 \item \code{maxiter} the maximal number of iteration used to solve the
 problem for a given value of lambda1. Default is 500.
 \item \code{method} a string for the underlying solver used. Either
-\code{"quadra"} or \code{"fista"}. Default is \code{"quadra"}.
+\code{"quadra"}, \code{"fista"} or \code{"pgd"}. Default is \code{"quadra"}.
 \item \code{threshold} a threshold for convergence. The algorithm stops
 when the optimality conditions are fulfill up to this threshold.
 Default is \code{1e-7} for \code{"quadra"} and \code{1e-2} for the first order methods.
@@ -119,7 +123,7 @@ when \code{'1'}, the bound derived in Grandvalet et al. is computed; when
 an object with class \link{GroupLassoFit}, inheriting from \link{QuadrupenFit}.
 }
 \description{
-Adjust a linear model with group-lasso regularization, that is a
+Adjust a linear model with (sparse) group regularization, that is a
 mixture of either a (possibly weighted)
 \eqn{\ell_1/\ell_2}{l1/l2}- or
 \eqn{\ell_1/\ell_\infty}{l1/linf}-norm, and a (possibly

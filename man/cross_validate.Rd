@@ -65,7 +65,7 @@ in order to provide results on the same grid of penalty tuned by
 \eqn{\lambda_1}{lambda1}.  This is done by means of \code{NA}
 values, so as mean and standard error are consistently
 evaluated. If, while cross-validating, the procedure experiences
-too much early stoppings, a warning is sent to the user, in which
+too much early stops, a warning is sent to the user, in which
 case you should reconsider the grid of \code{lambda1} used for the
 cross-validation.  If \code{bulletproof} is \code{TRUE} (the
 default), there is nothing to worry about, except a possible slow

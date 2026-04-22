@@ -8,7 +8,7 @@
 
 #include "Regularizer.h"
 #include "ActiveSet.h"
-#include "Penalty.h"
+#include "PenaltySimple.h"
 #include "OptimizerLINF.h"
 
 #define ZERO 2e-16 // practical zero

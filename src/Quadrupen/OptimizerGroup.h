@@ -7,36 +7,36 @@
 #define _quadrupen_GROUP_OPTIMIZER_H
 
 #include "Optimizer.h"
+#include "PenaltyGroup.h"
 
 using namespace Rcpp;
 using namespace arma;
 using namespace std;
 
-template <typename matrix, MixedNorm norm> class GroupOptimizer : public Optimizer<matrix >{
+template <typename matrix, GroupNorm norm> class GroupOptimizer : public Optimizer {
   
 public:
   
   GroupOptimizer() {} ;
-  GroupOptimizer(MixedPenalty<norm>&, const List&) ;
+  GroupOptimizer(GroupPenalty<norm>&, const List&) ;
   
-  MixedPenalty<norm> penalty_ ;
-  using Optimizer<matrix>::algorithm_  ;
-  using Optimizer<matrix>::accuracy_   ;
-  using Optimizer<matrix>::maxiter_    ;
-  using Optimizer<matrix>::maxfeat_    ;
-  using Optimizer<matrix>::verbosity_  ;
-  using Optimizer<matrix>::monitoring_ ;
-  using Optimizer<matrix>::iter_       ;
-  using Optimizer<matrix>::inner_iter_ ;
-  using Optimizer<matrix>::gap_        ;
-  using Optimizer<matrix>::J_          ;
-  using Optimizer<matrix>::D_          ;
-  using Optimizer<matrix>::J_vec_      ;
-  using Optimizer<matrix>::D_vec_      ;
-
-  using Optimizer<matrix>::optimality_gap ;
-  using Optimizer<matrix>::fista ;
-  using Optimizer<matrix>::fista_LM ;
+  GroupPenalty<norm> penalty_ ;
+  using Optimizer::algorithm_  ;
+  using Optimizer::accuracy_   ;
+  using Optimizer::maxiter_    ;
+  using Optimizer::maxfeat_    ;
+  using Optimizer::verbosity_  ;
+  using Optimizer::monitoring_ ;
+  using Optimizer::iter_       ;
+  using Optimizer::inner_iter_ ;
+  using Optimizer::gap_        ;
+  using Optimizer::J_          ;
+  using Optimizer::D_          ;
+  using Optimizer::J_vec_      ;
+  using Optimizer::D_vec_      ;
+  using Optimizer::optimality_gap ;
+  using Optimizer::fista ;
+  using Optimizer::pgd ;
   
   uword solve(
       vec& beta,
@@ -50,14 +50,14 @@ public:
 
 };
 
-template <typename matrix, MixedNorm norm>
+template <typename matrix, GroupNorm norm>
 GroupOptimizer<matrix, norm>::GroupOptimizer(
-    MixedPenalty<norm>& penalty, const List& control) : 
-  Optimizer<matrix>(control) {
+    GroupPenalty<norm>& penalty, const List& control) : 
+    Optimizer(control) {
     penalty_  = penalty ;
   }
 
-template <typename matrix, MixedNorm norm>
+template <typename matrix, GroupNorm norm>
 uword GroupOptimizer<matrix,norm>::solve(
     vec& beta,
     vec& grad,
@@ -70,8 +70,7 @@ uword GroupOptimizer<matrix,norm>::solve(
   if (verbosity_) Rprintf("\n current penalty = %f",lambda) ;
   if (verbosity_) Rprintf("\n nb active groups = %i\n", set.size_grp()) ;
   
-  vec lambda_w = lambda * weights ;
-  vec optimality = penalty_.elt_dual_norm(grad, set.grp_sizes_) - lambda_w;
+  vec optimality = penalty_.optimality(grad, lambda, set.grp_sizes_, weights) ;
   uword grp_in = optimality.index_max() ; // highest violation of KKT conditions 
   uword status = 0 ; iter_ = 0 ; bool success = true ; 
   gap_ = std::max(0.0, optimality(grp_in)) ;
@@ -90,33 +89,39 @@ uword GroupOptimizer<matrix,norm>::solve(
     } 
     
     // OPTIMIZATION OVER THE CURRENTLY ACTIVATED VARIABLES
-    // if (algorithm_ == FISTA) {
-    auto prox = [this, set, weights](vec x, double l) {
-      return(penalty_.proximal(x, l, weights(set.G_), set.grp_sizes_(set.G_)));
+    auto prox = [this, &set, &weights](const vec& x, const double l) {
+      return(penalty_.proximal(x, l, set.grp_sizes_(set.G_), weights(set.G_)));
     } ;
-    inner_iter_.push_back(
-      fista_LM(beta, grad, lambda, data, set, prox, 1e-6, 10000)
-    );
-    // }
+    
+    if (algorithm_ == FISTA) {
+      inner_iter_.push_back(
+        fista(beta, lambda, data.XTy_(set.A_), set.XATXA_, prox, 1e-7, 3000)
+      );
+    } else if (algorithm_ == PGD) {
+      inner_iter_.push_back(
+        pgd(beta, lambda, data.XTy_(set.A_), set.XATXA_, prox, 1e-7, 3000, 3)
+      );
+    }
 
     // VARIABLE DELETION IF APPLICABLE
+    grad(set.A_) = - data.XTy_(set.A_) + set.XATXA_ * beta ;
     uvec vanish = find(
-      penalty_.elt_norm(grad(set.A_), set.grp_sizes_(set.G_)) < lambda_w(set.G_) + ZERO &&
-      penalty_.elt_norm(beta, set.grp_sizes_(set.G_)) < ZERO
+      penalty_.elt_norm(grad(set.A_), set.grp_sizes_(set.G_), weights(set.G_)) < lambda + ZERO &&
+      penalty_.elt_norm(beta, set.grp_sizes_(set.G_), ones(set.size_grp())) < ZERO
     ) ;
     if (!vanish.is_empty()) { // Is var_in already in the active set?
-      set.del_group(vanish(0), beta) ;
-      if (verbosity_) {Rprintf("\tremoved group %i\n",set.G_(vanish(0)));}
+      if (verbosity_) set.G_(vanish).print("\tremoved group %i\n") ;
+      set.del_groups(vanish, beta) ;
     } 
 
     // OPTIMALITY TESTING
     grad = - data.XTy_ + set.XTXA_ * beta ;
-    optimality = penalty_.elt_dual_norm(grad, set.grp_sizes_) - lambda_w ;
+    optimality = penalty_.optimality(grad, lambda, set.grp_sizes_, weights) ;
     grp_in = optimality.index_max() ;
     gap_ = std::max(0.0, optimality(grp_in)) ;
     
     if (monitoring_ > 0) {
-      optimality_gap(beta, grad, lambda, gamma, data, set, monitoring_) ;
+      optimality_gap(beta, grad, lambda, gamma, data.XTy_(set.A_), set.XATXA_, data.norm_y_, set.A_, monitoring_) ;
       J_vec_.push_back(J_) ;
       D_vec_.push_back(D_) ;
     }

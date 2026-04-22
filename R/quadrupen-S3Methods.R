@@ -122,7 +122,7 @@ deviance.QuadrupenFit <- function(object, ...){
 #'
 #' Estimation of the degrees of freedom (for the elastic-net, the
 #' LASSO and also bounded regression) are computed by applying and
-#' adpating the results of Tibshirani and Taylor (see references
+#' adapting the results of Tibshirani and Taylor (see references
 #' below).
 #'
 #' @references Ryan Tibshirani and Jonathan Taylor. Degrees of
@@ -202,7 +202,7 @@ criteria.QuadrupenFit <-
 #' \eqn{\lambda_1}{lambda1}.  This is done by means of \code{NA}
 #' values, so as mean and standard error are consistently
 #' evaluated. If, while cross-validating, the procedure experiences
-#' too much early stoppings, a warning is sent to the user, in which
+#' too much early stops, a warning is sent to the user, in which
 #' case you should reconsider the grid of \code{lambda1} used for the
 #' cross-validation.  If \code{bulletproof} is \code{TRUE} (the
 #' default), there is nothing to worry about, except a possible slow

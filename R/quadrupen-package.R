@@ -55,7 +55,7 @@
 #' functionalities of the code, especially the reproducibility of the
 #' Lasso/Elastic-net solution path with the \pkg{lars},
 #' \pkg{elasticnet} and \pkg{glmnet} packages.  We also check the
-#' handling of runtime errors or unstabilities.
+#' handling of runtime errors or instabilities.
 #'
 #' @section Algorithm:
 #'
@@ -104,7 +104,7 @@
 #' \code{\link{bounded.reg}} criterion in a (hopefully) 'bulletproof'
 #' mode: using mainly the fast and accurate quadratic approach, it
 #' switches to the slower but more robust proximal resolution when
-#' unstability is detected.
+#' instability is detected.
 #'
 #' @section Technical remarks:
 #'

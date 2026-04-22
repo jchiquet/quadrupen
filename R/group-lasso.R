@@ -1,6 +1,6 @@
-#' Fit a linear model with group-lasso (either l1/l2 or l1/l-inf) regularization
+#' Fit a linear model with (sparse) group regularisation (either l1/l2, l1/l-inf or cooperative variant)
 #'
-#' Adjust a linear model with group-lasso regularization, that is a
+#' Adjust a linear model with (sparse) group regularization, that is a
 #' mixture of either a (possibly weighted)
 #' \eqn{\ell_1/\ell_2}{l1/l2}- or
 #' \eqn{\ell_1/\ell_\infty}{l1/linf}-norm, and a (possibly
@@ -11,8 +11,11 @@
 #' 
 #' @inheritParams elastic.net
 #' 
+#' @param alpha real scalar in (0,1); tunes mixture between \eqn{\ell_1}{l1} 
+#' group penalties. Default is 0.0 (standard group-lasso).
+#'
 #' @param group vector of integers indicating group belonging. Must
-#' match the number fo column in \code{x}. Must be SORTED integers
+#' match the number of column in \code{x}. Must be SORTED integers
 #' starting from 1.
 #'
 #' @param type string indicating whether the \eqn{\ell_1/\ell_2}{l1/l2} or the
@@ -70,6 +73,7 @@ group.lasso <- function(x,
                         type        = c("l2", "coop", "linf"),
                         lambda1   = NULL,
                         lambda2   = 0.01,
+                        alpha     = 0.0,
                         penscale  = sqrt(tabulate(group)),
                         struct    = Matrix::Diagonal(ncol(x), 1),
                         intercept = TRUE,
@@ -88,11 +92,12 @@ group.lasso <- function(x,
   ctrl$maxfeat <- maxfeat
   if (!is.null(control$method)) if (control$method != "quadra") ctrl$threshold <- 1e-2
   ctrl[names(control)] <- control # default overwritten by user specifications
-  ctrl$method  <- switch(ctrl$method, quadra = "QUADRA", fista = "FISTA", 0)
+  ctrl$method  <- switch(ctrl$method, fista = "FISTA", pgd = "PGD", 0)
   ctrl$usechol <- FALSE
   ctrl$normalize <- normalize
   ctrl$beta0  <- beta0
-
+  stopifnot(alpha <= 1 && alpha >= 0)
+  
   ## ============================================
   ## INSTANTIATE THE DATA MODEL
   ##
@@ -111,7 +116,8 @@ group.lasso <- function(x,
     group     = group,
     type      = match.arg(type),
     regParam  = list(lambda = lambda1, 
-                     gamma  = lambda2, 
+                     gamma  = lambda2,
+                     alpha  = alpha,
                      lambda_factor = penscale, 
                      min_ratio = minratio, n_lambda = nlambda1)
   )

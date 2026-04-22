@@ -1,12 +1,13 @@
 NEWS/Changelog
 
-# quadrupen dev version	(2026-03-xx)
+# quadrupen dev version	(2026-05-xx)
 
 - major updates
   - complete rewriting of R code using R6 classes
-  - complete rewriting of C++ code using template and OO style programing
+  - complete rewriting of C++ code using template and OO style programming
   - included 'FusedLasso' from the archived package by Holger Hoefling (fixed CRAN's complaints)
-  - added group-lasso/ group-elastic and variant (group penalty: l1/l2, l1/linf, cooperative Lasso) 
+  - added group-lasso/group-elastic and variants (group penalty: l1/l2, l1/linf, cooperative Lasso) 
+  - added sparse group-lasso/group-elastic and variant (group penalty: l1/l2, l1/linf, cooperative Lasso) 
   - added lava/post-lava (combination of sparse and dense regularization, Chernozukov et al, 2017)
   - extended to group-lava (group penalty: l1/l2, l1/linf, cooperative Lasso) 
   - added refit version of Lasso/Elastic-Net ("relaxed" Lasso/Enet)
@@ -56,15 +57,15 @@ NEWS/Changelog
 quadrupen 0.2-0	(2013-02-26)
 
 - Major updates
-  - added bounded regression (regression penalized by infinity norm + structered l2 norm)
-  - added corresponding functionalies for cross-validation and stability path
+  - added bounded regression (regression penalized by infinity norm + structured l2 norm)
+  - added corresponding features for cross-validation and stability path
 - Minor updates
 - corrected wrong annotations of the stability path (PFER)
 - handled normalization internally ('normalize' is no longer a parameter)
 - more simple internal handling of penscales and correction of the rescaling of the intercept
 - better use of multicore features
 - handled runtime error exception in RcppArmadillo when the system is singular (end of the solution path)
-  A consequence is quadrupen is less likely to crash due to user's "bad" parametrization
+  A consequence is quadrupen is less likely to crash due to user's "bad" parametrisation
 - simplification of the C++ code, bugs corrected, probably new ones added :-'(
 - added 'examples' and 'tests' directories
 

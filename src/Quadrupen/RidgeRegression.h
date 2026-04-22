@@ -7,7 +7,7 @@
 #define _quadrupen_RIDGE_H
 
 #include "Regularizer.h"
-#include "Penalty.h"
+#include "PenaltySimple.h"
 
 using namespace Rcpp;
 using namespace arma;

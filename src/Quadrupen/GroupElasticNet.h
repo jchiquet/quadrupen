@@ -13,7 +13,7 @@ using namespace Rcpp;
 using namespace arma;
 using namespace std;
 
-template <typename matrix, MixedNorm norm>
+template <typename matrix, GroupNorm norm>
 class GroupElasticNet : 
   public GroupSparseRegularizer<matrix,norm>{
   public:
@@ -48,7 +48,7 @@ class GroupElasticNet :
     
 };
 
-template <typename matrix, MixedNorm norm>
+template <typename matrix, GroupNorm norm>
 GroupElasticNet<matrix,norm>::GroupElasticNet(
   const RegressionData<matrix>& data, const uvec& group_ind, const List& regParam, const List& control) :
   GroupSparseRegularizer<matrix,norm>::GroupSparseRegularizer(data, regParam) {
@@ -68,8 +68,9 @@ GroupElasticNet<matrix,norm>::GroupElasticNet(
     //   grad_ = - data_.XTy_ + set_.XTXA_ * beta_  ;
     // }
 
-    // set the penalty to l1/l2
-    penalty_ = MixedPenalty<norm>() ;
+    // set up the penalty
+    penalty_ = GroupPenalty<norm>(as<double>(regParam["alpha"])) ;
+
     get_lambda_seq(get_lambda_max(), regParam) ;
     
     // Set up the optimizer
@@ -77,15 +78,15 @@ GroupElasticNet<matrix,norm>::GroupElasticNet(
 
   }
 
-template <typename matrix, MixedNorm norm>
+template <typename matrix, GroupNorm norm>
 double GroupElasticNet<matrix,norm>::get_df() {
 
   double df = data_.centered_ ;
 
   if (set_.size_grp() > 0) {
     // approximate degrees of freedom
-    vec active_grp_norm = penalty_.elt_norm(beta_, set_.grp_sizes_(set_.G_)) ;
-    vec active_grp_norm_ols = penalty_.elt_norm(beta_debiased_, set_.grp_sizes_(set_.G_)) / (1 + gamma_) ;
+    vec active_grp_norm = penalty_.elt_norm(beta_, set_.grp_sizes_(set_.G_), ones(set_.size_grp())) ;
+    vec active_grp_norm_ols = penalty_.elt_norm(beta_debiased_, set_.grp_sizes_(set_.G_), ones(set_.size_grp())) / (1 + gamma_) ;
     
     df = df + 
       accu(1 + (active_grp_norm / active_grp_norm_ols) % (set_.grp_sizes_(set_.G_) - 1)) ;
@@ -94,7 +95,7 @@ double GroupElasticNet<matrix,norm>::get_df() {
   return(df);
 }
 
-template <typename matrix, MixedNorm norm>
+template <typename matrix, GroupNorm norm>
 List GroupElasticNet<matrix,norm>::solution_path(const List& control) {
   
   vector<double> gap, timing ; // timings and optimality measures

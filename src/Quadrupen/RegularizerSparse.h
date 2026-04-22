@@ -20,7 +20,8 @@
 #include "RegressionData.h"
 #include "ActiveSet.h"
 #include "ActiveSetGroup.h"
-#include "Penalty.h"
+#include "PenaltySimple.h"
+#include "PenaltyGroup.h"
 
 using namespace Rcpp;
 using namespace arma;
@@ -122,7 +123,7 @@ SimpleSparseRegularizer<matrix, norm>::SimpleSparseRegularizer(
 // ====================================================
 // Group-Sparse Regularizers       
 
-template <typename matrix, MixedNorm norm>
+template <typename matrix, GroupNorm norm>
 class GroupSparseRegularizer : public SparseRegularizer<matrix> {
 public:
   
@@ -134,16 +135,16 @@ public:
   double get_lambda_max() 
   {
     return(
-      penalty_.dual_norm(data_.XTy_, set_.grp_sizes_, lambda_factor_)
+      penalty_.lambda_max(data_.XTy_, set_.grp_sizes_, lambda_factor_)
     );
   }
   
   ActiveSetGroup<matrix> set_ ; // Active set of variable and data
-  MixedPenalty<norm> penalty_ ; // main penalty object 
+  GroupPenalty<norm> penalty_ ; // main penalty object 
 
 };
 
-template <typename matrix, MixedNorm norm>
+template <typename matrix, GroupNorm norm>
 GroupSparseRegularizer<matrix, norm>::GroupSparseRegularizer(
     const RegressionData<matrix>& data, const List& regParam) : 
   SparseRegularizer<matrix>::SparseRegularizer(data, regParam) {}

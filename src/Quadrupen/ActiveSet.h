@@ -20,7 +20,7 @@ public:
   mat XATXA_, XTXA_ ; // matrices of currently activated variables
   mat XATXAinv_     ; 
   bool use_chol_    ; // Maintain a Cholesky factorization along the active set algorithm
-  mat R_, Rinv_     ; // Cholesky decomposition of XATXA
+  mat R_            ; // Cholesky decomposition of XATXA
   
   ActiveSet() {} ;
   ActiveSet(const RegressionData<matrix> &data, const bool use_chol=true) ;
@@ -29,9 +29,9 @@ public:
   // ACTIVE SET HANDLING
   void add_var(uword, const RegressionData<matrix> &) ; // add a variable in the active set
   void add_vars(uvec, const RegressionData<matrix> &) ; // add a list of variables in the active set
-  void del_var(uword) ; // remove the variable activated in position ind_var_out
-  void del_vars(uvec) ; // remove a set of non contiguous variables
-  void reset()        ; // empty the active set 
+  void del_var(uword, vec&) ; // remove the variable activated in position ind_var_out
+  void del_vars(uvec, vec&) ; // remove a set of non contiguous variables
+  void reset() ; // empty the active set 
   const uword size() const { return A_.n_elem ; }
   
   // Update Cholesky factorisation by inserting the last activated variables
@@ -93,22 +93,23 @@ void ActiveSet<matrix>::add_vars(uvec vars, const RegressionData<matrix>& data) 
 }
 
 template <typename matrix>
-void ActiveSet<matrix>::del_var(uword ivar_out) {
-  is_in_[A_[ivar_out]] = 0   ; // update the active set
-  A_.shed_row(ivar_out)      ;
-  XTXA_.shed_col(ivar_out)   ;
-  XATXA_.shed_col(ivar_out)  ;
-  XATXA_.shed_row(ivar_out)  ;
-
+void ActiveSet<matrix>::del_var(uword ivar_out, vec& beta) {
+  is_in_[A_[ivar_out]] = 0  ; // update the active set
+  A_.shed_row(ivar_out)     ;
+  XTXA_.shed_col(ivar_out)  ;
+  XATXA_.shed_col(ivar_out) ;
+  XATXA_.shed_row(ivar_out) ;
+  beta.shed_row(ivar_out)   ;
+  
   if (use_chol_) downdate_Cholesky(ivar_out) ;
-
+  
 }
 
 template <typename matrix>
-void ActiveSet<matrix>::del_vars(uvec ivars) {
+void ActiveSet<matrix>::del_vars(uvec ivars, vec& beta) {
   ivars = sort(ivars, "descend");
   for (uword i=0 ; i <ivars.n_elem ; i++) {
-    del_var(ivars[i]) ;
+    del_var(ivars[i], beta) ;
   }
 }
 
@@ -120,11 +121,12 @@ void ActiveSet<matrix>::update_Cholesky() {
     R_ = sqrt(XATXA_);
   } else {
     colvec rp  = zeros<colvec>(p,1);
-    rp.subvec(0,p-2) = solve (trimatl(strans(R_)), XATXA_.submat(0,p-1,p-2,p-1));
+    rp.subvec(0, p-2) = solve(trimatu(R_.submat(0,0,p-2,p-2)).t(), 
+              XATXA_.submat(0, p-1, p-2, p-1), 
+              solve_opts::fast);
     rp(p-1) = sqrt(XATXA_(p-1,p-1) - dot(rp,rp));
     R_ = join_rows( join_cols(R_, zeros<mat>(1,p-1)) , rp);
   }
-  Rinv_ = solve(trimatu(R_), eye(p, p)) ;
 }
 
 template <typename matrix>
@@ -141,7 +143,7 @@ void ActiveSet<matrix>::downdate_Cholesky(uword j) {
     x = R_.submat(k,k,k+1,k);
     
     if (x[1] != 0) {
-      r = norm(x,2);
+      r = std::hypot(x(0), x(1));
       G = {{x(0), x(1)}, {-x(1), x(0)}};
       G = G / r;
       x(0) = r; x(1) = 0;
@@ -154,13 +156,12 @@ void ActiveSet<matrix>::downdate_Cholesky(uword j) {
     }
   }
   R_.shed_row(p);
-  Rinv_ = solve(trimatu(R_), eye(p, p)) ;
 }
 
 template <typename matrix>
 void ActiveSet<matrix>::inverse_Gram() {
   if (use_chol_) {
-    XATXAinv_ = Rinv_ * Rinv_.t();
+    XATXAinv_ = solve(trimatu(R_), solve(trimatl(R_.t()), eye<mat>(R_.n_cols, R_.n_cols)));
   } else {
     XATXAinv_ = inv_sympd(XATXA_, inv_opts::allow_approx);
   }

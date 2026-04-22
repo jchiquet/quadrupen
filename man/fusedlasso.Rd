@@ -62,7 +62,7 @@ provided.}
 
 \item{minratio}{minimal value of \eqn{\ell_1}{l1}-part of the
 penalty that will be tried, as a fraction of the maximal
-\code{lambda1} value. A too small value might lead to unstability
+\code{lambda1} value. A too small value might lead to instability
 at the end of the solution path corresponding to small
 \code{lambda1} combined with \eqn{\lambda_2=0}{lambda2=0}.  The
 default value tries to avoid this, adapting to the
@@ -82,7 +82,7 @@ will initialized zero. May save time in some situation.}
 \item{control}{list of argument controlling low level options of
 the algorithm:
 \itemize{
-\item \code{verbose}: logical; ener verbose mode
+\item \code{verbose}: logical; verbose mode
 \item \code{timer}: logical; use to record the timing of the
 algorithm. Default is \code{FALSE}.
 \item \code{maxiterin} Maximum number of iterations in the inner loop to run.
@@ -115,8 +115,8 @@ argmin<sub>&beta;</sub> 1/2 RSS(&beta) + &lambda;<sub>1</sub>
 RSS(beta) + lambda1 |D beta|1 + lambda2 sum{(i,j) in G} w(ij) |beta_j -beta_i|,}} where
 \eqn{D}{D} is a diagonal matrix, whose diagonal terms are provided
 as a vector by the \code{penscale} argument. The \eqn{\ell_1}{l1} fusion penalty
-is structured by a possibily weighted graph \eqn{G}{G} provided via the \code{struct}
-argument, as a symmetrix (undirected) adjacency matrix.
+is structured by a possibly weighted graph \eqn{G}{G} provided via the \code{struct}
+argument, as a symmetric (undirected) adjacency matrix.
 }
 \examples{
 beta <- rep(c(0,1,0,-1,0), c(25,10,25,10,25))
