@@ -32,7 +32,7 @@ scale.}
 \item{y}{response vector.}
 
 \item{group}{vector of integers indicating group belonging. Must
-match the number fo column in \code{x}. Must be SORTED integers
+match the number of column in \code{x}. Must be SORTED integers
 starting from 1.}
 
 \item{type}{string indicating whether the \eqn{\ell_1/\ell_2}{l1/l2} or the
@@ -74,7 +74,7 @@ provided.}
 
 \item{minratio}{minimal value of \eqn{\ell_1}{l1}-part of the
 penalty that will be tried, as a fraction of the maximal
-\code{lambda1} value. A too small value might lead to unstability
+\code{lambda1} value. A too small value might lead to instability
 at the end of the solution path corresponding to small
 \code{lambda1} combined with \eqn{\lambda_2=0}{lambda2=0}.  The
 default value tries to avoid this, adapting to the

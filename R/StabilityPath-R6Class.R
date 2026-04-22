@@ -5,7 +5,7 @@
 #'
 #' @param sel_mode a character string, either `"rank"` or
 #' `"PFER"`. In the first case, the selection is based on the
-#' rank of total probabilties by variables along the path: the first
+#' rank of total probabilities by variables along the path: the first
 #' `nvarsel` variables are selected (see below). In the second
 #' case, the PFER control is used as described in Meinshausen and
 #' Buhlmannn's paper. Default is `"rank"`.
@@ -23,7 +23,7 @@ StabilityPath <- R6::R6Class(
     #' @field probabilities a `Matrix` object containing the
     #' estimated probabilities of selection along the path of solutions.
     probabilities = NA, 
-    #' @field regParam a lsit with the levels of the regularizing parameters used
+    #' @field regParam a list with the levels of the regularizing parameters used
     regParam      = NA, 
     #' @field subsamples a list that contains the folds used for each subsample.
     subsamples    = NA, 
@@ -32,7 +32,7 @@ StabilityPath <- R6::R6Class(
     #' Should be called internally by an object [`QuadrupenFit$stability()`][QuadrupenFit]
     #' @param probabilities a `Matrix` object containing the
     #' estimated probabilities of selection along the path of solutions.
-    #' @param regParam a lsit with the levels of the regularizing parameters used
+    #' @param regParam a list with the levels of the regularizing parameters used
     #' @param subsamples a list that contains the folds used for each subsample.
     initialize = 
       function(probabilities, regParam, subsamples) {

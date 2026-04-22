@@ -85,7 +85,7 @@ DataModel <- R6::R6Class(
     #' @param n_subsamples the number of subsamples
     #' @param subsample_size the subsample size
     #' @param subsamples list with vector of subsamples (optional)
-    #' @param weakness coefficient for randonly reweighting the regressor, default to 1
+    #' @param weakness coefficient for randomly weighting the regressor, default to 1
     #' @return  a list of DataModel, resampling of the original
     splitSubSamples = function(
     n_subsamples = 50,

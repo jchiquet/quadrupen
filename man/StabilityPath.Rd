@@ -52,7 +52,7 @@ cat("\nDONE.\n")
 \item{\code{probabilities}}{a \code{Matrix} object containing the
 estimated probabilities of selection along the path of solutions.}
 
-\item{\code{regParam}}{a lsit with the levels of the regularizing parameters used}
+\item{\code{regParam}}{a list with the levels of the regularizing parameters used}
 
 \item{\code{subsamples}}{a list that contains the folds used for each subsample.}
 }
@@ -98,7 +98,7 @@ Should be called internally by an object \code{\link[=QuadrupenFit]{QuadrupenFit
 \item{\code{probabilities}}{a \code{Matrix} object containing the
 estimated probabilities of selection along the path of solutions.}
 
-\item{\code{regParam}}{a lsit with the levels of the regularizing parameters used}
+\item{\code{regParam}}{a list with the levels of the regularizing parameters used}
 
 \item{\code{subsamples}}{a list that contains the folds used for each subsample.}
 }
@@ -144,7 +144,7 @@ Perform variable selection based on the stability path
 \describe{
 \item{\code{sel_mode}}{a character string, either \code{"rank"} or
 \code{"PFER"}. In the first case, the selection is based on the
-rank of total probabilties by variables along the path: the first
+rank of total probabilities by variables along the path: the first
 \code{nvarsel} variables are selected (see below). In the second
 case, the PFER control is used as described in Meinshausen and
 Buhlmannn's paper. Default is \code{"rank"}.}
@@ -195,7 +195,7 @@ the path (e.g., 'relevant'/'irrelevant'). See examples.}
 
 \item{\code{sel_mode}}{a character string, either \code{"rank"} or
 \code{"PFER"}. In the first case, the selection is based on the
-rank of total probabilties by variables along the path: the first
+rank of total probabilities by variables along the path: the first
 \code{nvarsel} variables are selected (see below). In the second
 case, the PFER control is used as described in Meinshausen and
 Buhlmannn's paper. Default is \code{"rank"}.}

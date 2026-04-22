@@ -12,7 +12,7 @@
 #' @inheritParams elastic.net
 #'
 #' @param group vector of integers indicating group belonging. Must
-#' match the number fo column in \code{x}. Must be SORTED integers
+#' match the number of column in \code{x}. Must be SORTED integers
 #' starting from 1.
 #' 
 #' @param type string indicating whether the \eqn{\ell_1/\ell_2}{l1/l2} or the

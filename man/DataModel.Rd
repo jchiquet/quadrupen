@@ -138,7 +138,7 @@ a function splitting data into subsamples
 
 \item{\code{subsamples}}{list with vector of subsamples (optional)}
 
-\item{\code{weakness}}{coefficient for randonly reweighting the regressor, default to 1}
+\item{\code{weakness}}{coefficient for randomly weighting the regressor, default to 1}
 }
 \if{html}{\out{</div>}}
 }

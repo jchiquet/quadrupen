@@ -14,7 +14,7 @@
 #' 
 #' @param control list of argument controlling low level options of
 #' the algorithm:
-#' * `verbose`: logical; ener verbose mode
+#' * `verbose`: logical; verbose mode
 #' * `timer`: logical; use to record the timing of the
 #' algorithm. Default is `FALSE`.
 #' * `maxiterin` Maximum number of iterations in the inner loop to run.
@@ -39,8 +39,8 @@
 #' RSS(beta) + lambda1 |D beta|1 + lambda2 sum{(i,j) in G} w(ij) |beta_j -beta_i|,}} where
 #' \eqn{D}{D} is a diagonal matrix, whose diagonal terms are provided
 #' as a vector by the \code{penscale} argument. The \eqn{\ell_1}{l1} fusion penalty 
-#' is structured by a possibily weighted graph \eqn{G}{G} provided via the `struct`
-#' argument, as a symmetrix (undirected) adjacency matrix.
+#' is structured by a possibly weighted graph \eqn{G}{G} provided via the `struct`
+#' argument, as a symmetric (undirected) adjacency matrix.
 #' 
 #' @author Original code by Holger Hoefling, refactoring by Julien Chiquet
 #' 

@@ -1,6 +1,6 @@
 #' Fit a linear model with lava regularization
 #'
-#' Adjust a the lava regularized linear models, that is a lava trasnformation 
+#' Adjust a the lava regularized linear models, that is a lava transformation 
 #' of the data followed by a 
 #' (possibly weighted) \eqn{\ell_1}{l1}-norm. The solution path is
 #' computed at a grid of values for the \eqn{\ell_1}{l1}-penalty. See
