@@ -68,7 +68,7 @@ When it is unknown, it writes
 n\*log(RSS) + penalty \* df
 
 Estimation of the degrees of freedom (for the elastic-net, the LASSO and
-also bounded regression) are computed by applying and adpating the
+also bounded regression) are computed by applying and adapting the
 results of Tibshirani and Taylor (see references below).
 
 ## References

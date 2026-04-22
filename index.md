@@ -43,7 +43,7 @@ additional function is given by the end of the present document
 (Appendix).
 
 We draw data from linear regression where the regression parameters are
-defined groupwise. The corresponding regression correlated according to
+defined group-wise. The corresponding regression correlated according to
 the same pattern.
 
 ``` r
@@ -58,12 +58,12 @@ beta   <- rep(c(0.25,1,-0.25,-1,0.25), group)
 x <- rPred.block(n, p, sizes = group, rho=c(0.25, 0.75, 0.25, 0.75, 0.25))
 ```
 
-Indeed, the correlation structure between the regressor exhibitis a
+Indeed, the correlation structure between the regressors exhibits a
 strong pattern:
 
 ![](reference/figures/unnamed-chunk-3-1.png)
 
-We draw the reponse variable by fixing the variance of the noise ratio
+We draw the response variable by fixing the variance of the noise ratio
 to get an $R^{2}$ equal to $0.8$.
 
 ``` r

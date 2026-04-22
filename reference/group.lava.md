@@ -45,7 +45,7 @@ group.lava(
 - group:
 
   vector of integers indicating group belonging. Must match the number
-  fo column in `x`. Must be SORTED integers starting from 1.
+  of column in `x`. Must be SORTED integers starting from 1.
 
 - type:
 
@@ -101,7 +101,7 @@ group.lava(
 
   minimal value of \\\ell_1\\-part of the penalty that will be tried, as
   a fraction of the maximal `lambda1` value. A too small value might
-  lead to unstability at the end of the solution path corresponding to
+  lead to instability at the end of the solution path corresponding to
   small `lambda1` combined with \\\lambda_2=0\\. The default value tries
   to avoid this, adapting to the '\\n\<p\\' context. Ignored if
   `lambda1` is provided.
@@ -137,8 +137,8 @@ group.lava(
   - `maxiter` the maximal number of iteration used to solve the problem
     for a given value of lambda1. Default is 500.
 
-  - `method` a string for the underlying solver used. Either `"quadra"`
-    or `"fista"`. Default is `"quadra"`.
+  - `method` a string for the underlying solver used. Either `"quadra"`,
+    `"fista"` or `"pgd"`. Default is `"quadra"`.
 
   - `threshold` a threshold for convergence. The algorithm stops when
     the optimality conditions are fulfill up to this threshold. Default

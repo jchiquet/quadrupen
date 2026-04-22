@@ -85,7 +85,7 @@ fusedlasso(
 
   minimal value of \\\ell_1\\-part of the penalty that will be tried, as
   a fraction of the maximal `lambda1` value. A too small value might
-  lead to unstability at the end of the solution path corresponding to
+  lead to instability at the end of the solution path corresponding to
   small `lambda1` combined with \\\lambda_2=0\\. The default value tries
   to avoid this, adapting to the '\\n\<p\\' context. Ignored if
   `lambda1` is provided.
@@ -108,7 +108,7 @@ fusedlasso(
 
   list of argument controlling low level options of the algorithm:
 
-  - `verbose`: logical; ener verbose mode
+  - `verbose`: logical; verbose mode
 
   - `timer`: logical; use to record the timing of the algorithm. Default
     is `FALSE`.
@@ -142,8 +142,8 @@ The optimized criterion is the following:
 
 where \\D\\ is a diagonal matrix, whose diagonal terms are provided as a
 vector by the `penscale` argument. The \\\ell_1\\ fusion penalty is
-structured by a possibily weighted graph \\G\\ provided via the `struct`
-argument, as a symmetrix (undirected) adjacency matrix.
+structured by a possibly weighted graph \\G\\ provided via the `struct`
+argument, as a symmetric (undirected) adjacency matrix.
 
 ## Author
 

@@ -22,7 +22,7 @@
 
     <a class="navbar-brand me-2" href="index.html">quadrupen</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3-9920</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3-9950</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -78,7 +78,7 @@
 <h3 id="a-toy-data-set-advocating-for-structured-regularization">A toy data set advocating for structured regularization<a class="anchor" aria-label="anchor" href="#a-toy-data-set-advocating-for-structured-regularization"></a>
 </h3>
 <p>See pages 29–30 in my <a href="https://tel.archives-ouvertes.fr/tel-01288976/" class="external-link">habilitation</a>. Code for additional function is given by the end of the present document (Appendix).</p>
-<p>We draw data from linear regression where the regression parameters are defined groupwise. The corresponding regression correlated according to the same pattern.</p>
+<p>We draw data from linear regression where the regression parameters are defined group-wise. The corresponding regression correlated according to the same pattern.</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">n</span> <span class="op">&lt;-</span> <span class="fl">200</span></span>
 <span><span class="va">p</span> <span class="op">&lt;-</span> <span class="fl">192</span></span>
@@ -89,9 +89,9 @@
 <span><span class="va">labels</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html" class="external-link">factor</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste</a></span><span class="op">(</span><span class="st">"group"</span>, <span class="fl">1</span><span class="op">:</span><span class="fl">5</span><span class="op">)</span>, <span class="va">group</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="va">beta</span>   <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.25</span>,<span class="fl">1</span>,<span class="op">-</span><span class="fl">0.25</span>,<span class="op">-</span><span class="fl">1</span>,<span class="fl">0.25</span><span class="op">)</span>, <span class="va">group</span><span class="op">)</span></span>
 <span><span class="va">x</span> <span class="op">&lt;-</span> <span class="fu">rPred.block</span><span class="op">(</span><span class="va">n</span>, <span class="va">p</span>, sizes <span class="op">=</span> <span class="va">group</span>, rho<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.25</span>, <span class="fl">0.75</span>, <span class="fl">0.25</span>, <span class="fl">0.75</span>, <span class="fl">0.25</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
-<p>Indeed, the correlation structure between the regressor exhibitis a strong pattern:</p>
+<p>Indeed, the correlation structure between the regressors exhibits a strong pattern:</p>
 <p><img src="reference/figures/unnamed-chunk-3-1.png"></p>
-<p>We draw the reponse variable by fixing the variance of the noise ratio to get an <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msup><mi>R</mi><mn>2</mn></msup><annotation encoding="application/x-tex">R^2</annotation></semantics></math> equal to <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mn>0.8</mn><annotation encoding="application/x-tex">0.8</annotation></semantics></math>.</p>
+<p>We draw the response variable by fixing the variance of the noise ratio to get an <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msup><mi>R</mi><mn>2</mn></msup><annotation encoding="application/x-tex">R^2</annotation></semantics></math> equal to <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mn>0.8</mn><annotation encoding="application/x-tex">0.8</annotation></semantics></math>.</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">dat</span> <span class="op">&lt;-</span> <span class="fu">rlm</span><span class="op">(</span><span class="va">x</span>,<span class="va">beta</span>,<span class="va">mu</span>,r2<span class="op">=</span><span class="fl">0.8</span><span class="op">)</span></span>
 <span><span class="va">y</span> <span class="op">&lt;-</span> <span class="va">dat</span><span class="op">$</span><span class="va">y</span></span>

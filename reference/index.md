@@ -11,8 +11,8 @@ Functions for fitting various structured regularization models
 - [`fusedlasso()`](https://jchiquet.github.io/quadrupen/reference/fusedlasso.md)
   : A function for fitting generalized fused-Lasso problems
 - [`group.lasso()`](https://jchiquet.github.io/quadrupen/reference/group.lasso.md)
-  : Fit a linear model with group-lasso (either l1/l2 or l1/l-inf)
-  regularization
+  : Fit a linear model with (sparse) group regularisation (either l1/l2,
+  l1/l-inf or cooperative variant)
 - [`group.lava()`](https://jchiquet.github.io/quadrupen/reference/group.lava.md)
   : Fit a linear model with group-lava regularization
 - [`lava()`](https://jchiquet.github.io/quadrupen/reference/lava.md) :

@@ -47,9 +47,8 @@ quadrupen 0.2-0 (2013-02-26)
 
 - Major updates
   - added bounded regression (regression penalized by infinity norm +
-    structered l2 norm)
-  - added corresponding functionalies for cross-validation and stability
-    path
+    structured l2 norm)
+  - added corresponding features for cross-validation and stability path
 - Minor updates
 - corrected wrong annotations of the stability path (PFER)
 - handled normalization internally (‘normalize’ is no longer a
@@ -59,7 +58,7 @@ quadrupen 0.2-0 (2013-02-26)
 - better use of multicore features
 - handled runtime error exception in RcppArmadillo when the system is
   singular (end of the solution path) A consequence is quadrupen is less
-  likely to crash due to user’s “bad” parametrization
+  likely to crash due to user’s “bad” parametrisation
 - simplification of the C++ code, bugs corrected, probably new ones
   added :-’(
 - added ‘examples’ and ‘tests’ directories

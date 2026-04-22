@@ -17,7 +17,7 @@ regularization. See details for the criterion optimized."></head><body>
 
     <a class="navbar-brand me-2" href="../index.html">quadrupen</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3-9920</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3-9950</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -139,7 +139,7 @@ provided.</p></dd>
 <dt id="arg-minratio">minratio<a class="anchor" aria-label="anchor" href="#arg-minratio"></a></dt>
 <dd><p>minimal value of \(\ell_1\)-part of the
 penalty that will be tried, as a fraction of the maximal
-<code>lambda1</code> value. A too small value might lead to unstability
+<code>lambda1</code> value. A too small value might lead to instability
 at the end of the solution path corresponding to small
 <code>lambda1</code> combined with \(\lambda_2=0\).  The
 default value tries to avoid this, adapting to the
@@ -173,7 +173,7 @@ algorithm. Default is <code>FALSE</code>.</p></li>
 <li><p><code>maxiter</code> the maximal number of iteration used to solve the
 problem for a given value of lambda1. Default is 500.</p></li>
 <li><p><code>method</code> a string for the underlying solver used. Either
-<code>"quadra"</code> or <code>"fista"</code>. Default is <code>"quadra"</code>.</p></li>
+<code>"quadra"</code>, <code>"fista"</code> or <code>"pgd"</code>. Default is <code>"quadra"</code>.</p></li>
 <li><p><code>threshold</code> a threshold for convergence. The algorithm stops
 when the optimality conditions are fulfill up to this threshold.
 Default is <code>1e-7</code> for <code>"quadra"</code> and <code>1e-2</code> for the first order methods.</p></li>

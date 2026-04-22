@@ -1,7 +1,7 @@
 # Fit a linear model with lava regularization
 
 Adjust a the lava regularized linear models, that is a lava
-trasnformation of the data followed by a (possibly weighted)
+transformation of the data followed by a (possibly weighted)
 \\\ell_1\\-norm. The solution path is computed at a grid of values for
 the \\\ell_1\\-penalty. See details for the criterion optimized.
 
@@ -86,7 +86,7 @@ lava(
 
   minimal value of \\\ell_1\\-part of the penalty that will be tried, as
   a fraction of the maximal `lambda1` value. A too small value might
-  lead to unstability at the end of the solution path corresponding to
+  lead to instability at the end of the solution path corresponding to
   small `lambda1` combined with \\\lambda_2=0\\. The default value tries
   to avoid this, adapting to the '\\n\<p\\' context. Ignored if
   `lambda1` is provided.
@@ -122,8 +122,8 @@ lava(
   - `maxiter` the maximal number of iteration used to solve the problem
     for a given value of lambda1. Default is 500.
 
-  - `method` a string for the underlying solver used. Either `"quadra"`
-    or `"fista"`. Default is `"quadra"`.
+  - `method` a string for the underlying solver used. Either `"quadra"`,
+    `"fista"` or `"pgd"`. Default is `"quadra"`.
 
   - `threshold` a threshold for convergence. The algorithm stops when
     the optimality conditions are fulfill up to this threshold. Default

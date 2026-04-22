@@ -22,7 +22,7 @@ function. Owns [`print()`](https://rdrr.io/r/base/print.html) and
 
 - `regParam`:
 
-  a lsit with the levels of the regularizing parameters used
+  a list with the levels of the regularizing parameters used
 
 - `subsamples`:
 
@@ -84,7 +84,7 @@ object
 
 - `regParam`:
 
-  a lsit with the levels of the regularizing parameters used
+  a list with the levels of the regularizing parameters used
 
 - `subsamples`:
 
@@ -130,7 +130,7 @@ Perform variable selection based on the stability path
 - `sel_mode`:
 
   a character string, either `"rank"` or `"PFER"`. In the first case,
-  the selection is based on the rank of total probabilties by variables
+  the selection is based on the rank of total probabilities by variables
   along the path: the first `nvarsel` variables are selected (see
   below). In the second case, the PFER control is used as described in
   Meinshausen and Buhlmannn's paper. Default is `"rank"`.
@@ -189,7 +189,7 @@ Produce a plot of the stability path obtained by stability selection.
 - `sel_mode`:
 
   a character string, either `"rank"` or `"PFER"`. In the first case,
-  the selection is based on the rank of total probabilties by variables
+  the selection is based on the rank of total probabilities by variables
   along the path: the first `nvarsel` variables are selected (see
   below). In the second case, the PFER control is used as described in
   Meinshausen and Buhlmannn's paper. Default is `"rank"`.

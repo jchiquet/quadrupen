@@ -171,7 +171,7 @@ a function splitting data into subsamples
 
 - `weakness`:
 
-  coefficient for randonly reweighting the regressor, default to 1
+  coefficient for randomly weighting the regressor, default to 1
 
 #### Returns
 

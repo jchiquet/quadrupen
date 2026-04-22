@@ -51,7 +51,7 @@ scripts using the testhat package are also present in the 'tests'
 directory, where we check basic functionalities of the code, especially
 the reproducibility of the Lasso/Elastic-net solution path with the
 lars, elasticnet and glmnet packages. We also check the handling of
-runtime errors or unstabilities.
+runtime errors or instabilities.
 
 ## Algorithm
 
@@ -98,7 +98,7 @@ optimization of the
 [`bounded.reg`](https://jchiquet.github.io/quadrupen/reference/bounded.reg.md)
 criterion in a (hopefully) 'bulletproof' mode: using mainly the fast and
 accurate quadratic approach, it switches to the slower but more robust
-proximal resolution when unstability is detected.
+proximal resolution when instability is detected.
 
 ## Technical remarks
 

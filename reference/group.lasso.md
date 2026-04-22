@@ -1,7 +1,7 @@
-# Fit a linear model with group-lasso (either l1/l2 or l1/l-inf) regularization
+# Fit a linear model with (sparse) group regularisation (either l1/l2, l1/l-inf or cooperative variant)
 
-Adjust a linear model with group-lasso regularization, that is a mixture
-of either a (possibly weighted) \\\ell_1/\ell_2\\- or
+Adjust a linear model with (sparse) group regularization, that is a
+mixture of either a (possibly weighted) \\\ell_1/\ell_2\\- or
 \\\ell_1/\ell\_\infty\\-norm, and a (possibly structured)
 \\\ell_2\\-norm (ridge-like). The solution path is computed at a grid of
 values for the \\\ell_1/\ell_q\\-penalty. See details for the criterion
@@ -17,6 +17,7 @@ group.lasso(
   type = c("l2", "coop", "linf"),
   lambda1 = NULL,
   lambda2 = 0.01,
+  alpha = 0,
   penscale = sqrt(tabulate(group)),
   struct = Matrix::Diagonal(ncol(x), 1),
   intercept = TRUE,
@@ -45,7 +46,7 @@ group.lasso(
 - group:
 
   vector of integers indicating group belonging. Must match the number
-  fo column in `x`. Must be SORTED integers starting from 1.
+  of column in `x`. Must be SORTED integers starting from 1.
 
 - type:
 
@@ -64,6 +65,11 @@ group.lasso(
 
   real scalar; tunes the \\\ell_2\\ penalty in the Elastic-net. Default
   is 0.01. Set to 0 to recover the Lasso.
+
+- alpha:
+
+  real scalar in (0,1); tunes mixture between \\\ell_1\\ group
+  penalties. Default is 0.0 (standard group-lasso).
 
 - penscale:
 
@@ -101,7 +107,7 @@ group.lasso(
 
   minimal value of \\\ell_1\\-part of the penalty that will be tried, as
   a fraction of the maximal `lambda1` value. A too small value might
-  lead to unstability at the end of the solution path corresponding to
+  lead to instability at the end of the solution path corresponding to
   small `lambda1` combined with \\\lambda_2=0\\. The default value tries
   to avoid this, adapting to the '\\n\<p\\' context. Ignored if
   `lambda1` is provided.
@@ -137,8 +143,8 @@ group.lasso(
   - `maxiter` the maximal number of iteration used to solve the problem
     for a given value of lambda1. Default is 500.
 
-  - `method` a string for the underlying solver used. Either `"quadra"`
-    or `"fista"`. Default is `"quadra"`.
+  - `method` a string for the underlying solver used. Either `"quadra"`,
+    `"fista"` or `"pgd"`. Default is `"quadra"`.
 
   - `threshold` a threshold for convergence. The algorithm stops when
     the optimality conditions are fulfill up to this threshold. Default

@@ -80,12 +80,11 @@ If the user runs the fitting method with option `'bulletproof'` set to
 stops are handled internally, in order to provide results on the same
 grid of penalty tuned by \\\lambda_1\\. This is done by means of `NA`
 values, so as mean and standard error are consistently evaluated. If,
-while cross-validating, the procedure experiences too much early
-stoppings, a warning is sent to the user, in which case you should
-reconsider the grid of `lambda1` used for the cross-validation. If
-`bulletproof` is `TRUE` (the default), there is nothing to worry about,
-except a possible slow down when any switching to the proximal algorithm
-is required.
+while cross-validating, the procedure experiences too much early stops,
+a warning is sent to the user, in which case you should reconsider the
+grid of `lambda1` used for the cross-validation. If `bulletproof` is
+`TRUE` (the default), there is nothing to worry about, except a possible
+slow down when any switching to the proximal algorithm is required.
 
 ## Examples
 
