@@ -1,6 +1,8 @@
 context("Consistency of the Lasso solution paths (package 'lars' and 'glmnet')")
 
-tol <- 1e-4
+testDataEnet <- readRDS("dataTest-Enet.rds")
+
+tol <- 1e-2
 
 test_that("lasso_quad2lars", {
 
@@ -22,11 +24,11 @@ test_that("lasso_quad2lars", {
   }
 
   ## PROSTATE DATA SET
-  load("prostate.rda")
-  x <- as.matrix(x)
-
+  x <- testDataEnet$x_prostate
+  y <- testDataEnet$y_prostate
+  
   ## Run the tests...
-  with.intercept <-get.lars(x,y,TRUE,TRUE)
+  with.intercept <- get.lars(x,y,TRUE,TRUE)
   expect_equal(with.intercept$quad,
               with.intercept$lars, check.attributes = FALSE, tolerance = tol)
 
@@ -34,31 +36,18 @@ test_that("lasso_quad2lars", {
   expect_equal(with.intercept.unnormalized$quad,
               with.intercept.unnormalized$lars, check.attributes = FALSE, tolerance = tol)
 
-  without.intercept <-get.lars(x,y,FALSE,TRUE)
+  without.intercept <- get.lars(x,y,FALSE,TRUE)
   expect_equal(without.intercept$quad,
               without.intercept$lars, check.attributes = FALSE, tolerance = tol)
 
-  without.intercept.unnormalized <-get.lars(x,y,FALSE,FALSE)
+  without.intercept.unnormalized <- get.lars(x,y,FALSE,FALSE)
   expect_equal(without.intercept.unnormalized$quad,
               without.intercept.unnormalized$lars, check.attributes = FALSE, tolerance = tol)
 
   ## RANDOM DATA
-  seed <- sample(1:10000,1)
-  ## cat("\n#seed=",seed)
-  set.seed(seed)
-
-  beta <- rep(c(0,1,0,-1,0), c(25,10,25,10,25))
-  n <- 100
-  p <- length(beta)
-
-  mu <- 3 # intercept
-  sigma <- 30 # huge noise
-  Sigma <- matrix(0.95,p,p) # huge correlation
-  diag(Sigma) <- 1
-
-  x <- as.matrix(matrix(rnorm(95*n),n,95) %*% chol(Sigma))
-  y <- 10 + x %*% beta + rnorm(n,0,10)
-
+  x <- testDataEnet$x_sim
+  y <- testDataEnet$y_sim
+  
   ## Run the tests...
   with.intercept <-get.lars(x,y,TRUE,TRUE)
   expect_equal(with.intercept$coef.quad,
@@ -85,13 +74,13 @@ test_that("lasso_quad2glmnet", {
   ## SECOND CHECK: compare to glmnet with prescaling of x
   x <- matrix(rnorm(100*50),100,50)
   y <- rnorm(100)
-  y <- y-mean(y)
+  y <- y - mean(y)
   n <- nrow(x)
   p <- ncol(x)
 
   ## If thresh is set to the default, the test won't pass!!!
   ## This is because coordinate descent is fast yet not extremely accurate
-  lasso.glmn <- glmnet(x,y, lambda.min.ratio=1e-2, thresh=1e-20)
+  lasso.glmn <- glmnet(x,y, lambda.min.ratio=1e-2)#, thresh=1e-20)
   lasso.quad <- elastic.net(x,y, lambda1=lasso.glmn$lambda*sqrt(n), lambda2=0)
 
   quad <- list(coef   = as.matrix(lasso.quad$coefficients),

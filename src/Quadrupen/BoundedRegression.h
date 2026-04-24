@@ -11,8 +11,6 @@
 #include "PenaltySimple.h"
 #include "OptimizerLINF.h"
 
-#define ZERO 2e-16 // practical zero
-
 using namespace Rcpp;
 using namespace arma;
 using namespace std;

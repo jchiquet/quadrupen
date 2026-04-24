@@ -1,6 +1,9 @@
 context("Consistency of the Lasso solution paths (package 'lars' and 'glmnet')")
 
+testDataEnet <- readRDS("dataTest-Enet.rds")
+
 tol <- 1e-4
+
 require(MASS)
 
 test_that("lasso_quad2lars", {
@@ -27,9 +30,8 @@ test_that("lasso_quad2lars", {
     return(list(quad=quad,mass=mass))
   }
   
-  ## PROSTATE DATA SET
-  load("prostate.rda")
-  x <- as.matrix(x)
+  x <- testDataEnet$x_prostate
+  y <- testDataEnet$y_prostate
   
   ## Run the tests...
   with.intercept <- get_ridge(x,y,TRUE)
@@ -41,22 +43,9 @@ test_that("lasso_quad2lars", {
                without.intercept$mass, check.attributes = FALSE, tolerance = tol)
   
   ## RANDOM DATA
-  seed <- sample(1:10000,1)
-  ## cat("\n#seed=",seed)
-  set.seed(seed)
-  
-  beta <- rep(c(0,1,0,-1,0), c(25,10,25,10,25))
-  n <- 100
-  p <- length(beta)
-  
-  mu <- 3 # intercept
-  sigma <- 30 # huge noise
-  Sigma <- matrix(0.95,p,p) # huge correlation
-  diag(Sigma) <- 1
-  
-  x <- as.matrix(matrix(rnorm(95*n),n,95) %*% chol(Sigma))
-  y <- 10 + x %*% beta + rnorm(n,0,10)
-  
+  x <- testDataEnet$x_sim
+  y <- testDataEnet$y_sim
+
   ## Run the tests...
   ## Run the tests...
   with.intercept <- get_ridge(x,y,TRUE)

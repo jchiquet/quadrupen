@@ -1,3 +1,5 @@
+context("Consistency of the fused-Lasso")
+
 load("dataTest-fusedlasso.rda")
 
 tol <- 2e-4

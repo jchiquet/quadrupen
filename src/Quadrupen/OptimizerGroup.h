@@ -79,14 +79,16 @@ uword GroupOptimizer<matrix,norm>::solve(
   while ((gap_ > accuracy_) && (iter_ <= maxiter_)) {
     R_CheckUserInterrupt();
     iter_++;
-    
+
     // VARIABLE ACTIVATION IF APPLICABLE
     if (set.is_grp_in_[grp_in] == 0 && optimality(grp_in) > 0) { // Is var_in already in the active set?
       set.add_group(grp_in, data) ;
-      beta.resize(beta.size()+set.grp_sizes_(grp_in)) ; // update the vector of active parameters
-      beta.tail(set.grp_sizes_(grp_in)) = - 1e-3 * sign(grad(set.group_[grp_in])) ;
+      beta.insert_rows(beta.n_elem, set.grp_sizes_(grp_in)); // update the vector of active parameters
+      beta.tail(set.grp_sizes_(grp_in)).fill(0.0);
       if (verbosity_) {Rprintf("\tnewly added group %i\n",grp_in);}
     } 
+  
+    vec beta_old = beta; // Save state for incremental gradient update
     
     // OPTIMIZATION OVER THE CURRENTLY ACTIVATED VARIABLES
     auto prox = [this, &set, &weights](const vec& x, const double l) {
@@ -103,11 +105,15 @@ uword GroupOptimizer<matrix,norm>::solve(
       );
     }
 
+    // INCREMENTAL GRADIENT UPDATE
+    if (beta.n_elem > 0) {
+      grad += set.XTXA_ * (beta - beta_old);
+    }
+    
     // VARIABLE DELETION IF APPLICABLE
-    grad(set.A_) = - data.XTy_(set.A_) + set.XATXA_ * beta ;
     uvec vanish = find(
-      penalty_.elt_norm(grad(set.A_), set.grp_sizes_(set.G_), weights(set.G_)) < lambda + ZERO &&
-      penalty_.elt_norm(beta, set.grp_sizes_(set.G_), ones(set.size_grp())) < ZERO
+      penalty_.optimality(grad(set.A_), lambda, set.grp_sizes_(set.G_), weights(set.G_)) <= accuracy_ &&
+      penalty_.elt_norm(beta, set.grp_sizes_(set.G_), ones(set.size_grp())) <= accuracy_/10
     ) ;
     if (!vanish.is_empty()) { // Is var_in already in the active set?
       if (verbosity_) set.G_(vanish).print("\tremoved group %i\n") ;
@@ -115,7 +121,6 @@ uword GroupOptimizer<matrix,norm>::solve(
     } 
 
     // OPTIMALITY TESTING
-    grad = - data.XTy_ + set.XTXA_ * beta ;
     optimality = penalty_.optimality(grad, lambda, set.grp_sizes_, weights) ;
     grp_in = optimality.index_max() ;
     gap_ = std::max(0.0, optimality(grp_in)) ;

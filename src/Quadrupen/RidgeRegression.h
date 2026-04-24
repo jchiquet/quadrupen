@@ -21,7 +21,7 @@ public:
   
   List solution_path(const mat&);
   
-  SimplePenalty<SimpleNorm::RIDGE> penalty_ ; // main penalty object 
+  SimplePenalty<SimpleNorm::L2> penalty_ ; // main penalty object 
   
 };
 

@@ -58,26 +58,27 @@ ElasticNet<matrix>::ElasticNet(
 
     // Scale the structuring matrix according to main penalty factor and the amount of l2 penalty 
     data_.scale_struct(gamma_) ;
-    
-    // Initialize the active set, beta_ and gradient with starting coefficient
-    vec beta0 = control["beta0"] ;
-    uvec A0 = find(beta0) ;
-    if (A0.is_empty()) {
-      set_  = ActiveSet(data_, as<bool>(control["usechol"])) ;
-      grad_ = - data_.XTy_ ;
-    } else {
-      set_  = ActiveSet(data_, A0, as<bool>(control["usechol"])) ;
-      beta_ = beta0(A0) ;
-      grad_ = - data_.XTy_ + set_.XTXA_ * beta_  ;
-    }
-    
+
     // set the penalty to l1
     penalty_ = SimplePenalty<SimpleNorm::L1>() ;
-    get_lambda_seq(get_lambda_max(), regParam) ;
+    double lmax = penalty_.lambda_max(data_.XTy_, lambda_factor_) ;
+    get_lambda_seq(lmax, regParam) ;
     
     // Set up the optimizer
     solver_ = OptimizerL1<matrix>(penalty_, control) ;
     
+    // Initialize the active set, beta_ and gradient with starting coefficient
+    vec beta0 = control["beta0"] ;
+    uvec A0 = find(beta0) ;
+    grad_ = - data_.XTy_ ;
+    if (A0.is_empty()) {
+      set_  = ActiveSet(data_, as<bool>(control["usechol"])) ;
+    } else {
+      set_  = ActiveSet(data_, A0, as<bool>(control["usechol"])) ;
+      beta_ = beta0(A0) ;
+      grad_ += set_.XTXA_ * beta_  ;
+    }
+
   }
 
 template <typename matrix>

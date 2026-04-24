@@ -11,8 +11,6 @@
 
 #include <RcppArmadillo.h>
 
-#define ZERO 2e-16 // practical zero
-
 enum class GroupNorm {L1L2, L1LINF, COOP};
 
 using namespace Rcpp;
@@ -28,7 +26,7 @@ public:
   
   double grp_norm  (const vec& x) ;
   double grp_norm_dual (const vec& x) ;
-  vec    elt_norm  (const vec& x, const uvec& pk, const vec& wk)         ;
+  vec    elt_norm  (const vec& x, const uvec& pk, const vec& wk) ;
   double pen_norm  (const vec& x, const uvec& pk, const vec& wk) ;
   double lambda_max (const vec& XTy, const uvec& pk, const vec& wk) ;
   vec proximal(const vec& x, double lambda, const uvec& pk, const vec& wk)  ;

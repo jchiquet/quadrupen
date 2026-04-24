@@ -13,16 +13,15 @@ using namespace arma;
 using namespace std;
 
 template <typename matrix>
-class OptimizerLINF : public SimpleOptimizer<matrix,SimpleNorm::LINF> {
+class OptimizerLINF : public Optimizer {
 
 public:
 
-  using SimpleOptimizer<matrix,SimpleNorm::LINF>::penalty_ ;
-  
+  SimplePenalty<SimpleNorm::LINF> penalty_ ;
   OptimizerLINF() {} ;
   OptimizerLINF(SimplePenalty<SimpleNorm::LINF>&, const List& control) ;
 
-  uword quadratic(
+  uword quadratic_breg(
       vec& beta,
       vec &grad,
       const double& lambda,
@@ -30,7 +29,7 @@ public:
       RegressionData<matrix> &data,
       ActiveSet<matrix>& set,
       const double& accuracy,
-      const uword& max_iter) override ;
+      const uword& max_iter) ;
 
   mat updateCholeskyFromExisting(const mat& R, const vec& b) ;
   
@@ -39,7 +38,7 @@ public:
 template <typename matrix>
 OptimizerLINF<matrix>::OptimizerLINF(
     SimplePenalty<SimpleNorm::LINF>& penalty, const List& control) : 
-  SimpleOptimizer<matrix, SimpleNorm::LINF>(penalty, control) 
+  penalty_(penalty), Optimizer(control) 
     {}
 
 template <typename matrix>
@@ -54,7 +53,7 @@ mat OptimizerLINF<matrix>::updateCholeskyFromExisting(const mat& R, const vec& b
 }
 
 template <typename matrix>
-uword OptimizerLINF<matrix>::quadratic(
+uword OptimizerLINF<matrix>::quadratic_breg(
     vec& beta,
     vec &grad,
     const double& lambda,

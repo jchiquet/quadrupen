@@ -1,5 +1,7 @@
 context("Consistency of the Structured Elastic-net (reference is computed via the 'augmented data' approach)")
 
+testDataEnet <- readRDS("dataTest-Enet.rds")
+
 tol <- 1e-3
 
 test_that("Consistency of the structured elastic-net", {
@@ -48,8 +50,8 @@ test_that("Consistency of the structured elastic-net", {
   }
 
   ## PROSTATE DATA SET
-  load("prostate.rda")
-  x <- as.matrix(x)
+  x <- testDataEnet$x_prostate
+  y <- testDataEnet$y_prostate
   p <- ncol(x)
 
   ## Simple Elastic.net: structuring matrix is the indentity

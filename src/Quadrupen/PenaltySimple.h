@@ -11,9 +11,7 @@
 
 #include <RcppArmadillo.h>
 
-#define ZERO 2e-16 // practical zero
-
-enum class SimpleNorm {L1, LINF, RIDGE};
+enum class SimpleNorm {L1, L2, LINF, MCP, SCAD};
 
 using namespace Rcpp;
 using namespace arma;
@@ -22,14 +20,27 @@ using namespace std;
 template <SimpleNorm norm> class SimplePenalty {
 public: 
   
+  double gamma_ = 0 ; // Optional factor for non-concave penalties
   SimplePenalty() {} ;
 
-  vec    elt_norm  (const vec& x) ;
-  vec    elt_dual_norm  (const vec& x) ;
-  double pen_norm  (const vec& x, const vec& w) ;
-  double dual_norm (const vec& x, const vec& w) ;
+  vec    elt_norm  (const vec& x, const vec& w, double lambda=0) ;
+  vec    elt_dual_norm  (const vec& x, const vec& w, double lambda=0) ;
+  double pen_norm  (const vec& x, const vec& w, double lambda=0) ;
+  double dual_norm (const vec& x, const vec& w, double lambda=0) ;
   vec proximal(const vec& x, double lambda, const vec& w) ;
-
+  double lambda_max (const vec& XTy, const vec& w) ;
+  vec optimality(const vec& x, double lambda, const vec& w)  ;
+  
 };
+
+template<SimpleNorm norm>
+vec SimplePenalty<norm>::optimality(const vec& grad, double lambda, const vec& w)  {
+  return(elt_dual_norm(grad, w) - lambda) ;
+}
+
+template<SimpleNorm norm>
+double SimplePenalty<norm>::lambda_max(const vec& XTy, const vec& w)  {
+  return(dual_norm(XTy, w)) ;
+}
 
 #endif

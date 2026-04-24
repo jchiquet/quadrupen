@@ -1,6 +1,8 @@
-context("Testing consistency and timings of warm restart")
+context("Consistency and timings of warm restart for the elastic.net")
 
-test_that("warm_restart", {
+testDataEnet <- readRDS("dataTest-Enet.rds")
+
+test_that("Warm restart works for Elastic-Net", {
 
   require(quadrupen)
 
@@ -29,37 +31,14 @@ test_that("warm_restart", {
   }
 
   ## PROSTATE DATA SET
-  load("prostate.rda")
-  x <- as.matrix(x)
-
+  x <- testDataEnet$x_prostate
+  y <- testDataEnet$y_prostate
+  
   ## Run the tests...
   cat("\n  * tiny-size problem...")
   out <- get.coef(x,y)
   expect_equal(out$coef.bot, out$coef.ref, check.attributs = FALSE)
   expect_equal(out$coef.up , out$coef.ref, check.attributs = FALSE)
-
-  ## RANDOM DATA
-  seed <- sample(1:10000,1)
-  ## cat(" #seed=",seed)
-  set.seed(seed)
-
-  beta <- rep(rep(c(0,1,0,-1,0), c(25,10,25,10,25)),5)
-  n <- 300
-  p <- length(beta)
-
-  mu <- 3 # intercept
-  sigma <- 30 # huge noise
-  Sigma <- matrix(0.95,p,p) # huge correlation
-  diag(Sigma) <- 1
-
-  x <- as.matrix(matrix(rnorm(p*n),n,p) %*% chol(Sigma))
-  y <- 10 + x %*% beta + rnorm(n,0,10)
-
-  ## Run the tests...
-  cat("\n  * small-size problem, with correlation...")
-  out <- get.coef(x,y)
-  # expect_equal(out$coef.bot, out$coef.ref, check.attributs = FALSE)
-  # expect_equal(out$coef.up , out$coef.ref, check.attributs = FALSE)
 
 })
 

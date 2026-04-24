@@ -1,12 +1,14 @@
+context("Consistency of LAVA")
+
+testDataEnet <- readRDS("dataTest-Enet.rds")
 
 tol <- 1e-4
 
 test_that("lava as lasso (when lambda2 -> infty) ", {
   
   
-  ## PROSTATE DATA SET
-  load("prostate.rda")
-  x <- as.matrix(x)
+  x <- testDataEnet$x_prostate
+  y <- testDataEnet$y_prostate
   
   ## INTERCEPT, NORMALIZE
   lasso_out <- lasso(x, y)
@@ -49,10 +51,8 @@ test_that("lava as lasso (when lambda2 -> infty) ", {
 
 test_that("lava as ridge (when lambda1 -> infty) ", {
   
-  
-  ## PROSTATE DATA SET
-  load("prostate.rda")
-  x <- as.matrix(x)
+  x <- testDataEnet$x_prostate
+  y <- testDataEnet$y_prostate
   
   ## INTERCEPT, NORMALIZE
   ridge_out <- ridge(x, y, lambda = .75)

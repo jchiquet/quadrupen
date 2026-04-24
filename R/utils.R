@@ -34,7 +34,7 @@ model_default <- function()
 optim_enet_default <- function(d)
   list(verbose     = 0, # default control options
        timer       = FALSE,
-       maxiter     = 100,
+       maxiter     = 50,
        method      = "quadra",
        threshold   = 1e-6,
        monitor     = 0,
