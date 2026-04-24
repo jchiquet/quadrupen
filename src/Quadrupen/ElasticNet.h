@@ -39,10 +39,10 @@ class ElasticNet :
     
   ElasticNet(const RegressionData<matrix>&, const List&, const List&);
 
+  List solution_path(const List&);
+  
   // Specific to Elastic-Net regularization
   OptimizerL1<matrix> solver_ ; // Solvers for L1 penalty
-
-  List solution_path(const List&);
 
   void optimality_gap(double lambda_, uword type) ;
   

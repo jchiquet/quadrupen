@@ -67,7 +67,7 @@ optim_grp_default <- function(d)
        timer       = FALSE,
        maxiter     = 50,
        method      = "fista",
-       threshold   = 1e-6,
+       threshold   = 1e-3,
        monitor     = 0,
        usechol     = FALSE
   )

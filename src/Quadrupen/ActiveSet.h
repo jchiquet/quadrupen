@@ -87,8 +87,25 @@ void ActiveSet<matrix>::add_var(uword var_in, const RegressionData<matrix>& data
 
 template <typename matrix>
 void ActiveSet<matrix>::add_vars(uvec vars, const RegressionData<matrix>& data) {
-  for (uword v=0; v < vars.n_elem ; v++) {
-    add_var(vars[v], data) ;
+  uword n_new = vars.n_elem;
+  uword p_old = size();
+  
+  for(uword v : vars) is_in_[v] = 1;
+  A_.resize(p_old + n_new);
+  A_.tail(n_new) = vars;
+  
+  mat new_cols = data.X_.t() * data.X_.cols(vars) - 
+    data.n_ * data.X_bar_ * data.X_bar_.rows(vars).t() + 
+    data.S_.cols(vars);
+  
+  if (!XATXA_.is_empty()) {
+    XATXA_ = join_cols(XATXA_, XTXA_.rows(vars));
+  }
+  XTXA_  = join_rows(XTXA_ , new_cols);
+  XATXA_ = join_rows(XATXA_, trans(XTXA_.rows(vars)));
+  
+  if (use_chol_) {
+    for(uword i=0; i<n_new; ++i) update_Cholesky(); 
   }
 }
 
