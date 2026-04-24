@@ -6,7 +6,8 @@
 #ifndef _quadrupen_OPTIMIZER_LINF_H
 #define _quadrupen_OPTIMIZER_LINF_H
 
-#include "OptimizerSimple.h"
+#include "Optimizer.h"
+#include "PenaltySimple.h"
 
 using namespace Rcpp;
 using namespace arma;
@@ -38,8 +39,8 @@ public:
 template <typename matrix>
 OptimizerLINF<matrix>::OptimizerLINF(
     SimplePenalty<SimpleNorm::LINF>& penalty, const List& control) : 
-  penalty_(penalty), Optimizer(control) 
-    {}
+  Optimizer(control) 
+{penalty_ = penalty ;}
 
 template <typename matrix>
 mat OptimizerLINF<matrix>::updateCholeskyFromExisting(const mat& R, const vec& b) {
