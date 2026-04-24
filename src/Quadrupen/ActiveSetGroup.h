@@ -23,6 +23,8 @@ public:
   uvec is_grp_in_     ; // indicator of active groups (0/1)
   uvec grp_sizes_     ; // vector of group sizes
   vector<uvec> group_ ; // vector of current parameters
+  vector<mat> V_      ; // eigen vector of each active groups
+  vector<vec> D_      ; // eigen values of each active groups
   
 public:
   
@@ -65,6 +67,15 @@ void ActiveSetGroup<matrix>::add_group(uword grp_in, const RegressionData<matrix
   is_grp_in_[grp_in] = 1    ;
 
   ActiveSet<matrix>::add_vars(group_[grp_in], data) ;
+  
+  uword sz = grp_sizes_(grp_in);
+  uword start = this->size() - sz;
+  mat Hg = this->XATXA_.submat(start, start, this->size() - 1, this->size() - 1);
+  
+  vec d; mat v; eig_sym(d, v, Hg); 
+  
+  D_.push_back(d);
+  V_.push_back(v);
 }
 
 template <typename matrix>
@@ -79,6 +90,9 @@ void ActiveSetGroup<matrix>::del_group(uword igrp_out, vec& beta) {
   
   is_grp_in_[G_[igrp_out]] = 0 ;
   G_.shed_row(igrp_out)        ;
+  
+  V_.erase(V_.begin() + igrp_out);
+  D_.erase(D_.begin() + igrp_out);
 }
 
 template <typename matrix>

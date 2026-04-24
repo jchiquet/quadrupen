@@ -94,46 +94,60 @@ uword GroupOptimizer<matrix, norm>::quadratic(
       vec beta_g = beta.subvec(offset, offset + sz - 1);
       double norm_g = std::sqrt(arma::dot(beta_g, beta_g) + 1e-12);
       
-      // Only optimize if current group is nonzero
-      if (norm_g > 1e-15) {
+      // Get current group residuals:  XTy_g - X'X_g,A * beta_A
+      vec res_g = XTy(ind_g) - set.XATXA_.rows(ind_g) * beta;
+      res_g += set.XATXA_(ind_g, ind_g) * beta_g; 
+      
+      if (norm == GroupNorm::COOP) { // COOPERATIVE LASSO
+        uvec idx_pos = find(beta_g >= 0);
+        uvec idx_neg = find(beta_g < 0);
         
-        // Get current group residuals:  XTy_g - X'X_g,A * beta_A
-        vec res_g = XTy(ind_g) - set.XATXA_.rows(ind_g) * beta;
-        res_g += set.XATXA_(ind_g, ind_g) * beta_g; 
-        
-        // Newton-Raphson Hessian: H = Xg'Xg + (l2 * wk / ||bg||) * I
         mat Hg = set.XATXA_(ind_g, ind_g);
-        Hg.diag() += (l2 * weights(k)) / norm_g;
-        
-        // Solve Hg * b_new = r_g - l1 * wk * sign(b_g)
-        // Add univariate l1 penalty (Sparse Group)
-        vec beta_new = arma::solve(Hg, res_g, solve_opts::fast);
-        
-        // Application du Soft-Thresholding Lasso composante par composante
-        if (penalty_.alpha_ > 0) {
-          for (uword i = 0; i < sz; ++i) {
-            double h_ii = Hg(i,i);
-            beta_new(i) = sign(beta_new(i)) * std::max(0.0, std::abs(beta_new(i)) - (l1 * weights(k)) / h_ii);
-          }
+        if (!idx_pos.is_empty()) {
+          double n_pos = arma::norm(beta_g(idx_pos), 2);
+          for(uword i : idx_pos) Hg(i,i) += (l2 * weights(k)) / (n_pos + 1e-15);
+        }
+        if (!idx_neg.is_empty()) {
+          double n_neg = arma::norm(beta_g(idx_neg), 2);
+          for(uword i : idx_neg) Hg(i,i) += (l2 * weights(k)) / (n_neg + 1e-15);
         }
         
-        if (arma::norm(beta_new, 2) < 1e-15) {
-          beta_new.zeros();
-          groups_to_remove.insert_rows(groups_to_remove.n_elem, 1);
-          groups_to_remove.tail(1) = k; // 
-        }
+        arma::solve(beta_g, Hg, res_g, solve_opts::fast);
+      } else { // COOPERATIVE LASSO
+        // Use cached eigen decomposition
+        double n_g = std::sqrt(arma::dot(beta_g, beta_g) + 1e-12);
+        double mu = (l2 * weights(k)) / n_g;
         
-        beta.subvec(offset, offset + sz - 1) = beta_new;
+        // Solve with 
+        vec D_mu_inv = 1.0 / (set.D_[k] + mu);
+        beta_g = set.V_[k] * (D_mu_inv % (set.V_[k].t() * res_g));
       }
       
+      // 3. Soft-thresholding for Sparse Group 
+      if (l1 > 0) {
+        for (uword i = 0; i < sz; ++i) {
+          // Approximation of the curvature with diag of XTX
+          double h_ii = set.XATXA_(ind_g(i), ind_g(i)); 
+          beta_g(i) = sign(beta_g(i)) * std::max(0.0, std::abs(beta_g(i)) - (l1 * weights(k)) / (h_ii + 1e-15));
+        }
+      }
+      
+      // 4. Test d'extinction du groupe
+      if (arma::norm(beta_g, 2) < 1e-10) {
+        beta_g.zeros();
+        groups_to_remove.insert_rows(groups_to_remove.n_elem, 1);
+        groups_to_remove.tail(1) = k;
+      }
+      
+      beta.subvec(offset, offset + sz - 1) = beta_g;
+
       offset += sz; // go to next group
     }
-
+    
     if (!groups_to_remove.is_empty()) {
-      if (verbosity_) set.G_(groups_to_remove).print("\tremoved group %i\n") ;
+      if (verbosity_) set.G_(groups_to_remove).print("\tremoving group") ;
       set.del_groups(groups_to_remove, beta);
-      // Après suppression, les offsets et la taille de beta ont changé
-      // Let working set handle new active set
+      // Let working set handle new active set (beta size now has changed...)
       return iter; 
     }
     
@@ -182,7 +196,7 @@ uword GroupOptimizer<matrix,norm>::solve(
     // OPTIMIZATION OVER THE CURRENTLY ACTIVATED VARIABLES
     if (algorithm_ == QUADRA) {
       inner_iter_.push_back(
-        quadratic(beta, lambda, weights(set.G_), data.XTy_(set.A_), set, current_tol)
+        quadratic(beta, lambda, weights(set.G_), data.XTy_(set.A_), set, 1e-4)
       );
       grad = - data.XTy_ + set.XTXA_ * beta ;
     } else {
