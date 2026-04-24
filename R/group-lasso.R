@@ -81,7 +81,7 @@ group.lasso <- function(x,
                         refit     = FALSE,
                         nlambda1  = ifelse(is.null(lambda1),100,length(lambda1)),
                         minratio  = 1e-2,
-                        maxfeat   = ifelse(lambda2 < 1e-2, min(nrow(x),ncol(x)), min(4*nrow(x),ncol(x))),
+                        maxfeat   = ifelse(lambda2 < 1e-2, min(2*nrow(x),ncol(x)), min(4*nrow(x),ncol(x))),
                         beta0     = numeric(ncol(x)),
                         control   = list()) {
   
@@ -96,7 +96,8 @@ group.lasso <- function(x,
   ctrl$usechol <- FALSE
   ctrl$normalize <- normalize
   ctrl$beta0  <- beta0
-  stopifnot(alpha <= 1 && alpha >= 0)
+  stopifnot(alpha < 1 && alpha >= 0)
+  stopifnot(!is.unsorted(group))
   
   ## ============================================
   ## INSTANTIATE THE DATA MODEL
