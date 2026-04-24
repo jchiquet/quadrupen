@@ -25,10 +25,8 @@ public:
   
   uword quadratic(
       vec &beta,
-      vec &grad,
-      const double &lambda ,
-      const vec &weights ,
-      RegressionData<matrix> &data,
+      const vec &lambda,
+      const vec &XTy,
       ActiveSet<matrix> &set,
       const double& accuracy,
       const uword& max_iter) override ;
@@ -43,73 +41,53 @@ OptimizerL1<matrix>::OptimizerL1(SimplePenalty<SimpleNorm::L1>& penalty, const L
 template <typename matrix>
 uword OptimizerL1<matrix>::quadratic(
     vec &beta,
-    vec &grad,
-    const double &lambda,
-    const vec &weights,
-    RegressionData<matrix> &data,
+    const vec &lambda,
+    const vec &XTy,
     ActiveSet<matrix> &set,
     const double& accuracy,
     const uword& max_iter) {
   
-  uword iter = 1, iter_in= 0 ; // count the number of systems solved
+  uword iter = 0, iter_in= 0 ;
+  bool signs_stable = false;
   
-  // Solving the quadratic problem
-  vec betak = beta;
-  vec theta = sign(beta) ; // vector of sign of the solution
-  if (set.use_chol_) {
-    // Step 1 - Forward Substitution
-    vec tmp = solve(trimatl(set.R_.t()), data.XTy_(set.A_) - lambda * weights % theta);
-    // Step 2 - Backward Substitution
-    betak = solve(trimatu(set.R_), tmp);
-  } else {
-    iter_in = 
-      this->conjugate_gradient(betak, set.XATXA_, 
-                               data.XTy_(set.A_) - lambda * weights % theta,
-                               accuracy, max_iter) ;
-  }
-  
-  // Check for swapping variables
-  uvec swap = find(abs(sign(betak) - theta) > ZERO);
-  if (swap.is_empty()) {
-    beta = betak;
-  } else {
-    iter++;
-    vec beta_swap = beta(swap); vec betak_swap = betak(swap);
-    
-    // first, go to zero for the swapped variable which cost the minimum
-    vec eta = -beta_swap / (betak_swap-beta_swap);
-    uword i_min = eta.index_min();
-    betak = beta + (betak-beta) * eta(i_min) ;
-    
-    // second, solve the problem after swapping the signs of the incriminated variable
-    uword i_swap = swap[i_min];
-    beta = betak;
-    beta(i_swap) = -betak_swap[i_min];
-    double grad_swap = - data.XTy_(set.A_(i_swap)) + 
-      dot(set.XATXA_.row(i_swap), betak) ;
-    theta(i_swap) = - sign(grad_swap) ;
-    vec betal = betak;
+  while (!signs_stable && iter < 10 && set.size() > 0) { // Max 10 swaps
+    iter++;  
+    // Solving the quadratic problem
+    vec betak = beta;
+    vec theta = sign(beta) ; // vector of sign of the solution
     if (set.use_chol_) {
       // Step 1 - Forward Substitution
-      vec tmp = solve(trimatl(set.R_.t()), data.XTy_(set.A_) - lambda * weights % theta);
+      vec tmp = solve(trimatl(set.R_.t()), XTy(set.A_) - lambda(set.A_) % theta);
       // Step 2 - Backward Substitution
-      betal = solve(trimatu(set.R_), tmp);
+      betak = solve(trimatu(set.R_), tmp);
     } else {
       iter_in = 
-        this->conjugate_gradient(betal, set.XATXA_, 
-                                 data.XTy_(set.A_) - lambda * weights %theta,
+        this->conjugate_gradient(betak, set.XATXA_, 
+                                 XTy(set.A_) - lambda(set.A_) % theta,
                                  accuracy, max_iter) ;
     }
     
-    // if the sign is coherent, keep that one...
-    grad_swap = - data.XTy_(set.A_(i_swap)) + 
-      dot(set.XATXA_.row(i_swap), betal) ;
-    if (abs(grad_swap + lambda * sign(betal(i_swap))) <= ZERO) {
-      beta = betal ;
+    // Check for swapping variables
+    // uvec swap = find(abs(betak) > accuracy/100 && sign(betak) != theta) ;
+    uvec swap = find(sign(betak) != theta) ;
+    if (swap.is_empty()) {
+      beta = betak;
+      signs_stable = true;
     } else {
-      beta = betak ; // otherwise, backtrack to betak
-      if (verbosity_) Rprintf("\tremoving variables %i", set.A_(i_swap)) ;
-      set.del_var(i_swap, beta) ; // and desactivate de zeroed variable
+      // Find the first variable hitting zero
+      vec eta = -beta(swap) / (betak(swap) - beta(swap));
+      uword i_min = eta.index_min();
+      uword idx_to_remove = swap[i_min];
+      
+      // Interpolate by moving all variables to this point
+      beta = beta + eta(i_min) * (betak - beta);
+      
+      // Remove the incriminated variable
+      if (verbosity_) Rprintf("\tremoving variables %i\n", set.A_(idx_to_remove)) ;
+      set.del_var(idx_to_remove, beta) ; 
+
+      // Update theta on the new set
+      theta = sign(beta);      
     }
   }
   

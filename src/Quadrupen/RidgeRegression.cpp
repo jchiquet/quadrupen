@@ -12,7 +12,7 @@ RidgeRegression::RidgeRegression(
   RegressionData<mat>& data, const List& regParam) :
   Regularizer::Regularizer(data, regParam) 
 {
-  penalty_ = SimplePenalty<SimpleNorm::RIDGE>() ;
+  penalty_ = SimplePenalty<SimpleNorm::L2>() ;
   get_lambda_seq(get_lambda_max(), regParam) ;
 }
 

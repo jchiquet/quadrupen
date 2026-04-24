@@ -1,5 +1,7 @@
 context("Consistency between sparse/non-sparse encoding")
 
+require(Matrix)
+        
 test_that("Consistency of quadrupen between sparse/non-sparse encoding of the predictors", {
 
   ## data generation

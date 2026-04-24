@@ -50,10 +50,8 @@ public:
 
   virtual uword quadratic(
       vec &beta,
-      vec &grad,
-      const double &lambda ,
-      const vec &weights ,
-      RegressionData<matrix> &data,
+      const vec &lambda,
+      const vec &XTy,
       ActiveSet<matrix> &set,
       const double& accuracy,
       const uword& max_iter) = 0 ;
@@ -80,7 +78,7 @@ uword SimpleOptimizer<matrix,norm>::solve(
   if (verbosity_) Rprintf("\n current penalty = %f",lambda) ;
   if (verbosity_) Rprintf("\n nb active variables = %i\n", set.size()) ;
 
-  vec optimality = penalty_.elt_dual_norm(grad) - lambda * weights ;
+  vec optimality = penalty_.optimality(grad, lambda, weights) ;
   uword var_in = optimality.index_max() ; // highest violation of KKT conditions 
   uword status = 0 ; iter_ = 0 ; bool success = true ; 
   gap_ = std::max(0.0, optimality(var_in)) ;
@@ -89,57 +87,60 @@ uword SimpleOptimizer<matrix,norm>::solve(
   while ((gap_ > accuracy_) && (iter_ <= maxiter_)) {
     R_CheckUserInterrupt();
     iter_++;
-    
+
     // VARIABLE ACTIVATION IF APPLICABLE
     if (set.is_in_[var_in] == 0) { // Is var_in already in the active set?
       set.add_var(var_in, data) ;
-      beta.resize(beta.size()+1) ; // update the vector of active parameters
-      beta.tail(1) = - 1e-3 * sign(grad(var_in)) ;
+      beta.insert_rows(beta.n_elem, 1); // update the vector of active parameters
+      if (algorithm_ ==  QUADRA) {
+        beta.tail(1).fill(- 1e-3 * sign(grad(var_in)));
+      } else {
+        beta.tail(1).fill(0.0);
+      }
       if (verbosity_) {Rprintf("\tnewly added variable %i\n",var_in);}
     }
     
     // OPTIMIZATION OVER THE CURRENTLY ACTIVATED VARIABLES
-    if (algorithm_ == FISTA) {
-      auto prox = [this, set, weights](const vec& x, double l) {
-        return(penalty_.proximal(x, l, weights(set.A_)));
-      } ;
-      inner_iter_.push_back(
-        fista(beta, lambda, data.XTy_(set.A_), set.XATXA_, prox, 1e-10, 10000)
-      );
-    } else if (algorithm_ == PGD) {
-      auto prox = [this, set, weights](const vec& x, double l) {
-        return(penalty_.proximal(x, l, weights(set.A_)));
-      } ;
-      inner_iter_.push_back(
-        pgd(beta, lambda, data.XTy_(set.A_), set.XATXA_, prox, 1e-10, 10000, 3)
-      );
-    } else { // QUADRA solver
+    if (algorithm_ ==  QUADRA) { // Newton-based solver
       try {
         inner_iter_.push_back(
-          quadratic(beta, grad, lambda, weights(set.A_), data, set, 1e-5, 10000)
+          quadratic(beta, lambda*weights, data.XTy_, set, 1e-9, 1000)
         );
+        grad = - data.XTy_ + set.XTXA_ * beta ;
       } catch (std::runtime_error& error) {
         if (verbosity_ > 0) {
           Rprintf("\nWarning: singular system at this stage of the solution path, cutting here.\n");
         }
         success = false ;
       }
-    }
-    
-    // VARIABLE DELETION IF APPLICABLE
-    grad(set.A_) = - data.XTy_(set.A_) + set.XATXA_ * beta ;
-    uvec vanish = find(
-      penalty_.elt_norm(grad(set.A_)) < lambda * weights(set.A_) + ZERO &&
-        penalty_.elt_norm(beta) < ZERO
-    ) ;
-    if (!vanish.is_empty()) { // Is var_in already in the active set?
-      if (verbosity_) {set.A_(vanish).print("removed variables");}
-      set.del_vars(vanish, beta) ;
     } 
+    else { // Proximal-based solvers
+      auto prox = [this, &set, &weights](const vec& x, double l) {
+        return(penalty_.proximal(x, l, weights.elem(set.A_)));
+      };
+      vec beta_old = beta ;
+      if (algorithm_ == FISTA) {
+        inner_iter_.push_back(
+          fista(beta, lambda, data.XTy_.elem(set.A_), set.XATXA_, prox, 1e-7, 3000)
+        );
+      } else if (algorithm_ == PGD) {
+        inner_iter_.push_back(
+          pgd(beta, lambda, data.XTy_.elem(set.A_), set.XATXA_, prox, 1e-7, 3000, 5)
+        );
+      }
+      grad += set.XTXA_ * (beta - beta_old); // Incremental update of the gradient
+      uvec vanish = find( // Variable deletion if applicable
+        penalty_.optimality(grad.elem(set.A_), lambda, weights.elem(set.A_)) <= accuracy_ &&
+          abs(beta) < accuracy_/10 * weights.elem(set.A_)
+      ) ;
+      if (!vanish.is_empty()) {
+        if (verbosity_) {set.A_(vanish).t().print("Removing variables");}
+        set.del_vars(vanish, beta) ;
+      }
+    }
 
     // OPTIMALITY TESTING
-    grad = - data.XTy_ + set.XTXA_ * beta ;
-    optimality = penalty_.elt_dual_norm(grad) - lambda * weights;
+    optimality = penalty_.optimality(grad, lambda, weights) ;
     var_in = optimality.index_max() ;
     gap_ = std::max(0.0, optimality(var_in)) ;
     

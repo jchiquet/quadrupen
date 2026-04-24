@@ -153,7 +153,7 @@ elastic.net <- function(x,
   ##
   ctrl <- optim_enet_default(ncol(x))
   ctrl$maxfeat <- maxfeat
-  if (!is.null(control$method)) if (control$method != "quadra") ctrl$threshold <- 1e-4
+  if (!is.null(control$method)) if (control$method != "quadra") ctrl$threshold <- 1e-6
   ctrl[names(control)] <- control # default overwritten by user specifications
   ctrl$method <- switch(ctrl$method, quadra = "QUADRA", fista = "FISTA", pgd = "PGD", 0)
   ctrl$normalize <- normalize

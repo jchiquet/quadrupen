@@ -10,3 +10,5 @@ README.qmd
 ^\.vscode$
 ^tools$
 ^memcheck
+^\.positai$
+^\.claude$

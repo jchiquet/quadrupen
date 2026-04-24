@@ -11,8 +11,6 @@
 #include "PenaltySimple.h"
 #include "OptimizerLINF.h"
 
-#define ZERO 2e-16 // practical zero
-
 using namespace Rcpp;
 using namespace arma;
 using namespace std;
@@ -22,9 +20,10 @@ public:
 
   // Specific to Bounded regression
   SimplePenalty<SimpleNorm::LINF> penalty_ ; // main penalty object 
-  OptimizerLINF<mat> solver_ ; // Solvers for LINF penalty
-  ActiveSet<mat> set_        ; // Active set of variable and data
-  vector<uvec> bounded_       ; // variables reaching the boundary (for all lambda values)
+  OptimizerLINF solver_ ; // Solvers for LINF penalty
+// TODO: use a more simple forme of ActiveSet...
+  ActiveSet<mat> set_   ; // Active set of variable and data
+  vector<uvec> bounded_ ; // variables reaching the boundary (for all lambda values)
   
   BoundedRegression(RegressionData<mat>&, const List&, const List&);
 

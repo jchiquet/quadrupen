@@ -13,8 +13,6 @@
 
 enum SolverType {FISTA, QUADRA, PGD};
 
-#define ZERO 2e-16 // practical zero
-
 using namespace Rcpp;
 using namespace arma;
 using namespace std;
@@ -63,7 +61,7 @@ public:
       std::function<vec(const vec&, double)> proximal_operator, 
       const double& accuracy,
       const uword& max_iter,
-      const uword m = 5
+      const uword m = 3
   ) ;
 
   void optimality_gap(

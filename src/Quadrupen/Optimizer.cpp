@@ -74,11 +74,11 @@ uword Optimizer::pgd(
   vec betak = beta;
   vec g_k, g_prev;
   
-  // Historique pour Anderson
-  mat mat_F(p, m, fill::zeros); // Stocke les résidus de point fixe : f_i = G(x_i) - x_i
-  mat mat_X(p, m, fill::zeros); // Stocke les itérés : x_i
+  // Anderson acceleration
+  mat mat_F(p, m, fill::zeros); // Stock fix-point residuals f_i = G(x_i) - x_i
+  mat mat_X(p, m, fill::zeros); // Stock iterates x_i
   
-  // Estimation de L (Power Iteration comme vu précédemment)
+  // Estimation of Lipschitz constant (Power Iteration)
   double L = estimate_lipschitz(XTX); 
   double invL = 1.0 / L;
   
@@ -126,7 +126,7 @@ uword Optimizer::pgd(
     delta = norm(f_k, 2); // fix-point residual at optimum
     iter++;
     
-    if (iter % 10 == 0) R_CheckUserInterrupt();
+    if (iter % 100 == 0) R_CheckUserInterrupt();
   }
   
   return iter;
@@ -171,7 +171,7 @@ uword Optimizer::fista(
     t0 = tk;
     iter++;
     
-    if (iter % 10 == 0) R_CheckUserInterrupt();
+    if (iter % 100 == 0) R_CheckUserInterrupt();
   }
   
   return iter;
@@ -216,7 +216,7 @@ uword Optimizer::conjugate_gradient(
     p = r + (rs_new / rs_old) * p;
     rs_old = rs_new;
     
-    if (i % 50 == 0) R_CheckUserInterrupt();
+    if (i % 100 == 0) R_CheckUserInterrupt();
   }
   
   return i;

@@ -17,7 +17,7 @@ BoundedRegression::BoundedRegression(
     get_lambda_seq(get_lambda_max(), regParam) ;
 
     // Set up the optimizer 
-    solver_ = OptimizerLINF<mat>(penalty_, control) ;
+    solver_ = OptimizerLINF(penalty_, control) ;
     
     // Scale the structuring matrix according to main penalty factor and the amount of l2 penalty 
     data_.scale_struct(gamma_) ;
@@ -98,7 +98,7 @@ List BoundedRegression::solution_path(const List& control) {
             throw std::runtime_error("Fail to converge...");
           } else {
             ioptim.push_back(
-              solver_.quadratic(beta_, grad_, lambda_, lambda_factor_, data_, set_, accuracy, 10000)
+              solver_.quadratic_breg(beta_, grad_, lambda_, lambda_factor_, data_, set_, accuracy, 10000)
             );
           }
         } catch (std::runtime_error& error) {
@@ -114,11 +114,11 @@ List BoundedRegression::solution_path(const List& control) {
 
       // OPTIMALITY TESTING
       grad_ = - data_.XTy_ + data_.XTX_ * beta_ ;
-      current_gap = penalty_.dual_norm(grad_, lambda_factor_) - lambda_ ;
+      current_gap = sum(penalty_.optimality(grad_, lambda_, lambda_factor_)) ;
     } while ((current_gap > accuracy) && (current_it <= maxiter));
 
     // Checking convergence status
-    gap.push_back(fmax(0.0, penalty_.dual_norm(grad_, lambda_factor_) - lambda_)) ;
+    gap.push_back(fmax(0.0, sum(penalty_.optimality(grad_, lambda_, lambda_factor_)))) ;
     iactive.push_back(current_it) ;
     status.push_back(0) ;
     if (current_it >= maxiter) { status.back() = 1 ; }

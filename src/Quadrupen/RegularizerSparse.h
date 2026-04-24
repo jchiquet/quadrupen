@@ -107,7 +107,7 @@ public:
   SimpleSparseRegularizer(const RegressionData<matrix>&, const List&);
   double get_lambda_max() 
   {
-    return(penalty_.dual_norm(data_.XTy_, lambda_factor_));
+    return(penalty_.lambda_max(data_.XTy_, lambda_factor_));
   }
   
   ActiveSet<matrix> set_       ; // Active set of variable and data
