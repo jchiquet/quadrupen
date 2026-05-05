@@ -62,4 +62,4 @@ Collate:
     'RcppExports.R'
 Packaged: 2013-03-25 19:41:00 UTC; jchiquet
 Roxygen: list(markdown = TRUE)
-RoxygenNote: 7.3.3
+Config/roxygen2/version: 8.0.0
