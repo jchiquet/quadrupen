@@ -92,8 +92,7 @@ uword GroupOptimizer<matrix, norm>::quadratic(
       uvec ind_g = regspace<uvec>(offset, offset + sz - 1);
       
       vec beta_g = beta.subvec(offset, offset + sz - 1);
-      double norm_g = std::sqrt(arma::dot(beta_g, beta_g) + 1e-12);
-      
+
       // Get current group residuals:  XTy_g - X'X_g,A * beta_A
       vec res_g = XTy(ind_g) - set.XATXA_.rows(ind_g) * beta;
       res_g += set.XATXA_(ind_g, ind_g) * beta_g; 
@@ -113,7 +112,7 @@ uword GroupOptimizer<matrix, norm>::quadratic(
         }
         
         arma::solve(beta_g, Hg, res_g, solve_opts::fast);
-      } else { // COOPERATIVE LASSO
+      } else { // GROUP LASSO
         // Use cached eigen decomposition
         double n_g = std::sqrt(arma::dot(beta_g, beta_g) + 1e-12);
         double mu = (l2 * weights(k)) / n_g;

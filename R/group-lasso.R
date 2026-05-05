@@ -84,6 +84,9 @@ group.lasso <- function(x,
                         maxfeat   = ifelse(lambda2 < 1e-2, min(2*nrow(x),ncol(x)), min(4*nrow(x),ncol(x))),
                         beta0     = numeric(ncol(x)),
                         control   = list()) {
+
+  stopifnot(alpha < 1 && alpha >= 0)
+  stopifnot(!is.unsorted(group))
   
   ## ============================================
   ## RECOVER LOW LEVEL CONFIGURATION
@@ -93,12 +96,9 @@ group.lasso <- function(x,
   if (!is.null(control$method)) if (control$method != "quadra") ctrl$threshold <- 1e-2
   ctrl[names(control)] <- control # default overwritten by user specifications
   ctrl$method  <- switch(ctrl$method, quadra = "QUADRA", fista = "FISTA", pgd = "PGD", 0)
-  ctrl$usechol <- FALSE
   ctrl$normalize <- normalize
   ctrl$beta0  <- beta0
-  stopifnot(alpha < 1 && alpha >= 0)
-  stopifnot(!is.unsorted(group))
-  
+
   ## ============================================
   ## INSTANTIATE THE DATA MODEL
   ##
