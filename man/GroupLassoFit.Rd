@@ -4,11 +4,11 @@
 \alias{GroupLassoFit}
 \title{Class "GroupLassoFit"}
 \description{
-Class of object returned by the fitting function \code{\link[=group.lasso]{group.lasso()}}. Inherits fields
+Class of object returned by the fitting function \code{\link[=group_sparse_lm]{group_sparse_lm()}}. Inherits fields
 and methods of \link{QuadrupenFit}
 }
 \seealso{
-\link{QuadrupenFit}, \code{\link[=group.lasso]{group.lasso()}}
+\link{QuadrupenFit}, \code{\link[=group_sparse_lm]{group_sparse_lm()}}
 }
 \section{Super class}{
 \code{\link[quadrupen:QuadrupenFit]{QuadrupenFit}} -> \code{GroupLassoFit}

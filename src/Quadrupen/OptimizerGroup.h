@@ -113,7 +113,7 @@ uword GroupOptimizer<matrix, norm>::quadratic(
         
         arma::solve(beta_g, Hg, res_g, solve_opts::fast);
       } else { // GROUP LASSO
-        // Use cached eigen decomposition
+        // Use cached Eigen decomposition
         double n_g = std::sqrt(arma::dot(beta_g, beta_g) + 1e-12);
         double mu = (l2 * weights(k)) / n_g;
         
@@ -122,7 +122,7 @@ uword GroupOptimizer<matrix, norm>::quadratic(
         beta_g = set.V_[k] * (D_mu_inv % (set.V_[k].t() * res_g));
       }
       
-      // 3. Soft-thresholding for Sparse Group 
+      // Soft-thresholding for Sparse Group 
       if (l1 > 0) {
         for (uword i = 0; i < sz; ++i) {
           // Approximation of the curvature with diag of XTX
@@ -131,7 +131,7 @@ uword GroupOptimizer<matrix, norm>::quadratic(
         }
       }
       
-      // 4. Test d'extinction du groupe
+      // Group deletion if applicable
       if (arma::norm(beta_g, 2) < 1e-10) {
         beta_g.zeros();
         groups_to_remove.insert_rows(groups_to_remove.n_elem, 1);
@@ -146,7 +146,7 @@ uword GroupOptimizer<matrix, norm>::quadratic(
     if (!groups_to_remove.is_empty()) {
       if (verbosity_) set.G_(groups_to_remove).print("\tremoving group") ;
       set.del_groups(groups_to_remove, beta);
-      // Let working set handle new active set (beta size now has changed...)
+      // Let the working set algorithm handle new active set (beta size now has changed...)
       return iter; 
     }
     

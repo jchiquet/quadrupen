@@ -105,10 +105,10 @@ FusedLassoFit <- R6::R6Class(
 
 #' Class "GroupLassoFit"
 #' 
-#' Class of object returned by the fitting function [group.lasso()]. Inherits fields
+#' Class of object returned by the fitting function [group_sparse_lm()]. Inherits fields
 #' and methods of [QuadrupenFit]
 #' 
-#' @seealso [QuadrupenFit], [group.lasso()]
+#' @seealso [QuadrupenFit], [group_sparse_lm()]
 #' 
 #' @export
 #' 

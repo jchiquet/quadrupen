@@ -6,8 +6,8 @@ tol <- 1e-3
 
 get_cooplasso <- function(x, y, group, lambda, intercept, normalize) {
   
-  out_quadr   <- quadrupen::group.lasso(x, y, group, type = "coop", lambda1 = lambda, 
-                                        intercept = intercept, normalize = normalize, lambda2 = 0,
+  out_quadr   <- quadrupen::coop_lasso(x, y, group, lambda1 = lambda, 
+                                      intercept = intercept, normalize = normalize, 
                                         control = list(maxfeat = ncol(x)))
   coef_quadr  <-  as.matrix(out_quadr$coefficients)
   group_quadr <- rowsum(coef_quadr^2, group)
