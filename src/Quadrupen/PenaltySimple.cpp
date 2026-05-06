@@ -111,7 +111,7 @@ vec SimplePenalty<SimpleNorm::MCP>::elt_norm(const vec& x, const vec& w, double 
     if (abs_xi <= gamma_ * lambda) {
       res[i] = lambda * w[i] * abs_xi - (abs_xi * abs_xi) / (2.0 * gamma_);
     } else {
-      res[i] = 0.5 * gamma_ * lambda * lambda * w[i]; // Valeur constante (plateau)
+      res[i] = 0.5 * gamma_ * lambda * lambda * w[i]; // constant value (plateau)
     }
   }
   return res;
@@ -133,7 +133,7 @@ vec SimplePenalty<SimpleNorm::MCP>::proximal(const vec& x, double lambda, const 
     } else if (abs_xi <= gamma_ * l) {
       res[i] = std::copysign(abs_xi - l, x[i]) / (1.0 - 1.0/gamma_);
     } else {
-      res[i] = x[i]; // Pas de biais
+      res[i] = x[i];
     }
   }
   return res;
@@ -160,6 +160,7 @@ vec SimplePenalty<SimpleNorm::SCAD>::elt_norm(const vec& x, const vec& w, double
 }
 
 // Comme MCP, la condition d'entrée (dual) est dominée par la pente à l'origine
+// Donc comme le Lasso
 template<>
 double SimplePenalty<SimpleNorm::SCAD>::dual_norm(const vec& x, const vec& w, double lambda) {
   return arma::max(arma::abs(x) / w);

@@ -1,12 +1,13 @@
 /*
  * Author: Julien CHIQUET
  *         MIA Paris-Saclay
- *         
- * Group-Sparse Regularizers
  */
 
-#ifndef _GroupSparse_H
-#define _GroupSparse_H
+// ====================================================
+// Group-Sparse Regularizers       
+
+#ifndef _GroupLasso_H
+#define _GroupLasso_H
 
 #include "RegularizerSparse.h"
 #include "OptimizerGroup.h"

@@ -1,16 +1,6 @@
 /*
  * Author: Julien CHIQUET
  *         MIA Paris-Saclay
- *         
- *  3 Classes for Sparse regularization:
- *  - SparseRegularizer
- *  - SimpleSparseRegularizer
- *  - GroupSparseRegularizer
- *  
- *  Inheritance:
- *  
- *  Regularizer-> SparseRegularizer -> SimpleSparseRegularizers
- *  Regularizer-> SparseRegularizer -> GroupSparseRegularizers
  */
 
 #ifndef _RegularizerSparse_H
@@ -117,35 +107,6 @@ public:
 
 template <typename matrix, SimpleNorm norm>
 SimpleSparseRegularizer<matrix, norm>::SimpleSparseRegularizer(
-    const RegressionData<matrix>& data, const List& regParam) : 
-  SparseRegularizer<matrix>::SparseRegularizer(data, regParam) {}
-
-// ====================================================
-// Group-Sparse Regularizers       
-
-template <typename matrix, GroupNorm norm>
-class GroupSparseRegularizer : public SparseRegularizer<matrix> {
-public:
-  
-  using Regularizer<matrix>::data_ ;
-  using Regularizer<matrix>::lambda_factor_ ;
-  
-  GroupSparseRegularizer() {} ;
-  GroupSparseRegularizer(const RegressionData<matrix>&, const List&);
-  double get_lambda_max() 
-  {
-    return(
-      penalty_.lambda_max(data_.XTy_, set_.grp_sizes_, lambda_factor_)
-    );
-  }
-  
-  ActiveSetGroup<matrix> set_ ; // Active set of variable and data
-  GroupPenalty<norm> penalty_ ; // main penalty object 
-
-};
-
-template <typename matrix, GroupNorm norm>
-GroupSparseRegularizer<matrix, norm>::GroupSparseRegularizer(
     const RegressionData<matrix>& data, const List& regParam) : 
   SparseRegularizer<matrix>::SparseRegularizer(data, regParam) {}
 
