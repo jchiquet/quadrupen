@@ -102,17 +102,10 @@ uword SimpleOptimizer<matrix,norm>::solve(
     
     // OPTIMIZATION OVER THE CURRENTLY ACTIVATED VARIABLES
     if (algorithm_ ==  QUADRA) { // Newton-based solver
-      try {
-        inner_iter_.push_back(
-          quadratic(beta, lambda*weights, data.XTy_, set, 1e-9, 1000)
-        );
-        grad = - data.XTy_ + set.XTXA_ * beta ;
-      } catch (std::runtime_error& error) {
-        if (verbosity_ > 0) {
-          Rprintf("\nWarning: singular system at this stage of the solution path, cutting here.\n");
-        }
-        success = false ;
-      }
+      inner_iter_.push_back(
+        quadratic(beta, lambda*weights, data.XTy_, set, 1e-9, 1000)
+      );
+      grad = - data.XTy_ + set.XTXA_ * beta ;
     } 
     else { // Proximal-based solvers
       auto prox = [this, &set, &weights](const vec& x, double l) {

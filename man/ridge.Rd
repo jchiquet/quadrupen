@@ -71,13 +71,17 @@ Automatically set to \code{0} when the method is embedded within
 cross-validation or stability selection.
 \item \code{timer}: logical; use to record the timing of the
 algorithm. Default is \code{FALSE}.
-\item \code{maxiter} the maximal number of iteration used to solve the
-problem for a given value of lambda1. Default is 500.
+\item \code{maxiter} the maximal number of iteration used in the active set algorithm
+to solve the problem for a given value of lambda1 . Default is 50.
 \item \code{method} a string for the underlying solver used. Either
 \code{"quadra"}, \code{"fista"} or \code{"pgd"}. Default is \code{"quadra"}.
+\item \code{factmat} Boolean indicating if matrix factorization should be used to
+solve the sub-system. If \code{TRUE} (the default), a Cholesky decomposition is
+maintained along the path. If \code{FALSE}, the sub-system are solved with
+a conjugate gradient algorithm.
 \item \code{threshold} a threshold for convergence. The algorithm stops
 when the optimality conditions are fulfill up to this threshold.
-Default is \code{1e-7} for \code{"quadra"} and \code{1e-2} for the first order methods.
+Default is \code{1e-6}.
 \item \code{monitor} indicates if a monitoring of the convergence should be
 recorded, by computing a lower bound between the current solution and
 the optimum: when \code{'0'} (the default), no monitoring is provided;

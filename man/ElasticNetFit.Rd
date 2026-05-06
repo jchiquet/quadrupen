@@ -4,11 +4,6 @@
 \alias{ElasticNetFit}
 \title{Class "ElasticNetFit"}
 \description{
-Class "ElasticNetFit"
-
-Class "ElasticNetFit"
-}
-\details{
 Class of object returned by the fitting function \code{\link[=elastic.net]{elastic.net()}}. Inherits fields
 and methods of \link{QuadrupenFit}
 }
@@ -16,74 +11,74 @@ and methods of \link{QuadrupenFit}
 \link{QuadrupenFit}, \code{\link[=elastic.net]{elastic.net()}}
 }
 \section{Super class}{
-\code{\link[quadrupen:QuadrupenFit]{quadrupen::QuadrupenFit}} -> \code{ElasticNetFit}
+\code{\link[quadrupen:QuadrupenFit]{QuadrupenFit}} -> \code{ElasticNetFit}
 }
 \section{Active bindings}{
-\if{html}{\out{<div class="r6-active-bindings">}}
-\describe{
-\item{\code{penalty}}{character describing the regularizer/penalty}
-}
-\if{html}{\out{</div>}}
+  \if{html}{\out{<div class="r6-active-bindings">}}
+  \describe{
+    \item{\code{penalty}}{character describing the regularizer/penalty}
+  }
+  \if{html}{\out{</div>}}
 }
 \section{Methods}{
 \subsection{Public methods}{
-\itemize{
-\item \href{#method-ElasticNetFit-new}{\code{ElasticNetFit$new()}}
-\item \href{#method-ElasticNetFit-clone}{\code{ElasticNetFit$clone()}}
+  \itemize{
+    \item \href{#method-ElasticNetFit-initialize}{\code{ElasticNetFit$new()}}
+    \item \href{#method-ElasticNetFit-clone}{\code{ElasticNetFit$clone()}}
+  }
 }
-}
-\if{html}{\out{
-<details><summary>Inherited methods</summary>
+\if{html}{\out{<details><summary>Inherited methods</summary>
 <ul>
-<li><span class="pkg-link" data-pkg="quadrupen" data-topic="QuadrupenFit" data-id="criteria"><a href='../../quadrupen/html/QuadrupenFit.html#method-QuadrupenFit-criteria'><code>quadrupen::QuadrupenFit$criteria()</code></a></span></li>
-<li><span class="pkg-link" data-pkg="quadrupen" data-topic="QuadrupenFit" data-id="cross_validate"><a href='../../quadrupen/html/QuadrupenFit.html#method-QuadrupenFit-cross_validate'><code>quadrupen::QuadrupenFit$cross_validate()</code></a></span></li>
-<li><span class="pkg-link" data-pkg="quadrupen" data-topic="QuadrupenFit" data-id="fit"><a href='../../quadrupen/html/QuadrupenFit.html#method-QuadrupenFit-fit'><code>quadrupen::QuadrupenFit$fit()</code></a></span></li>
-<li><span class="pkg-link" data-pkg="quadrupen" data-topic="QuadrupenFit" data-id="get_model"><a href='../../quadrupen/html/QuadrupenFit.html#method-QuadrupenFit-get_model'><code>quadrupen::QuadrupenFit$get_model()</code></a></span></li>
-<li><span class="pkg-link" data-pkg="quadrupen" data-topic="QuadrupenFit" data-id="plot"><a href='../../quadrupen/html/QuadrupenFit.html#method-QuadrupenFit-plot'><code>quadrupen::QuadrupenFit$plot()</code></a></span></li>
-<li><span class="pkg-link" data-pkg="quadrupen" data-topic="QuadrupenFit" data-id="plot_path"><a href='../../quadrupen/html/QuadrupenFit.html#method-QuadrupenFit-plot_path'><code>quadrupen::QuadrupenFit$plot_path()</code></a></span></li>
-<li><span class="pkg-link" data-pkg="quadrupen" data-topic="QuadrupenFit" data-id="predict"><a href='../../quadrupen/html/QuadrupenFit.html#method-QuadrupenFit-predict'><code>quadrupen::QuadrupenFit$predict()</code></a></span></li>
-<li><span class="pkg-link" data-pkg="quadrupen" data-topic="QuadrupenFit" data-id="print"><a href='../../quadrupen/html/QuadrupenFit.html#method-QuadrupenFit-print'><code>quadrupen::QuadrupenFit$print()</code></a></span></li>
-<li><span class="pkg-link" data-pkg="quadrupen" data-topic="QuadrupenFit" data-id="show"><a href='../../quadrupen/html/QuadrupenFit.html#method-QuadrupenFit-show'><code>quadrupen::QuadrupenFit$show()</code></a></span></li>
-<li><span class="pkg-link" data-pkg="quadrupen" data-topic="QuadrupenFit" data-id="stability"><a href='../../quadrupen/html/QuadrupenFit.html#method-QuadrupenFit-stability'><code>quadrupen::QuadrupenFit$stability()</code></a></span></li>
+  <li><span class="pkg-link" data-pkg="quadrupen" data-topic="QuadrupenFit" data-id="criteria"><a href='../../quadrupen/html/QuadrupenFit.html#method-QuadrupenFit-criteria'><code>QuadrupenFit$criteria()</code></a></span></li>
+  <li><span class="pkg-link" data-pkg="quadrupen" data-topic="QuadrupenFit" data-id="cross_validate"><a href='../../quadrupen/html/QuadrupenFit.html#method-QuadrupenFit-cross_validate'><code>QuadrupenFit$cross_validate()</code></a></span></li>
+  <li><span class="pkg-link" data-pkg="quadrupen" data-topic="QuadrupenFit" data-id="fit"><a href='../../quadrupen/html/QuadrupenFit.html#method-QuadrupenFit-fit'><code>QuadrupenFit$fit()</code></a></span></li>
+  <li><span class="pkg-link" data-pkg="quadrupen" data-topic="QuadrupenFit" data-id="get_model"><a href='../../quadrupen/html/QuadrupenFit.html#method-QuadrupenFit-get_model'><code>QuadrupenFit$get_model()</code></a></span></li>
+  <li><span class="pkg-link" data-pkg="quadrupen" data-topic="QuadrupenFit" data-id="plot"><a href='../../quadrupen/html/QuadrupenFit.html#method-QuadrupenFit-plot'><code>QuadrupenFit$plot()</code></a></span></li>
+  <li><span class="pkg-link" data-pkg="quadrupen" data-topic="QuadrupenFit" data-id="plot_path"><a href='../../quadrupen/html/QuadrupenFit.html#method-QuadrupenFit-plot_path'><code>QuadrupenFit$plot_path()</code></a></span></li>
+  <li><span class="pkg-link" data-pkg="quadrupen" data-topic="QuadrupenFit" data-id="predict"><a href='../../quadrupen/html/QuadrupenFit.html#method-QuadrupenFit-predict'><code>QuadrupenFit$predict()</code></a></span></li>
+  <li><span class="pkg-link" data-pkg="quadrupen" data-topic="QuadrupenFit" data-id="print"><a href='../../quadrupen/html/QuadrupenFit.html#method-QuadrupenFit-print'><code>QuadrupenFit$print()</code></a></span></li>
+  <li><span class="pkg-link" data-pkg="quadrupen" data-topic="QuadrupenFit" data-id="show"><a href='../../quadrupen/html/QuadrupenFit.html#method-QuadrupenFit-show'><code>QuadrupenFit$show()</code></a></span></li>
+  <li><span class="pkg-link" data-pkg="quadrupen" data-topic="QuadrupenFit" data-id="stability"><a href='../../quadrupen/html/QuadrupenFit.html#method-QuadrupenFit-stability'><code>QuadrupenFit$stability()</code></a></span></li>
 </ul>
-</details>
-}}
+</details>}}
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-ElasticNetFit-new"></a>}}
-\if{latex}{\out{\hypertarget{method-ElasticNetFit-new}{}}}
-\subsection{Method \code{new()}}{
-Initialize a \code{\link{ElasticNetFit}} model
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{ElasticNetFit$new(data, intercept, regParam)}\if{html}{\out{</div>}}
+\if{html}{\out{<a id="method-ElasticNetFit-initialize"></a>}}
+\if{latex}{\out{\hypertarget{method-ElasticNetFit-initialize}{}}}
+\subsection{\code{ElasticNetFit$new()}}{
+  Initialize a \code{\link{ElasticNetFit}} model
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{ElasticNetFit$new(data, intercept, regParam)}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Arguments}{
+    \if{html}{\out{<div class="arguments">}}
+    \describe{
+      \item{\code{data}}{a \code{\link{DataModel}} object}
+      \item{\code{intercept}}{a logical; should an intercept be included in the mode?}
+      \item{\code{regParam}}{a list with two elements, a vector and a scalar, for the regularization}
+    }
+    \if{html}{\out{</div>}}
+  }
 }
 
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{data}}{a \code{\link{DataModel}} object}
-
-\item{\code{intercept}}{a logical; should an intercept be included in the mode?}
-
-\item{\code{regParam}}{a list with two elements, a vector and a scalar, for the regularization}
-}
-\if{html}{\out{</div>}}
-}
-}
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-ElasticNetFit-clone"></a>}}
 \if{latex}{\out{\hypertarget{method-ElasticNetFit-clone}{}}}
-\subsection{Method \code{clone()}}{
-The objects of this class are cloneable with this method.
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{ElasticNetFit$clone(deep = FALSE)}\if{html}{\out{</div>}}
+\subsection{\code{ElasticNetFit$clone()}}{
+  The objects of this class are cloneable with this method.
+  \subsection{Usage}{
+    \if{html}{\out{<div class="r">}}
+    \preformatted{ElasticNetFit$clone(deep = FALSE)}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Arguments}{
+    \if{html}{\out{<div class="arguments">}}
+    \describe{
+      \item{\code{deep}}{Whether to make a deep clone.}
+    }
+    \if{html}{\out{</div>}}
+  }
 }
 
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{deep}}{Whether to make a deep clone.}
-}
-\if{html}{\out{</div>}}
-}
-}
 }

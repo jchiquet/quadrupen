@@ -23,7 +23,7 @@ BoundedRegression::BoundedRegression(
     data_.scale_struct(gamma_) ;
 
     // Initialize the active set with starting coefficient
-    set_= ActiveSet(data, as<bool>(control["usechol"])) ;
+    set_= ActiveSet(data, as<bool>(control["factmat"])) ;
     
     // Compute the Gram matrix (+ gamma * S)
     data_.precompute_XTX() ;

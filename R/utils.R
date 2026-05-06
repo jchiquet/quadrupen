@@ -23,14 +23,6 @@ conn_from_adj <- function(adjacency_matrix) {
   G
 }
 
-model_default <- function()
-  list(verbose     = 0, # default control options
-       intercept   = TRUE,
-       normalize   = TRUE,
-       nlambda1    = 100,
-       min_ratio   = 1e-2
-  )
-
 optim_enet_default <- function(d)
   list(verbose     = 0, # default control options
        timer       = FALSE,
@@ -38,17 +30,17 @@ optim_enet_default <- function(d)
        method      = "quadra",
        threshold   = 1e-6,
        monitor     = 0,
-       usechol     = TRUE
+       factmat     = TRUE
   )
 
 optim_breg_default <- function(d)
   list(verbose     = 0, # default control options
        timer       = FALSE,
        maxiter     = 10,
-       method      = "fista",
+       method      = "quadra",
        threshold   = 1e-4,
        monitor     = 0,
-       usechol     = FALSE
+       factmat     = FALSE
   )
 
 optim_fused_default <- function(d)
@@ -67,9 +59,9 @@ optim_grp_default <- function(d)
        timer       = FALSE,
        maxiter     = 50,
        method      = "fista",
-       threshold   = 1e-6,
+       threshold   = 1e-3,
        monitor     = 0,
-       usechol     = FALSE
+       factmat     = FALSE
   )
 
 status_to_message <- function(status) {

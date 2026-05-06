@@ -75,20 +75,22 @@
 #' cross-validation or stability selection.
 #' * `timer`: logical; use to record the timing of the
 #' algorithm. Default is `FALSE`.
-#' * `maxiter` the maximal number of iteration used to solve the
-#'  problem for a given value of lambda1. Default is 500.
+#' * `maxiter` the maximal number of iteration used in the active set algorithm
+#' to solve the problem for a given value of lambda1 . Default is 50.
 #' * `method` a string for the underlying solver used. Either 
-#' `"quadra"`, `"fista"` or `"pgd"`. Default is `"quadra"`.
+#' `"quadra"`, `"fista"` or `"pgd"`. Default is `"quadra"`. 
+#' * `factmat` Boolean indicating if matrix factorization should be used to
+#' solve the sub-system. If `TRUE` (the default), a Cholesky decomposition is 
+#' maintained along the path. If `FALSE`, the sub-system are solved with 
+#' a conjugate gradient algorithm.
 #' * `threshold` a threshold for convergence. The algorithm stops 
 #' when the optimality conditions are fulfill up to this threshold.
-#' Default is `1e-7` for `"quadra"` and `1e-2` for the first order methods.
+#' Default is `1e-6`.
 #' * `monitor` indicates if a monitoring of the convergence should be 
 #' recorded, by computing a lower bound between the current solution and 
 #' the optimum: when `'0'` (the default), no monitoring is provided; 
 #' when `'1'`, the bound derived in Grandvalet et al. is computed; when 
 #' `'>1'`, the Fenchel duality gap is computed along the algorithm.
-#'
-#' @return an object with class [ElasticNetFit], inheriting from [QuadrupenFit].
 #'
 #' @details The optimized criterion is the following: \if{latex}{\deqn{%
 #' \hat{\beta}_{\lambda_1,\lambda_2} = \arg \min_{\beta} \frac{1}{2}
@@ -106,6 +108,8 @@
 #' structuring matrix \eqn{S}{S} is provided via the `struct`
 #' argument, a positive semidefinite matrix (possibly of class
 #' `Matrix`).
+#'
+#' @return an object with class [ElasticNetFit], inheriting from [QuadrupenFit].
 #'
 #' @seealso See also [QuadrupenFit]
 #' 
@@ -153,7 +157,6 @@ elastic.net <- function(x,
   ##
   ctrl <- optim_enet_default(ncol(x))
   ctrl$maxfeat <- maxfeat
-  if (!is.null(control$method)) if (control$method != "quadra") ctrl$threshold <- 1e-6
   ctrl[names(control)] <- control # default overwritten by user specifications
   ctrl$method <- switch(ctrl$method, quadra = "QUADRA", fista = "FISTA", pgd = "PGD", 0)
   ctrl$normalize <- normalize

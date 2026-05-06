@@ -36,7 +36,9 @@ public:
   
   // Update Cholesky factorisation by inserting the last activated variables
   void update_Cholesky() ; 
-  
+  // Update Cholesky factorisation by inserting the last n_new activated variables
+  void update_Cholesky_block(uword n_new) ;
+                                                  
   // Downdate Cholesky factorisation by removing the specified variables
   void downdate_Cholesky(uword j) ; 
   
@@ -87,9 +89,32 @@ void ActiveSet<matrix>::add_var(uword var_in, const RegressionData<matrix>& data
 
 template <typename matrix>
 void ActiveSet<matrix>::add_vars(uvec vars, const RegressionData<matrix>& data) {
-  for (uword v=0; v < vars.n_elem ; v++) {
-    add_var(vars[v], data) ;
+  uword n_new = vars.n_elem;
+  uword p_old = size();
+  
+  for(uword v : vars) is_in_[v] = 1;
+  A_.resize(p_old + n_new);
+  A_.tail(n_new) = vars;
+
+  // new columns for XTXA_ (p x n_new)
+  mat new_cols = data.X_.t() * data.X_.cols(vars) - 
+    data.n_ * data.X_bar_ * data.X_bar_.rows(vars).t() + 
+    data.S_.cols(vars);
+
+  if (p_old == 0) { // If empty matrix
+    XTXA_  = new_cols;
+    XATXA_ = new_cols.rows(vars);
+  } else { // Add to existing set of variables
+    mat bottom_left = XTXA_.rows(vars); 
+    
+    XTXA_ = join_rows(XTXA_, new_cols);
+    // [ XATXA_old   | bottom_left.t() ]
+    // [ bottom_left | new_cols.rows(vars) ]
+    mat bottom_right = new_cols.rows(vars);
+    XATXA_ = join_cols(join_rows(XATXA_, bottom_left.t()), 
+                       join_rows(bottom_left, bottom_right));
   }
+  if (use_chol_) update_Cholesky_block(n_new) ;
 }
 
 template <typename matrix>
@@ -129,6 +154,33 @@ void ActiveSet<matrix>::update_Cholesky() {
   }
 }
 
+template <typename matrix>
+void ActiveSet<matrix>::update_Cholesky_block(uword n_new) {
+  uword p_total = XATXA_.n_cols;
+  uword p_old = p_total - n_new;
+  
+  if (p_old == 0) {
+    R_ = chol(XATXA_);
+  } else {
+    // Solve R_old.t() * R_new_block = XATXA_joint
+    // XATXA_joint is the upper right block (p_old x n_new)
+    mat R_new_cols = solve(trimatu(R_).t(), 
+                           XATXA_.submat(0, p_old, p_old - 1, p_total - 1), 
+                           solve_opts::fast);
+    
+    // Compute the Schur complement for the new diagonal block
+    // S = XATXA_new - R_new_cols.t() * R_new_cols
+    mat S = XATXA_.submat(p_old, p_old, p_total - 1, p_total - 1) - 
+      R_new_cols.t() * R_new_cols;
+    mat R_bottom_right = chol(S);
+    
+    // Final assembly
+    // [ R_old | R_new_cols     ]
+    // [ 0     | R_bottom_right ]
+    R_ = join_rows(join_cols(R_, zeros<mat>(n_new, p_old)), 
+                   join_cols(R_new_cols, R_bottom_right));
+  }
+}
 template <typename matrix>
 void ActiveSet<matrix>::downdate_Cholesky(uword j) {
   

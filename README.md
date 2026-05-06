@@ -206,60 +206,87 @@ original proposition.
 group <- rep(1:5, c(25,10,25,10,25)) 
 ```
 
-#### Group-Lasso (group sparse L1/L2)
+#### Group Lasso (group sparse L1/L2)
 
 ``` r
-plot(group.lasso(x, y, group, type = "l2", lambda2=0, intercept=FALSE), labels=labels)
+plot(group_lasso(x, y, group, intercept=FALSE), labels=labels)
 ```
 
 ![](man/figures/grplasso-l1l2-1.png)
 
+#### Sparse Group Lasso (mixing L1 + group sparse L1/L2)
+
+``` r
+plot(sparse_group_lasso(x, y, group, alpha = 0.75, intercept=FALSE), labels=labels)
+```
+
+![](man/figures/sparse-grplasso-l1l2-1.png)
+
 #### Group-Lasso (group sparse L1/LInf)
 
 ``` r
-plot(group.lasso(x, y, group, type = "linf", lambda2=0, intercept=FALSE), labels=labels)
+plot(group_l1linf(x, y, group, intercept=FALSE), labels=labels)
 ```
 
 ![](man/figures/grplasso-l1linf-1.png)
 
+#### Sparse Group Lasso (mixing L1 + group sparse L1/LInf)
+
+``` r
+plot(sparse_group_l1linf(x, y, group, alpha = 0.75, intercept=FALSE), labels=labels)
+```
+
+![](man/figures/sparse-grplasso-l1linf-1.png)
+
 #### Cooperative-Lasso (sign-coherent group lasso)
 
 ``` r
-plot(group.lasso(x, y, group, type = "coop", lambda2=0, intercept=FALSE), labels=labels)
+plot(coop_lasso(x, y, group, intercept=FALSE), labels=labels)
 ```
 
-![](man/figures/cooplasso-1.png)
+![](man/figures/sparse-cooplasso-1.png)
+
+#### Sparse Cooperative Lasso (mixing L1 + Cooperative norm)
+
+``` r
+plot(sparse_coop_lasso(x, y, group, alpha = 0.75, intercept=FALSE), labels=labels)
+```
+
+![](man/figures/sparse-grplasso-coop-1.png)
 
 ### Regularization mixing smooth and hard prior knowledge
 
 We let the possibility to add structured-$\ell_2$ penalty to this
 mixed-group penalties, in order to introduce additional smoothing prior
 in the regularization, just like in the structured version of the
-Elastic-Net and Ridge regression
+Elastic-Net and Ridge regression. For this, the function
+`group_sparse_lm` is the more generic group-wise function, which
+generalize all the above model by letting the possibility to add an
+$\ell_2$-structured penalty.
 
-#### Group-Lasso L2 + Structured ElasticNet (group sparse L1/L2 + structured L2)
-
-``` r
-plot(group.lasso(x, y, group, type = "l2", lambda2 = 2, struct = L, intercept=FALSE), labels=labels)
-```
-
-![](man/figures/grpenet-l1l2-1.png)
-
-#### Group-Lasso LInf + Structured ElasticNet (group sparse L1/LInf + structured L2)
+#### Sparse Group-Lasso L2 + Structured ElasticNet (group sparse L1/L2 + structured L2)
 
 ``` r
-plot(group.lasso(x, y, group, type = "linf", lambda2 = 2, struct = L, intercept=FALSE), labels=labels)
+plot(group_sparse_lm(x, y, group, type = "l2", alpha = 0.5, lambda2 = 2, struct = L, intercept=FALSE), labels=labels)
 ```
 
-![](man/figures/grpenet-l1linf-1.png)
+![](man/figures/sparse-grpenet-l1l2-1.png)
 
-#### Cooperative-Lasso + Structured ElasticNet (sign-coherent group lasso + structured L2)
+#### Sparse Group-Lasso LInf + Structured ElasticNet (group sparse L1/LInf + structured L2)
 
 ``` r
-plot(group.lasso(x, y, group, type = "coop", lambda2 = 2, struct = L, intercept=FALSE), labels=labels)
+plot(group_sparse_lm(x, y, group, type = "linf", alpha = 0.5, lambda2 = 2, struct = L, intercept=FALSE), labels=labels)
 ```
 
-![](man/figures/coopenet-1.png)
+![](man/figures/sparse-grpenet-l1linf-1.png)
+
+#### Sparse Cooperative-Lasso + Structured ElasticNet (sign-coherent group lasso + structured L2)
+
+``` r
+plot(group_sparse_lm(x, y, group, type = "coop", alpha = 0.5, lambda2 = 2, struct = L, intercept=FALSE), labels=labels)
+```
+
+![](man/figures/sparse-coopenet-1.png)
 
 ## Appendix: functions for data generation
 
