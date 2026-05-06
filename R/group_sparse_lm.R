@@ -114,8 +114,7 @@ group_sparse_lm <-
     ctrl$maxfeat <- maxfeat
     ctrl[names(control)] <- control # default overwritten by user specifications
     ctrl$method  <- switch(ctrl$method, quadra = "QUADRA", fista = "FISTA", pgd = "PGD", 0)
-    if (ctrl$method != "QUADRA") ctrl$factmat <- FALSE
-    
+    ctrl$factmat <- ctrl$method == "QUADRA" 
     ctrl$normalize <- normalize
     ctrl$beta0  <- beta0
     

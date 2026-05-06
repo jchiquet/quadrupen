@@ -23,14 +23,6 @@ conn_from_adj <- function(adjacency_matrix) {
   G
 }
 
-model_default <- function()
-  list(verbose     = 0, # default control options
-       intercept   = TRUE,
-       normalize   = TRUE,
-       nlambda1    = 100,
-       min_ratio   = 1e-2
-  )
-
 optim_enet_default <- function(d)
   list(verbose     = 0, # default control options
        timer       = FALSE,
@@ -45,7 +37,7 @@ optim_breg_default <- function(d)
   list(verbose     = 0, # default control options
        timer       = FALSE,
        maxiter     = 10,
-       method      = "fista",
+       method      = "quadra",
        threshold   = 1e-4,
        monitor     = 0,
        factmat     = FALSE
