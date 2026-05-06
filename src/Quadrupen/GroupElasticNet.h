@@ -58,7 +58,7 @@ GroupElasticNet<matrix,norm>::GroupElasticNet(
     
     // Initialize the active set, beta_ and gradient with starting coefficient
     vec beta0 = control["beta0"] ;
-    set_ = ActiveSetGroup(data_, group_ind, as<bool>(control["usechol"])) ;
+    set_ = ActiveSetGroup(data_, group_ind, as<bool>(control["factmat"])) ;
     grad_ = - data_.XTy_ ;
 
     // set up the penalty

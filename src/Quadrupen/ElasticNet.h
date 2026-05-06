@@ -72,9 +72,9 @@ ElasticNet<matrix>::ElasticNet(
     uvec A0 = find(beta0) ;
     grad_ = - data_.XTy_ ;
     if (A0.is_empty()) {
-      set_  = ActiveSet(data_, as<bool>(control["usechol"])) ;
+      set_  = ActiveSet(data_, as<bool>(control["factmat"])) ;
     } else {
-      set_  = ActiveSet(data_, A0, as<bool>(control["usechol"])) ;
+      set_  = ActiveSet(data_, A0, as<bool>(control["factmat"])) ;
       beta_ = beta0(A0) ;
       grad_ += set_.XTXA_ * beta_  ;
     }

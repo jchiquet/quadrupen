@@ -74,6 +74,10 @@ QuadrupenFit <- R6::R6Class(
         return(private$tuning[[2]])
       else private$tuning[[2]] <- value
     },
+    #' @field is_l2_regularized Boolean indicating if l2 regularization is applied
+    is_l2_regularized = function(value) {
+      ifelse(private$tuning$gamma > 0, TRUE, FALSE)
+    },
     #' @field optim_monitoring list monitoring the optimization
     optim_monitoring = function(value) {
       if (!is.null(private$monitoring$convergence))
@@ -580,7 +584,7 @@ QuadrupenFit <- R6::R6Class(
     #' }
     #'
     plot_path = function(xvar = c("lambda", "fraction", "df"), log_scale = TRUE,
-                    title = paste(self$penalty," path", sep = ""),
+                    title = paste("Path for", self$penalty),
                     standardize = TRUE, labels = NULL) {
 
       xvar <- match.arg(xvar)      

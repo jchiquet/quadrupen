@@ -103,7 +103,7 @@ FusedLassoFit <- R6::R6Class(
   )
 )
 
-#' Class "GroupLassoFit"
+#' Class "SparseGroupFit"
 #' 
 #' Class of object returned by the fitting function [group_sparse_lm()]. Inherits fields
 #' and methods of [QuadrupenFit]
@@ -112,21 +112,39 @@ FusedLassoFit <- R6::R6Class(
 #' 
 #' @export
 #' 
-GroupLassoFit <- R6::R6Class(
-  classname = "GroupLassoFit",
+SparseGroupFit <- R6::R6Class(
+  classname = "SparseGroupFit",
   inherit = QuadrupenFit,
   private  = list(group_ = NA, type_ = NA),
   active  = list(
     #' @field penalty character describing the regularizer/penalty
-    penalty = function(value) paste0("group.lasso l1/", private$type_),
+    penalty = function(value) {
+      sparse <- ifelse(self$is_group_sparse, "Sparse", "")
+      ridge  <- ifelse(self$is_l2_regularized, "plus L2-regularization", "")
+      group  <- switch(private$type_,
+             "l2" = "L1/L2 Group penalty",
+             "linf" = "L1/Linf Group penalty",
+             "coop" = "Cooperative Penalty"
+      )
+      paste(sparse, group, ridge)
+    },
     #' @field group vector of integers indicating group belonging
     group = function(value) private$group_,
-    #' @field type string indicating whether the \eqn{\ell_1/\ell_2}{l1/l2} or the
-    #' \eqn{\ell_1/\ell_\infty}{l1/linf} group-Lasso must be fitted.
-    type = function(value) private$type_
+    #' @field type string the type of group-wise regularization applied
+    type = function(value) private$type_,
+    #' @field mixture_tuning mixture coefficient of the sparse group penalty
+    mixture_tuning = function(value) {
+      if (missing(value))
+        return(private$tuning$alpha)
+      else private$tuning$alpha <- value
+    },
+    #' @field is_group_sparse boolean indicating if sparse group or group penalty is applied
+    is_group_sparse = function(value) {
+      ifelse(self$mixture_tuning > 0, TRUE, FALSE)
+    }
   ),
   public  = list(
-    #' @description Initialize a [`GroupLassoFit`] model
+    #' @description Initialize a [`SparseGroupFit`] model
     #' @param data a [`DataModel`] object
     #' @param intercept a logical; should an intercept be included in the mode?
     #' @param group vector of integers indicating group belonging.

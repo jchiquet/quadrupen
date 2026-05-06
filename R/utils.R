@@ -38,7 +38,7 @@ optim_enet_default <- function(d)
        method      = "quadra",
        threshold   = 1e-6,
        monitor     = 0,
-       usechol     = TRUE
+       factmat     = TRUE
   )
 
 optim_breg_default <- function(d)
@@ -48,7 +48,7 @@ optim_breg_default <- function(d)
        method      = "fista",
        threshold   = 1e-4,
        monitor     = 0,
-       usechol     = FALSE
+       factmat     = FALSE
   )
 
 optim_fused_default <- function(d)
@@ -69,7 +69,7 @@ optim_grp_default <- function(d)
        method      = "fista",
        threshold   = 1e-3,
        monitor     = 0,
-       usechol     = FALSE
+       factmat     = FALSE
   )
 
 status_to_message <- function(status) {

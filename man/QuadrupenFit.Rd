@@ -84,6 +84,8 @@ Penalized criteria based on estimation of degrees of freedom
 
     \item{\code{minor_tuning}}{vector of "minor" tuning parameters (either l1 or l2)}
 
+    \item{\code{is_l2_regularized}}{Boolean indicating if l2 regularization is applied}
+
     \item{\code{optim_monitoring}}{list monitoring the optimization}
 
     \item{\code{optim_config}}{list with low level options used for optimization.}
@@ -415,7 +417,7 @@ small. Remind that the intercept does not count. Default is
     \preformatted{QuadrupenFit$plot_path(
   xvar = c("lambda", "fraction", "df"),
   log_scale = TRUE,
-  title = paste(self$penalty, " path", sep = ""),
+  title = paste("Path for", self$penalty),
   standardize = TRUE,
   labels = NULL
 )}

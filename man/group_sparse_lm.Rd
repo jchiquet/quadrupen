@@ -8,7 +8,7 @@
 \alias{sparse_group_lasso}
 \alias{sparse_group_l1linf}
 \alias{sparse_coop_lasso}
-\title{Fit a linear model with (sparse) group regularisation (either l1/l2, l1/l-inf or cooperative variant)}
+\title{Fit a linear model with (sparse) group regularisation (either l1/l2, l1/linf or cooperative)}
 \usage{
 group_sparse_lm(
   x,
@@ -40,9 +40,9 @@ group_lasso(
   normalize = TRUE,
   nlambda1 = ifelse(is.null(lambda1), 100, length(lambda1)),
   minratio = 0.01,
-  maxfeat = ifelse(lambda2 < 0.01, min(2 * nrow(x), ncol(x)), min(4 * nrow(x), ncol(x))),
+  maxfeat = ncol(x),
   beta0 = numeric(ncol(x)),
-  control = list()
+  control = list(method = "quadra")
 )
 
 group_l1linf(
@@ -55,7 +55,7 @@ group_l1linf(
   normalize = TRUE,
   nlambda1 = ifelse(is.null(lambda1), 100, length(lambda1)),
   minratio = 0.01,
-  maxfeat = ifelse(lambda2 < 0.01, min(2 * nrow(x), ncol(x)), min(4 * nrow(x), ncol(x))),
+  maxfeat = ncol(x),
   beta0 = numeric(ncol(x)),
   control = list()
 )
@@ -70,9 +70,9 @@ coop_lasso(
   normalize = TRUE,
   nlambda1 = ifelse(is.null(lambda1), 100, length(lambda1)),
   minratio = 0.01,
-  maxfeat = ifelse(lambda2 < 0.01, min(2 * nrow(x), ncol(x)), min(4 * nrow(x), ncol(x))),
+  maxfeat = ncol(x),
   beta0 = numeric(ncol(x)),
-  control = list()
+  control = list(method = "quadra")
 )
 
 sparse_group_lasso(
@@ -86,7 +86,7 @@ sparse_group_lasso(
   normalize = TRUE,
   nlambda1 = ifelse(is.null(lambda1), 100, length(lambda1)),
   minratio = 0.01,
-  maxfeat = ifelse(lambda2 < 0.01, min(2 * nrow(x), ncol(x)), min(4 * nrow(x), ncol(x))),
+  maxfeat = ncol(x),
   beta0 = numeric(ncol(x)),
   control = list()
 )
@@ -102,7 +102,7 @@ sparse_group_l1linf(
   normalize = TRUE,
   nlambda1 = ifelse(is.null(lambda1), 100, length(lambda1)),
   minratio = 0.01,
-  maxfeat = ifelse(lambda2 < 0.01, min(2 * nrow(x), ncol(x)), min(4 * nrow(x), ncol(x))),
+  maxfeat = ncol(x),
   beta0 = numeric(ncol(x)),
   control = list()
 )
@@ -118,7 +118,7 @@ sparse_coop_lasso(
   normalize = TRUE,
   nlambda1 = ifelse(is.null(lambda1), 100, length(lambda1)),
   minratio = 0.01,
-  maxfeat = ifelse(lambda2 < 0.01, min(2 * nrow(x), ncol(x)), min(4 * nrow(x), ncol(x))),
+  maxfeat = ncol(x),
   beta0 = numeric(ncol(x)),
   control = list()
 )
@@ -204,13 +204,17 @@ Automatically set to \code{0} when the method is embedded within
 cross-validation or stability selection.
 \item \code{timer}: logical; use to record the timing of the
 algorithm. Default is \code{FALSE}.
-\item \code{maxiter} the maximal number of iteration used to solve the
-problem for a given value of lambda1. Default is 500.
+\item \code{maxiter} the maximal number of iteration used in the active set algorithm
+to solve the problem for a given value of lambda1 . Default is 50.
 \item \code{method} a string for the underlying solver used. Either
 \code{"quadra"}, \code{"fista"} or \code{"pgd"}. Default is \code{"quadra"}.
+\item \code{factmat} Boolean indicating if matrix factorization should be used to
+solve the sub-system. If \code{TRUE} (the default), a Cholesky decomposition is
+maintained along the path. If \code{FALSE}, the sub-system are solved with
+a conjugate gradient algorithm.
 \item \code{threshold} a threshold for convergence. The algorithm stops
 when the optimality conditions are fulfill up to this threshold.
-Default is \code{1e-7} for \code{"quadra"} and \code{1e-2} for the first order methods.
+Default is \code{1e-6}.
 \item \code{monitor} indicates if a monitoring of the convergence should be
 recorded, by computing a lower bound between the current solution and
 the optimum: when \code{'0'} (the default), no monitoring is provided;
@@ -219,17 +223,16 @@ when \code{'1'}, the bound derived in Grandvalet et al. is computed; when
 }}
 }
 \value{
-an object with class \link{GroupLassoFit}, inheriting from \link{QuadrupenFit}.
+an object with class \link{SparseGroupFit}, inheriting from \link{QuadrupenFit}.
 }
 \description{
-Adjust a linear model with (sparse) group regularization, that is a
-mixture of either a (possibly weighted)
-\eqn{\ell_1/\ell_2}{l1/l2}- or
-\eqn{\ell_1/\ell_\infty}{l1/linf}-norm, and a (possibly
-structured) \eqn{\ell_2}{l2}-norm (ridge-like). The solution path
-is computed at a grid of values for the
-\eqn{\ell_1/\ell_q}{l1/lq}-penalty. See details for the criterion
-optimized.
+Adjust a linear model with (sparse) group regularization, that is, a
+mixture of an element-wise \eqn{\ell_1}{l1} norm and a group-wise mixed-norm
+(either \eqn{\ell_1/\ell_2}{l1/l2}, \eqn{\ell_1/\ell_\infty}{l1/linf} or
+cooperative). We also add a (possibly structured) \eqn{\ell_2}{l2}-norm (ridge-like).
+The solution path is computed on an automatically tuned  grid of values for
+the sparse group penalty. The mixture coefficient and the amount of ridge-like
+regularization are fixed by the user. See details for the criterion
 }
 \examples{
 ## Simulating multivariate Gaussian with blockwise correlation
@@ -251,23 +254,39 @@ labels <- rep("irrelevant", length(beta))
 labels[beta != 0] <- "relevant"
 
 \dontrun{
+
+## Group-Lasso
+plot(group_lasso(x, y, grp), label=labels)
+
+## Sparse Group-Lasso
+plot(sparse_group_lasso(x, y, grp, alpha = 0.75), label=labels)
+
 ## Sparse Group-Lasso + L2 regularisation
-plot(grp_sparse_lm(x, y, grp, type = "l2, alpha = .75), label=labels)
-plot(grp_sparse_lm(x, y, grp, type = "l2, alpha = .75, lambda2=.5), label=labels)
-plot(grp_sparse_lm(x, y, grp, type = "l2, alpha = .75, lambda2=10), label=labels)
-plot(grp_sparse_lm(x, y, grp, type = "l2, alpha = .75, lambda2=10,struct=solve(Sigma)), label=labels)
+plot(group_sparse_lm(x, y, grp, type = "l2", alpha = .75, lambda2=.5), label=labels)
+plot(group_sparse_lm(x, y, grp, type = "l2", alpha = .75, lambda2=10), label=labels)
+plot(group_sparse_lm(x, y, grp, type = "l2", alpha = .75, lambda2=10, struct=solve(Sigma)), label=labels)
+
+## Group-Lasso L1/LINF
+plot(group_l1linf(x, y, grp), label=labels)
+
+## Sparse Group-Lasso L1/LINF
+plot(sparse_group_l1linf(x, y, grp, alpha = 0.75), label=labels)
 
 ## Sparse L1/LINF Group-Lasso + L2 regularisation
-plot(grp_sparse_lm(x, y, grp, type = "linf", alpha = .75), label=labels)
-plot(grp_sparse_lm(x, y, grp, type = "linf", alpha = .75, lambda2=.5), label=labels)
-plot(grp_sparse_lm(x, y, grp, type = "linf", alpha = .75, lambda2=10), label=labels)
-plot(grp_sparse_lm(x, y, grp, type = "linf", alpha = .75, lambda2=10,struct=solve(Sigma)), label=labels)
+plot(group_sparse_lm(x, y, grp, type = "linf", alpha = .75, lambda2=.5), label=labels)
+plot(group_sparse_lm(x, y, grp, type = "linf", alpha = .75, lambda2=10), label=labels)
+plot(group_sparse_lm(x, y, grp, type = "linf", alpha = .75, lambda2=10, struct=solve(Sigma)), label=labels)
+
+## Cooperative-Lasso
+plot(coop_lasso(x, y, grp), label=labels)
+
+## Sparse Cooperative-Lasso
+plot(sparse_coop_lasso(x, y, grp, alpha = 0.75), label=labels)
 
 ## Sparse Cooperative-Lasso + L2 regularisation
-plot(grp_sparse_lm(x, y, grp, type = "coop", alpha = .75), label=labels)
-plot(grp_sparse_lm(x, y, grp, type = "coop", alpha = .75, lambda2=.5), label=labels)
-plot(grp_sparse_lm(x, y, grp, type = "coop", alpha = .75, lambda2=10), label=labels)
-plot(grp_sparse_lm(x, y, grp, type = "coop", alpha = .75, lambda2=10,struct=solve(Sigma)), label=labels)
+plot(group_sparse_lm(x, y, grp, type = "coop", alpha = .75, lambda2=.5), label=labels)
+plot(group_sparse_lm(x, y, grp, type = "coop", alpha = .75, lambda2=10), label=labels)
+plot(group_sparse_lm(x, y, grp, type = "coop", alpha = .75, lambda2=10, struct=solve(Sigma)), label=labels)
 }
 }
 \seealso{

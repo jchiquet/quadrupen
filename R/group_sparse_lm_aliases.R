@@ -12,7 +12,7 @@ group_lasso <-
            minratio  = 1e-2,
            maxfeat   = ncol(x),
            beta0     = numeric(ncol(x)),
-           control   = list()) {
+           control   = list(method = "quadra")) {
     
     out <- group_sparse_lm(
       x,
@@ -88,7 +88,7 @@ coop_lasso <-
            minratio  = 1e-2,
            maxfeat   = ncol(x),
            beta0     = numeric(ncol(x)),
-           control   = list()) {
+           control   = list(method = "quadra")) {
     
     out <- group_sparse_lm(
       x,

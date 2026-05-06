@@ -1,13 +1,12 @@
-#' Fit a linear model with (sparse) group regularisation (either l1/l2, l1/l-inf or cooperative variant)
+#' Fit a linear model with (sparse) group regularisation (either l1/l2, l1/linf or cooperative)
 #'
-#' Adjust a linear model with (sparse) group regularization, that is a
-#' mixture of either a (possibly weighted)
-#' \eqn{\ell_1/\ell_2}{l1/l2}- or
-#' \eqn{\ell_1/\ell_\infty}{l1/linf}-norm, and a (possibly
-#' structured) \eqn{\ell_2}{l2}-norm (ridge-like). The solution path
-#' is computed at a grid of values for the
-#' \eqn{\ell_1/\ell_q}{l1/lq}-penalty. See details for the criterion
-#' optimized.
+#' Adjust a linear model with (sparse) group regularization, that is, a
+#' mixture of an element-wise \eqn{\ell_1}{l1} norm and a group-wise mixed-norm 
+#' (either \eqn{\ell_1/\ell_2}{l1/l2}, \eqn{\ell_1/\ell_\infty}{l1/linf} or 
+#' cooperative). We also add a (possibly structured) \eqn{\ell_2}{l2}-norm (ridge-like). 
+#' The solution path is computed on an automatically tuned  grid of values for 
+#' the sparse group penalty. The mixture coefficient and the amount of ridge-like
+#' regularization are fixed by the user. See details for the criterion
 #' 
 #' @inheritParams elastic.net
 #' 
@@ -22,7 +21,7 @@
 #' \eqn{\ell_1/\ell_\infty}{l1/linf} group-Lasso must be fitted. Could be "linf" or 
 #' "l2", default is "l2"
 #'
-#' @return an object with class [GroupLassoFit], inheriting from [QuadrupenFit].
+#' @return an object with class [SparseGroupFit], inheriting from [QuadrupenFit].
 #'
 #' @seealso See also [QuadrupenFit]
 #' 
@@ -55,10 +54,11 @@
 #' ## Sparse Group-Lasso
 #' plot(sparse_group_lasso(x, y, grp, alpha = 0.75), label=labels)
 #' 
-#' ## Sparse Group-Lasso + L2 regularisation
+#' ## Sparse Group-Lasso + L2 regularization
 #' plot(group_sparse_lm(x, y, grp, type = "l2", alpha = .75, lambda2=.5), label=labels)
 #' plot(group_sparse_lm(x, y, grp, type = "l2", alpha = .75, lambda2=10), label=labels)
-#' plot(group_sparse_lm(x, y, grp, type = "l2", alpha = .75, lambda2=10, struct=solve(Sigma)), label=labels)
+#' plot(group_sparse_lm(x, y, grp, type = "l2", alpha = .75, lambda2=10, 
+#'           struct=solve(Sigma)), label=labels)
 #' 
 #' ## Group-Lasso L1/LINF
 #' plot(group_l1linf(x, y, grp), label=labels)
@@ -66,10 +66,11 @@
 #' ## Sparse Group-Lasso L1/LINF
 #' plot(sparse_group_l1linf(x, y, grp, alpha = 0.75), label=labels)
 #' 
-#' ## Sparse L1/LINF Group-Lasso + L2 regularisation
+#' ## Sparse L1/LINF Group-Lasso + L2 regularization
 #' plot(group_sparse_lm(x, y, grp, type = "linf", alpha = .75, lambda2=.5), label=labels)
 #' plot(group_sparse_lm(x, y, grp, type = "linf", alpha = .75, lambda2=10), label=labels)
-#' plot(group_sparse_lm(x, y, grp, type = "linf", alpha = .75, lambda2=10, struct=solve(Sigma)), label=labels)
+#' plot(group_sparse_lm(x, y, grp, type = "linf", alpha = .75, lambda2=10, 
+#'           struct=solve(Sigma)), label=labels)
 #' 
 #' ## Cooperative-Lasso
 #' plot(coop_lasso(x, y, grp), label=labels)
@@ -77,10 +78,11 @@
 #' ## Sparse Cooperative-Lasso
 #' plot(sparse_coop_lasso(x, y, grp, alpha = 0.75), label=labels)
 #' 
-#' ## Sparse Cooperative-Lasso + L2 regularisation
+#' ## Sparse Cooperative-Lasso + L2 regularization
 #' plot(group_sparse_lm(x, y, grp, type = "coop", alpha = .75, lambda2=.5), label=labels)
 #' plot(group_sparse_lm(x, y, grp, type = "coop", alpha = .75, lambda2=10), label=labels)
-#' plot(group_sparse_lm(x, y, grp, type = "coop", alpha = .75, lambda2=10, struct=solve(Sigma)), label=labels)
+#' plot(group_sparse_lm(x, y, grp, type = "coop", alpha = .75, lambda2=10, 
+#'         struct=solve(Sigma)), label=labels)
 #' }
 #' @export
 group_sparse_lm <- 
@@ -112,7 +114,7 @@ group_sparse_lm <-
     ctrl$maxfeat <- maxfeat
     ctrl[names(control)] <- control # default overwritten by user specifications
     ctrl$method  <- switch(ctrl$method, quadra = "QUADRA", fista = "FISTA", pgd = "PGD", 0)
-    if (ctrl$method != "QUADRA") ctrl$usechol <- FALSE
+    if (ctrl$method != "QUADRA") ctrl$factmat <- FALSE
     
     ctrl$normalize <- normalize
     ctrl$beta0  <- beta0
@@ -129,7 +131,7 @@ group_sparse_lm <-
     ## ============================================
     ## INSTANTIATE THE PENALIZED MODEL
     ##
-    myModel <- GroupLassoFit$new(
+    myModel <- SparseGroupFit$new(
       data      = myData,
       intercept = intercept,
       group     = group,
