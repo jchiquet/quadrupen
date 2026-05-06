@@ -50,7 +50,7 @@ Class for storing data and various fixed quantity
 
 ### Public methods
 
-- [`DataModel$new()`](#method-DataModel-new)
+- [`DataModel$new()`](#method-DataModel-initialize)
 
 - [`DataModel$CholStruct()`](#method-DataModel-CholStruct)
 
@@ -62,7 +62,7 @@ Class for storing data and various fixed quantity
 
 ------------------------------------------------------------------------
 
-### Method `new()`
+### `DataModel$new()`
 
 constructor for DataModel
 
@@ -104,7 +104,7 @@ constructor for DataModel
 
 ------------------------------------------------------------------------
 
-### Method `CholStruct()`
+### `DataModel$CholStruct()`
 
 Compute Cholesky factorization of the Structuring matrix
 
@@ -114,7 +114,7 @@ Compute Cholesky factorization of the Structuring matrix
 
 ------------------------------------------------------------------------
 
-### Method `splitTrainTest()`
+### `DataModel$splitTrainTest()`
 
 a function splitting the data into train and test folds
 
@@ -141,7 +141,7 @@ a list with train and test data and id.
 
 ------------------------------------------------------------------------
 
-### Method `splitSubSamples()`
+### `DataModel$splitSubSamples()`
 
 a function splitting data into subsamples
 
@@ -179,7 +179,7 @@ a list of DataModel, resampling of the original
 
 ------------------------------------------------------------------------
 
-### Method `clone()`
+### `DataModel$clone()`
 
 The objects of this class are cloneable with this method.
 

@@ -24,6 +24,7 @@ get more insight by reading pages 65-66, 70-71.
 Ok first load the package
 
 ``` r
+
 library(quadrupen)
 ```
 
@@ -47,6 +48,7 @@ defined group-wise. The corresponding regression correlated according to
 the same pattern.
 
 ``` r
+
 n <- 200
 p <- 192
 
@@ -64,9 +66,10 @@ strong pattern:
 ![](reference/figures/unnamed-chunk-3-1.png)
 
 We draw the response variable by fixing the variance of the noise ratio
-to get an $R^{2}$ equal to $0.8$.
+to get an $`R^2`$ equal to $`0.8`$.
 
 ``` r
+
 dat <- rlm(x,beta,mu,r2=0.8)
 y <- dat$y
 sigma <- dat$sigma
@@ -77,41 +80,46 @@ sigma <- dat$sigma
 No we try the available penalized regression method in `quadrupen` to
 fit the regularization path to this data set
 
-#### Ridge regression ($\ell_{2}$ penalty)
+#### Ridge regression ($`\ell_2`$ penalty)
 
 ``` r
+
 plot(ridge(x,y, intercept=FALSE), labels=labels)
 ```
 
 ![](reference/figures/ridge_nostruct-1.png)
 
-#### Lasso ($\ell_{1}$ penalty)
+#### Lasso ($`\ell_1`$ penalty)
 
 ``` r
+
 plot(lasso(x,y, intercept=FALSE), labels=labels)
 ```
 
 ![](reference/figures/lasso_nostruct-1.png)
 
-#### Elastic-net ($\ell_{1} + \ell_{2}$ penalty)
+#### Elastic-net ($`\ell_1+\ell_2`$ penalty)
 
 ``` r
+
 plot(elastic.net(x,y, lambda2=1, intercept=FALSE), labels=labels)
 ```
 
 ![](reference/figures/enet_nostruct-1.png)
 
-#### Bounded regression ($\ell_{\infty}$ penalty)
+#### Bounded regression ($`\ell_\infty`$ penalty)
 
 ``` r
+
 plot(bounded.reg(x,y, lambda2=0, intercept=FALSE), labels=labels)
 ```
 
 ![](reference/figures/breg_nostruct-1.png)
 
-#### Ridge + Bounded regression ($\ell_{\infty} + \ell_{2}$ penalty)
+#### Ridge + Bounded regression ($`\ell_\infty+\ell_2`$ penalty)
 
 ``` r
+
 plot(bounded.reg(x,y, lambda2=5, intercept=FALSE), labels=labels)
 ```
 
@@ -120,6 +128,7 @@ plot(bounded.reg(x,y, lambda2=5, intercept=FALSE), labels=labels)
 #### Lava (sparse + dense signal decomposition)
 
 ``` r
+
 out_lava <- lava(x,y, lambda2=1, intercept=FALSE)
 out_lava$plot_path(component = "sparse", labels=labels)
 ```
@@ -127,6 +136,7 @@ out_lava$plot_path(component = "sparse", labels=labels)
 ![](reference/figures/lava_nostruct-1.png)
 
 ``` r
+
 out_lava$plot_path(component = "dense", labels=labels)
 ```
 
@@ -140,6 +150,7 @@ ton ensure strict positive definiteness (in he future, this matrix
 should preferentially be defined with a graph).
 
 ``` r
+
 A <- Matrix::bdiag(lapply(group, function(s) matrix(1,s,s))) ; diag(A) <- 0
 L <- -A; diag(L) <- Matrix::colSums(A) + 1e-2
 ```
@@ -149,25 +160,28 @@ replacing the ridge penalty \$\\ \code \\\_2^2\$ with \$\\ \code
 \\\_{\mathbf{L}}^2\$ to enforce some structure in the regularization:
 the solution paths look a lot more convincing.
 
-#### Structured/Generalized Ridge regression ($\ell_{2}$ penalty)
+#### Structured/Generalized Ridge regression ($`\ell_2`$ penalty)
 
 ``` r
+
 plot(ridge(x,y, lambda = 10^seq(4,-1,len=100), struct = L, intercept=FALSE), labels=labels)
 ```
 
 ![](reference/figures/ridge_struct-1.png)
 
-#### Structured/Generalized Elastic-net ($\ell_{1} + \ell_{2}$ penalty)
+#### Structured/Generalized Elastic-net ($`\ell_1+\ell_2`$ penalty)
 
 ``` r
+
 plot(elastic.net(x,y, struct = L, lambda2=1, intercept=FALSE), labels=labels)
 ```
 
 ![](reference/figures/enet_struct-1.png)
 
-#### Bounded regression + structured/Generalized Ridge ($\ell_{\infty} + \ell_{2}$ penalty)
+#### Bounded regression + structured/Generalized Ridge ($`\ell_\infty+\ell_2`$ penalty)
 
 ``` r
+
 plot(bounded.reg(x,y, struct = L, lambda2=5, intercept=FALSE), labels=labels)
 ```
 
@@ -176,6 +190,7 @@ plot(bounded.reg(x,y, struct = L, lambda2=5, intercept=FALSE), labels=labels)
 #### Lava (sparse + structured dense)
 
 ``` r
+
 out_lava <- lava(x,y, lambda2=1, struct = L, intercept=FALSE)
 out_lava$plot_path(component = "sparse", labels=labels)
 ```
@@ -183,6 +198,7 @@ out_lava$plot_path(component = "sparse", labels=labels)
 ![](reference/figures/lava_struct-1.png)
 
 ``` r
+
 out_lava$plot_path(component = "dense", labels=labels)
 ```
 
@@ -193,73 +209,111 @@ out_lava$plot_path(component = "dense", labels=labels)
 We can use the correlation structure as a proxy for forming groups of
 variables, and use group-sparse regularization. We offer three variants
 of group sparse regularization in `quadrupen`: standard group-lasso
-($\ell_{1}/\ell_{2}$ mixed norm), type 2 group Lasso (
-($\ell_{1}/\ell_{\infty}$ mixed norm)) and the
+($`\ell_1/\ell_2`$ mixed norm), type 2 group Lasso (
+($`\ell_1/\ell_\infty`$ mixed norm)) and the
 [cooperative-lasso](https://jchiquet.github.io/quadrupen/doi.org/10.1214/11-AOAS520),
 an original proposition.
 
 ``` r
+
 group <- rep(1:5, c(25,10,25,10,25)) 
 ```
 
-#### Group-Lasso (group sparse L1/L2)
+#### Group Lasso (group sparse L1/L2)
 
 ``` r
-plot(group.lasso(x, y, group, type = "l2", lambda2=0, intercept=FALSE), labels=labels)
+
+plot(group_lasso(x, y, group, intercept=FALSE), labels=labels)
 ```
 
 ![](reference/figures/grplasso-l1l2-1.png)
 
+#### Sparse Group Lasso (mixing L1 + group sparse L1/L2)
+
+``` r
+
+plot(sparse_group_lasso(x, y, group, alpha = 0.75, intercept=FALSE), labels=labels)
+```
+
+![](reference/figures/sparse-grplasso-l1l2-1.png)
+
 #### Group-Lasso (group sparse L1/LInf)
 
 ``` r
-plot(group.lasso(x, y, group, type = "linf", lambda2=0, intercept=FALSE), labels=labels)
+
+plot(group_l1linf(x, y, group, intercept=FALSE), labels=labels)
 ```
 
 ![](reference/figures/grplasso-l1linf-1.png)
 
+#### Sparse Group Lasso (mixing L1 + group sparse L1/LInf)
+
+``` r
+
+plot(sparse_group_l1linf(x, y, group, alpha = 0.75, intercept=FALSE), labels=labels)
+```
+
+![](reference/figures/sparse-grplasso-l1linf-1.png)
+
 #### Cooperative-Lasso (sign-coherent group lasso)
 
 ``` r
-plot(group.lasso(x, y, group, type = "coop", lambda2=0, intercept=FALSE), labels=labels)
+
+plot(coop_lasso(x, y, group, intercept=FALSE), labels=labels)
 ```
 
-![](reference/figures/cooplasso-1.png)
+![](reference/figures/sparse-cooplasso-1.png)
+
+#### Sparse Cooperative Lasso (mixing L1 + Cooperative norm)
+
+``` r
+
+plot(sparse_coop_lasso(x, y, group, alpha = 0.75, intercept=FALSE), labels=labels)
+```
+
+![](reference/figures/sparse-grplasso-coop-1.png)
 
 ### Regularization mixing smooth and hard prior knowledge
 
-We let the possibility to add structured-$\ell_{2}$ penalty to this
+We let the possibility to add structured-$`\ell_2`$ penalty to this
 mixed-group penalties, in order to introduce additional smoothing prior
 in the regularization, just like in the structured version of the
-Elastic-Net and Ridge regression
+Elastic-Net and Ridge regression. For this, the function
+`group_sparse_lm` is the more generic group-wise function, which
+generalize all the above model by letting the possibility to add an
+$`\ell_2`$-structured penalty.
 
-#### Group-Lasso L2 + Structured ElasticNet (group sparse L1/L2 + structured L2)
-
-``` r
-plot(group.lasso(x, y, group, type = "l2", lambda2 = 2, struct = L, intercept=FALSE), labels=labels)
-```
-
-![](reference/figures/grpenet-l1l2-1.png)
-
-#### Group-Lasso LInf + Structured ElasticNet (group sparse L1/LInf + structured L2)
+#### Sparse Group-Lasso L2 + Structured ElasticNet (group sparse L1/L2 + structured L2)
 
 ``` r
-plot(group.lasso(x, y, group, type = "linf", lambda2 = 2, struct = L, intercept=FALSE), labels=labels)
+
+plot(group_sparse_lm(x, y, group, type = "l2", alpha = 0.5, lambda2 = 2, struct = L, intercept=FALSE), labels=labels)
 ```
 
-![](reference/figures/grpenet-l1linf-1.png)
+![](reference/figures/sparse-grpenet-l1l2-1.png)
 
-#### Cooperative-Lasso + Structured ElasticNet (sign-coherent group lasso + structured L2)
+#### Sparse Group-Lasso LInf + Structured ElasticNet (group sparse L1/LInf + structured L2)
 
 ``` r
-plot(group.lasso(x, y, group, type = "coop", lambda2 = 2, struct = L, intercept=FALSE), labels=labels)
+
+plot(group_sparse_lm(x, y, group, type = "linf", alpha = 0.5, lambda2 = 2, struct = L, intercept=FALSE), labels=labels)
 ```
 
-![](reference/figures/coopenet-1.png)
+![](reference/figures/sparse-grpenet-l1linf-1.png)
+
+#### Sparse Cooperative-Lasso + Structured ElasticNet (sign-coherent group lasso + structured L2)
+
+``` r
+
+plot(group_sparse_lm(x, y, group, type = "coop", alpha = 0.5, lambda2 = 2, struct = L, intercept=FALSE), labels=labels)
+```
+
+![](reference/figures/sparse-coopenet-1.png)
 
 ## Appendix: functions for data generation
 
 ``` r
+
 chol.uniform <- function(p,rho) {
 
   q <- 0     ## sum_k^(i-1) c.k^2
@@ -320,9 +374,15 @@ Functions for fitting various structured regularization models
   : Fit a linear model with elastic-net regularization
 - [`fusedlasso()`](https://jchiquet.github.io/quadrupen/reference/fusedlasso.md)
   : A function for fitting generalized fused-Lasso problems
-- [`group.lasso()`](https://jchiquet.github.io/quadrupen/reference/group.lasso.md)
+- [`group_sparse_lm()`](https://jchiquet.github.io/quadrupen/reference/group_sparse_lm.md)
+  [`group_lasso()`](https://jchiquet.github.io/quadrupen/reference/group_sparse_lm.md)
+  [`group_l1linf()`](https://jchiquet.github.io/quadrupen/reference/group_sparse_lm.md)
+  [`coop_lasso()`](https://jchiquet.github.io/quadrupen/reference/group_sparse_lm.md)
+  [`sparse_group_lasso()`](https://jchiquet.github.io/quadrupen/reference/group_sparse_lm.md)
+  [`sparse_group_l1linf()`](https://jchiquet.github.io/quadrupen/reference/group_sparse_lm.md)
+  [`sparse_coop_lasso()`](https://jchiquet.github.io/quadrupen/reference/group_sparse_lm.md)
   : Fit a linear model with (sparse) group regularisation (either l1/l2,
-  l1/l-inf or cooperative variant)
+  l1/linf or cooperative)
 - [`group.lava()`](https://jchiquet.github.io/quadrupen/reference/group.lava.md)
   : Fit a linear model with group-lava regularization
 - [`lava()`](https://jchiquet.github.io/quadrupen/reference/lava.md) :
@@ -342,8 +402,8 @@ R6 Classes for the user to manipulate the ouput of the main functions
   : Class "ElasticNetFit"
 - [`FusedLassoFit`](https://jchiquet.github.io/quadrupen/reference/FusedLassoFit.md)
   : Class "FusedLassoFit"
-- [`GroupLassoFit`](https://jchiquet.github.io/quadrupen/reference/GroupLassoFit.md)
-  : Class "GroupLassoFit"
+- [`SparseGroupFit`](https://jchiquet.github.io/quadrupen/reference/SparseGroupFit.md)
+  : Class "SparseGroupFit"
 - [`GroupLavaFit`](https://jchiquet.github.io/quadrupen/reference/GroupLavaFit.md)
   : Class "GroupLavaFit"
 - [`LavaFit`](https://jchiquet.github.io/quadrupen/reference/LavaFit.md)

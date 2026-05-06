@@ -1,11 +1,5 @@
 # Class InformationCriteria
 
-Class InformationCriteria
-
-Class InformationCriteria
-
-## Details
-
 Class of object returned by the
 [`QuadrupenFit$criteria()`](https://jchiquet.github.io/quadrupen/reference/QuadrupenFit.md)
 method or the
@@ -33,7 +27,7 @@ function. Owns [`print()`](https://rdrr.io/r/base/print.html) and
 
 ### Public methods
 
-- [`InformationCriteria$new()`](#method-InformationCriteria-new)
+- [`InformationCriteria$new()`](#method-InformationCriteria-initialize)
 
 - [`InformationCriteria$show()`](#method-InformationCriteria-show)
 
@@ -45,7 +39,7 @@ function. Owns [`print()`](https://rdrr.io/r/base/print.html) and
 
 ------------------------------------------------------------------------
 
-### Method `new()`
+### `InformationCriteria$new()`
 
 Constructor for a InformationCriteria object Should be called internally
 by an object
@@ -64,7 +58,7 @@ by an object
 
 ------------------------------------------------------------------------
 
-### Method `show()`
+### `InformationCriteria$show()`
 
 User friendly print method
 
@@ -74,7 +68,7 @@ User friendly print method
 
 ------------------------------------------------------------------------
 
-### Method [`print()`](https://rdrr.io/r/base/print.html)
+### `InformationCriteria$print()`
 
 User friendly print method
 
@@ -84,7 +78,7 @@ User friendly print method
 
 ------------------------------------------------------------------------
 
-### Method [`plot()`](https://rdrr.io/r/graphics/plot.default.html)
+### `InformationCriteria$plot()`
 
 Plot the the desired criteria
 
@@ -125,7 +119,7 @@ a ggplot2 object
 
 ------------------------------------------------------------------------
 
-### Method `clone()`
+### `InformationCriteria$clone()`
 
 The objects of this class are cloneable with this method.
 

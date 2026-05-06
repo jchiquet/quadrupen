@@ -44,19 +44,19 @@
 <dd><p>matrix of regressor</p></dd>
 
 
-<dt><code>y</code></dt>
+    <dt><code>y</code></dt>
 <dd><p>vector of response</p></dd>
 
 
-<dt><code>C_inv</code></dt>
+    <dt><code>C_inv</code></dt>
 <dd><p>Inverse of the Cholesky decomposition of S</p></dd>
 
 
-<dt><code>S</code></dt>
+    <dt><code>S</code></dt>
 <dd><p>SDP structuring matrix</p></dd>
 
 
-<dt><code>wy</code></dt>
+    <dt><code>wy</code></dt>
 <dd><p>vector of observation weights</p></dd>
 
 
@@ -68,19 +68,19 @@
 <dd><p>number of regressor</p></dd>
 
 
-<dt><code>n</code></dt>
+    <dt><code>n</code></dt>
 <dd><p>sample size</p></dd>
 
 
-<dt><code>sparse_encoding</code></dt>
+    <dt><code>sparse_encoding</code></dt>
 <dd><p>logical indicating if the matrix of regressor is sparsely encoded</p></dd>
 
 
-<dt><code>varnames</code></dt>
+    <dt><code>varnames</code></dt>
 <dd><p>character, the names of the covariates/regressors</p></dd>
 
 
-<dt><code>normx</code></dt>
+    <dt><code>normx</code></dt>
 <dd><p>norm of each column of X</p></dd>
 
 
@@ -91,14 +91,13 @@
 
 <div class="section">
 <h3 id="public-methods">Public methods<a class="anchor" aria-label="anchor" href="#public-methods"></a></h3>
-
-<ul><li><p><a href="#method-DataModel-new"><code>DataModel$new()</code></a></p></li>
+<p></p><ul><li><p><a href="#method-DataModel-initialize"><code>DataModel$new()</code></a></p></li>
 <li><p><a href="#method-DataModel-CholStruct"><code>DataModel$CholStruct()</code></a></p></li>
 <li><p><a href="#method-DataModel-splitTrainTest"><code>DataModel$splitTrainTest()</code></a></p></li>
 <li><p><a href="#method-DataModel-splitSubSamples"><code>DataModel$splitSubSamples()</code></a></p></li>
 <li><p><a href="#method-DataModel-clone"><code>DataModel$clone()</code></a></p></li>
-</ul></div><p></p><hr><a id="method-DataModel-new"></a><div class="section">
-<h3 id="method-new-">Method <code>new()</code><a class="anchor" aria-label="anchor" href="#method-new-"></a></h3>
+</ul></div><p></p><hr><a id="method-DataModel-initialize"></a><div class="section">
+<h3 id="datamodel-new-"><code>DataModel$new()</code><a class="anchor" aria-label="anchor" href="#datamodel-new-"></a></h3>
 <p>constructor for DataModel</p><div class="section">
 <h4 id="usage">Usage<a class="anchor" aria-label="anchor" href="#usage"></a></h4>
 <p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va"><a href="../reference/DataModel.html">DataModel</a></span><span class="op">$</span><span class="fu">new</span><span class="op">(</span></span>
@@ -108,74 +107,68 @@
 <span>  obs_weights <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">outcome</span><span class="op">)</span><span class="op">)</span>,</span>
 <span>  check_args <span class="op">=</span> <span class="cn">TRUE</span></span>
 <span><span class="op">)</span></span></code></pre></div><p></p></div>
-</div>
-
-<div class="section">
+</div><p></p><div class="section">
 <h4 id="arguments">Arguments<a class="anchor" aria-label="anchor" href="#arguments"></a></h4>
 <p></p><div class="arguments"><dl><dt><code>covariates</code></dt>
 <dd><p>matrix of covariates/regressors</p></dd>
 
-
-<dt><code>outcome</code></dt>
+      <dt><code>outcome</code></dt>
 <dd><p>vector of outcome/response</p></dd>
 
-
-<dt><code>cov_struct</code></dt>
+      <dt><code>cov_struct</code></dt>
 <dd><p>sdp matrix structuring the covariates/regressors</p></dd>
 
-
-<dt><code>obs_weights</code></dt>
+      <dt><code>obs_weights</code></dt>
 <dd><p>vector of observations weights</p></dd>
 
-
-<dt><code>check_args</code></dt>
+      <dt><code>check_args</code></dt>
 <dd><p>logical, should args be check at initialization?</p></dd>
 
-
-<dt><code>cov_weights</code></dt>
+      <dt><code>cov_weights</code></dt>
 <dd><p>vector of covariates/regressors weights</p></dd>
 
 
 </dl><p></p></div>
 </div>
 
-</div><p></p><hr><a id="method-DataModel-CholStruct"></a><div class="section">
-<h3 id="method-cholstruct-">Method <code>CholStruct()</code><a class="anchor" aria-label="anchor" href="#method-cholstruct-"></a></h3>
+</div>
+
+<p></p><hr><a id="method-DataModel-CholStruct"></a><div class="section">
+<h3 id="datamodel-cholstruct-"><code>DataModel$CholStruct()</code><a class="anchor" aria-label="anchor" href="#datamodel-cholstruct-"></a></h3>
 <p>Compute Cholesky factorization of the Structuring matrix</p><div class="section">
 <h4 id="usage-1">Usage<a class="anchor" aria-label="anchor" href="#usage-1"></a></h4>
 <p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">DataModel</span><span class="op">$</span><span class="fu">CholStruct</span><span class="op">(</span><span class="op">)</span></span></code></pre></div><p></p></div>
 </div>
 
+</div>
 
-</div><p></p><hr><a id="method-DataModel-splitTrainTest"></a><div class="section">
-<h3 id="method-splittraintest-">Method <code>splitTrainTest()</code><a class="anchor" aria-label="anchor" href="#method-splittraintest-"></a></h3>
+<p></p><hr><a id="method-DataModel-splitTrainTest"></a><div class="section">
+<h3 id="datamodel-splittraintest-"><code>DataModel$splitTrainTest()</code><a class="anchor" aria-label="anchor" href="#datamodel-splittraintest-"></a></h3>
 <p>a function splitting the data into train and test folds</p><div class="section">
 <h4 id="usage-2">Usage<a class="anchor" aria-label="anchor" href="#usage-2"></a></h4>
 <p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">DataModel</span><span class="op">$</span><span class="fu">splitTrainTest</span><span class="op">(</span></span>
 <span>  nfolds <span class="op">=</span> <span class="fl">10</span>,</span>
 <span>  folds <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/split.html" class="external-link">split</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/sample.html" class="external-link">sample</a></span><span class="op">(</span><span class="fl">1</span><span class="op">:</span><span class="va">self</span><span class="op">$</span><span class="va">n</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fl">1</span><span class="op">:</span><span class="va">nfolds</span>, length <span class="op">=</span> <span class="va">self</span><span class="op">$</span><span class="va">n</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="op">)</span></span></code></pre></div><p></p></div>
-</div>
-
-<div class="section">
+</div><p></p><div class="section">
 <h4 id="arguments-1">Arguments<a class="anchor" aria-label="anchor" href="#arguments-1"></a></h4>
 <p></p><div class="arguments"><dl><dt><code>nfolds</code></dt>
 <dd><p>the number of folds</p></dd>
 
-
-<dt><code>folds</code></dt>
+      <dt><code>folds</code></dt>
 <dd><p>a list of vectors describing the folds (optional)</p></dd>
 
 
 </dl><p></p></div>
-</div>
-<div class="section">
+</div><p></p><div class="section">
 <h4 id="returns">Returns<a class="anchor" aria-label="anchor" href="#returns"></a></h4>
 <p>a list with train and test data and id.</p>
 </div>
 
-</div><p></p><hr><a id="method-DataModel-splitSubSamples"></a><div class="section">
-<h3 id="method-splitsubsamples-">Method <code>splitSubSamples()</code><a class="anchor" aria-label="anchor" href="#method-splitsubsamples-"></a></h3>
+</div>
+
+<p></p><hr><a id="method-DataModel-splitSubSamples"></a><div class="section">
+<h3 id="datamodel-splitsubsamples-"><code>DataModel$splitSubSamples()</code><a class="anchor" aria-label="anchor" href="#datamodel-splitsubsamples-"></a></h3>
 <p>a function splitting data into subsamples</p><div class="section">
 <h4 id="usage-3">Usage<a class="anchor" aria-label="anchor" href="#usage-3"></a></h4>
 <p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">DataModel</span><span class="op">$</span><span class="fu">splitSubSamples</span><span class="op">(</span></span>
@@ -185,41 +178,35 @@
 <span>    <span class="cn">FALSE</span><span class="op">)</span>,</span>
 <span>  weakness <span class="op">=</span> <span class="fl">1</span></span>
 <span><span class="op">)</span></span></code></pre></div><p></p></div>
-</div>
-
-<div class="section">
+</div><p></p><div class="section">
 <h4 id="arguments-2">Arguments<a class="anchor" aria-label="anchor" href="#arguments-2"></a></h4>
 <p></p><div class="arguments"><dl><dt><code>n_subsamples</code></dt>
 <dd><p>the number of subsamples</p></dd>
 
-
-<dt><code>subsample_size</code></dt>
+      <dt><code>subsample_size</code></dt>
 <dd><p>the subsample size</p></dd>
 
-
-<dt><code>subsamples</code></dt>
+      <dt><code>subsamples</code></dt>
 <dd><p>list with vector of subsamples (optional)</p></dd>
 
-
-<dt><code>weakness</code></dt>
+      <dt><code>weakness</code></dt>
 <dd><p>coefficient for randomly weighting the regressor, default to 1</p></dd>
 
 
 </dl><p></p></div>
-</div>
-<div class="section">
+</div><p></p><div class="section">
 <h4 id="returns-1">Returns<a class="anchor" aria-label="anchor" href="#returns-1"></a></h4>
 <p>a list of DataModel, resampling of the original</p>
 </div>
 
-</div><p></p><hr><a id="method-DataModel-clone"></a><div class="section">
-<h3 id="method-clone-">Method <code>clone()</code><a class="anchor" aria-label="anchor" href="#method-clone-"></a></h3>
+</div>
+
+<p></p><hr><a id="method-DataModel-clone"></a><div class="section">
+<h3 id="datamodel-clone-"><code>DataModel$clone()</code><a class="anchor" aria-label="anchor" href="#datamodel-clone-"></a></h3>
 <p>The objects of this class are cloneable with this method.</p><div class="section">
 <h4 id="usage-4">Usage<a class="anchor" aria-label="anchor" href="#usage-4"></a></h4>
 <p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">DataModel</span><span class="op">$</span><span class="fu">clone</span><span class="op">(</span>deep <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></code></pre></div><p></p></div>
-</div>
-
-<div class="section">
+</div><p></p><div class="section">
 <h4 id="arguments-3">Arguments<a class="anchor" aria-label="anchor" href="#arguments-3"></a></h4>
 <p></p><div class="arguments"><dl><dt><code>deep</code></dt>
 <dd><p>Whether to make a deep clone.</p></dd>
@@ -229,6 +216,7 @@
 </div>
 
 </div>
+
 
     </div>
 

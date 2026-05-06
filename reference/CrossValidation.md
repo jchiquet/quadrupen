@@ -1,11 +1,5 @@
 # Class CrossValidation
 
-Class CrossValidation
-
-Class CrossValidation
-
-## Details
-
 Class of object returned by the
 [`QuadrupenFit$cross_validate()`](https://jchiquet.github.io/quadrupen/reference/QuadrupenFit.md)
 method or the
@@ -58,7 +52,7 @@ function. Owns [`print()`](https://rdrr.io/r/base/print.html) and
 
 ### Public methods
 
-- [`CrossValidation$new()`](#method-CrossValidation-new)
+- [`CrossValidation$new()`](#method-CrossValidation-initialize)
 
 - [`CrossValidation$show()`](#method-CrossValidation-show)
 
@@ -74,7 +68,7 @@ function. Owns [`print()`](https://rdrr.io/r/base/print.html) and
 
 ------------------------------------------------------------------------
 
-### Method `new()`
+### `CrossValidation$new()`
 
 Constructor for a CrossValidation object Should be called internally by
 an object
@@ -96,7 +90,7 @@ an object
 
 ------------------------------------------------------------------------
 
-### Method `show()`
+### `CrossValidation$show()`
 
 User friendly print method
 
@@ -106,7 +100,7 @@ User friendly print method
 
 ------------------------------------------------------------------------
 
-### Method [`print()`](https://rdrr.io/r/base/print.html)
+### `CrossValidation$print()`
 
 User friendly print method
 
@@ -116,7 +110,7 @@ User friendly print method
 
 ------------------------------------------------------------------------
 
-### Method `plotCV_1D()`
+### `CrossValidation$plotCV_1D()`
 
 Plot 1-dimensional cross-validation
 
@@ -140,7 +134,7 @@ a ggplot object
 
 ------------------------------------------------------------------------
 
-### Method `plotCV_2D()`
+### `CrossValidation$plotCV_2D()`
 
 Plot 2-dimensional cross-validation output (grid lambda1 x lambda2)
 
@@ -160,7 +154,7 @@ a ggplot2 object
 
 ------------------------------------------------------------------------
 
-### Method [`plot()`](https://rdrr.io/r/graphics/plot.default.html)
+### `CrossValidation$plot()`
 
 Plot cross-validation job by choosing the most appropriate output (1D-
 or 2D)
@@ -185,7 +179,7 @@ a ggplot object
 
 ------------------------------------------------------------------------
 
-### Method `clone()`
+### `CrossValidation$clone()`
 
 The objects of this class are cloneable with this method.
 

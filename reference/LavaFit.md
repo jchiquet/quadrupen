@@ -1,11 +1,5 @@
 # Class "LavaFit"
 
-Class "LavaFit"
-
-Class "LavaFit"
-
-## Details
-
 Class of object returned by the fitting function
 [`lava()`](https://jchiquet.github.io/quadrupen/reference/lava.md).
 Inherits fields and methods of
@@ -18,7 +12,7 @@ Inherits fields and methods of
 
 ## Super class
 
-[`quadrupen::QuadrupenFit`](https://jchiquet.github.io/quadrupen/reference/QuadrupenFit.md)
+[`QuadrupenFit`](https://jchiquet.github.io/quadrupen/reference/QuadrupenFit.md)
 -\> `LavaFit`
 
 ## Active bindings
@@ -44,7 +38,7 @@ Inherits fields and methods of
 
 ### Public methods
 
-- [`LavaFit$new()`](#method-LavaFit-new)
+- [`LavaFit$new()`](#method-LavaFit-initialize)
 
 - [`LavaFit$fit()`](#method-LavaFit-fit)
 
@@ -54,18 +48,18 @@ Inherits fields and methods of
 
 Inherited methods
 
-- [`quadrupen::QuadrupenFit$criteria()`](https://jchiquet.github.io/quadrupen/reference/QuadrupenFit.html#method-criteria)
-- [`quadrupen::QuadrupenFit$cross_validate()`](https://jchiquet.github.io/quadrupen/reference/QuadrupenFit.html#method-cross_validate)
-- [`quadrupen::QuadrupenFit$get_model()`](https://jchiquet.github.io/quadrupen/reference/QuadrupenFit.html#method-get_model)
-- [`quadrupen::QuadrupenFit$plot()`](https://jchiquet.github.io/quadrupen/reference/QuadrupenFit.html#method-plot)
-- [`quadrupen::QuadrupenFit$predict()`](https://jchiquet.github.io/quadrupen/reference/QuadrupenFit.html#method-predict)
-- [`quadrupen::QuadrupenFit$print()`](https://jchiquet.github.io/quadrupen/reference/QuadrupenFit.html#method-print)
-- [`quadrupen::QuadrupenFit$show()`](https://jchiquet.github.io/quadrupen/reference/QuadrupenFit.html#method-show)
-- [`quadrupen::QuadrupenFit$stability()`](https://jchiquet.github.io/quadrupen/reference/QuadrupenFit.html#method-stability)
+- [`QuadrupenFit$criteria()`](https://jchiquet.github.io/quadrupen/reference/QuadrupenFit.html#method-criteria)
+- [`QuadrupenFit$cross_validate()`](https://jchiquet.github.io/quadrupen/reference/QuadrupenFit.html#method-cross_validate)
+- [`QuadrupenFit$get_model()`](https://jchiquet.github.io/quadrupen/reference/QuadrupenFit.html#method-get_model)
+- [`QuadrupenFit$plot()`](https://jchiquet.github.io/quadrupen/reference/QuadrupenFit.html#method-plot)
+- [`QuadrupenFit$predict()`](https://jchiquet.github.io/quadrupen/reference/QuadrupenFit.html#method-predict)
+- [`QuadrupenFit$print()`](https://jchiquet.github.io/quadrupen/reference/QuadrupenFit.html#method-print)
+- [`QuadrupenFit$show()`](https://jchiquet.github.io/quadrupen/reference/QuadrupenFit.html#method-show)
+- [`QuadrupenFit$stability()`](https://jchiquet.github.io/quadrupen/reference/QuadrupenFit.html#method-stability)
 
 ------------------------------------------------------------------------
 
-### Method `new()`
+### `LavaFit$new()`
 
 Initialize a `LavaFit` model
 
@@ -92,7 +86,7 @@ Initialize a `LavaFit` model
 
 ------------------------------------------------------------------------
 
-### Method `fit()`
+### `LavaFit$fit()`
 
 function performing the optimization
 
@@ -109,7 +103,7 @@ function performing the optimization
 
 ------------------------------------------------------------------------
 
-### Method `plot_path()`
+### `LavaFit$plot_path()`
 
 Produce a plot of the solution path of a LavaFit object.
 
@@ -166,7 +160,7 @@ a ggplot2 object .
 
 ------------------------------------------------------------------------
 
-### Method `clone()`
+### `LavaFit$clone()`
 
 The objects of this class are cloneable with this method.
 

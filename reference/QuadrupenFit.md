@@ -1,11 +1,5 @@
 # Class "QuadrupenFit"
 
-Class "QuadrupenFit"
-
-Class "QuadrupenFit"
-
-## Details
-
 Class of object returned by any fitting function of the quadrupen
 package (`elastic.net` or `bounded.reg`).
 
@@ -82,6 +76,10 @@ Penalized criteria based on estimation of degrees of freedom
 
   vector of "minor" tuning parameters (either l1 or l2)
 
+- `is_l2_regularized`:
+
+  Boolean indicating if l2 regularization is applied
+
 - `optim_monitoring`:
 
   list monitoring the optimization
@@ -154,7 +152,7 @@ Penalized criteria based on estimation of degrees of freedom
 
 ### Public methods
 
-- [`QuadrupenFit$new()`](#method-QuadrupenFit-new)
+- [`QuadrupenFit$new()`](#method-QuadrupenFit-initialize)
 
 - [`QuadrupenFit$show()`](#method-QuadrupenFit-show)
 
@@ -180,7 +178,7 @@ Penalized criteria based on estimation of degrees of freedom
 
 ------------------------------------------------------------------------
 
-### Method `new()`
+### `QuadrupenFit$new()`
 
 Initialize a QuadrupenFit model
 
@@ -207,7 +205,7 @@ Initialize a QuadrupenFit model
 
 ------------------------------------------------------------------------
 
-### Method `show()`
+### `QuadrupenFit$show()`
 
 User friendly print method
 
@@ -217,7 +215,7 @@ User friendly print method
 
 ------------------------------------------------------------------------
 
-### Method [`print()`](https://rdrr.io/r/base/print.html)
+### `QuadrupenFit$print()`
 
 User friendly print method
 
@@ -227,7 +225,7 @@ User friendly print method
 
 ------------------------------------------------------------------------
 
-### Method `fit()`
+### `QuadrupenFit$fit()`
 
 function performing the optimization
 
@@ -243,7 +241,7 @@ function performing the optimization
 
 ------------------------------------------------------------------------
 
-### Method `get_model()`
+### `QuadrupenFit$get_model()`
 
 Model extraction
 
@@ -268,7 +266,7 @@ either a vector of coefficients, a scalar or the model index
 
 ------------------------------------------------------------------------
 
-### Method [`predict()`](https://rdrr.io/r/stats/predict.html)
+### `QuadrupenFit$predict()`
 
 Predict response for new sample based on the current model
 
@@ -294,7 +292,7 @@ a vector of predicted value Cross-validation for Quadrupen object
 
 ------------------------------------------------------------------------
 
-### Method [`cross_validate()`](https://jchiquet.github.io/quadrupen/reference/cross_validate.md)
+### `QuadrupenFit$cross_validate()`
 
 Function that computes K-fold cross-validated error of a `quadrupen`
 fit, possibly on a grid of `lambda1`, `lambda2`.
@@ -346,7 +344,7 @@ is sent back and stored as a field of the original QuadrupenFit object.
 
 ------------------------------------------------------------------------
 
-### Method [`stability()`](https://jchiquet.github.io/quadrupen/reference/stability.md)
+### `QuadrupenFit$stability()`
 
 Compute the stability path of a (possibly randomized) fitting procedure
 as introduced by Meinshausen and Buhlmann (2010).
@@ -405,7 +403,7 @@ is sent back and stored as a field of the original QuadrupenFit object.
 
 ------------------------------------------------------------------------
 
-### Method [`criteria()`](https://jchiquet.github.io/quadrupen/reference/criteria.md)
+### `QuadrupenFit$criteria()`
 
 Produce a plot or send back the values of some penalized criteria
 accompanied with the vector(s) of parameters selected accordingly. The
@@ -443,7 +441,7 @@ is sent back and stored as a field of the original QuadrupenFit object.
 
 ------------------------------------------------------------------------
 
-### Method [`plot()`](https://rdrr.io/r/graphics/plot.default.html)
+### `QuadrupenFit$plot()`
 
 Plot method for QuadrupenFit
 
@@ -477,7 +475,7 @@ Plot method for QuadrupenFit
 
 ------------------------------------------------------------------------
 
-### Method `plot_path()`
+### `QuadrupenFit$plot_path()`
 
 Produce a plot of the solution path of a QuadrupenFit object.
 
@@ -486,7 +484,7 @@ Produce a plot of the solution path of a QuadrupenFit object.
     QuadrupenFit$plot_path(
       xvar = c("lambda", "fraction", "df"),
       log_scale = TRUE,
-      title = paste(self$penalty, " path", sep = ""),
+      title = paste("Path for", self$penalty),
       standardize = TRUE,
       labels = NULL
     )
@@ -528,7 +526,6 @@ a ggplot2 object .
 
 #### Examples
 
-    \dontrun{
     ## Simulating multivariate Gaussian with blockwise correlation
     ## and piecewise constant vector of parameters
     beta <- rep(c(0,1,0,-1,0), c(25,10,25,10,25))
@@ -549,11 +546,10 @@ a ggplot2 object .
     plot(elastic.net(x,y, lambda2=10), standardize=FALSE, xvar="fraction")
     ## Plot the Bounded regression path (fraction on X-axis)
     plot(bounded.reg(x,y, lambda2=10), xvar="fraction")
-    }
 
 ------------------------------------------------------------------------
 
-### Method `clone()`
+### `QuadrupenFit$clone()`
 
 The objects of this class are cloneable with this method.
 
@@ -570,8 +566,9 @@ The objects of this class are cloneable with this method.
 ## Examples
 
 ``` r
+
 ## ------------------------------------------------
-## Method `QuadrupenFit$plot_path`
+## Method `QuadrupenFit$plot_path()`
 ## ------------------------------------------------
 
 if (FALSE) { # \dontrun{

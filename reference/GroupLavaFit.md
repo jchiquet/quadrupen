@@ -1,11 +1,5 @@
 # Class "GroupLavaFit"
 
-Class "GroupLavaFit"
-
-Class "GroupLavaFit"
-
-## Details
-
 Class of object returned by the fitting function
 [`group.lava()`](https://jchiquet.github.io/quadrupen/reference/group.lava.md).
 Inherits fields and methods of
@@ -19,9 +13,9 @@ and [LavaFit](https://jchiquet.github.io/quadrupen/reference/LavaFit.md)
 
 ## Super classes
 
-[`quadrupen::QuadrupenFit`](https://jchiquet.github.io/quadrupen/reference/QuadrupenFit.md)
+[`QuadrupenFit`](https://jchiquet.github.io/quadrupen/reference/QuadrupenFit.md)
 -\>
-[`quadrupen::LavaFit`](https://jchiquet.github.io/quadrupen/reference/LavaFit.md)
+[`LavaFit`](https://jchiquet.github.io/quadrupen/reference/LavaFit.md)
 -\> `GroupLavaFit`
 
 ## Active bindings
@@ -43,26 +37,26 @@ and [LavaFit](https://jchiquet.github.io/quadrupen/reference/LavaFit.md)
 
 ### Public methods
 
-- [`GroupLavaFit$new()`](#method-GroupLavaFit-new)
+- [`GroupLavaFit$new()`](#method-GroupLavaFit-initialize)
 
 - [`GroupLavaFit$clone()`](#method-GroupLavaFit-clone)
 
 Inherited methods
 
-- [`quadrupen::QuadrupenFit$criteria()`](https://jchiquet.github.io/quadrupen/reference/QuadrupenFit.html#method-criteria)
-- [`quadrupen::QuadrupenFit$cross_validate()`](https://jchiquet.github.io/quadrupen/reference/QuadrupenFit.html#method-cross_validate)
-- [`quadrupen::QuadrupenFit$get_model()`](https://jchiquet.github.io/quadrupen/reference/QuadrupenFit.html#method-get_model)
-- [`quadrupen::QuadrupenFit$plot()`](https://jchiquet.github.io/quadrupen/reference/QuadrupenFit.html#method-plot)
-- [`quadrupen::QuadrupenFit$predict()`](https://jchiquet.github.io/quadrupen/reference/QuadrupenFit.html#method-predict)
-- [`quadrupen::QuadrupenFit$print()`](https://jchiquet.github.io/quadrupen/reference/QuadrupenFit.html#method-print)
-- [`quadrupen::QuadrupenFit$show()`](https://jchiquet.github.io/quadrupen/reference/QuadrupenFit.html#method-show)
-- [`quadrupen::QuadrupenFit$stability()`](https://jchiquet.github.io/quadrupen/reference/QuadrupenFit.html#method-stability)
-- [`quadrupen::LavaFit$fit()`](https://jchiquet.github.io/quadrupen/reference/LavaFit.html#method-fit)
-- [`quadrupen::LavaFit$plot_path()`](https://jchiquet.github.io/quadrupen/reference/LavaFit.html#method-plot_path)
+- [`QuadrupenFit$criteria()`](https://jchiquet.github.io/quadrupen/reference/QuadrupenFit.html#method-criteria)
+- [`QuadrupenFit$cross_validate()`](https://jchiquet.github.io/quadrupen/reference/QuadrupenFit.html#method-cross_validate)
+- [`QuadrupenFit$get_model()`](https://jchiquet.github.io/quadrupen/reference/QuadrupenFit.html#method-get_model)
+- [`QuadrupenFit$plot()`](https://jchiquet.github.io/quadrupen/reference/QuadrupenFit.html#method-plot)
+- [`QuadrupenFit$predict()`](https://jchiquet.github.io/quadrupen/reference/QuadrupenFit.html#method-predict)
+- [`QuadrupenFit$print()`](https://jchiquet.github.io/quadrupen/reference/QuadrupenFit.html#method-print)
+- [`QuadrupenFit$show()`](https://jchiquet.github.io/quadrupen/reference/QuadrupenFit.html#method-show)
+- [`QuadrupenFit$stability()`](https://jchiquet.github.io/quadrupen/reference/QuadrupenFit.html#method-stability)
+- [`LavaFit$fit()`](https://jchiquet.github.io/quadrupen/reference/LavaFit.html#method-fit)
+- [`LavaFit$plot_path()`](https://jchiquet.github.io/quadrupen/reference/LavaFit.html#method-plot_path)
 
 ------------------------------------------------------------------------
 
-### Method `new()`
+### `GroupLavaFit$new()`
 
 Initialize a `GroupLavaFit` model
 
@@ -98,7 +92,7 @@ Initialize a `GroupLavaFit` model
 
 ------------------------------------------------------------------------
 
-### Method `clone()`
+### `GroupLavaFit$clone()`
 
 The objects of this class are cloneable with this method.
 

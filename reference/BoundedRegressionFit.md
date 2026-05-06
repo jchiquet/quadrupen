@@ -1,11 +1,5 @@
 # Class "BoundedRegression"
 
-Class "BoundedRegression"
-
-Class "BoundedRegression"
-
-## Details
-
 Class of object returned by the fitting function
 [`bounded.reg()`](https://jchiquet.github.io/quadrupen/reference/bounded.reg.md).
 Inherits fields and methods of
@@ -18,7 +12,7 @@ Inherits fields and methods of
 
 ## Super class
 
-[`quadrupen::QuadrupenFit`](https://jchiquet.github.io/quadrupen/reference/QuadrupenFit.md)
+[`QuadrupenFit`](https://jchiquet.github.io/quadrupen/reference/QuadrupenFit.md)
 -\> `BoundedRegressionFit`
 
 ## Active bindings
@@ -31,26 +25,26 @@ Inherits fields and methods of
 
 ### Public methods
 
-- [`BoundedRegressionFit$new()`](#method-BoundedRegressionFit-new)
+- [`BoundedRegressionFit$new()`](#method-BoundedRegressionFit-initialize)
 
 - [`BoundedRegressionFit$clone()`](#method-BoundedRegressionFit-clone)
 
 Inherited methods
 
-- [`quadrupen::QuadrupenFit$criteria()`](https://jchiquet.github.io/quadrupen/reference/QuadrupenFit.html#method-criteria)
-- [`quadrupen::QuadrupenFit$cross_validate()`](https://jchiquet.github.io/quadrupen/reference/QuadrupenFit.html#method-cross_validate)
-- [`quadrupen::QuadrupenFit$fit()`](https://jchiquet.github.io/quadrupen/reference/QuadrupenFit.html#method-fit)
-- [`quadrupen::QuadrupenFit$get_model()`](https://jchiquet.github.io/quadrupen/reference/QuadrupenFit.html#method-get_model)
-- [`quadrupen::QuadrupenFit$plot()`](https://jchiquet.github.io/quadrupen/reference/QuadrupenFit.html#method-plot)
-- [`quadrupen::QuadrupenFit$plot_path()`](https://jchiquet.github.io/quadrupen/reference/QuadrupenFit.html#method-plot_path)
-- [`quadrupen::QuadrupenFit$predict()`](https://jchiquet.github.io/quadrupen/reference/QuadrupenFit.html#method-predict)
-- [`quadrupen::QuadrupenFit$print()`](https://jchiquet.github.io/quadrupen/reference/QuadrupenFit.html#method-print)
-- [`quadrupen::QuadrupenFit$show()`](https://jchiquet.github.io/quadrupen/reference/QuadrupenFit.html#method-show)
-- [`quadrupen::QuadrupenFit$stability()`](https://jchiquet.github.io/quadrupen/reference/QuadrupenFit.html#method-stability)
+- [`QuadrupenFit$criteria()`](https://jchiquet.github.io/quadrupen/reference/QuadrupenFit.html#method-criteria)
+- [`QuadrupenFit$cross_validate()`](https://jchiquet.github.io/quadrupen/reference/QuadrupenFit.html#method-cross_validate)
+- [`QuadrupenFit$fit()`](https://jchiquet.github.io/quadrupen/reference/QuadrupenFit.html#method-fit)
+- [`QuadrupenFit$get_model()`](https://jchiquet.github.io/quadrupen/reference/QuadrupenFit.html#method-get_model)
+- [`QuadrupenFit$plot()`](https://jchiquet.github.io/quadrupen/reference/QuadrupenFit.html#method-plot)
+- [`QuadrupenFit$plot_path()`](https://jchiquet.github.io/quadrupen/reference/QuadrupenFit.html#method-plot_path)
+- [`QuadrupenFit$predict()`](https://jchiquet.github.io/quadrupen/reference/QuadrupenFit.html#method-predict)
+- [`QuadrupenFit$print()`](https://jchiquet.github.io/quadrupen/reference/QuadrupenFit.html#method-print)
+- [`QuadrupenFit$show()`](https://jchiquet.github.io/quadrupen/reference/QuadrupenFit.html#method-show)
+- [`QuadrupenFit$stability()`](https://jchiquet.github.io/quadrupen/reference/QuadrupenFit.html#method-stability)
 
 ------------------------------------------------------------------------
 
-### Method `new()`
+### `BoundedRegressionFit$new()`
 
 Initialize a `BoundedRegressionFit` model
 
@@ -77,7 +71,7 @@ Initialize a `BoundedRegressionFit` model
 
 ------------------------------------------------------------------------
 
-### Method `clone()`
+### `BoundedRegressionFit$clone()`
 
 The objects of this class are cloneable with this method.
 

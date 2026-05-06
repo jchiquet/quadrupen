@@ -10,9 +10,15 @@ Functions for fitting various structured regularization models
   : Fit a linear model with elastic-net regularization
 - [`fusedlasso()`](https://jchiquet.github.io/quadrupen/reference/fusedlasso.md)
   : A function for fitting generalized fused-Lasso problems
-- [`group.lasso()`](https://jchiquet.github.io/quadrupen/reference/group.lasso.md)
+- [`group_sparse_lm()`](https://jchiquet.github.io/quadrupen/reference/group_sparse_lm.md)
+  [`group_lasso()`](https://jchiquet.github.io/quadrupen/reference/group_sparse_lm.md)
+  [`group_l1linf()`](https://jchiquet.github.io/quadrupen/reference/group_sparse_lm.md)
+  [`coop_lasso()`](https://jchiquet.github.io/quadrupen/reference/group_sparse_lm.md)
+  [`sparse_group_lasso()`](https://jchiquet.github.io/quadrupen/reference/group_sparse_lm.md)
+  [`sparse_group_l1linf()`](https://jchiquet.github.io/quadrupen/reference/group_sparse_lm.md)
+  [`sparse_coop_lasso()`](https://jchiquet.github.io/quadrupen/reference/group_sparse_lm.md)
   : Fit a linear model with (sparse) group regularisation (either l1/l2,
-  l1/l-inf or cooperative variant)
+  l1/linf or cooperative)
 - [`group.lava()`](https://jchiquet.github.io/quadrupen/reference/group.lava.md)
   : Fit a linear model with group-lava regularization
 - [`lava()`](https://jchiquet.github.io/quadrupen/reference/lava.md) :
@@ -32,8 +38,8 @@ R6 Classes for the user to manipulate the ouput of the main functions
   : Class "ElasticNetFit"
 - [`FusedLassoFit`](https://jchiquet.github.io/quadrupen/reference/FusedLassoFit.md)
   : Class "FusedLassoFit"
-- [`GroupLassoFit`](https://jchiquet.github.io/quadrupen/reference/GroupLassoFit.md)
-  : Class "GroupLassoFit"
+- [`SparseGroupFit`](https://jchiquet.github.io/quadrupen/reference/SparseGroupFit.md)
+  : Class "SparseGroupFit"
 - [`GroupLavaFit`](https://jchiquet.github.io/quadrupen/reference/GroupLavaFit.md)
   : Class "GroupLavaFit"
 - [`LavaFit`](https://jchiquet.github.io/quadrupen/reference/LavaFit.md)

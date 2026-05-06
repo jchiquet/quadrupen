@@ -1,11 +1,5 @@
 # Class StabilityPath
 
-Class StabilityPath
-
-Class StabilityPath
-
-## Details
-
 Class of object returned by the
 [`QuadrupenFit$cross_validate()`](https://jchiquet.github.io/quadrupen/reference/QuadrupenFit.md)
 method or the
@@ -51,7 +45,7 @@ function. Owns [`print()`](https://rdrr.io/r/base/print.html) and
 
 ### Public methods
 
-- [`StabilityPath$new()`](#method-StabilityPath-new)
+- [`StabilityPath$new()`](#method-StabilityPath-initialize)
 
 - [`StabilityPath$show()`](#method-StabilityPath-show)
 
@@ -65,7 +59,7 @@ function. Owns [`print()`](https://rdrr.io/r/base/print.html) and
 
 ------------------------------------------------------------------------
 
-### Method `new()`
+### `StabilityPath$new()`
 
 Constructor for a StabilityPath object Should be called internally by an
 object
@@ -92,7 +86,7 @@ object
 
 ------------------------------------------------------------------------
 
-### Method `show()`
+### `StabilityPath$show()`
 
 User friendly print method
 
@@ -102,7 +96,7 @@ User friendly print method
 
 ------------------------------------------------------------------------
 
-### Method [`print()`](https://rdrr.io/r/base/print.html)
+### `StabilityPath$print()`
 
 User friendly print method
 
@@ -112,7 +106,7 @@ User friendly print method
 
 ------------------------------------------------------------------------
 
-### Method `selection()`
+### `StabilityPath$selection()`
 
 Perform variable selection based on the stability path
 
@@ -152,7 +146,7 @@ Perform variable selection based on the stability path
 
 ------------------------------------------------------------------------
 
-### Method [`plot()`](https://rdrr.io/r/graphics/plot.default.html)
+### `StabilityPath$plot()`
 
 Produce a plot of the stability path obtained by stability selection.
 
@@ -227,7 +221,6 @@ choice (`"rank"` or `"PFER"`).
 
 #### Examples
 
-    \dontrun{
     ## Simulating multivariate Gaussian with blockwise correlation
     ## and piecewise constant vector of parameters
     beta <- rep(c(0,1,0,-1,0), c(25,10,25,10,25))
@@ -253,11 +246,10 @@ choice (`"rank"` or `"PFER"`).
     cat("\nFalse positives for the randomized Elastic-net with stability selection: ",
          sum(labels[stab$selection()] != "relevant"))
     cat("\nDONE.\n")
-    }
 
 ------------------------------------------------------------------------
 
-### Method `clone()`
+### `StabilityPath$clone()`
 
 The objects of this class are cloneable with this method.
 
@@ -274,8 +266,9 @@ The objects of this class are cloneable with this method.
 ## Examples
 
 ``` r
+
 ## ------------------------------------------------
-## Method `StabilityPath$plot`
+## Method `StabilityPath$plot()`
 ## ------------------------------------------------
 
 if (FALSE) { # \dontrun{

@@ -190,13 +190,17 @@ Automatically set to <code>0</code> when the method is embedded within
 cross-validation or stability selection.</p></li>
 <li><p><code>timer</code>: logical; use to record the timing of the
 algorithm. Default is <code>FALSE</code>.</p></li>
-<li><p><code>maxiter</code> the maximal number of iteration used to solve the
-problem for a given value of lambda1. Default is 500.</p></li>
+<li><p><code>maxiter</code> the maximal number of iteration used in the active set algorithm
+to solve the problem for a given value of lambda1 . Default is 50.</p></li>
 <li><p><code>method</code> a string for the underlying solver used. Either
 <code>"quadra"</code>, <code>"fista"</code> or <code>"pgd"</code>. Default is <code>"quadra"</code>.</p></li>
+<li><p><code>factmat</code> Boolean indicating if matrix factorization should be used to
+solve the sub-system. If <code>TRUE</code> (the default), a Cholesky decomposition is
+maintained along the path. If <code>FALSE</code>, the sub-system are solved with
+a conjugate gradient algorithm.</p></li>
 <li><p><code>threshold</code> a threshold for convergence. The algorithm stops
 when the optimality conditions are fulfill up to this threshold.
-Default is <code>1e-7</code> for <code>"quadra"</code> and <code>1e-2</code> for the first order methods.</p></li>
+Default is <code>1e-6</code>.</p></li>
 <li><p><code>monitor</code> indicates if a monitoring of the convergence should be
 recorded, by computing a lower bound between the current solution and
 the optimum: when <code>'0'</code> (the default), no monitoring is provided;

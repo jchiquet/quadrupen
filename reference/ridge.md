@@ -94,15 +94,21 @@ ridge(
   - `timer`: logical; use to record the timing of the algorithm. Default
     is `FALSE`.
 
-  - `maxiter` the maximal number of iteration used to solve the problem
-    for a given value of lambda1. Default is 500.
+  - `maxiter` the maximal number of iteration used in the active set
+    algorithm to solve the problem for a given value of lambda1 .
+    Default is 50.
 
   - `method` a string for the underlying solver used. Either `"quadra"`,
     `"fista"` or `"pgd"`. Default is `"quadra"`.
 
+  - `factmat` Boolean indicating if matrix factorization should be used
+    to solve the sub-system. If `TRUE` (the default), a Cholesky
+    decomposition is maintained along the path. If `FALSE`, the
+    sub-system are solved with a conjugate gradient algorithm.
+
   - `threshold` a threshold for convergence. The algorithm stops when
     the optimality conditions are fulfill up to this threshold. Default
-    is `1e-7` for `"quadra"` and `1e-2` for the first order methods.
+    is `1e-6`.
 
   - `monitor` indicates if a monitoring of the convergence should be
     recorded, by computing a lower bound between the current solution
