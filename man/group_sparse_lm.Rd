@@ -72,7 +72,7 @@ coop_lasso(
   minratio = 0.01,
   maxfeat = ncol(x),
   beta0 = numeric(ncol(x)),
-  control = list(method = "quadra")
+  control = list()
 )
 
 sparse_group_lasso(
@@ -261,10 +261,11 @@ plot(group_lasso(x, y, grp), label=labels)
 ## Sparse Group-Lasso
 plot(sparse_group_lasso(x, y, grp, alpha = 0.75), label=labels)
 
-## Sparse Group-Lasso + L2 regularisation
+## Sparse Group-Lasso + L2 regularization
 plot(group_sparse_lm(x, y, grp, type = "l2", alpha = .75, lambda2=.5), label=labels)
 plot(group_sparse_lm(x, y, grp, type = "l2", alpha = .75, lambda2=10), label=labels)
-plot(group_sparse_lm(x, y, grp, type = "l2", alpha = .75, lambda2=10, struct=solve(Sigma)), label=labels)
+plot(group_sparse_lm(x, y, grp, type = "l2", alpha = .75, lambda2=10, 
+          struct=solve(Sigma)), label=labels)
 
 ## Group-Lasso L1/LINF
 plot(group_l1linf(x, y, grp), label=labels)
@@ -272,10 +273,11 @@ plot(group_l1linf(x, y, grp), label=labels)
 ## Sparse Group-Lasso L1/LINF
 plot(sparse_group_l1linf(x, y, grp, alpha = 0.75), label=labels)
 
-## Sparse L1/LINF Group-Lasso + L2 regularisation
+## Sparse L1/LINF Group-Lasso + L2 regularization
 plot(group_sparse_lm(x, y, grp, type = "linf", alpha = .75, lambda2=.5), label=labels)
 plot(group_sparse_lm(x, y, grp, type = "linf", alpha = .75, lambda2=10), label=labels)
-plot(group_sparse_lm(x, y, grp, type = "linf", alpha = .75, lambda2=10, struct=solve(Sigma)), label=labels)
+plot(group_sparse_lm(x, y, grp, type = "linf", alpha = .75, lambda2=10, 
+          struct=solve(Sigma)), label=labels)
 
 ## Cooperative-Lasso
 plot(coop_lasso(x, y, grp), label=labels)
@@ -283,10 +285,11 @@ plot(coop_lasso(x, y, grp), label=labels)
 ## Sparse Cooperative-Lasso
 plot(sparse_coop_lasso(x, y, grp, alpha = 0.75), label=labels)
 
-## Sparse Cooperative-Lasso + L2 regularisation
+## Sparse Cooperative-Lasso + L2 regularization
 plot(group_sparse_lm(x, y, grp, type = "coop", alpha = .75, lambda2=.5), label=labels)
 plot(group_sparse_lm(x, y, grp, type = "coop", alpha = .75, lambda2=10), label=labels)
-plot(group_sparse_lm(x, y, grp, type = "coop", alpha = .75, lambda2=10, struct=solve(Sigma)), label=labels)
+plot(group_sparse_lm(x, y, grp, type = "coop", alpha = .75, lambda2=10, 
+        struct=solve(Sigma)), label=labels)
 }
 }
 \seealso{

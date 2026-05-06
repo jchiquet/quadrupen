@@ -1,4 +1,4 @@
-#' Fit a linear model with (sparse) group regularisation (either l1/l2, l1/linf or cooperative)
+#' Fit a linear model with (sparse) group regularisation
 #'
 #' Adjust a linear model with (sparse) group regularization, that is, a
 #' mixture of an element-wise \eqn{\ell_1}{l1} norm and a group-wise mixed-norm 
@@ -106,17 +106,19 @@ group_sparse_lm <-
     
     stopifnot(alpha < 1 && alpha >= 0)
     stopifnot(!is.unsorted(group))
+    type <- match.arg(type)
     
     ## ============================================
     ## RECOVER LOW LEVEL CONFIGURATION
     ##
     ctrl <- optim_grp_default(ncol(x))
-    ctrl$maxfeat <- maxfeat
+    if (is.null(control$method) && type == "l2" && alpha == 0.0) control$method <- "quadra"
     ctrl[names(control)] <- control # default overwritten by user specifications
     ctrl$method  <- switch(ctrl$method, quadra = "QUADRA", fista = "FISTA", pgd = "PGD", 0)
-    ctrl$factmat <- ctrl$method == "QUADRA" 
+    ctrl$factmat <- ctrl$method == "QUADRA" && type == "l2"
     ctrl$normalize <- normalize
-    ctrl$beta0  <- beta0
+    ctrl$beta0 <- beta0
+    ctrl$maxfeat <- maxfeat
     
     ## ============================================
     ## INSTANTIATE THE DATA MODEL
@@ -134,7 +136,7 @@ group_sparse_lm <-
       data      = myData,
       intercept = intercept,
       group     = group,
-      type      = match.arg(type),
+      type      = type,
       regParam  = list(lambda = lambda1, 
                        gamma  = lambda2,
                        alpha  = alpha,
