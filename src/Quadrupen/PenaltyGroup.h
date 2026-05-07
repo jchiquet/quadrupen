@@ -1,5 +1,4 @@
-#ifndef _quadrupen_PENALTY_GROUP_H
-#define _quadrupen_PENALTY_GROUP_H
+#pragma once
 
 #define ARMA_NO_DEBUG
 #define ARMA_USE_LAPACK
@@ -11,13 +10,13 @@
 
 #include <RcppArmadillo.h>
 
-enum class GroupNorm {L1L2, L1LINF, COOP};
+enum class GroupSparseNorm {L1L2, L1LINF, COOP};
 
 using namespace Rcpp;
 using namespace arma;
 using namespace std;
 
-template <GroupNorm norm> class GroupPenalty {
+template <GroupSparseNorm norm> class GroupPenalty {
 public: 
   
   double alpha_ = 0 ; // Optional sparse factor 
@@ -34,7 +33,7 @@ public:
   
 };
 
-template<GroupNorm norm>
+template<GroupSparseNorm norm>
 vec GroupPenalty<norm>::elt_norm(const vec& x, const uvec& pk, const vec& wk) {
   
   vec  res = zeros<vec> (pk.n_elem) ;
@@ -49,12 +48,12 @@ vec GroupPenalty<norm>::elt_norm(const vec& x, const uvec& pk, const vec& wk) {
   return(res);
 }
 
-template<GroupNorm norm>
+template<GroupSparseNorm norm>
 double GroupPenalty<norm>::pen_norm(const vec& x, const uvec& pk, const vec& wk) {
   return(sum(elt_norm(x, pk, wk)));
 }
 
-template<GroupNorm norm>
+template<GroupSparseNorm norm>
 vec GroupPenalty<norm>::optimality(const vec& x, double lambda, const uvec& pk, const vec& wk)  {
   
   vec x_st = x;
@@ -73,7 +72,7 @@ vec GroupPenalty<norm>::optimality(const vec& x, double lambda, const uvec& pk, 
   
 }
 
-template<GroupNorm norm>
+template<GroupSparseNorm norm>
 double GroupPenalty<norm>::lambda_max(const vec& XTy, const uvec& pk, const vec& wk) {
   double l_max = 0;
   
@@ -105,5 +104,3 @@ double GroupPenalty<norm>::lambda_max(const vec& XTy, const uvec& pk, const vec&
   
   return l_max ;
 }
-
-#endif

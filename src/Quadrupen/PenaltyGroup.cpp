@@ -11,17 +11,17 @@ using namespace arma;
 // ______________________________________________________
 // L1/L2 NORM A.K.A GROUP-LASSO
 template<>
-double GroupPenalty<GroupNorm::L1L2>::grp_norm(const vec& x) {
+double GroupPenalty<GroupSparseNorm::L1L2>::grp_norm(const vec& x) {
   return(arma::norm(x, 2)) ;
 }
 
 template<>
-double GroupPenalty<GroupNorm::L1L2>::grp_norm_dual(const vec& x) {
+double GroupPenalty<GroupSparseNorm::L1L2>::grp_norm_dual(const vec& x) {
   return(arma::norm(x, 2)) ;
 }
 
 template<>
-vec GroupPenalty<GroupNorm::L1L2>::proximal(const vec& x, double lambda, const uvec& pk, const vec& wk) {
+vec GroupPenalty<GroupSparseNorm::L1L2>::proximal(const vec& x, double lambda, const uvec& pk, const vec& wk) {
 
   vec res = x;
   
@@ -56,17 +56,17 @@ vec GroupPenalty<GroupNorm::L1L2>::proximal(const vec& x, double lambda, const u
 // 
 
 template<>
-double GroupPenalty<GroupNorm::L1LINF>::grp_norm(const vec& x) {
+double GroupPenalty<GroupSparseNorm::L1LINF>::grp_norm(const vec& x) {
   return(norm(x, "inf")) ;
 }
 
 template<>
-double GroupPenalty<GroupNorm::L1LINF>::grp_norm_dual(const vec& x) {
+double GroupPenalty<GroupSparseNorm::L1LINF>::grp_norm_dual(const vec& x) {
   return(norm(x, 1)) ;
 }
 
 template<>
-vec GroupPenalty<GroupNorm::L1LINF>::proximal(const vec& x, double lambda, const uvec& pk, const vec& wk) {
+vec GroupPenalty<GroupSparseNorm::L1LINF>::proximal(const vec& x, double lambda, const uvec& pk, const vec& wk) {
 
   vec res = x;
   
@@ -114,7 +114,7 @@ vec GroupPenalty<GroupNorm::L1LINF>::proximal(const vec& x, double lambda, const
 // 
 
 template<>
-double GroupPenalty<GroupNorm::COOP>::grp_norm(const vec& x) {
+double GroupPenalty<GroupSparseNorm::COOP>::grp_norm(const vec& x) {
   double pos_sq = 0.0;
   double neg_sq = 0.0;
   
@@ -127,7 +127,7 @@ double GroupPenalty<GroupNorm::COOP>::grp_norm(const vec& x) {
 }
 
 template<>
-double GroupPenalty<GroupNorm::COOP>::grp_norm_dual(const vec& x) {
+double GroupPenalty<GroupSparseNorm::COOP>::grp_norm_dual(const vec& x) {
   double pos_sq = 0.0;
   double neg_sq = 0.0;
   
@@ -140,7 +140,7 @@ double GroupPenalty<GroupNorm::COOP>::grp_norm_dual(const vec& x) {
 }
 
 template<>
-vec GroupPenalty<GroupNorm::COOP>::proximal(const vec& x, double lambda, const uvec& pk, const vec& wk) {
+vec GroupPenalty<GroupSparseNorm::COOP>::proximal(const vec& x, double lambda, const uvec& pk, const vec& wk) {
   
   vec res = x;
   

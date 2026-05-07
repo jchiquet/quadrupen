@@ -1,5 +1,4 @@
-#ifndef _FUSEDLASSO_H_
-#define _FUSEDLASSO_H_
+#pragma once
 
 #include "FusedLasso_utils.h"
 #include "FusedLasso_enums.h"
@@ -130,4 +129,4 @@ public:
   void checkSolution(ostream& outStream);
 };
 
-#endif // _FUSEDLASSO_H_
+

@@ -3,11 +3,10 @@
  *         MIA Paris-Saclay
  */
 
-#ifndef _quadrupen_RIDGE_H
-#define _quadrupen_RIDGE_H
+#pragma once
 
 #include "Regularizer.h"
-#include "PenaltySimple.h"
+#include "PenaltyDense.h"
 
 using namespace Rcpp;
 using namespace arma;
@@ -21,9 +20,7 @@ public:
   
   List solution_path(const mat&);
   
-  SimplePenalty<SimpleNorm::L2> penalty_ ; // main penalty object 
+  DensePenalty<DenseNorm::L2> penalty_ ; // main penalty object 
   
 };
-
-#endif
 

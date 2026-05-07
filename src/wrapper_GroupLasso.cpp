@@ -3,7 +3,7 @@
  *         MIA Paris-Saclay
  */
 
-#include "Quadrupen/GroupElasticNet.h"
+#include "Quadrupen/GroupSparseRegularizer.h"
 
 using namespace Rcpp;
 using namespace arma;
@@ -19,7 +19,7 @@ List group_enet_l1l2_dense_cpp(
   
   RegressionData<mat> data(dataModel, intercept, as<bool>(control["normalize"])) ;
 
-  GroupElasticNet<mat,GroupNorm::L1L2> grpenet(data, group, regParam, control);
+  GroupSparseRegularizer<mat,GroupSparseNorm::L1L2> grpenet(data, group, regParam, control);
   
   List results = grpenet.solution_path(control);
 
@@ -51,7 +51,7 @@ List group_enet_l1l2_sparse_cpp(
   
   RegressionData<sp_mat> data(dataModel, intercept, as<bool>(control["normalize"])) ;
   
-  GroupElasticNet<sp_mat,GroupNorm::L1L2> grpenet(data, group, regParam, control);
+  GroupSparseRegularizer<sp_mat,GroupSparseNorm::L1L2> grpenet(data, group, regParam, control);
   
   List results = grpenet.solution_path(control);
   
@@ -83,7 +83,7 @@ List group_enet_l1linf_dense_cpp(
   
   RegressionData<mat> data(dataModel, intercept, as<bool>(control["normalize"])) ;
   
-  GroupElasticNet<mat,GroupNorm::L1LINF> grpenet(data, group, regParam, control);
+  GroupSparseRegularizer<mat,GroupSparseNorm::L1LINF> grpenet(data, group, regParam, control);
   
   List results = grpenet.solution_path(control);
 
@@ -115,7 +115,7 @@ List group_enet_l1linf_sparse_cpp(
   
   RegressionData<sp_mat> data(dataModel, intercept, as<bool>(control["normalize"])) ;
   
-  GroupElasticNet<sp_mat,GroupNorm::L1LINF> grpenet(data, group, regParam, control);
+  GroupSparseRegularizer<sp_mat,GroupSparseNorm::L1LINF> grpenet(data, group, regParam, control);
   
   List results = grpenet.solution_path(control);
   
@@ -147,7 +147,7 @@ List group_enet_coop_dense_cpp(
   
   RegressionData<mat> data(dataModel, intercept, as<bool>(control["normalize"])) ;
   
-  GroupElasticNet<mat,GroupNorm::COOP> coop(data, group, regParam, control);
+  GroupSparseRegularizer<mat,GroupSparseNorm::COOP> coop(data, group, regParam, control);
   
   List results = coop.solution_path(control);
   
@@ -179,7 +179,7 @@ List group_enet_coop_sparse_cpp(
   
   RegressionData<sp_mat> data(dataModel, intercept, as<bool>(control["normalize"])) ;
   
-  GroupElasticNet<sp_mat,GroupNorm::COOP> coop(data, group, regParam, control);
+  GroupSparseRegularizer<sp_mat,GroupSparseNorm::COOP> coop(data, group, regParam, control);
   
   List results = coop.solution_path(control);
   

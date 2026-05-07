@@ -1,5 +1,4 @@
-#ifndef _FUSEDLASSO_UTILS_H_
-#define _FUSEDLASSO_UTILS_H_
+#pragma once
 
 #include "RcppArmadillo.h"
 #include <iostream>
@@ -133,5 +132,3 @@ private:
   }
 };
 
-
-#endif // _FUSEDLASSO_UTILS_H_

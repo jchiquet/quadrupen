@@ -3,21 +3,24 @@
  *         MIA Paris-Saclay
  */
 
-#ifndef _GroupLasso_H
-#define _GroupLasso_H
+// ====================================================
+// Group-Sparse Regularizers       
+
+#pragma once
 
 #include "RegularizerSparse.h"
+#include "PenaltyGroup.h"
 #include "OptimizerGroup.h"
 
 using namespace Rcpp;
 using namespace arma;
 using namespace std;
 
-template <typename matrix, GroupNorm norm>
-class GroupElasticNet : 
-  public GroupSparseRegularizer<matrix,norm>{
+template <typename matrix, GroupSparseNorm norm>
+class GroupSparseRegularizer : 
+  public SparseRegularizer<matrix> {
   public:
-    
+
     using Regularizer<matrix>::intercept_ ;
     using Regularizer<matrix>::lambdas_   ;
     using Regularizer<matrix>::gamma_   ;
@@ -32,47 +35,52 @@ class GroupElasticNet :
     using SparseRegularizer<matrix>::beta_debiased_ ;
     using SparseRegularizer<matrix>::intercept_debiased_   ;
     using SparseRegularizer<matrix>::active_ ;
-    using GroupSparseRegularizer<matrix,norm>::penalty_   ;
-    using GroupSparseRegularizer<matrix,norm>::set_  ;
-    using GroupSparseRegularizer<matrix,norm>::get_lambda_max ;
 
-    GroupElasticNet(const RegressionData<matrix>&, const uvec&, const List&, const List&);
+    ActiveSetGroup<matrix> set_ ; // Active set of variable and data
+    GroupPenalty<norm> penalty_ ; // main penalty object 
+    
+    double get_lambda_max() 
+    {
+      return(
+        penalty_.lambda_max(data_.XTy_, set_.grp_sizes_, lambda_factor_)
+      );
+    }
+
+    GroupSparseRegularizer(const RegressionData<matrix>&, const uvec&, const List&, const List&);
   
     List solution_path(const List&);
     
     // Specific to Group Lasso regularization
-    GroupOptimizer<matrix,norm> solver_ ; // Solvers for Group L1 penalty
+    GroupOptimizer<matrix,norm> solver_ ; // Solvers for Group Sparse penalty
 
     // Compute degrees of freedom for the current estimate
     double get_df() ;
     
 };
 
-template <typename matrix, GroupNorm norm>
-GroupElasticNet<matrix,norm>::GroupElasticNet(
+template <typename matrix, GroupSparseNorm norm>
+GroupSparseRegularizer<matrix,norm>::GroupSparseRegularizer(
   const RegressionData<matrix>& data, const uvec& group_ind, const List& regParam, const List& control) :
-  GroupSparseRegularizer<matrix,norm>::GroupSparseRegularizer(data, regParam) {
+  SparseRegularizer<matrix>::SparseRegularizer(data, regParam) {
+
+    // Set up the penalty
+    penalty_ = GroupPenalty<norm>(as<double>(regParam["alpha"])) ;
+    get_lambda_seq(get_lambda_max(), regParam) ;
+
+    // Set up the optimizer
+    solver_ = GroupOptimizer<matrix,norm>(penalty_, control);
 
     // Scale the structuring matrix according to the amount of l2 penalty 
     data_.scale_struct(gamma_) ;
     
-    // Initialize the active set, beta_ and gradient with starting coefficient
-    vec beta0 = control["beta0"] ;
-    set_ = ActiveSetGroup(data_, group_ind, as<bool>(control["factmat"])) ;
+    // Initialize the active set and the gradient
     grad_ = - data_.XTy_ ;
-
-    // set up the penalty
-    penalty_ = GroupPenalty<norm>(as<double>(regParam["alpha"])) ;
-
-    get_lambda_seq(get_lambda_max(), regParam) ;
+    set_ = ActiveSetGroup(data_, group_ind, as<bool>(control["factmat"])) ;
     
-    // Set up the optimizer
-    solver_ = GroupOptimizer<matrix,norm>(penalty_, control);
-
   }
 
-template <typename matrix, GroupNorm norm>
-double GroupElasticNet<matrix,norm>::get_df() {
+template <typename matrix, GroupSparseNorm norm>
+double GroupSparseRegularizer<matrix,norm>::get_df() {
 
   double df = data_.centered_ ;
 
@@ -88,8 +96,8 @@ double GroupElasticNet<matrix,norm>::get_df() {
   return(df);
 }
 
-template <typename matrix, GroupNorm norm>
-List GroupElasticNet<matrix,norm>::solution_path(const List& control) {
+template <typename matrix, GroupSparseNorm norm>
+List GroupSparseRegularizer<matrix,norm>::solution_path(const List& control) {
   
   vector<double> gap, timing ; // timings and optimality measures
   vector<uword> status, iter ; // convergence and # of inner/outer iterates
@@ -140,5 +148,4 @@ List GroupElasticNet<matrix,norm>::solution_path(const List& control) {
   );
 }
 
-#endif
 

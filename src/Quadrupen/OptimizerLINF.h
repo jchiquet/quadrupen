@@ -3,11 +3,11 @@
  *         MIA Paris-Saclay
  */
 
-#ifndef _quadrupen_OPTIMIZER_LINF_H
-#define _quadrupen_OPTIMIZER_LINF_H
+#pragma once
 
 #include "Optimizer.h"
-#include "PenaltySimple.h"
+#include "PenaltyDense.h"
+#include "ActiveSet.h"
 
 using namespace Rcpp;
 using namespace arma;
@@ -17,9 +17,9 @@ class OptimizerLINF : public Optimizer {
 
 public:
 
-  SimplePenalty<SimpleNorm::LINF> penalty_ ;
-  OptimizerLINF() {} ;
-  OptimizerLINF(SimplePenalty<SimpleNorm::LINF>&, const List& control) ;
+  DensePenalty<DenseNorm::LINF> penalty_ ;
+  OptimizerLINF() {} ; // needed
+  OptimizerLINF(DensePenalty<DenseNorm::LINF>&, const List& control) ;
 
   uword quadratic_breg(
       vec& beta,
@@ -27,13 +27,10 @@ public:
       const double& lambda,
       const vec& weights,
       RegressionData<mat> &data,
-      ActiveSet<mat>& set,
+      uvec& unbounded,
       const double& accuracy,
       const uword& max_iter) ;
 
-  mat updateCholeskyFromExisting(const mat& R, const vec& b) ;
-  
 };
 
-#endif
 

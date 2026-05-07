@@ -3,12 +3,9 @@
  *         MIA Paris-Saclay
  */
 
-#ifndef _quadrupen_GENERIC_OPTIMIZER_H
-#define _quadrupen_GENERIC_OPTIMIZER_H
+#pragma once
 
 #include "RegressionData.h"
-#include "ActiveSet.h"
-#include "ActiveSetGroup.h"
 #include <functional>
 
 enum SolverType {FISTA, QUADRA, PGD};
@@ -77,4 +74,3 @@ public:
     ) ;
 };
 
-#endif

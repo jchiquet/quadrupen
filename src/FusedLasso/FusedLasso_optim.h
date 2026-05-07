@@ -1,5 +1,4 @@
-#ifndef _FUSEDLASSOOPTIM_H_
-#define _FUSEDLASSOOPTIM_H_
+#pragma once
 
 #include "FusedLasso_data_struct.h"
 #include "FusedLasso_utils.h"
@@ -98,4 +97,3 @@ public:
 
 };
 
-#endif // _FUSEDLASSOOPTIM_H_

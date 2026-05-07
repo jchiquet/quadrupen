@@ -2,11 +2,10 @@
  * Author: Julien CHIQUET
  *         MIA Paris-Saclay
  */
-
-#ifndef _ElasticNet_H
-#define _ElasticNet_H
+#pragma once
 
 #include "RegularizerSparse.h"
+#include "PenaltySparse.h"
 #include "ActiveSet.h"
 #include "OptimizerL1.h"
 
@@ -16,7 +15,7 @@ using namespace std;
 
 template <typename matrix>
 class ElasticNet : 
-  public SimpleSparseRegularizer<matrix,SimpleNorm::L1>{
+  public SparseRegularizer<matrix>{
   public:
     
     using Regularizer<matrix>::intercept_ ;
@@ -33,41 +32,45 @@ class ElasticNet :
     using SparseRegularizer<matrix>::beta_debiased_ ;
     using SparseRegularizer<matrix>::intercept_debiased_   ;
     using SparseRegularizer<matrix>::active_ ;
-    using SimpleSparseRegularizer<matrix,SimpleNorm::L1>::penalty_   ;
-    using SimpleSparseRegularizer<matrix,SimpleNorm::L1>::set_ ;
-    using SimpleSparseRegularizer<matrix,SimpleNorm::L1>::get_lambda_max ;
+
+    SparsePenalty<SparseNorm::L1> penalty_ ; // main penalty object 
+    ActiveSet<matrix> set_       ; // Active set of variable and data
     
-  ElasticNet(const RegressionData<matrix>&, const List&, const List&);
-
-  List solution_path(const List&);
-  
-  // Specific to Elastic-Net regularization
-  OptimizerL1<matrix> solver_ ; // Solvers for L1 penalty
-
-  void optimality_gap(double lambda_, uword type) ;
-  
-  // Compute degrees of freedom for the current estimate
-  double get_df() ;
-
+    double get_lambda_max() 
+    {
+      return(penalty_.lambda_max(data_.XTy_, lambda_factor_));
+    }
+    
+    ElasticNet(const RegressionData<matrix>&, const List&, const List&);
+    
+    List solution_path(const List&);
+    
+    // Specific to Elastic-Net regularization
+    OptimizerL1<matrix> solver_ ; // Solvers for L1 penalty
+    
+    void optimality_gap(double lambda_, uword type) ;
+    
+    // Compute degrees of freedom for the current estimate
+    double get_df() ;
+    
 };
 
 template <typename matrix>
 ElasticNet<matrix>::ElasticNet(
   const RegressionData<matrix>& data, const List& regParam, const List& control) :
-  SimpleSparseRegularizer<matrix,SimpleNorm::L1>::SimpleSparseRegularizer(data, regParam) {
-
-    // Scale the structuring matrix according to main penalty factor and the amount of l2 penalty 
-    data_.scale_struct(gamma_) ;
-
-    // set the penalty to l1
-    penalty_ = SimplePenalty<SimpleNorm::L1>() ;
-    double lmax = penalty_.lambda_max(data_.XTy_, lambda_factor_) ;
-    get_lambda_seq(lmax, regParam) ;
+  SparseRegularizer<matrix>::SparseRegularizer(data, regParam) {
+    
+    // Set the penalty to l1
+    penalty_ = SparsePenalty<SparseNorm::L1>() ;
+    get_lambda_seq(penalty_.lambda_max(data_.XTy_, lambda_factor_), regParam) ;
     
     // Set up the optimizer
     solver_ = OptimizerL1<matrix>(penalty_, control) ;
+
+    // Scale the structuring matrix according to the amount of l2 penalty 
+    data_.scale_struct(gamma_) ;
     
-    // Initialize the active set, beta_ and gradient with starting coefficient
+    // Initialize the active set, beta_ and the gradient
     vec beta0 = control["beta0"] ;
     uvec A0 = find(beta0) ;
     grad_ = - data_.XTy_ ;
@@ -78,7 +81,7 @@ ElasticNet<matrix>::ElasticNet(
       beta_ = beta0(A0) ;
       grad_ += set_.XTXA_ * beta_  ;
     }
-
+    
   }
 
 template <typename matrix>
@@ -106,7 +109,7 @@ List ElasticNet<matrix>::solution_path(const List& control) {
   
   vector<double> gap, timing ; // timings and optimality measures
   vector<uword> status, iter ; // convergence and # of inner/outer iterates
-
+  
   // LAMBDA LOOP
   wall_clock timer ; timer.tic(); // clock
   for(auto lambda_ : lambdas_) {
@@ -153,5 +156,4 @@ List ElasticNet<matrix>::solution_path(const List& control) {
   );
 }
 
-#endif
 

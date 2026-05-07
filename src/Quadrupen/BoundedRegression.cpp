@@ -12,38 +12,35 @@ BoundedRegression::BoundedRegression(
   RegressionData<mat>& data, const List& regParam, const List& control) :
   Regularizer<mat>::Regularizer(data, regParam) {
     
-    // set the penalty to l infinity
-    penalty_ = SimplePenalty<SimpleNorm::LINF>() ;
+    // Set the penalty to L-infinity
+    penalty_ = DensePenalty<DenseNorm::LINF>() ;
     get_lambda_seq(get_lambda_max(), regParam) ;
 
     // Set up the optimizer 
     solver_ = OptimizerLINF(penalty_, control) ;
-    
-    // Scale the structuring matrix according to main penalty factor and the amount of l2 penalty 
-    data_.scale_struct(gamma_) ;
 
-    // Initialize the active set with starting coefficient
-    set_= ActiveSet(data, as<bool>(control["factmat"])) ;
+    // Scale the structuring matrix according to the amount of l2 penalty 
+    data_.scale_struct(gamma_) ;
     
     // Compute the Gram matrix (+ gamma * S)
     data_.precompute_XTX() ;
 
+    // Initialize beta_ and the gradient
     beta_ = zeros<vec>(data_.p_) ; // vector of current parameters
     grad_ = -data_.XTy_          ; // vector of current gradient (smooth part)
   }
 
 double BoundedRegression::get_df() {
 
-  uvec U = find(abs(beta_) < max(abs(beta_))) ;
-  double df = data_.centered_ + U.size();
+  double df = data_.centered_ + unbounded_.size();
   
-  mat SUU(U.size(), U.size()) ;
+  mat SUU(unbounded_.size(), unbounded_.size()) ;
   if (gamma_ > 0) {
-    mat C = inv_sympd(data_.XTX_(U,U));
+    mat C = inv_sympd(data_.XTX_(unbounded_,unbounded_));
     // loop due to sparse encoding. should iterate over the n_zeros only...
-    for (uword i=0;i<U.size();i++){
-      for (uword j=i;j<U.size();j++){
-        SUU(i,j) = data_.S_.at(U(i),U(j));
+    for (uword i=0;i<unbounded_.size();i++){
+      for (uword j=i;j<unbounded_.size();j++){
+        SUU(i,j) = data_.S_.at(unbounded_(i),unbounded_(j));
         SUU(j,i) = SUU(i,j);
       }
     }
@@ -64,8 +61,6 @@ List BoundedRegression::solution_path(const List& control) {
   SolverType algorithm = QUADRA; // Optimizer (default to QUADRA)
   if (as<std::string>(control["method"]) == "FISTA") {
     algorithm = FISTA;
-    set_.reset();
-    set_.add_vars(all, data_);
   }
 
   // Variables monitoring the algorithm
@@ -98,7 +93,7 @@ List BoundedRegression::solution_path(const List& control) {
             throw std::runtime_error("Fail to converge...");
           } else {
             ioptim.push_back(
-              solver_.quadratic_breg(beta_, grad_, lambda_, lambda_factor_, data_, set_, accuracy, 10000)
+              solver_.quadratic_breg(beta_, grad_, lambda_, lambda_factor_, data_, unbounded_, accuracy, 10000)
             );
           }
         } catch (std::runtime_error& error) {
@@ -107,8 +102,6 @@ List BoundedRegression::solution_path(const List& control) {
           }
           current_it = 0; // start this lambda all the way back, with FISTA algorithm
           algorithm = FISTA ;
-          set_.reset();
-          set_.add_vars(all, data_);
         }
       }
 
@@ -122,7 +115,7 @@ List BoundedRegression::solution_path(const List& control) {
     iactive.push_back(current_it) ;
     status.push_back(0) ;
     if (current_it >= maxiter) { status.back() = 1 ; }
-    if ((set_.size() > maxfeat) & 
+    if ((unbounded_.n_elem > maxfeat) & 
         (algorithm == QUADRA)) { status.back() = 2 ; }
 
     // Preparing next value of the penalty

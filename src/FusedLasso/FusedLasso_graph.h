@@ -4,8 +4,8 @@
 *** Groups of fused variables will be treated by taking subgraphs
 *** 
 ***********************************************************************/
-#ifndef _FUSEDLASSO_GRAPH_
-#define _FUSEDLASSO_GRAPH_
+
+#pragma once
 
 #include "FusedLasso_utils.h"
 
@@ -153,4 +153,3 @@ public:
   void printIntList(ostream& outStream, list<int> x);
 };
 
-#endif // _FUSEDLASSO_GRAPH_

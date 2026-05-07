@@ -1,8 +1,7 @@
 /*
  * Author: Julien CHIQUET
  */
-#ifndef _ActiveSetGroup_H
-#define _ActiveSetGroup_H
+#pragma once
 
 using namespace Rcpp;
 using namespace arma;
@@ -126,4 +125,3 @@ void ActiveSetGroup<matrix>::del_groups(uvec igrps_out, vec& beta) {
   }
 }
 
-#endif

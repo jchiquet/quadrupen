@@ -1,27 +1,12 @@
 /*
  * Author: Julien CHIQUET
  *         MIA Paris-Saclay
- *         
- *  3 Classes for Sparse regularization:
- *  - SparseRegularizer
- *  - SimpleSparseRegularizer
- *  - GroupSparseRegularizer
- *  
- *  Inheritance:
- *  
- *  Regularizer-> SparseRegularizer -> SimpleSparseRegularizers
- *  Regularizer-> SparseRegularizer -> GroupSparseRegularizers
  */
 
-#ifndef _RegularizerSparse_H
-#define _RegularizerSparse_H
+#pragma once
 
 #include "Regularizer.h"
 #include "RegressionData.h"
-#include "ActiveSet.h"
-#include "ActiveSetGroup.h"
-#include "PenaltySimple.h"
-#include "PenaltyGroup.h"
 
 using namespace Rcpp;
 using namespace arma;
@@ -93,61 +78,4 @@ SparseRegularizer<matrix>::SparseRegularizer(
   Regularizer<matrix>(data, regParam)
   {}
 
-// ====================================================
-// Simple Sparse Regularizers
-
-template <typename matrix, SimpleNorm norm>
-class SimpleSparseRegularizer : public SparseRegularizer<matrix> {
-public:
-  
-  using Regularizer<matrix>::data_ ;
-  using Regularizer<matrix>::lambda_factor_ ;
-  
-  SimpleSparseRegularizer() {} ;
-  SimpleSparseRegularizer(const RegressionData<matrix>&, const List&);
-  double get_lambda_max() 
-  {
-    return(penalty_.lambda_max(data_.XTy_, lambda_factor_));
-  }
-  
-  ActiveSet<matrix> set_       ; // Active set of variable and data
-  SimplePenalty<norm> penalty_ ; // main penalty object 
-  
-};
-
-template <typename matrix, SimpleNorm norm>
-SimpleSparseRegularizer<matrix, norm>::SimpleSparseRegularizer(
-    const RegressionData<matrix>& data, const List& regParam) : 
-  SparseRegularizer<matrix>::SparseRegularizer(data, regParam) {}
-
-// ====================================================
-// Group-Sparse Regularizers       
-
-template <typename matrix, GroupNorm norm>
-class GroupSparseRegularizer : public SparseRegularizer<matrix> {
-public:
-  
-  using Regularizer<matrix>::data_ ;
-  using Regularizer<matrix>::lambda_factor_ ;
-  
-  GroupSparseRegularizer() {} ;
-  GroupSparseRegularizer(const RegressionData<matrix>&, const List&);
-  double get_lambda_max() 
-  {
-    return(
-      penalty_.lambda_max(data_.XTy_, set_.grp_sizes_, lambda_factor_)
-    );
-  }
-  
-  ActiveSetGroup<matrix> set_ ; // Active set of variable and data
-  GroupPenalty<norm> penalty_ ; // main penalty object 
-
-};
-
-template <typename matrix, GroupNorm norm>
-GroupSparseRegularizer<matrix, norm>::GroupSparseRegularizer(
-    const RegressionData<matrix>& data, const List& regParam) : 
-  SparseRegularizer<matrix>::SparseRegularizer(data, regParam) {}
-
-#endif
 

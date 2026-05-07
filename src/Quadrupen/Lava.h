@@ -3,8 +3,7 @@
  *         MIA Paris-Saclay
  */
 
-#ifndef _Lava_H
-#define _Lava_H
+#pragma once
 
 #include "ElasticNet.h"
 
@@ -95,4 +94,3 @@ void Lava<matrix>::post_treatment(const RegressionData<matrix>& data, const mat&
 
 }
 
-#endif

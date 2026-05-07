@@ -3,28 +3,27 @@
  *         MIA Paris-Saclay
  */
 
-#ifndef _Group_Lava_H
-#define _Group_Lava_H
+#pragma once
 
-#include "GroupElasticNet.h"
+#include "GroupSparseRegularizer.h"
 
 using namespace Rcpp;
 using namespace arma;
 using namespace std;
 
-template <typename matrix, GroupNorm norm>
-class GroupLava : public GroupElasticNet<matrix,norm> {
+template <typename matrix, GroupSparseNorm norm>
+class GroupLava : public GroupSparseRegularizer<matrix,norm> {
   
 public:
   
   using Regularizer<matrix>::coef_       ;
   using Regularizer<matrix>::intercept_  ;
   using Regularizer<matrix>::data_       ;
-  using GroupElasticNet<matrix,norm>::set_     ;
-  using GroupElasticNet<matrix,norm>::active_  ;
-  using GroupElasticNet<matrix,norm>::debiased_ ;
-  using GroupElasticNet<matrix,norm>::intercept_debiased_ ;
-  using GroupElasticNet<matrix,norm>::lambda_factor_ ;
+  using GroupSparseRegularizer<matrix,norm>::set_     ;
+  using GroupSparseRegularizer<matrix,norm>::active_  ;
+  using GroupSparseRegularizer<matrix,norm>::debiased_ ;
+  using GroupSparseRegularizer<matrix,norm>::intercept_debiased_ ;
+  using GroupSparseRegularizer<matrix,norm>::lambda_factor_ ;
   
   GroupLava(const RegressionData<matrix>&, const mat&, const uvec&, const List&, const List&);
   
@@ -39,20 +38,20 @@ public:
   
 };
 
-template <typename matrix, GroupNorm norm>
+template <typename matrix, GroupSparseNorm norm>
 GroupLava<matrix,norm>::GroupLava(
-  const RegressionData<matrix>& data,
-  const mat& Proj,
-  const uvec& group_ind, 
-  const List& regParam,
-  const List& control) :
-  GroupElasticNet<matrix,norm>::GroupElasticNet(data, group_ind, regParam, control), 
+    const RegressionData<matrix>& data,
+    const mat& Proj,
+    const uvec& group_ind, 
+    const List& regParam,
+    const List& control) :
+  GroupSparseRegularizer<matrix,norm>::GroupSparseRegularizer(data, group_ind, regParam, control), 
   Proj_(Proj) {}
 
-template <typename matrix, GroupNorm norm>
+template <typename matrix, GroupSparseNorm norm>
 double GroupLava<matrix,norm>::get_df() {
-
-  double df = GroupElasticNet<matrix,norm>::get_df() ;
+  
+  double df = GroupSparseRegularizer<matrix,norm>::get_df() ;
   mat K = diagmat(ones(data_.n_)) - 
     data_.X_.cols(set_.A_) * set_.XATXAinv_ * data_.X_.cols(set_.A_).t() ;
   
@@ -61,7 +60,7 @@ double GroupLava<matrix,norm>::get_df() {
   return(df);
 }
 
-template <typename matrix, GroupNorm norm>
+template <typename matrix, GroupSparseNorm norm>
 void GroupLava<matrix,norm>::post_treatment(const RegressionData<matrix>& data, const mat& b) {
   
   sp_mat beta = this->coefficients() ;
@@ -97,4 +96,3 @@ void GroupLava<matrix,norm>::post_treatment(const RegressionData<matrix>& data, 
   
 }
 
-#endif
