@@ -19,7 +19,7 @@ class OptimizerLINF : public Optimizer {
 public:
 
   SimplePenalty<SimpleNorm::LINF> penalty_ ;
-  OptimizerLINF() {} ;
+  OptimizerLINF() {} ; // needed
   OptimizerLINF(SimplePenalty<SimpleNorm::LINF>&, const List& control) ;
 
   uword quadratic_breg(
@@ -28,12 +28,10 @@ public:
       const double& lambda,
       const vec& weights,
       RegressionData<mat> &data,
-      uvec& active,
+      uvec& unbounded,
       const double& accuracy,
       const uword& max_iter) ;
 
-  mat updateCholeskyFromExisting(const mat& R, const vec& b) ;
-  
 };
 
 #endif

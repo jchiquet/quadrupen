@@ -62,18 +62,17 @@ ElasticNet<matrix>::ElasticNet(
   const RegressionData<matrix>& data, const List& regParam, const List& control) :
   SparseRegularizer<matrix>::SparseRegularizer(data, regParam) {
     
-    // Scale the structuring matrix according to main penalty factor and the amount of l2 penalty 
-    data_.scale_struct(gamma_) ;
-    
-    // set the penalty to l1
+    // Set the penalty to l1
     penalty_ = SimplePenalty<SimpleNorm::L1>() ;
-    double lmax = penalty_.lambda_max(data_.XTy_, lambda_factor_) ;
-    get_lambda_seq(lmax, regParam) ;
+    get_lambda_seq(penalty_.lambda_max(data_.XTy_, lambda_factor_), regParam) ;
     
     // Set up the optimizer
     solver_ = OptimizerL1<matrix>(penalty_, control) ;
+
+    // Scale the structuring matrix according to the amount of l2 penalty 
+    data_.scale_struct(gamma_) ;
     
-    // Initialize the active set, beta_ and gradient with starting coefficient
+    // Initialize the active set, beta_ and the gradient
     vec beta0 = control["beta0"] ;
     uvec A0 = find(beta0) ;
     grad_ = - data_.XTy_ ;

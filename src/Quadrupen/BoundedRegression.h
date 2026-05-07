@@ -20,7 +20,7 @@ public:
   // Specific to Bounded regression
   SimplePenalty<SimpleNorm::LINF> penalty_ ; // main penalty object 
   OptimizerLINF solver_ ; // Solvers for LINF penalty
-  uvec active_   ; // Active variables (away from the boundary)
+  uvec unbounded_   ; // Active variables (away from the boundary)
   vector<uvec> bounded_ ; // variables reaching the boundary (for all lambda values)
   
   BoundedRegression(RegressionData<mat>&, const List&, const List&);

@@ -28,7 +28,7 @@ public:
   vec beta_                    ; // vector of current parameters (for fix lambda value)
   vec grad_                    ; // vector of current gradient (smooth part)
   vector<double> df_           ; // degrees of freedom along the path
-  uvec all                     ; // a vector with all variable indices
+  // uvec all                     ; // a vector with all variable indices
   
   void get_lambda_seq(double, const List&);
   
@@ -45,7 +45,7 @@ Regularizer<matrix>::Regularizer(
   const RegressionData<matrix>& data, const List& regParam) : 
   data_ (data), gamma_(as<double>(regParam["gamma"])), lambda_factor_(as<vec>(regParam["lambda_factor"]))
 {
-  all = regspace<uvec>(0,data_.p_-1) ;
+  // all = regspace<uvec>(0,data_.p_-1) ;
 }
 
 template <typename matrix>
