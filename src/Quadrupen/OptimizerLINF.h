@@ -28,7 +28,7 @@ public:
       const double& lambda,
       const vec& weights,
       RegressionData<mat> &data,
-      ActiveSet<mat>& set,
+      uvec& active,
       const double& accuracy,
       const uword& max_iter) ;
 

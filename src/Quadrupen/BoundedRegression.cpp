@@ -22,9 +22,6 @@ BoundedRegression::BoundedRegression(
     // Scale the structuring matrix according to main penalty factor and the amount of l2 penalty 
     data_.scale_struct(gamma_) ;
 
-    // Initialize the active set with starting coefficient
-    set_= ActiveSet(data, as<bool>(control["factmat"])) ;
-    
     // Compute the Gram matrix (+ gamma * S)
     data_.precompute_XTX() ;
 
@@ -64,8 +61,6 @@ List BoundedRegression::solution_path(const List& control) {
   SolverType algorithm = QUADRA; // Optimizer (default to QUADRA)
   if (as<std::string>(control["method"]) == "FISTA") {
     algorithm = FISTA;
-    set_.reset();
-    set_.add_vars(all, data_);
   }
 
   // Variables monitoring the algorithm
@@ -98,7 +93,7 @@ List BoundedRegression::solution_path(const List& control) {
             throw std::runtime_error("Fail to converge...");
           } else {
             ioptim.push_back(
-              solver_.quadratic_breg(beta_, grad_, lambda_, lambda_factor_, data_, set_, accuracy, 10000)
+              solver_.quadratic_breg(beta_, grad_, lambda_, lambda_factor_, data_, active_, accuracy, 10000)
             );
           }
         } catch (std::runtime_error& error) {
@@ -107,8 +102,6 @@ List BoundedRegression::solution_path(const List& control) {
           }
           current_it = 0; // start this lambda all the way back, with FISTA algorithm
           algorithm = FISTA ;
-          set_.reset();
-          set_.add_vars(all, data_);
         }
       }
 
@@ -122,7 +115,7 @@ List BoundedRegression::solution_path(const List& control) {
     iactive.push_back(current_it) ;
     status.push_back(0) ;
     if (current_it >= maxiter) { status.back() = 1 ; }
-    if ((set_.size() > maxfeat) & 
+    if ((active_.n_elem > maxfeat) & 
         (algorithm == QUADRA)) { status.back() = 2 ; }
 
     // Preparing next value of the penalty

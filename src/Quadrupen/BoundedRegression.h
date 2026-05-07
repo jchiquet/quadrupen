@@ -7,7 +7,6 @@
 #define _BoundedRegression_H
 
 #include "Regularizer.h"
-#include "ActiveSet.h"
 #include "PenaltySimple.h"
 #include "OptimizerLINF.h"
 
@@ -21,8 +20,7 @@ public:
   // Specific to Bounded regression
   SimplePenalty<SimpleNorm::LINF> penalty_ ; // main penalty object 
   OptimizerLINF solver_ ; // Solvers for LINF penalty
-  // TODO: use a more simple forme of ActiveSet...
-  ActiveSet<mat> set_   ; // Active set of variable and data
+  uvec active_   ; // Active variables (away from the boundary)
   vector<uvec> bounded_ ; // variables reaching the boundary (for all lambda values)
   
   BoundedRegression(RegressionData<mat>&, const List&, const List&);
