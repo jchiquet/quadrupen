@@ -2,9 +2,7 @@
  * Author: Julien CHIQUET
  *         MIA Paris-Saclay
  */
-
-#ifndef _ElasticNet_H
-#define _ElasticNet_H
+#pragma once
 
 #include "RegularizerSparse.h"
 #include "PenaltySparse.h"
@@ -158,5 +156,4 @@ List ElasticNet<matrix>::solution_path(const List& control) {
   );
 }
 
-#endif
 

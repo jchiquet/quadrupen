@@ -1,5 +1,4 @@
-#ifndef _FUSEDLASSO_VECTOROPS_H_
-#define _FUSEDLASSO_VECTOROPS_H_
+#pragma once
 
 #include "FusedLasso_utils.h"
 #include <vector>
@@ -154,4 +153,3 @@ namespace VectorOps {
 
 }
 
-#endif // _FUSEDLASSO_VECTOROPS_H_

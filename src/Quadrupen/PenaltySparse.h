@@ -1,5 +1,4 @@
-#ifndef _quadrupen_PENALTY_SPARSE_H
-#define _quadrupen_PENALTY_SPARSE_H
+#pragma once
 
 #define ARMA_NO_DEBUG
 #define ARMA_USE_LAPACK
@@ -43,4 +42,3 @@ template<SparseNorm norm>
     return(dual_norm(XTy, w)) ;
   }
 
-#endif

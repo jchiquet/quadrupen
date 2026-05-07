@@ -3,8 +3,7 @@
  *         MIA Paris-Saclay
  */
 
-#ifndef _quadrupen_RIDGE_H
-#define _quadrupen_RIDGE_H
+#pragma once
 
 #include "Regularizer.h"
 #include "PenaltyDense.h"
@@ -24,6 +23,4 @@ public:
   DensePenalty<DenseNorm::L2> penalty_ ; // main penalty object 
   
 };
-
-#endif
 

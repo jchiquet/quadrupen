@@ -1,5 +1,4 @@
-#ifndef _quadrupen_PENALTY_SIMPLE_H
-#define _quadrupen_PENALTY_SIMPLE_H
+#pragma once
 
 #define ARMA_NO_DEBUG
 #define ARMA_USE_LAPACK
@@ -42,5 +41,3 @@ template<DenseNorm norm>
 double DensePenalty<norm>::lambda_max(const vec& XTy, const vec& w)  {
   return(dual_norm(XTy, w)) ;
 }
-
-#endif

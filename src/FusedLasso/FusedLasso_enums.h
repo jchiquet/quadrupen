@@ -1,5 +1,4 @@
-#ifndef _FUSEDLASSO_ENUMS_H_
-#define _FUSEDLASSO_ENUMS_H_
+#pragma once
 
 /**
  * @file FusedLasso_enums.h
@@ -25,4 +24,3 @@ enum penEnum {
     L2         ///< Pénalité L2 (norme L2)
 };
 
-#endif // _FUSEDLASSO_ENUMS_H_

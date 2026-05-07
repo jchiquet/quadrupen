@@ -3,8 +3,7 @@
  *         MIA Paris-Saclay
  */
 
-#ifndef _quadrupen_OPTIMIZER_LINF_H
-#define _quadrupen_OPTIMIZER_LINF_H
+#pragma once
 
 #include "Optimizer.h"
 #include "PenaltyDense.h"
@@ -34,5 +33,4 @@ public:
 
 };
 
-#endif
 

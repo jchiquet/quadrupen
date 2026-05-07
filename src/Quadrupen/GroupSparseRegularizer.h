@@ -6,8 +6,7 @@
 // ====================================================
 // Group-Sparse Regularizers       
 
-#ifndef _GroupSparseReg_H
-#define _GroupSparseReg_H
+#pragma once
 
 #include "RegularizerSparse.h"
 #include "PenaltyGroup.h"
@@ -149,5 +148,4 @@ List GroupSparseRegularizer<matrix,norm>::solution_path(const List& control) {
   );
 }
 
-#endif
 

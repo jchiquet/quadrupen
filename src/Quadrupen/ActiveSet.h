@@ -1,8 +1,8 @@
 /*
  * Author: Julien CHIQUET
+ * MIA PS
  */
-#ifndef _ActiveSet_H
-#define _ActiveSet_H
+#pragma once
 
 using namespace Rcpp;
 using namespace arma;
@@ -219,5 +219,5 @@ void ActiveSet<matrix>::inverse_Gram() {
   }
 }
 
-#endif
+
 

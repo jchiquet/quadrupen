@@ -2,9 +2,7 @@
  * Author: Julien CHIQUET
  *         MIA Paris-Saclay
  */
-
-#ifndef _BoundedRegression_H
-#define _BoundedRegression_H
+#pragma once
 
 #include "Regularizer.h"
 #include "PenaltyDense.h"
@@ -48,5 +46,4 @@ public:
   
 };
 
-#endif
 

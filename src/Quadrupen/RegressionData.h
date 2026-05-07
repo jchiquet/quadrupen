@@ -5,8 +5,7 @@
  *         MIA Paris-Saclay
  */
 
-#ifndef _quadrupen_REGRESSION_DATA_H
-#define _quadrupen_REGRESSION_DATA_H
+#pragma once
 
 #define ARMA_NO_DEBUG
 #define ARMA_USE_LAPACK
@@ -148,5 +147,3 @@ void RegressionData<matrix>::standardize() {
   
   XTy_ = X_.t() * (y_-y_bar_) - sum(y_-y_bar_) * X_bar_ ;
 }
-
-#endif

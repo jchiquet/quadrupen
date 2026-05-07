@@ -3,8 +3,7 @@
  *         MIA Paris-Saclay
  */
 
-#ifndef _quadrupen_SIMPLE_OPTIMIZER_H
-#define _quadrupen_SIMPLE_OPTIMIZER_H
+#pragma once
 
 #include "Optimizer.h"
 #include "PenaltySparse.h"
@@ -155,5 +154,4 @@ uword SimpleOptimizer<matrix,norm>::solve(
   return status ;
 }
 
-#endif
 

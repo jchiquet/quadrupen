@@ -1,5 +1,4 @@
-#ifndef _quadrupen_PENALTY_GROUP_H
-#define _quadrupen_PENALTY_GROUP_H
+#pragma once
 
 #define ARMA_NO_DEBUG
 #define ARMA_USE_LAPACK
@@ -105,5 +104,3 @@ double GroupPenalty<norm>::lambda_max(const vec& XTy, const uvec& pk, const vec&
   
   return l_max ;
 }
-
-#endif

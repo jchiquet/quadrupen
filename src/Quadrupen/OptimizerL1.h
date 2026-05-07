@@ -3,8 +3,7 @@
  *         MIA Paris-Saclay
  */
 
-#ifndef _quadrupen_OPTIMIZER_L1_H
-#define _quadrupen_OPTIMIZER_L1_H
+#pragma once
 
 #include "OptimizerSparse.h"
 
@@ -97,5 +96,4 @@ uword OptimizerL1<matrix>::quadratic(
   
 }
 
-#endif
 

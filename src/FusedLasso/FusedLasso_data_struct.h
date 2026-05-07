@@ -1,5 +1,4 @@
-#ifndef _FUSEDLASSO_DATA_STRUCT_H_
-#define _FUSEDLASSO_DATA_STRUCT_H_
+#pragma once
 
 #include "FusedLasso_utils.h"
 #include "FusedLasso_enums.h"
@@ -304,5 +303,3 @@ public:
   
 };
 
-
-#endif // _FUSEDLASSO_DATA_STRUCT_H_

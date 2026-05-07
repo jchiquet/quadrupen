@@ -3,8 +3,7 @@
  *         MIA Paris-Saclay
  */
 
-#ifndef _Group_Lava_H
-#define _Group_Lava_H
+#pragma once
 
 #include "GroupSparseRegularizer.h"
 
@@ -97,4 +96,3 @@ void GroupLava<matrix,norm>::post_treatment(const RegressionData<matrix>& data, 
   
 }
 
-#endif

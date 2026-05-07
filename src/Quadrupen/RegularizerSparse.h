@@ -3,8 +3,7 @@
  *         MIA Paris-Saclay
  */
 
-#ifndef _RegularizerSparse_H
-#define _RegularizerSparse_H
+#pragma once
 
 #include "Regularizer.h"
 #include "RegressionData.h"
@@ -79,5 +78,4 @@ SparseRegularizer<matrix>::SparseRegularizer(
   Regularizer<matrix>(data, regParam)
   {}
 
-#endif
 

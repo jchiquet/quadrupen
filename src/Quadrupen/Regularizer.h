@@ -3,8 +3,7 @@
  *         MIA Paris-Saclay
  */
 
-#ifndef _Regularizer_H
-#define _Regularizer_H
+#pragma once
 
 #include "RegressionData.h"
 
@@ -28,8 +27,7 @@ public:
   vec beta_                    ; // vector of current parameters (for fix lambda value)
   vec grad_                    ; // vector of current gradient (smooth part)
   vector<double> df_           ; // degrees of freedom along the path
-  // uvec all                     ; // a vector with all variable indices
-  
+
   void get_lambda_seq(double, const List&);
   
   // Getter functions to access private members
@@ -43,10 +41,10 @@ public:
 template <typename matrix>
 Regularizer<matrix>::Regularizer(
   const RegressionData<matrix>& data, const List& regParam) : 
-  data_ (data), gamma_(as<double>(regParam["gamma"])), lambda_factor_(as<vec>(regParam["lambda_factor"]))
-{
-  // all = regspace<uvec>(0,data_.p_-1) ;
-}
+  data_ (data),
+  gamma_(as<double>(regParam["gamma"])),
+  lambda_factor_(as<vec>(regParam["lambda_factor"]))
+{}
 
 template <typename matrix>
 void Regularizer<matrix>::get_lambda_seq(double lambda_max, const List& regParam) {
@@ -62,6 +60,4 @@ void Regularizer<matrix>::get_lambda_seq(double lambda_max, const List& regParam
     );
   }
 }
-
-#endif
 

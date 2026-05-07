@@ -3,8 +3,7 @@
  *         MIA Paris-Saclay
  */
 
-#ifndef _quadrupen_GROUP_OPTIMIZER_H
-#define _quadrupen_GROUP_OPTIMIZER_H
+#pragma once
 
 #include "Optimizer.h"
 #include "PenaltyGroup.h"
@@ -248,5 +247,4 @@ uword GroupOptimizer<matrix,norm>::solve(
   return status ;
 }
 
-#endif
 
