@@ -8,10 +8,6 @@
 
 #include "Regularizer.h"
 #include "RegressionData.h"
-#include "ActiveSet.h"
-#include "ActiveSetGroup.h"
-#include "PenaltySimple.h"
-#include "PenaltyGroup.h"
 
 using namespace Rcpp;
 using namespace arma;
@@ -82,33 +78,6 @@ SparseRegularizer<matrix>::SparseRegularizer(
   const RegressionData<matrix>& data, const List& regParam) : 
   Regularizer<matrix>(data, regParam)
   {}
-
-// ====================================================
-// Simple Sparse Regularizers
-
-template <typename matrix, SimpleNorm norm>
-class SimpleSparseRegularizer : public SparseRegularizer<matrix> {
-public:
-  
-  using Regularizer<matrix>::data_ ;
-  using Regularizer<matrix>::lambda_factor_ ;
-  
-  SimpleSparseRegularizer() {} ;
-  SimpleSparseRegularizer(const RegressionData<matrix>&, const List&);
-  double get_lambda_max() 
-  {
-    return(penalty_.lambda_max(data_.XTy_, lambda_factor_));
-  }
-  
-  ActiveSet<matrix> set_       ; // Active set of variable and data
-  SimplePenalty<norm> penalty_ ; // main penalty object 
-  
-};
-
-template <typename matrix, SimpleNorm norm>
-SimpleSparseRegularizer<matrix, norm>::SimpleSparseRegularizer(
-    const RegressionData<matrix>& data, const List& regParam) : 
-  SparseRegularizer<matrix>::SparseRegularizer(data, regParam) {}
 
 #endif
 

@@ -8,7 +8,7 @@
 \alias{sparse_group_lasso}
 \alias{sparse_group_l1linf}
 \alias{sparse_coop_lasso}
-\title{Fit a linear model with (sparse) group regularisation (either l1/l2, l1/linf or cooperative)}
+\title{Fit a linear model with (sparse) group regularisation}
 \usage{
 group_sparse_lm(
   x,

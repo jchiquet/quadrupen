@@ -10,6 +10,7 @@
 #define _GroupLasso_H
 
 #include "RegularizerSparse.h"
+#include "PenaltyGroup.h"
 #include "OptimizerGroup.h"
 
 using namespace Rcpp;

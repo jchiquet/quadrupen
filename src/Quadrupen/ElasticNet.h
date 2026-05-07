@@ -8,6 +8,7 @@
 
 #include "RegularizerSparse.h"
 #include "ActiveSet.h"
+#include "PenaltySimple.h"
 #include "OptimizerL1.h"
 
 using namespace Rcpp;
@@ -16,7 +17,7 @@ using namespace std;
 
 template <typename matrix>
 class ElasticNet : 
-  public SimpleSparseRegularizer<matrix,SimpleNorm::L1>{
+  public SparseRegularizer<matrix>{
   public:
     
     using Regularizer<matrix>::intercept_ ;
@@ -33,9 +34,14 @@ class ElasticNet :
     using SparseRegularizer<matrix>::beta_debiased_ ;
     using SparseRegularizer<matrix>::intercept_debiased_   ;
     using SparseRegularizer<matrix>::active_ ;
-    using SimpleSparseRegularizer<matrix,SimpleNorm::L1>::penalty_   ;
-    using SimpleSparseRegularizer<matrix,SimpleNorm::L1>::set_ ;
-    using SimpleSparseRegularizer<matrix,SimpleNorm::L1>::get_lambda_max ;
+
+    SimplePenalty<SimpleNorm::L1> penalty_ ; // main penalty object 
+    ActiveSet<matrix> set_       ; // Active set of variable and data
+    
+    double get_lambda_max() 
+    {
+      return(penalty_.lambda_max(data_.XTy_, lambda_factor_));
+    }
     
     ElasticNet(const RegressionData<matrix>&, const List&, const List&);
     
@@ -54,7 +60,7 @@ class ElasticNet :
 template <typename matrix>
 ElasticNet<matrix>::ElasticNet(
   const RegressionData<matrix>& data, const List& regParam, const List& control) :
-  SimpleSparseRegularizer<matrix,SimpleNorm::L1>::SimpleSparseRegularizer(data, regParam) {
+  SparseRegularizer<matrix>::SparseRegularizer(data, regParam) {
     
     // Scale the structuring matrix according to main penalty factor and the amount of l2 penalty 
     data_.scale_struct(gamma_) ;
