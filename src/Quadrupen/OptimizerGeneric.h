@@ -7,8 +7,6 @@
 #define _quadrupen_GENERIC_OPTIMIZER_H
 
 #include "RegressionData.h"
-#include "ActiveSet.h"
-#include "ActiveSetGroup.h"
 #include <functional>
 
 enum SolverType {FISTA, QUADRA, PGD};

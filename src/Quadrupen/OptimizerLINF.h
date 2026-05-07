@@ -8,6 +8,7 @@
 
 #include "Optimizer.h"
 #include "PenaltySimple.h"
+#include "ActiveSet.h"
 
 using namespace Rcpp;
 using namespace arma;

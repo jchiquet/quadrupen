@@ -6,8 +6,8 @@
 // ====================================================
 // Group-Sparse Regularizers       
 
-#ifndef _GroupLasso_H
-#define _GroupLasso_H
+#ifndef _GroupSparseReg_H
+#define _GroupSparseReg_H
 
 #include "RegularizerSparse.h"
 #include "PenaltyGroup.h"
@@ -52,7 +52,7 @@ class GroupSparseRegularizer :
     List solution_path(const List&);
     
     // Specific to Group Lasso regularization
-    GroupOptimizer<matrix,norm> solver_ ; // Solvers for Group L1 penalty
+    GroupOptimizer<matrix,norm> solver_ ; // Solvers for Group Sparse penalty
 
     // Compute degrees of freedom for the current estimate
     double get_df() ;
