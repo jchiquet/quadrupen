@@ -1,4 +1,4 @@
-# Fit a linear model with (sparse) group regularisation (either l1/l2, l1/linf or cooperative)
+# Fit a linear model with (sparse) group regularisation
 
 Adjust a linear model with (sparse) group regularization, that is, a
 mixture of an element-wise \\\ell_1\\ norm and a group-wise mixed-norm
