@@ -7,7 +7,7 @@
 #define _quadrupen_OPTIMIZER_LINF_H
 
 #include "Optimizer.h"
-#include "PenaltySimple.h"
+#include "PenaltyDense.h"
 #include "ActiveSet.h"
 
 using namespace Rcpp;
@@ -18,9 +18,9 @@ class OptimizerLINF : public Optimizer {
 
 public:
 
-  SimplePenalty<SimpleNorm::LINF> penalty_ ;
+  DensePenalty<DenseNorm::LINF> penalty_ ;
   OptimizerLINF() {} ; // needed
-  OptimizerLINF(SimplePenalty<SimpleNorm::LINF>&, const List& control) ;
+  OptimizerLINF(DensePenalty<DenseNorm::LINF>&, const List& control) ;
 
   uword quadratic_breg(
       vec& beta,

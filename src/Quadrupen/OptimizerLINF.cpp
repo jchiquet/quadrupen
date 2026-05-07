@@ -9,7 +9,7 @@ using namespace Rcpp;
 using namespace arma;
 
 OptimizerLINF::OptimizerLINF(
-  SimplePenalty<SimpleNorm::LINF>& penalty, const List& control) : 
+  DensePenalty<DenseNorm::LINF>& penalty, const List& control) : 
   Optimizer(control) 
 {penalty_ = penalty ;}
 

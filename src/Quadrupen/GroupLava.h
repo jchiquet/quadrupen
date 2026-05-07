@@ -12,7 +12,7 @@ using namespace Rcpp;
 using namespace arma;
 using namespace std;
 
-template <typename matrix, GroupNorm norm>
+template <typename matrix, GroupSparseNorm norm>
 class GroupLava : public GroupSparseRegularizer<matrix,norm> {
   
 public:
@@ -39,7 +39,7 @@ public:
   
 };
 
-template <typename matrix, GroupNorm norm>
+template <typename matrix, GroupSparseNorm norm>
 GroupLava<matrix,norm>::GroupLava(
     const RegressionData<matrix>& data,
     const mat& Proj,
@@ -49,7 +49,7 @@ GroupLava<matrix,norm>::GroupLava(
   GroupSparseRegularizer<matrix,norm>::GroupSparseRegularizer(data, group_ind, regParam, control), 
   Proj_(Proj) {}
 
-template <typename matrix, GroupNorm norm>
+template <typename matrix, GroupSparseNorm norm>
 double GroupLava<matrix,norm>::get_df() {
   
   double df = GroupSparseRegularizer<matrix,norm>::get_df() ;
@@ -61,7 +61,7 @@ double GroupLava<matrix,norm>::get_df() {
   return(df);
 }
 
-template <typename matrix, GroupNorm norm>
+template <typename matrix, GroupSparseNorm norm>
 void GroupLava<matrix,norm>::post_treatment(const RegressionData<matrix>& data, const mat& b) {
   
   sp_mat beta = this->coefficients() ;

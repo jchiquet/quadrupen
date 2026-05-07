@@ -13,7 +13,7 @@ BoundedRegression::BoundedRegression(
   Regularizer<mat>::Regularizer(data, regParam) {
     
     // Set the penalty to L-infinity
-    penalty_ = SimplePenalty<SimpleNorm::LINF>() ;
+    penalty_ = DensePenalty<DenseNorm::LINF>() ;
     get_lambda_seq(get_lambda_max(), regParam) ;
 
     // Set up the optimizer 

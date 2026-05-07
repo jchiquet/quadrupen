@@ -7,8 +7,8 @@
 #define _ElasticNet_H
 
 #include "RegularizerSparse.h"
+#include "PenaltySparse.h"
 #include "ActiveSet.h"
-#include "PenaltySimple.h"
 #include "OptimizerL1.h"
 
 using namespace Rcpp;
@@ -35,7 +35,7 @@ class ElasticNet :
     using SparseRegularizer<matrix>::intercept_debiased_   ;
     using SparseRegularizer<matrix>::active_ ;
 
-    SimplePenalty<SimpleNorm::L1> penalty_ ; // main penalty object 
+    SparsePenalty<SparseNorm::L1> penalty_ ; // main penalty object 
     ActiveSet<matrix> set_       ; // Active set of variable and data
     
     double get_lambda_max() 
@@ -63,7 +63,7 @@ ElasticNet<matrix>::ElasticNet(
   SparseRegularizer<matrix>::SparseRegularizer(data, regParam) {
     
     // Set the penalty to l1
-    penalty_ = SimplePenalty<SimpleNorm::L1>() ;
+    penalty_ = SparsePenalty<SparseNorm::L1>() ;
     get_lambda_seq(penalty_.lambda_max(data_.XTy_, lambda_factor_), regParam) ;
     
     // Set up the optimizer

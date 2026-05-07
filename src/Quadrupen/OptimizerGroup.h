@@ -14,7 +14,7 @@ using namespace Rcpp;
 using namespace arma;
 using namespace std;
 
-template <typename matrix, GroupNorm norm> class GroupOptimizer : public Optimizer {
+template <typename matrix, GroupSparseNorm norm> class GroupOptimizer : public Optimizer {
   
 public:
   
@@ -59,14 +59,14 @@ public:
 
 };
 
-template <typename matrix, GroupNorm norm>
+template <typename matrix, GroupSparseNorm norm>
 GroupOptimizer<matrix, norm>::GroupOptimizer(
     GroupPenalty<norm>& penalty, const List& control) : 
   Optimizer(control) {
   penalty_  = penalty ;
 }
 
-template <typename matrix, GroupNorm norm>
+template <typename matrix, GroupSparseNorm norm>
 uword GroupOptimizer<matrix, norm>::quadratic(
     vec &beta,
     const double lambda,
@@ -98,7 +98,7 @@ uword GroupOptimizer<matrix, norm>::quadratic(
       vec res_g = XTy(ind_g) - set.XATXA_.rows(ind_g) * beta;
       res_g += set.XATXA_(ind_g, ind_g) * beta_g; 
       
-      if (norm == GroupNorm::COOP) { // COOPERATIVE LASSO
+      if (norm == GroupSparseNorm::COOP) { // COOPERATIVE LASSO
         uvec idx_pos = find(beta_g >= 0);
         uvec idx_neg = find(beta_g < 0);
         
@@ -157,7 +157,7 @@ uword GroupOptimizer<matrix, norm>::quadratic(
   return iter;
 }
 
-template <typename matrix, GroupNorm norm>
+template <typename matrix, GroupSparseNorm norm>
 uword GroupOptimizer<matrix,norm>::solve(
     vec& beta,
     vec& grad,

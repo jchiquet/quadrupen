@@ -6,22 +6,22 @@
 #ifndef _quadrupen_OPTIMIZER_L1_H
 #define _quadrupen_OPTIMIZER_L1_H
 
-#include "OptimizerSimple.h"
+#include "OptimizerSparse.h"
 
 using namespace Rcpp;
 using namespace arma;
 using namespace std;
 
 template <typename matrix>
-class OptimizerL1 : public SimpleOptimizer<matrix,SimpleNorm::L1> {
+class OptimizerL1 : public SimpleOptimizer<matrix,SparseNorm::L1> {
   
 public:
   
-  using SimpleOptimizer<matrix,SimpleNorm::L1>::penalty_ ;
+  using SimpleOptimizer<matrix,SparseNorm::L1>::penalty_ ;
   using Optimizer::verbosity_ ;
     
   OptimizerL1() {} ;
-  OptimizerL1(SimplePenalty<SimpleNorm::L1>&, const List& control) ;
+  OptimizerL1(SparsePenalty<SparseNorm::L1>&, const List& control) ;
   
   uword quadratic(
       vec &beta,
@@ -34,8 +34,8 @@ public:
 };
 
 template <typename matrix>
-OptimizerL1<matrix>::OptimizerL1(SimplePenalty<SimpleNorm::L1>& penalty, const List& control) : 
-  SimpleOptimizer<matrix, SimpleNorm::L1>(penalty, control) 
+OptimizerL1<matrix>::OptimizerL1(SparsePenalty<SparseNorm::L1>& penalty, const List& control) : 
+  SimpleOptimizer<matrix, SparseNorm::L1>(penalty, control) 
   {}
 
 template <typename matrix>

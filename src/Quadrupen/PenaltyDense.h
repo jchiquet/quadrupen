@@ -11,17 +11,17 @@
 
 #include <RcppArmadillo.h>
 
-enum class SimpleNorm {L1, L2, LINF, MCP, SCAD};
+enum class DenseNorm {L2, LINF};
 
 using namespace Rcpp;
 using namespace arma;
 using namespace std;
 
-template <SimpleNorm norm> class SimplePenalty {
+template <DenseNorm norm> class DensePenalty {
 public: 
   
   double gamma_ = 0 ; // Optional factor for non-concave penalties
-  SimplePenalty() {} ;
+  DensePenalty() {} ;
 
   vec    elt_norm  (const vec& x, const vec& w, double lambda=0) ;
   vec    elt_dual_norm  (const vec& x, const vec& w, double lambda=0) ;
@@ -33,13 +33,13 @@ public:
   
 };
 
-template<SimpleNorm norm>
-vec SimplePenalty<norm>::optimality(const vec& grad, double lambda, const vec& w)  {
+template<DenseNorm norm>
+vec DensePenalty<norm>::optimality(const vec& grad, double lambda, const vec& w)  {
   return(elt_dual_norm(grad, w) - lambda) ;
 }
 
-template<SimpleNorm norm>
-double SimplePenalty<norm>::lambda_max(const vec& XTy, const vec& w)  {
+template<DenseNorm norm>
+double DensePenalty<norm>::lambda_max(const vec& XTy, const vec& w)  {
   return(dual_norm(XTy, w)) ;
 }
 

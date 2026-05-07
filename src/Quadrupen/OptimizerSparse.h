@@ -7,21 +7,21 @@
 #define _quadrupen_SIMPLE_OPTIMIZER_H
 
 #include "Optimizer.h"
-#include "PenaltySimple.h"
+#include "PenaltySparse.h"
 #include "ActiveSet.h"
 
 using namespace Rcpp;
 using namespace arma;
 using namespace std;
 
-template <typename matrix, SimpleNorm norm> class SimpleOptimizer: public Optimizer {
+template <typename matrix, SparseNorm norm> class SimpleOptimizer: public Optimizer {
   
 public:
   
   SimpleOptimizer() {} ;
-  SimpleOptimizer(SimplePenalty<norm>&, const List&) ;
+  SimpleOptimizer(SparsePenalty<norm>&, const List&) ;
   
-  SimplePenalty<norm> penalty_ ;
+  SparsePenalty<norm> penalty_ ;
   using Optimizer::algorithm_  ;
   using Optimizer::accuracy_   ;
   using Optimizer::maxiter_    ;
@@ -59,14 +59,14 @@ public:
   
 };
 
-template <typename matrix, SimpleNorm norm>
+template <typename matrix, SparseNorm norm>
 SimpleOptimizer<matrix, norm>::SimpleOptimizer(
-    SimplePenalty<norm>& penalty, const List& control) : 
+    SparsePenalty<norm>& penalty, const List& control) : 
     Optimizer(control) {
     penalty_ = penalty ;
   }
 
-template <typename matrix, SimpleNorm norm>
+template <typename matrix, SparseNorm norm>
 uword SimpleOptimizer<matrix,norm>::solve(
     vec& beta,
     vec& grad,

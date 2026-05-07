@@ -7,7 +7,7 @@
 #define _BoundedRegression_H
 
 #include "Regularizer.h"
-#include "PenaltySimple.h"
+#include "PenaltyDense.h"
 #include "OptimizerLINF.h"
 
 using namespace Rcpp;
@@ -18,7 +18,7 @@ class BoundedRegression : public Regularizer<mat> {
 public:
   
   // Specific to Bounded regression
-  SimplePenalty<SimpleNorm::LINF> penalty_ ; // main penalty object 
+  DensePenalty<DenseNorm::LINF> penalty_ ; // main penalty object 
   OptimizerLINF solver_ ; // Solvers for LINF penalty
   uvec unbounded_   ; // Active variables (away from the boundary)
   vector<uvec> bounded_ ; // variables reaching the boundary (for all lambda values)
