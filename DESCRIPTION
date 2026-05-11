@@ -53,6 +53,7 @@ Collate:
     'bounded-reg.R'
     'elastic-net.R'
     'fused-lasso.R'
+    'sparse_lm.R'
     'group_sparse_lm.R'
     'group_sparse_lm_aliases.R'
     'group-lava.R'

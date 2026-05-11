@@ -19,8 +19,9 @@ using namespace std;
 template <SparseNorm norm> class SparsePenalty {
   public: 
     
-    double gamma_ = 0 ; // Optional factor for non-concave penalties
+    double eta_ = 0 ; // Optional factor for non-concave penalties
     SparsePenalty() {} ;
+    SparsePenalty(double eta) : eta_(eta){} ;
     
     vec    elt_norm  (const vec& x, const vec& w, double lambda=0) ;
     vec    elt_dual_norm  (const vec& x, const vec& w, double lambda=0) ;
@@ -31,6 +32,21 @@ template <SparseNorm norm> class SparsePenalty {
     vec optimality(const vec& x, double lambda, const vec& w)  ;
     
 };
+
+template<SparseNorm norm>
+double SparsePenalty<norm>::pen_norm(const vec& x, const vec& w, double lambda) {
+  return(accu(elt_norm(x, w)));
+}
+
+template<SparseNorm norm>
+vec SparsePenalty<norm>::elt_dual_norm(const vec& x, const vec& w, double lambda) {
+  return(arma::abs(x) / w);
+}
+
+template<SparseNorm norm>
+double SparsePenalty<norm>::dual_norm(const vec& x, const vec& w, double lambda) {
+  return arma::max(elt_dual_norm(x, w));
+}
 
 template<SparseNorm norm>
   vec SparsePenalty<norm>::optimality(const vec& grad, double lambda, const vec& w)  {

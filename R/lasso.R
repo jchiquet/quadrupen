@@ -57,19 +57,21 @@ lasso <- function(x,
                   beta0     = numeric(ncol(x)),
                   control   = list()) {
   
-  out <- elastic.net(x,
-                     y,
-                     lambda1   = lambda1,
-                     lambda2   = 0,
-                     penscale  = penscale,
-                     intercept = intercept,
-                     normalize = normalize,
-                     refit     = refit,
-                     nlambda1  = nlambda1,
-                     minratio  = minratio,
-                     maxfeat   = maxfeat,
-                     beta0     = beta0,
-                     control   = control)
+  out <- sparse_lm(x,
+                   y,
+                   type = "l1",
+                   lambda1   = lambda1,
+                   lambda2   = 0,
+                   eta       = 0,
+                   penscale  = penscale,
+                   intercept = intercept,
+                   normalize = normalize,
+                   refit     = refit,
+                   nlambda1  = nlambda1,
+                   minratio  = minratio,
+                   maxfeat   = maxfeat,
+                   beta0     = beta0,
+                   control   = control)
   out
 }
 

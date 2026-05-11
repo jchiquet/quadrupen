@@ -17,9 +17,8 @@
 #' match the number of column in \code{x}. Must be SORTED integers
 #' starting from 1.
 #'
-#' @param type string indicating whether the \eqn{\ell_1/\ell_2}{l1/l2} or the
-#' \eqn{\ell_1/\ell_\infty}{l1/linf} group-Lasso must be fitted. Could be "linf" or 
-#' "l2", default is "l2"
+#' @param type string indicating the sparse-group variant to be fitted. 
+#' Could be "l2", "coop", or "linf". Default is "l2" (regular Group-Lasso)
 #'
 #' @return an object with class [SparseGroupFit], inheriting from [QuadrupenFit].
 #'

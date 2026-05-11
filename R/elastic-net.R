@@ -152,48 +152,21 @@ elastic.net <- function(x,
                         beta0     = numeric(ncol(x)),
                         control   = list()) {
   
-  ## ============================================
-  ## RECOVER LOW LEVEL CONFIGURATION
-  ##
-  ctrl <- optim_enet_default(ncol(x))
-  ctrl$maxfeat <- maxfeat
-  ctrl[names(control)] <- control # default overwritten by user specifications
-  ctrl$method <- switch(ctrl$method, quadra = "QUADRA", fista = "FISTA", pgd = "PGD", 0)
-  ctrl$normalize <- normalize
-  ctrl$beta0  <- beta0
-  
-  ## ============================================
-  ## INSTANTIATE THE DATA MODEL
-  ##
-  myData <- DataModel$new(
-    covariates  = x,
-    outcome     = y,
-    cov_struct  = struct
-  )
-  
-  ## ============================================
-  ## INSTANTIATE THE PENALIZED MODEL
-  ##
-  myModel <- ElasticNetFit$new(
-    data      = myData,
-    intercept = intercept,
-    regParam  = list(lambda = lambda1, 
-                     gamma  = lambda2, 
-                     lambda_factor = penscale, 
-                     min_ratio = minratio, n_lambda = nlambda1)
-  )
-    
-  ## ============================================
-  ## FIT THE MODEL WITH ACTIVE SET ALGORITHM
-  ##
-  if (ctrl$verbose > 0) cat("\nModel fitting and optimization")
-  myModel$fit(ctrl)
-
-  ## ============================================
-  ## POSTREATMENT + SEND BACK THE RESULTING MODEL
-  ##
-  if (ctrl$verbose > 0) cat("\nPost-treatment")
-  myModel$debias <- refit
-  myModel$criteria()
-  myModel
+  out <- sparse_lm(x,
+                   y,
+                   type      = "l1",
+                   lambda1   = lambda1,
+                   lambda2   = lambda2,
+                   eta       = 0,
+                   penscale  = penscale,
+                   struct    = struct,
+                   intercept = intercept,
+                   normalize = normalize,
+                   refit     = refit,
+                   nlambda1  = nlambda1,
+                   minratio  = minratio,
+                   maxfeat   = maxfeat,
+                   beta0     = beta0,
+                   control   = control)
+  out  
 }

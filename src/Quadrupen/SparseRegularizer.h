@@ -11,7 +11,7 @@ using namespace Rcpp;
 using namespace arma;
 using namespace std;
 
-template <typename matrix>
+template <typename matrix, SparseNorm norm>
 class SparseRegularizer : 
   public Regularizer<matrix>{
   public:
@@ -31,7 +31,7 @@ class SparseRegularizer :
     vector<uvec> active_ ; // successively activated variable (for all lambda values)
     vector<double >intercept_debiased_ ; // debiased vector of intercept values (for all lambda values)
     vec beta_debiased_ ; // vector of current active beta debiased (for the current lambda)
-    SparsePenalty<SparseNorm::L1> penalty_ ; // main penalty object 
+    SparsePenalty<norm> penalty_ ; // main penalty object 
     ActiveSet<matrix> set_       ; // Active set of variable and data
     
     double get_lambda_max() 
@@ -44,7 +44,7 @@ class SparseRegularizer :
     List solution_path(const List&);
     
     // Specific to Elastic-Net regularization
-    SparseOptimizer<matrix, SparseNorm::L1> solver_ ; // Solvers for L1 penalty
+    SparseOptimizer<matrix, norm> solver_ ; // Solvers for L1 penalty
     
     void optimality_gap(double lambda_, uword type) ;
     
@@ -91,17 +91,17 @@ class SparseRegularizer :
 
 };
 
-template <typename matrix>
-SparseRegularizer<matrix>::SparseRegularizer(
+template <typename matrix, SparseNorm norm>
+SparseRegularizer<matrix,norm>::SparseRegularizer(
   const RegressionData<matrix>& data, const List& regParam, const List& control) :
   Regularizer<matrix>::Regularizer(data, regParam) {
     
     // Set the penalty to l1
-    penalty_ = SparsePenalty<SparseNorm::L1>() ;
+    penalty_ = SparsePenalty<norm>(as<double>(regParam["eta"])) ;
     get_lambda_seq(penalty_.lambda_max(data_.XTy_, lambda_factor_), regParam) ;
     
     // Set up the optimizer
-    solver_ = SparseOptimizer<matrix,SparseNorm::L1>(penalty_, control) ;
+    solver_ = SparseOptimizer<matrix,norm>(penalty_, control) ;
 
     // Scale the structuring matrix according to the amount of l2 penalty 
     data_.scale_struct(gamma_) ;
@@ -120,8 +120,8 @@ SparseRegularizer<matrix>::SparseRegularizer(
     
   }
 
-template <typename matrix>
-double SparseRegularizer<matrix>::get_df() {
+template <typename matrix, SparseNorm norm>
+double SparseRegularizer<matrix,norm>::get_df() {
   
   double df = set_.size() + data_.centered_ ;
   if (gamma_ > 0) {
@@ -140,8 +140,8 @@ double SparseRegularizer<matrix>::get_df() {
   return(df);
 }
 
-template <typename matrix>
-List SparseRegularizer<matrix>::solution_path(const List& control) {
+template <typename matrix, SparseNorm norm>
+List SparseRegularizer<matrix,norm>::solution_path(const List& control) {
   
   vector<double> gap, timing ; // timings and optimality measures
   vector<uword> status, iter ; // convergence and # of inner/outer iterates
@@ -191,5 +191,4 @@ List SparseRegularizer<matrix>::solution_path(const List& control) {
     )
   );
 }
-
 

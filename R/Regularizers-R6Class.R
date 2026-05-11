@@ -10,17 +10,42 @@
 ElasticNetFit <- R6::R6Class(
   classname = "ElasticNetFit",
   inherit = QuadrupenFit,
-  #' @field penalty character describing the regularizer/penalty
-  active  = list(penalty = function(value) "elastic.net"),
+  private  = list(type_ = NA),
+  active  = list(
+    #' @field penalty character describing the regularizer/penalty
+    penalty = function(value) {
+      ridge  <- ifelse(self$is_l2_regularized, "plus L2-regularization", "")
+      sparse  <- switch(private$type_,
+                       "l1" = "L1",
+                       "mcp" = "MCP",
+                       "scad" = "SCAD"
+      )
+      paste(sparse, ridge)
+    },
+    #' @field type string the type of group-wise regularization applied
+    type = function(value) private$type_,
+    #' @field unbiasing_tuning unbiasing coefficient of the MCP or SCAD penalties
+    unbiasing_tuning = function(value) {
+      if (missing(value))
+        return(private$tuning$eta)
+      else private$tuning$eta <- value
+    }
+  ),
   public  = list(
     #' @description Initialize a [`ElasticNetFit`] model
     #' @param data a [`DataModel`] object
     #' @param intercept a logical; should an intercept be included in the mode?
     #' @param regParam a list with two elements, a vector and a scalar, for the regularization
-    initialize =  function(data, intercept, regParam) {
+    initialize =  function(data, intercept, type, regParam) {
       super$initialize(data, intercept, regParam)
-      private$optimizer <- 
-        ifelse(data$sparse_encoding, elastic_net_sparse_cpp, elastic_net_dense_cpp)
+      private$type_  <- type
+      if (data$sparse_encoding) {
+        private$optimizer <-  switch(private$type_, 
+            "mcp" = mcp_sparse_cpp, "scad" = scad_sparse_cpp, elastic_net_sparse_cpp)
+      } else {
+        private$optimizer <- switch(private$type_,
+            "mcp" = mcp_dense_cpp, "scad" = scad_dense_cpp, elastic_net_dense_cpp)
+      }
     }
   )
 )

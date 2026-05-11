@@ -17,6 +17,10 @@ and methods of \link{QuadrupenFit}
   \if{html}{\out{<div class="r6-active-bindings">}}
   \describe{
     \item{\code{penalty}}{character describing the regularizer/penalty}
+
+    \item{\code{type}}{string the type of group-wise regularization applied}
+
+    \item{\code{unbiasing_tuning}}{unbiasing coefficient of the MCP or SCAD penalties}
   }
   \if{html}{\out{</div>}}
 }
