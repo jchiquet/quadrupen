@@ -13,12 +13,13 @@ using namespace Rcpp;
 using namespace arma;
 using namespace std;
 
-template <typename matrix, SparseNorm norm> class SimpleOptimizer: public Optimizer {
+template <typename matrix, SparseNorm norm>
+class SparseOptimizer: public Optimizer {
   
 public:
   
-  SimpleOptimizer() {} ;
-  SimpleOptimizer(SparsePenalty<norm>&, const List&) ;
+  SparseOptimizer() {} ;
+  SparseOptimizer(SparsePenalty<norm>&, const List&) ;
   
   SparsePenalty<norm> penalty_ ;
   using Optimizer::algorithm_  ;
@@ -38,7 +39,7 @@ public:
   using Optimizer::fista ;
   using Optimizer::pgd ;
   
-  uword solve(
+  uword working_set(
       vec& beta,
       vec& grad,
       const double& lambda, 
@@ -48,25 +49,84 @@ public:
       ActiveSet<matrix>& set
   ) ;
 
-  virtual uword quadratic(
+  uword quadratic(
       vec &beta,
       const vec &lambda,
       const vec &XTy,
       ActiveSet<matrix> &set,
       const double& accuracy,
-      const uword& max_iter) = 0 ;
+      const uword& max_iter) ;
   
 };
 
 template <typename matrix, SparseNorm norm>
-SimpleOptimizer<matrix, norm>::SimpleOptimizer(
+SparseOptimizer<matrix, norm>::SparseOptimizer(
     SparsePenalty<norm>& penalty, const List& control) : 
     Optimizer(control) {
     penalty_ = penalty ;
   }
 
 template <typename matrix, SparseNorm norm>
-uword SimpleOptimizer<matrix,norm>::solve(
+uword SparseOptimizer<matrix, norm>::quadratic(
+    vec &beta,
+    const vec &lambda,
+    const vec &XTy,
+    ActiveSet<matrix> &set,
+    const double& accuracy,
+    const uword& max_iter) {
+  
+  uword iter = 0, iter_in= 0 ;
+  bool signs_stable = false;
+  
+  while (!signs_stable && iter < 10 && set.size() > 0) { // Max 10 swaps
+    iter++;  
+    // Solving the quadratic problem
+    vec betak = beta;
+    vec theta = sign(beta) ; // vector of sign of the solution
+    if (set.use_chol_) {
+      // Step 1 - Forward Substitution
+      vec tmp = arma::solve(trimatl(set.R_.t()), XTy(set.A_) - lambda(set.A_) % theta);
+      // Step 2 - Backward Substitution
+      betak = arma::solve(trimatu(set.R_), tmp);
+    } else {
+      iter_in = 
+        this->conjugate_gradient(betak, set.XATXA_, 
+                                 XTy(set.A_) - lambda(set.A_) % theta,
+                                 accuracy, max_iter) ;
+    }
+    
+    // Check for swapping variables
+    // uvec swap = find(abs(betak) > accuracy/100 && sign(betak) != theta) ;
+    uvec swap = find(sign(betak) != theta) ;
+    if (swap.is_empty()) {
+      beta = betak;
+      signs_stable = true;
+    } else {
+      // Find the first variable hitting zero
+      vec eta = -beta(swap) / (betak(swap) - beta(swap));
+      uword i_min = eta.index_min();
+      uword idx_to_remove = swap[i_min];
+      
+      // Interpolate by moving all variables to this point
+      beta = beta + eta(i_min) * (betak - beta);
+      
+      // Remove the incriminated variable
+      if (verbosity_) Rprintf("\tremoving variables %i\n", set.A_(idx_to_remove)) ;
+      set.del_var(idx_to_remove, beta) ; 
+      
+      // Update theta on the new set
+      theta = sign(beta);      
+    }
+  }
+  
+  if (set.use_chol_) {
+    return(iter) ;
+  } else return(iter_in) ;
+  
+}
+
+template <typename matrix, SparseNorm norm>
+uword SparseOptimizer<matrix,norm>::working_set(
     vec& beta,
     vec& grad,
     const double& lambda,

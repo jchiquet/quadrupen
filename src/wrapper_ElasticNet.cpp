@@ -3,7 +3,7 @@
  *         MIA Paris-Saclay
  */
 
-#include "Quadrupen/ElasticNet.h"
+#include "Quadrupen/SparseRegularizer.h"
 
 using namespace Rcpp;
 using namespace arma;
@@ -18,7 +18,7 @@ List elastic_net_dense_cpp(
 
   RegressionData<mat> data(dataModel, intercept, as<bool>(control["normalize"])) ;
 
-  ElasticNet<mat> enet(data, regParam, control);
+  SparseRegularizer<mat> enet(data, regParam, control);
 
   List results = enet.solution_path(control);
 
@@ -49,7 +49,7 @@ List elastic_net_sparse_cpp(
   
   RegressionData<sp_mat> data(dataModel, intercept, as<bool>(control["normalize"])) ;
   
-  ElasticNet<sp_mat> enet(data, regParam, control);
+  SparseRegularizer<sp_mat> enet(data, regParam, control);
   
   List results = enet.solution_path(control);
   

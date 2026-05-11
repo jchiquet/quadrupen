@@ -13,7 +13,8 @@ using namespace Rcpp;
 using namespace arma;
 using namespace std;
 
-template <typename matrix, GroupSparseNorm norm> class GroupOptimizer : public Optimizer {
+template <typename matrix, GroupSparseNorm norm> 
+class GroupOptimizer : public Optimizer {
   
 public:
   
@@ -38,7 +39,7 @@ public:
   using Optimizer::fista ;
   using Optimizer::pgd ;
   
-  uword solve(
+  uword working_set(
       vec& beta,
       vec& grad,
       const double& lambda,
@@ -157,7 +158,7 @@ uword GroupOptimizer<matrix, norm>::quadratic(
 }
 
 template <typename matrix, GroupSparseNorm norm>
-uword GroupOptimizer<matrix,norm>::solve(
+uword GroupOptimizer<matrix,norm>::working_set(
     vec& beta,
     vec& grad,
     const double& lambda,
