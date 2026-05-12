@@ -9,7 +9,10 @@ reference:
   contents: 
   - bounded_reg
   - elastic_net
+  - scad
+  - mcp
   - fusedlasso
+  - sparse_lm
   - group_sparse_lm
   - group_lasso
   - sparse_group_lasso
@@ -25,8 +28,8 @@ reference:
   desc: "R6 Classes for the user to manipulate the ouput of the main functions"
   contents:
   - QuadrupenFit
-  - ElasticNetFit
   - FusedLassoFit
+  - SparseFit
   - SparseGroupFit
   - GroupLavaFit
   - LavaFit
