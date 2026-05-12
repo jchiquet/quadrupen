@@ -1,4 +1,4 @@
-#' Class "ElasticNetFit"
+#' Class "SparseFit"
 #' 
 #' Class of object returned by the fitting function [elastic.net()]. Inherits fields
 #' and methods of [QuadrupenFit]
@@ -7,8 +7,8 @@
 #' 
 #' @export
 #' 
-ElasticNetFit <- R6::R6Class(
-  classname = "ElasticNetFit",
+SparseFit <- R6::R6Class(
+  classname = "SparseFit",
   inherit = QuadrupenFit,
   private  = list(type_ = NA),
   active  = list(
@@ -32,7 +32,7 @@ ElasticNetFit <- R6::R6Class(
     }
   ),
   public  = list(
-    #' @description Initialize a [`ElasticNetFit`] model
+    #' @description Initialize a [`SparseFit`] model
     #' @param data a [`DataModel`] object
     #' @param intercept a logical; should an intercept be included in the mode?
     #' @param regParam a list with two elements, a vector and a scalar, for the regularization

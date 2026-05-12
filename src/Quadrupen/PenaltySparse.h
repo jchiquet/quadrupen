@@ -30,7 +30,8 @@ template <SparseNorm norm> class SparsePenalty {
     vec proximal(const vec& x, double lambda, const vec& w) ;
     double lambda_max (const vec& XTy, const vec& w) ;
     vec optimality(const vec& x, double lambda, const vec& w)  ;
-    
+    vec derivative(const vec& beta, double lambda, const vec& w) ;
+
 };
 
 template<SparseNorm norm>
@@ -48,6 +49,7 @@ double SparsePenalty<norm>::dual_norm(const vec& x, const vec& w, double lambda)
   return arma::max(elt_dual_norm(x, w));
 }
 
+// Proche de zéro, SCAD et MCP se comportent comme le Lasso
 template<SparseNorm norm>
   vec SparsePenalty<norm>::optimality(const vec& grad, double lambda, const vec& w)  {
     return(elt_dual_norm(grad, w) - lambda) ;

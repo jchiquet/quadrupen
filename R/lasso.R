@@ -21,7 +21,7 @@
 #' \eqn{D}{D} is a diagonal matrix, whose diagonal terms are provided
 #' as a vector by the \code{penscale} argument.
 #'
-#' @return an object with class [ElasticNetFit], inheriting from [QuadrupenFit].
+#' @return an object with class [SparseFit], inheriting from [QuadrupenFit].
 #' 
 #' @keywords models, regression
 #'

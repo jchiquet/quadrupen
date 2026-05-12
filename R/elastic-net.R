@@ -109,7 +109,7 @@
 #' argument, a positive semidefinite matrix (possibly of class
 #' `Matrix`).
 #'
-#' @return an object with class [ElasticNetFit], inheriting from [QuadrupenFit].
+#' @return an object with class [SparseFit], inheriting from [QuadrupenFit].
 #'
 #' @seealso See also [QuadrupenFit]
 #' 

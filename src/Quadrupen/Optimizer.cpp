@@ -222,7 +222,7 @@ uword Optimizer::conjugate_gradient(
   return i;
 }
 
-void Optimizer::optimality_gap(
+void Optimizer::optimality_violation(
   vec& beta,
   vec& grad,
   const double& lambda,

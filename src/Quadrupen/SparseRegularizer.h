@@ -46,7 +46,7 @@ class SparseRegularizer :
     // Specific to Elastic-Net regularization
     SparseOptimizer<matrix, norm> solver_ ; // Solvers for L1 penalty
     
-    void optimality_gap(double lambda_, uword type) ;
+    void optimality_violation(double lambda_, uword type) ;
     
     // Compute degrees of freedom for the current estimate
     double get_df() ;

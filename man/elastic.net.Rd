@@ -110,7 +110,7 @@ when \code{'1'}, the bound derived in Grandvalet et al. is computed; when
 }}
 }
 \value{
-an object with class \link{ElasticNetFit}, inheriting from \link{QuadrupenFit}.
+an object with class \link{SparseFit}, inheriting from \link{QuadrupenFit}.
 }
 \description{
 Adjust a linear model with elastic-net regularization, mixing a

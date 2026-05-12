@@ -35,7 +35,7 @@ public:
   using Optimizer::D_          ;
   using Optimizer::J_vec_      ;
   using Optimizer::D_vec_      ;
-  using Optimizer::optimality_gap ;
+  using Optimizer::optimality_violation ;
   using Optimizer::fista ;
   using Optimizer::pgd ;
   
@@ -51,7 +51,8 @@ public:
 
   uword quadratic(
       vec &beta,
-      const vec &lambda,
+      const double &lambda,
+      const vec &weights,
       const vec &XTy,
       ActiveSet<matrix> &set,
       const double& accuracy,
@@ -69,59 +70,67 @@ SparseOptimizer<matrix, norm>::SparseOptimizer(
 template <typename matrix, SparseNorm norm>
 uword SparseOptimizer<matrix, norm>::quadratic(
     vec &beta,
-    const vec &lambda,
+    const double &lambda,
+    const vec &weights,
     const vec &XTy,
     ActiveSet<matrix> &set,
     const double& accuracy,
     const uword& max_iter) {
   
-  uword iter = 0, iter_in= 0 ;
+  uword iter = 0 ;
   bool signs_stable = false;
   
   while (!signs_stable && iter < 10 && set.size() > 0) { // Max 10 swaps
-    iter++;  
-    // Solving the quadratic problem
-    vec betak = beta;
-    vec theta = sign(beta) ; // vector of sign of the solution
+    iter++;
+    vec beta_old = beta;
+    
+    // Local weights for local linear approximation (LLA)
+    // For MCP/SCAD, effective weights changes according to the current beta
+    vec local_w = penalty_.derivative(beta_old, lambda, weights.elem(set.A_));
+    vec theta = sign(beta_old);    
+    
+    // Solving the quadratic problem (KKT Newton)
+    // (XA'XA) beta = XA'y - local_w * sign(beta)
+    vec betak; // candidate for next step
     if (set.use_chol_) {
+      vec rhs = XTy(set.A_) - local_w % theta;
       // Step 1 - Forward Substitution
-      vec tmp = arma::solve(trimatl(set.R_.t()), XTy(set.A_) - lambda(set.A_) % theta);
+      vec tmp = arma::solve(trimatl(set.R_.t()), rhs);
       // Step 2 - Backward Substitution
       betak = arma::solve(trimatu(set.R_), tmp);
     } else {
-      iter_in = 
-        this->conjugate_gradient(betak, set.XATXA_, 
-                                 XTy(set.A_) - lambda(set.A_) % theta,
-                                 accuracy, max_iter) ;
+      betak = beta_old ; // warm start for CG
+      this->conjugate_gradient(beta, set.XATXA_, 
+                               XTy(set.A_) - local_w % theta, 
+                               accuracy, max_iter);
     }
     
-    // Check for swapping variables
-    // uvec swap = find(abs(betak) > accuracy/100 && sign(betak) != theta) ;
-    uvec swap = find(sign(betak) != theta) ;
-    if (swap.is_empty()) {
+    // Check for swapping variables / sign stability
+    uvec swap = find(sign(betak) != theta && abs(beta_old) > accuracy);
+    if (swap.is_empty()) { // No swap: check for convergence 
+      double diff = arma::norm(beta_old - betak, 2); // for MCP and SCAD
       beta = betak;
-      signs_stable = true;
+      if (diff < accuracy) signs_stable = true;
     } else {
-      // Find the first variable hitting zero
-      vec eta = -beta(swap) / (betak(swap) - beta(swap));
-      uword i_min = eta.index_min();
+      // Find the first variable hitting zero and its interpolating ratio
+      vec ratios = -beta_old(swap) / (betak(swap) - beta_old(swap));
+      uword i_min = ratios.index_min();
       uword idx_to_remove = swap[i_min];
       
       // Interpolate by moving all variables to this point
-      beta = beta + eta(i_min) * (betak - beta);
+      beta = beta_old + ratios(i_min) * (betak - beta_old);
+      beta[idx_to_remove] = 0.0;
       
       // Remove the incriminated variable
       if (verbosity_) Rprintf("\tremoving variables %i\n", set.A_(idx_to_remove)) ;
       set.del_var(idx_to_remove, beta) ; 
       
-      // Update theta on the new set
-      theta = sign(beta);      
+      // // Update theta on the new set
+      // theta = sign(beta);      
     }
   }
   
-  if (set.use_chol_) {
-    return(iter) ;
-  } else return(iter_in) ;
+  return(iter) ;
   
 }
 
@@ -163,7 +172,7 @@ uword SparseOptimizer<matrix,norm>::working_set(
     // OPTIMIZATION OVER THE CURRENTLY ACTIVATED VARIABLES
     if (algorithm_ ==  QUADRA) { // Newton-based solver
       inner_iter_.push_back(
-        quadratic(beta, lambda*weights, data.XTy_, set, 1e-9, 1000)
+        quadratic(beta, lambda, weights, data.XTy_, set, 1e-9, 1000)
       );
       grad = - data.XTy_ + set.XTXA_ * beta ;
     } 
@@ -198,7 +207,7 @@ uword SparseOptimizer<matrix,norm>::working_set(
     gap_ = std::max(0.0, optimality(var_in)) ;
     
     if (monitoring_ > 0) {
-      optimality_gap(beta, grad, lambda, gamma, data.XTy_(set.A_), set.XATXA_, data.norm_y_, set.A_, monitoring_) ;
+      optimality_violation(beta, grad, lambda, gamma, data.XTy_(set.A_), set.XATXA_, data.norm_y_, set.A_, monitoring_) ;
       J_vec_.push_back(J_) ;
       D_vec_.push_back(D_) ;
     }

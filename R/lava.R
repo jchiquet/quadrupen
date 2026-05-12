@@ -90,7 +90,8 @@ lava <- function(x,
     data      = myData,
     intercept = intercept,
     regParam  = list(lambda = lambda1, 
-                     gamma  = lambda2, 
+                     gamma  = lambda2,
+                     eta = 1,
                      lambda_factor = penscale, 
                      min_ratio = minratio, n_lambda = nlambda1)
   )

@@ -15,7 +15,7 @@
 #' @param eta real positive scalar for tuning SCAD or MCP penalties. 
 #' Default is 3. Ignored when type == "l1".
 #'
-#' @return an object with class [ElasticNetFit], inheriting from [QuadrupenFit].
+#' @return an object with class [SparseFit], inheriting from [QuadrupenFit].
 #'
 #' @seealso See also [QuadrupenFit]
 #' 
@@ -48,7 +48,7 @@ sparse_lm <- function(x,
                       type      = c("l1", "mcp", "scad"),
                       lambda1   = NULL,
                       lambda2   = 0.01,
-                      eta       = 3,
+                      eta       = 3.7,
                       penscale  = rep(1,ncol(x)),
                       struct    = Matrix::Diagonal(ncol(x), 1),
                       intercept = TRUE,
@@ -60,9 +60,10 @@ sparse_lm <- function(x,
                       beta0     = numeric(ncol(x)),
                       control   = list()) {
 
-  stopifnot(eta >= 0)
   type <- match.arg(type)
-  
+  if (type == "mcp") stopifnot(eta > 1)
+  if (type == "scad") stopifnot(eta > 2)
+
   ## ============================================
   ## RECOVER LOW LEVEL CONFIGURATION
   ##
@@ -70,6 +71,7 @@ sparse_lm <- function(x,
   ctrl$maxfeat <- maxfeat
   ctrl[names(control)] <- control # default overwritten by user specifications
   ctrl$method <- switch(ctrl$method, quadra = "QUADRA", fista = "FISTA", pgd = "PGD", 0)
+  ctrl$factmat <- ctrl$method == "QUADRA"
   ctrl$normalize <- normalize
   ctrl$beta0  <- beta0
   
@@ -85,7 +87,7 @@ sparse_lm <- function(x,
   ## ============================================
   ## INSTANTIATE THE PENALIZED MODEL
   ##
-  myModel <- ElasticNetFit$new(
+  myModel <- SparseFit$new(
     data      = myData,
     intercept = intercept,
     type      = type,
