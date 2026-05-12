@@ -13,5 +13,5 @@ n <- 50
 x <- as.matrix(matrix(rnorm(95*n),n,95) %*% chol(Sigma))
 y <- 10 + x %*% beta + rnorm(n,0,10)
 S <-solve(Sigma)
-joint_pprof(elastic.net(x,y, lambda2=10, struct = S))
+joint_pprof(elastic_net(x,y, lambda2=10, struct = S))
 

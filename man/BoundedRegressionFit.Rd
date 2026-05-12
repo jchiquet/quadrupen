@@ -4,11 +4,11 @@
 \alias{BoundedRegressionFit}
 \title{Class "BoundedRegression"}
 \description{
-Class of object returned by the fitting function \code{\link[=bounded.reg]{bounded.reg()}}. Inherits fields
+Class of object returned by the fitting function \code{\link[=bounded_reg]{bounded_reg()}}. Inherits fields
 and methods of \link{QuadrupenFit}.
 }
 \seealso{
-\link{QuadrupenFit}, \code{\link[=bounded.reg]{bounded.reg()}}
+\link{QuadrupenFit}, \code{\link[=bounded_reg]{bounded_reg()}}
 }
 \section{Super class}{
 \code{\link[quadrupen:QuadrupenFit]{QuadrupenFit}} -> \code{BoundedRegressionFit}

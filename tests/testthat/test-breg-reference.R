@@ -6,7 +6,7 @@ tol <- 1e-3
 
 test_that("Bounded regression with lambda2 = 0, QUADRA - test on the documentation example", {
   
-  res <- bounded.reg(
+  res <- bounded_reg(
     testDataBreg$x,
     testDataBreg$y,
     lambda2 = 0,
@@ -18,7 +18,7 @@ test_that("Bounded regression with lambda2 = 0, QUADRA - test on the documentati
 
 test_that("Bounded regression with lambda2 = 5, QUADRA - test on the documentation example", {
   
-  res <- bounded.reg(
+  res <- bounded_reg(
     testDataBreg$x,
     testDataBreg$y,
     lambda2 = 5,
@@ -30,7 +30,7 @@ test_that("Bounded regression with lambda2 = 5, QUADRA - test on the documentati
 
 test_that("Bounded regression with lambda2 = 10 + S, QUADRA - test on the documentation example", {
   
-  res <- bounded.reg(
+  res <- bounded_reg(
     testDataBreg$x,
     testDataBreg$y,
     lambda2 = 10, 
@@ -43,7 +43,7 @@ test_that("Bounded regression with lambda2 = 10 + S, QUADRA - test on the docume
 
 test_that("Bounded regression with lambda2 = 0, QUADRA with conjuguate gradient - test on the documentation example", {
   
-  res <- bounded.reg(
+  res <- bounded_reg(
     testDataBreg$x,
     testDataBreg$y,
     lambda2 = 0,
@@ -55,7 +55,7 @@ test_that("Bounded regression with lambda2 = 0, QUADRA with conjuguate gradient 
 
 test_that("Bounded regression with lambda2 = 5, QUADRA with conjuguate gradient - test on the documentation example", {
   
-  res <- bounded.reg(
+  res <- bounded_reg(
     testDataBreg$x,
     testDataBreg$y,
     lambda2 = 5,
@@ -67,7 +67,7 @@ test_that("Bounded regression with lambda2 = 5, QUADRA with conjuguate gradient 
 
 test_that("Bounded regression with lambda2 = 10 + S, QUADRA with conjuguate gradient - test on the documentation example", {
   
-  res <- bounded.reg(
+  res <- bounded_reg(
     testDataBreg$x,
     testDataBreg$y,
     lambda2 = 10, 
@@ -83,7 +83,7 @@ tol <- 1e-2
 
 test_that("Bounded regression with lambda2 = 0, FISTA - test on the documentation example", {
   
-  res <- bounded.reg(
+  res <- bounded_reg(
     testDataBreg$x,
     testDataBreg$y,
     lambda2 = 0, control = list(method = "fista")
@@ -94,7 +94,7 @@ test_that("Bounded regression with lambda2 = 0, FISTA - test on the documentatio
 
 test_that("Bounded regression with lambda2 = 5, FISTA - test on the documentation example", {
   
-  res <- bounded.reg(
+  res <- bounded_reg(
     testDataBreg$x,
     testDataBreg$y,
     lambda2 = 5, control = list(method = "fista")
@@ -105,7 +105,7 @@ test_that("Bounded regression with lambda2 = 5, FISTA - test on the documentatio
 
 test_that("Bounded regression with lambda2 = 10 + S, FISTA  - test on the documentation example", {
   
-  res <- bounded.reg(
+  res <- bounded_reg(
     testDataBreg$x,
     testDataBreg$y,
     lambda2 = 10, 

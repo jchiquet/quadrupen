@@ -4,7 +4,7 @@
 #' It can take a general matrix x and provides for possible weights on the 
 #' `lambda1` and `lambda2` penalties. 
 #' 
-#' @inheritParams elastic.net
+#' @inheritParams elastic_net
 #' 
 #' @param struct Description of the graph that corresponds to the `lambda2` penalty structure. 
 #' If \code{NULL} (the default) a chain graph is assumed, like in the standard fused-lasso.

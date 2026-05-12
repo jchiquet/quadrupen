@@ -16,23 +16,13 @@ vec SparsePenalty<SparseNorm::L1>::elt_norm(const vec& x, const vec& w, double l
 }
 
 template<>
-vec SparsePenalty<SparseNorm::L1>::elt_dual_norm(const vec& x, const vec& w, double lambda) {
-  return(arma::abs(x) / w);
-}
-
-template<>
-double SparsePenalty<SparseNorm::L1>::pen_norm(const vec& x, const vec& w, double lambda) {
-  return(accu(elt_norm(x, w)));
-}
-
-template<>
-double SparsePenalty<SparseNorm::L1>::dual_norm(const vec& x, const vec& w, double lambda) {
-  return(max(elt_dual_norm(x, w))) ;
-}
-
-template<>
 vec SparsePenalty<SparseNorm::L1>::proximal(const vec& x, double lambda, const vec& w) {
   return(sign(x) % max(abs(x) - lambda * w, zeros<vec>(x.n_elem))) ;
+}
+
+template<>
+vec SparsePenalty<SparseNorm::L1>::derivative(const vec& beta, double lambda, const vec& w) {
+  return lambda * w;
 }
 
 // ______________________________________________________
@@ -43,18 +33,13 @@ vec SparsePenalty<SparseNorm::MCP>::elt_norm(const vec& x, const vec& w, double 
   vec res = zeros<vec>(x.n_elem);
   for(uword i=0; i<x.n_elem; ++i) {
     double abs_xi = std::abs(x[i]);
-    if (abs_xi <= gamma_ * lambda) {
-      res[i] = lambda * w[i] * abs_xi - (abs_xi * abs_xi) / (2.0 * gamma_);
+    if (abs_xi <= eta_ * lambda) {
+      res[i] = lambda * w[i] * abs_xi - (abs_xi * abs_xi) / (2.0 * eta_);
     } else {
-      res[i] = 0.5 * gamma_ * lambda * lambda * w[i]; // constant value (plateau)
+      res[i] = 0.5 * eta_ * lambda * lambda * w[i]; // constant value (plateau)
     }
   }
   return res;
-}
-
-template<>
-double SparsePenalty<SparseNorm::MCP>::dual_norm(const vec& x, const vec& w, double lambda) {
-  return arma::max(arma::abs(x) / w);
 }
 
 template<>
@@ -65,13 +50,27 @@ vec SparsePenalty<SparseNorm::MCP>::proximal(const vec& x, double lambda, const 
     double l = lambda * w[i];
     if (abs_xi <= l) {
       res[i] = 0.0;
-    } else if (abs_xi <= gamma_ * l) {
-      res[i] = std::copysign(abs_xi - l, x[i]) / (1.0 - 1.0/gamma_);
+    } else if (abs_xi <= eta_ * l) {
+      res[i] = std::copysign(abs_xi - l, x[i]) / (1.0 - 1.0/eta_);
     } else {
       res[i] = x[i];
     }
   }
   return res;
+}
+
+template<>
+vec SparsePenalty<SparseNorm::MCP>::derivative(const vec& beta, double lambda, const vec& w) {
+  vec d = zeros<vec>(beta.n_elem);
+  for(uword i=0; i<beta.n_elem; ++i) {
+    double abs_b = std::abs(beta[i]);
+    if (abs_b < eta_ * lambda * w[i]) {
+      d[i] = lambda * w[i] - abs_b / eta_;
+    } else {
+      d[i] = 0.0;
+    }
+  }
+  return d;
 }
 
 // ______________________________________________________
@@ -85,20 +84,13 @@ vec SparsePenalty<SparseNorm::SCAD>::elt_norm(const vec& x, const vec& w, double
     double l = lambda * w[i];
     if (abs_xi <= l) {
       res[i] = l * abs_xi;
-    } else if (abs_xi <= gamma_ * l) {
-      res[i] = (2.0 * gamma_ * l * abs_xi - abs_xi * abs_xi - l * l) / (2.0 * (gamma_ - 1.0));
+    } else if (abs_xi <= eta_ * l) {
+      res[i] = (2.0 * eta_ * l * abs_xi - abs_xi * abs_xi - l * l) / (2.0 * (eta_ - 1.0));
     } else {
-      res[i] = (l * l * (gamma_ + 1.0)) / 2.0;
+      res[i] = (l * l * (eta_ + 1.0)) / 2.0;
     }
   }
   return res;
-}
-
-// Comme MCP, la condition d'entrée (dual) est dominée par la pente à l'origine
-// Donc comme le Lasso
-template<>
-double SparsePenalty<SparseNorm::SCAD>::dual_norm(const vec& x, const vec& w, double lambda) {
-  return arma::max(arma::abs(x) / w);
 }
 
 template<>
@@ -110,9 +102,9 @@ vec SparsePenalty<SparseNorm::SCAD>::proximal(const vec& x, double lambda, const
     if (abs_xi <= 2.0 * l) {
       // Soft-thresholding classique
       res[i] = std::copysign(std::max(0.0, abs_xi - l), x[i]);
-    } else if (abs_xi <= gamma_ * l) {
+    } else if (abs_xi <= eta_ * l) {
       // Zone intermédiaire (interpolation)
-      res[i] = ((gamma_ - 1.0) * x[i] - std::copysign(gamma_ * l, x[i])) / (gamma_ - 2.0);
+      res[i] = ((eta_ - 1.0) * x[i] - std::copysign(eta_ * l, x[i])) / (eta_ - 2.0);
     } else {
       res[i] = x[i]; // Pas de biais
     }
@@ -120,3 +112,19 @@ vec SparsePenalty<SparseNorm::SCAD>::proximal(const vec& x, double lambda, const
   return res;
 }
 
+template<>
+vec SparsePenalty<SparseNorm::SCAD>::derivative(const vec& beta, double lambda, const vec& w) {
+  vec d = zeros<vec>(beta.n_elem);
+  for(uword i=0; i<beta.n_elem; ++i) {
+    double abs_b = std::abs(beta[i]);
+    double l = lambda * w[i];
+    if (abs_b <= l) {
+      d[i] = l;
+    } else if (abs_b <= eta_ * l) {
+      d[i] = (eta_ * l - abs_b) / (eta_ - 1.0);
+    } else {
+      d[i] = 0.0;
+    }
+  }
+  return d;
+}

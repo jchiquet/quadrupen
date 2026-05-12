@@ -5,25 +5,25 @@
 
 #pragma once
 
-#include "ElasticNet.h"
+#include "SparseRegularizer.h"
 
 using namespace Rcpp;
 using namespace arma;
 using namespace std;
 
-template <typename matrix>
-class Lava : public ElasticNet<matrix> {
+template <typename matrix, SparseNorm norm>
+class Lava : public SparseRegularizer<matrix,norm> {
 
 public:
 
   using Regularizer<matrix>::coef_       ;
   using Regularizer<matrix>::intercept_  ;
   using Regularizer<matrix>::data_       ;
-  using ElasticNet<matrix>::set_      ;
-  using ElasticNet<matrix>::active_  ;
-  using ElasticNet<matrix>::debiased_ ;
-  using ElasticNet<matrix>::intercept_debiased_ ;
-  using ElasticNet<matrix>::lambda_factor_ ;
+  using SparseRegularizer<matrix,norm>::set_      ;
+  using SparseRegularizer<matrix,norm>::active_  ;
+  using SparseRegularizer<matrix,norm>::debiased_ ;
+  using SparseRegularizer<matrix,norm>::intercept_debiased_ ;
+  using SparseRegularizer<matrix,norm>::lambda_factor_ ;
   
   Lava(const RegressionData<matrix>&, const mat&, const List&, const List&);
 
@@ -38,17 +38,17 @@ public:
   
 };
 
-template <typename matrix>
-Lava<matrix>::Lava(
+template <typename matrix, SparseNorm norm>
+Lava<matrix,norm>::Lava(
   const RegressionData<matrix>& data,
   const mat& Proj,
   const List& regParam,
   const List& control) :
-  ElasticNet<matrix>::ElasticNet(data, regParam, control), 
+  SparseRegularizer<matrix,norm>::SparseRegularizer(data, regParam, control), 
   Proj_(Proj) {}
 
-template <typename matrix>
-double Lava<matrix>::get_df() {
+template <typename matrix, SparseNorm norm>
+double Lava<matrix,norm>::get_df() {
   
   double df = set_.size() + data_.centered_ ;
   mat K = diagmat(ones(data_.n_)) - 
@@ -59,8 +59,8 @@ double Lava<matrix>::get_df() {
   return(df);
 }
 
-template <typename matrix>
-void Lava<matrix>::post_treatment(const RegressionData<matrix>& data, const mat& b) {
+template <typename matrix, SparseNorm norm>
+void Lava<matrix,norm>::post_treatment(const RegressionData<matrix>& data, const mat& b) {
   
   sp_mat beta = this->coefficients() ;
 

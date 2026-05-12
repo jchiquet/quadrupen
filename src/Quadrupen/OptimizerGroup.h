@@ -13,7 +13,8 @@ using namespace Rcpp;
 using namespace arma;
 using namespace std;
 
-template <typename matrix, GroupSparseNorm norm> class GroupOptimizer : public Optimizer {
+template <typename matrix, GroupSparseNorm norm> 
+class GroupOptimizer : public Optimizer {
   
 public:
   
@@ -34,11 +35,11 @@ public:
   using Optimizer::D_          ;
   using Optimizer::J_vec_      ;
   using Optimizer::D_vec_      ;
-  using Optimizer::optimality_gap ;
+  using Optimizer::optimality_violation ;
   using Optimizer::fista ;
   using Optimizer::pgd ;
   
-  uword solve(
+  uword working_set(
       vec& beta,
       vec& grad,
       const double& lambda,
@@ -157,7 +158,7 @@ uword GroupOptimizer<matrix, norm>::quadratic(
 }
 
 template <typename matrix, GroupSparseNorm norm>
-uword GroupOptimizer<matrix,norm>::solve(
+uword GroupOptimizer<matrix,norm>::working_set(
     vec& beta,
     vec& grad,
     const double& lambda,
@@ -231,7 +232,7 @@ uword GroupOptimizer<matrix,norm>::solve(
     gap_ = std::max(0.0, optimality(grp_in)) ;
     
     if (monitoring_ > 0) {
-      optimality_gap(beta, grad, lambda, gamma, data.XTy_(set.A_), set.XATXA_, data.norm_y_, set.A_, monitoring_) ;
+      optimality_violation(beta, grad, lambda, gamma, data.XTy_(set.A_), set.XATXA_, data.norm_y_, set.A_, monitoring_) ;
       J_vec_.push_back(J_) ;
       D_vec_.push_back(D_) ;
     }

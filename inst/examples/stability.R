@@ -17,7 +17,7 @@ labels[beta != 0] <- c("relevant")
 labels <- factor(labels, ordered=TRUE, levels=c("relevant","irrelevant"))
 
 ## Call to stability selection function, 200 subsampling
-enet <- elastic.net(x, y, lambda2 = 1e-2, minratio = 1e-3)
+enet <- elastic_net(x, y, lambda2 = 1e-2, minratio = 1e-3)
 stab <- stability(enet, n_subsamples = 200)
 
 ## Build the plot an recover the selected variable for a given cutoff

@@ -1,9 +1,8 @@
-#' Fit a linear model with elastic-net regularization
+#' Fit a linear model with sparse regularization
 #'
-#' Adjust a linear model with elastic-net regularization, mixing a
-#' (possibly weighted) \eqn{\ell_1}{l1}-norm (LASSO) and a
-#' (possibly structured) \eqn{\ell_2}{l2}-norm (ridge-like). The
-#' solution path is computed at a grid of values for the
+#' Adjust a linear model with sparse regularization (either, LASSO,
+#' MCP or SCAD penalty). We also add a (possibly structured) \eqn{\ell_2}{l2}-norm
+#' (ridge-like). The solution path is computed at a grid of values for the
 #' \eqn{\ell_1}{l1}-penalty, fixing the amount of \eqn{\ell_2}{l2}
 #' regularization. See details for the criterion optimized.
 #'
@@ -91,7 +90,13 @@
 #' the optimum: when `'0'` (the default), no monitoring is provided; 
 #' when `'1'`, the bound derived in Grandvalet et al. is computed; when 
 #' `'>1'`, the Fenchel duality gap is computed along the algorithm.
-#'
+#' 
+#' @param type string indicating the sparse variant to be fitted. 
+#' Could be "l1", "mcp" or "scad". Default is "l1".
+#' 
+#' @param eta real positive scalar for tuning SCAD or MCP penalties. 
+#' Default is 3.7. Ignored when type == "l1".
+#' 
 #' @details The optimized criterion is the following: \if{latex}{\deqn{%
 #' \hat{\beta}_{\lambda_1,\lambda_2} = \arg \min_{\beta} \frac{1}{2}
 #' (y - X \beta)^T (y - X \beta) + \lambda_1 \|D \beta \|_{1} +
@@ -108,8 +113,8 @@
 #' structuring matrix \eqn{S}{S} is provided via the `struct`
 #' argument, a positive semidefinite matrix (possibly of class
 #' `Matrix`).
-#'
-#' @return an object with class [ElasticNetFit], inheriting from [QuadrupenFit].
+#' 
+#' @return an object with class [SparseFit], inheriting from [QuadrupenFit].
 #'
 #' @seealso See also [QuadrupenFit]
 #' 
@@ -127,31 +132,52 @@
 #' n <- 50
 #' x <- as.matrix(matrix(rnorm(95*n),n,95) %*% chol(Sigma))
 #' y <- 10 + x %*% beta + rnorm(n,0,10)
-#'
-#' ## Structured Elastic.net without/with an additional l2 regularization term
-#' ## and with structuring prior
 #' labels <- rep("irrelevant", length(beta))
 #' labels[beta != 0] <- "relevant"
-#' plot(lasso(x,y), label=labels) ## a mess
-#' plot(elastic.net(x,y,lambda2=10), label=labels) ## good guys are selected first
-#' plot(elastic.net(x,y,lambda2=10,struct=solve(Sigma)), label=labels) ## even better
 #'
+#' ## Lasso
+#' plot(lasso(x, y), label=labels)
+#' 
+#' ## SCAD
+#' plot(scad(x, y), label=labels)
+#' 
+#' ## MCP
+#' plot(mcp(x, y), label=labels)
+#' 
+#' ## Elastic-net
+#' plot(elastic_net(x,y,lambda2=1), label=labels)
+#' 
+#' ## Structured Elastic-net (l2-structuring prior)
+#' plot(elastic_net(x,y,lambda2=3,struct=solve(Sigma)), label=labels)
+#'
+#' ## SCAD + L2
+#' plot(scad(x,y, eta = 3.7, lambda2=1), label=labels)
+#'
+#' ## MCP + L2
+#' plot(mcp(x, y, eta = 3, lambda2=1), label=labels)
+#' 
 #' @export
-elastic.net <- function(x,
-                        y,
-                        lambda1   = NULL,
-                        lambda2   = 0.01,
-                        penscale  = rep(1,ncol(x)),
-                        struct    = Matrix::Diagonal(ncol(x), 1),
-                        intercept = TRUE,
-                        normalize = TRUE,
-                        refit     = FALSE,
-                        nlambda1  = ifelse(is.null(lambda1),100,length(lambda1)),
-                        minratio  = ifelse(nrow(x) <= ncol(x), 1e-2, 1e-4),
-                        maxfeat   = ifelse(lambda2 < 1e-2, min(nrow(x),ncol(x)), min(4*nrow(x),ncol(x))),
-                        beta0     = numeric(ncol(x)),
-                        control   = list()) {
-  
+sparse_lm <- function(x,
+                      y,
+                      type      = c("l1", "mcp", "scad"),
+                      lambda1   = NULL,
+                      lambda2   = 0.01,
+                      eta       = 3.7,
+                      penscale  = rep(1,ncol(x)),
+                      struct    = Matrix::Diagonal(ncol(x), 1),
+                      intercept = TRUE,
+                      normalize = TRUE,
+                      refit     = FALSE,
+                      nlambda1  = ifelse(is.null(lambda1),100,length(lambda1)),
+                      minratio  = ifelse(nrow(x) <= ncol(x), 1e-2, 1e-4),
+                      maxfeat   = ifelse(lambda2 < 1e-2, min(nrow(x),ncol(x)), min(4*nrow(x),ncol(x))),
+                      beta0     = numeric(ncol(x)),
+                      control   = list()) {
+
+  type <- match.arg(type)
+  if (type == "mcp") stopifnot(eta > 1)
+  if (type == "scad") stopifnot(eta > 2)
+
   ## ============================================
   ## RECOVER LOW LEVEL CONFIGURATION
   ##
@@ -159,6 +185,7 @@ elastic.net <- function(x,
   ctrl$maxfeat <- maxfeat
   ctrl[names(control)] <- control # default overwritten by user specifications
   ctrl$method <- switch(ctrl$method, quadra = "QUADRA", fista = "FISTA", pgd = "PGD", 0)
+  ctrl$factmat <- ctrl$method == "QUADRA"
   ctrl$normalize <- normalize
   ctrl$beta0  <- beta0
   
@@ -174,21 +201,23 @@ elastic.net <- function(x,
   ## ============================================
   ## INSTANTIATE THE PENALIZED MODEL
   ##
-  myModel <- ElasticNetFit$new(
+  myModel <- SparseFit$new(
     data      = myData,
     intercept = intercept,
+    type      = type,
     regParam  = list(lambda = lambda1, 
-                     gamma  = lambda2, 
+                     gamma = lambda2,
+                     eta = eta,
                      lambda_factor = penscale, 
                      min_ratio = minratio, n_lambda = nlambda1)
   )
-    
+  
   ## ============================================
   ## FIT THE MODEL WITH ACTIVE SET ALGORITHM
   ##
   if (ctrl$verbose > 0) cat("\nModel fitting and optimization")
   myModel$fit(ctrl)
-
+  
   ## ============================================
   ## POSTREATMENT + SEND BACK THE RESULTING MODEL
   ##

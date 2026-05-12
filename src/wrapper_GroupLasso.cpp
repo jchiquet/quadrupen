@@ -20,7 +20,7 @@ List group_enet_l1l2_dense_cpp(
   RegressionData<mat> data(dataModel, intercept, as<bool>(control["normalize"])) ;
 
   GroupSparseRegularizer<mat,GroupSparseNorm::L1L2> grpenet(data, group, regParam, control);
-  
+
   List results = grpenet.solution_path(control);
 
   return List::create(

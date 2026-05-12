@@ -61,7 +61,7 @@ public:
       const uword m = 3
   ) ;
 
-  void optimality_gap(
+  void optimality_violation(
       vec& beta,
       vec& grad,
       const double& lambda,

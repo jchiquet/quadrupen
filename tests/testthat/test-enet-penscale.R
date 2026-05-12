@@ -11,7 +11,7 @@ test_that("weighted_ quad2theo", {
   y <- rnorm(100)
 
   ## no penscale...
-  lasso.quad <- elastic.net(x, y, intercept=FALSE, lambda2=0)
+  lasso.quad <- elastic_net(x, y, intercept=FALSE, lambda2=0)
   theo.path  <- sapply(lasso.quad$major_tuning, function(lambda) y*pmax(0,1-lambda/abs(y)))
   expect_equal(as.matrix(lasso.quad$coefficients), theo.path, check.attributes = FALSE, tolerance = tol)
 
@@ -23,7 +23,7 @@ test_that("weighted_ quad2theo", {
   ## random penscale...
   w <- 1/runif(p,0.5,1)
   w <- w/sum(w)*p ## to fit glmnet rescaling
-  lasso.quad <- elastic.net(x, y,intercept=FALSE, penscale = w, lambda2=0)
+  lasso.quad <- elastic_net(x, y,intercept=FALSE, penscale = w, lambda2=0)
   theo.path  <- sapply(lasso.quad$major_tuning, function(lambda) y*pmax(0,1-lambda*w/abs(y)))
   expect_equal(as.matrix(lasso.quad$coefficients), theo.path, tolerance = 1e-6, check.attributes = FALSE)
 
@@ -31,7 +31,7 @@ test_that("weighted_ quad2theo", {
   w <- 1/runif(p,0.5,1)
   w <- w/sum(w)*p ## to fit glmnet rescaling
   lasso.glmn <- glmnet::glmnet(x,y, penalty.factor= w,lambda.min.ratio=1e-2, control = list(thresh=1e-20))
-  lasso.quad <- elastic.net(x,y, lambda1=lasso.glmn$lambda*sqrt(n), penscale = w, lambda2=0)
+  lasso.quad <- elastic_net(x,y, lambda1=lasso.glmn$lambda*sqrt(n), penscale = w, lambda2=0)
   
   expect_equal(as.matrix(lasso.glmn$beta), as.matrix(lasso.quad$coefficients), tolerance = tol, check.attributes = FALSE)
   
@@ -51,7 +51,7 @@ test_that("weighted_ fista2theo", {
   y <- rnorm(100)
   
   ## no penscale...
-  lasso.quad <- elastic.net(x, y, intercept=FALSE, lambda2=0, control = list(method = "fista"))
+  lasso.quad <- elastic_net(x, y, intercept=FALSE, lambda2=0, control = list(method = "fista"))
   theo.path  <- sapply(lasso.quad$major_tuning, function(lambda) y*pmax(0,1-lambda/abs(y)))
   expect_equal(as.matrix(lasso.quad$coefficients), theo.path, check.attributes = FALSE, tolerance = 1e-2)
   
@@ -63,7 +63,7 @@ test_that("weighted_ fista2theo", {
   ## random penscale...
   w <- 1/runif(p,0.5,1)
   w <- w/sum(w)*p ## to fit glmnet rescaling
-  lasso.quad <- elastic.net(x, y, intercept=FALSE, penscale = w, lambda2=0, control = list(method = "fista"))
+  lasso.quad <- elastic_net(x, y, intercept=FALSE, penscale = w, lambda2=0, control = list(method = "fista"))
   theo.path  <- sapply(lasso.quad$major_tuning, function(lambda) y*pmax(0,1-lambda*w/abs(y)))
   expect_equal(as.matrix(lasso.quad$coefficients), theo.path, tolerance = 1e-2, check.attributes = FALSE)
   
@@ -71,7 +71,7 @@ test_that("weighted_ fista2theo", {
   w <- 1/runif(p,0.5,1)
   w <- w/sum(w)*p ## to fit glmnet rescaling
   lasso.glmn <- glmnet::glmnet(x,y, penalty.factor= w,lambda.min.ratio=1e-2, control = list(thresh=1e-20))
-  lasso.quad <- elastic.net(x,y, lambda1=lasso.glmn$lambda*sqrt(n), penscale = w, lambda2=0, control = list(method = "fista"))
+  lasso.quad <- elastic_net(x,y, lambda1=lasso.glmn$lambda*sqrt(n), penscale = w, lambda2=0, control = list(method = "fista"))
   
   expect_equal(as.matrix(lasso.glmn$beta), as.matrix(lasso.quad$coefficients), tolerance = 1e-2, check.attributes = FALSE)
   

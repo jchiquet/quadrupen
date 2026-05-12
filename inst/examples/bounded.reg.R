@@ -17,9 +17,9 @@ y <- 10 + x %*% beta + rnorm(n,0,10)
 labels <- rep("irrelevant", length(beta))
 labels[beta != 0] <- "relevant"
 
-BREG0    <- bounded.reg(x,y,lambda2=0) 
-BREGNET  <- bounded.reg(x,y,lambda2=10)
-BREGSNET <- bounded.reg(x,y,lambda2=10 , struct=solve(Sigma))
+BREG0    <- bounded_reg(x,y,lambda2=0) 
+BREGNET  <- bounded_reg(x,y,lambda2=10)
+BREGSNET <- bounded_reg(x,y,lambda2=10 , struct=solve(Sigma))
 
 plot(BREG0, label=labels) ## a mess
 plot(BREGNET, label=labels) ## good guy are the boundaries

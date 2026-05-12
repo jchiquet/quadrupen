@@ -9,10 +9,10 @@ test_that("Cholesky, conjugate gradient, FISTA, PGD ", {
   get.coef <- function(x,y) {
     lambda1 <- .25
 
-    enet.ref <- elastic.net(x,y,lambda1=lambda1, control=list(timer=TRUE))
-    enet.cg  <- elastic.net(x,y,lambda1=lambda1, control=list(timer=TRUE,usechol=FALSE))
-    enet.fista <- elastic.net(x,y,lambda1=lambda1, control=list(timer=TRUE,method = "fista"))
-    enet.pgd <- elastic.net(x,y,lambda1=lambda1, control=list(timer=TRUE,method = "pgd"))
+    enet.ref <- elastic_net(x,y,lambda1=lambda1, control=list(timer=TRUE))
+    enet.cg  <- elastic_net(x,y,lambda1=lambda1, control=list(timer=TRUE,usechol=FALSE))
+    enet.fista <- elastic_net(x,y,lambda1=lambda1, control=list(timer=TRUE,method = "fista"))
+    enet.pgd <- elastic_net(x,y,lambda1=lambda1, control=list(timer=TRUE,method = "pgd"))
 
     cat("\n\tTimings with warm-restart along the path")
     cat("\n\t\tQuadratic from stratch (Cholesky): ",enet.ref$optim_monitoring$timer)

@@ -22,7 +22,7 @@ y <- mu + x %*% beta + rnorm(n, 0, sigma)
 
 ## THESE SETTINGS SHOULD INDUCE EARLY STOPS: CHECK RELEVANCE OF THE
 ## CROSSVAL FUNCTION
-breg <- bounded.reg(x, y, lambda2=0, minratio=1e-2)
+breg <- bounded_reg(x, y, lambda2=0, minratio=1e-2)
 
 ## Bulletproof mode: should go at the end of the path, but slow (proximal)
 cv.simple.bp  <- cross_validate(breg)

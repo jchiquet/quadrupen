@@ -1,8 +1,8 @@
 #' Class "QuadrupenFit"
 #'
 #' Class of object returned by any fitting function of the
-#' \pkg{quadrupen} package (\code{elastic.net} or
-#' \code{bounded.reg}).
+#' \pkg{quadrupen} package (\code{elastic_net} or
+#' \code{bounded_reg}).
 #' 
 #' This class comes with the usual [predict()], [fitted()], [coef()],
 #' [residuals()], [show()], [print()] and [deviance()] S3 methods.
@@ -576,11 +576,11 @@ QuadrupenFit <- R6::R6Class(
     #' ## Plot the Lasso path
     #' plot(lasso(x,y), title="Lasso solution path")
     #' ## Plot the Elastic-net path
-    #' plot(elastic.net(x,y), title = "Elastic-net solution path")
+    #' plot(elastic_net(x,y), title = "Elastic-net solution path")
     #' ## Plot the Elastic-net path (fraction on X-axis, unstandardized coefficient)
-    #' plot(elastic.net(x,y, lambda2=10), standardize=FALSE, xvar="fraction")
+    #' plot(elastic_net(x,y, lambda2=10), standardize=FALSE, xvar="fraction")
     #' ## Plot the Bounded regression path (fraction on X-axis)
-    #' plot(bounded.reg(x,y, lambda2=10), xvar="fraction")
+    #' plot(bounded_reg(x,y, lambda2=10), xvar="fraction")
     #' }
     #'
     plot_path = function(xvar = c("lambda", "fraction", "df"), log_scale = TRUE,

@@ -1,43 +1,68 @@
-#' Class "ElasticNetFit"
+#' Class "SparseFit"
 #' 
-#' Class of object returned by the fitting function [elastic.net()]. Inherits fields
+#' Class of object returned by the fitting function [elastic_net()]. Inherits fields
 #' and methods of [QuadrupenFit]
 #' 
-#' @seealso [QuadrupenFit], [elastic.net()]
+#' @seealso [QuadrupenFit], [elastic_net()]
 #' 
 #' @export
 #' 
-ElasticNetFit <- R6::R6Class(
-  classname = "ElasticNetFit",
+SparseFit <- R6::R6Class(
+  classname = "SparseFit",
   inherit = QuadrupenFit,
-  #' @field penalty character describing the regularizer/penalty
-  active  = list(penalty = function(value) "elastic.net"),
+  private  = list(type_ = NA),
+  active  = list(
+    #' @field penalty character describing the regularizer/penalty
+    penalty = function(value) {
+      ridge  <- ifelse(self$is_l2_regularized, "plus L2-regularization", "")
+      sparse  <- switch(private$type_,
+                       "l1" = "L1",
+                       "mcp" = "MCP",
+                       "scad" = "SCAD"
+      )
+      paste(sparse, ridge)
+    },
+    #' @field type string the type of group-wise regularization applied
+    type = function(value) private$type_,
+    #' @field unbiasing_tuning unbiasing coefficient of the MCP or SCAD penalties
+    unbiasing_tuning = function(value) {
+      if (missing(value))
+        return(private$tuning$eta)
+      else private$tuning$eta <- value
+    }
+  ),
   public  = list(
-    #' @description Initialize a [`ElasticNetFit`] model
+    #' @description Initialize a [`SparseFit`] model
     #' @param data a [`DataModel`] object
     #' @param intercept a logical; should an intercept be included in the mode?
     #' @param regParam a list with two elements, a vector and a scalar, for the regularization
-    initialize =  function(data, intercept, regParam) {
+    initialize =  function(data, intercept, type, regParam) {
       super$initialize(data, intercept, regParam)
-      private$optimizer <- 
-        ifelse(data$sparse_encoding, elastic_net_sparse_cpp, elastic_net_dense_cpp)
+      private$type_  <- type
+      if (data$sparse_encoding) {
+        private$optimizer <-  switch(private$type_, 
+            "mcp" = mcp_sparse_cpp, "scad" = scad_sparse_cpp, elastic_net_sparse_cpp)
+      } else {
+        private$optimizer <- switch(private$type_,
+            "mcp" = mcp_dense_cpp, "scad" = scad_dense_cpp, elastic_net_dense_cpp)
+      }
     }
   )
 )
 
 #' Class "BoundedRegression"
 #' 
-#' Class of object returned by the fitting function [bounded.reg()]. Inherits fields
+#' Class of object returned by the fitting function [bounded_reg()]. Inherits fields
 #' and methods of [QuadrupenFit].
 #' 
-#' @seealso [QuadrupenFit], [bounded.reg()]
+#' @seealso [QuadrupenFit], [bounded_reg()]
 #' 
 #' @export
 BoundedRegressionFit <- R6::R6Class(
   classname = "BoundedRegressionFit",
   inherit = QuadrupenFit,
   #' @field penalty character describing the regularizer/penalty
-  active  = list(penalty = function(value) "bounded.reg"),
+  active  = list(penalty = function(value) "bounded_reg"),
   #' @description Initialize a [`BoundedRegressionFit`] model
   #' @param data a [`DataModel`] object
   #' @param intercept a logical; should an intercept be included in the mode?
@@ -83,7 +108,7 @@ RidgeRegressionFit <- R6::R6Class(
 #' Class of object returned by the fitting function [fusedlasso()]. Inherits fields
 #' and methods of [QuadrupenFit].
 #' 
-#' @seealso [QuadrupenFit], [bounded.reg()]
+#' @seealso [QuadrupenFit], [bounded_reg()]
 #' 
 #' @export
 FusedLassoFit <- R6::R6Class(

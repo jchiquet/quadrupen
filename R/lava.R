@@ -6,7 +6,7 @@
 #' computed at a grid of values for the \eqn{\ell_1}{l1}-penalty. See
 #' details for the criterion optimized.
 #'
-#' @inheritParams elastic.net
+#' @inheritParams elastic_net
 #'
 #' @return an object with class [QuadrupenFit].
 #'
@@ -90,7 +90,8 @@ lava <- function(x,
     data      = myData,
     intercept = intercept,
     regParam  = list(lambda = lambda1, 
-                     gamma  = lambda2, 
+                     gamma  = lambda2,
+                     eta = 1,
                      lambda_factor = penscale, 
                      min_ratio = minratio, n_lambda = nlambda1)
   )

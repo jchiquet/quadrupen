@@ -8,7 +8,7 @@
 #' \eqn{\ell_2}{l2} regularization. See details for the criterion
 #' optimized.
 #'
-#' @inheritParams elastic.net
+#' @inheritParams sparse_lm
 #' 
 #' @return an object with class [QuadrupenFit].
 #'
@@ -65,12 +65,12 @@
 #' ## and with structuring prior
 #' labels <- rep("irrelevant", length(beta))
 #' labels[beta != 0] <- "relevant"
-#' plot(bounded.reg(x,y,lambda2=0) , label=labels) ## a mess
-#' plot(bounded.reg(x,y,lambda2=10), label=labels) ## good guys are at the boundaries
-#' plot(bounded.reg(x,y,lambda2=10,struct=solve(Sigma)), label=labels) ## even better
+#' plot(bounded_reg(x,y,lambda2=0) , label=labels) ## a mess
+#' plot(bounded_reg(x,y,lambda2=10), label=labels) ## good guys are at the boundaries
+#' plot(bounded_reg(x,y,lambda2=10,struct=solve(Sigma)), label=labels) ## even better
 #'
 #' @export
-bounded.reg <- function(x,
+bounded_reg <- function(x,
                         y,
                         lambda1   = NULL,
                         lambda2   = 0.01,
@@ -126,3 +126,38 @@ bounded.reg <- function(x,
   myModel$criteria()
   myModel
 }
+
+#' @rdname bounded_reg
+#' @importFrom lifecycle badge deprecate_warn
+#' @export
+bounded.reg <- function(x,
+                        y,
+                        lambda1   = NULL,
+                        lambda2   = 0.01,
+                        penscale  = rep(1,ncol(x)),
+                        struct    = Matrix::Diagonal(ncol(x), 1),
+                        intercept = TRUE,
+                        normalize = TRUE,
+                        nlambda1  = ifelse(is.null(lambda1),100,length(lambda1)),
+                        minratio  = ifelse(nrow(x) <= ncol(x), 1e-2, 1e-4),
+                        maxfeat   = ifelse(lambda2 < 1e-2, min(nrow(x),ncol(x)), min(4*nrow(x),ncol(x))),
+                        control   = list()) {
+
+  lifecycle::deprecate_warn("1.1.0", "bounded.reg()", "bounded_reg()")
+  
+  out <- bounded_reg(x,
+                     y,
+                     lambda1   = lambda1,
+                     lambda2   = lambda2,
+                     penscale  = penscale,
+                     struct    = struct,
+                     intercept = intercept,
+                     normalize = normalize,
+                     nlambda1  = nlambda1,
+                     minratio  = minratio,
+                     maxfeat   = maxfeat,
+                     control   = control)
+  out
+}
+
+                        

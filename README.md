@@ -98,10 +98,26 @@ plot(lasso(x,y, intercept=FALSE), labels=labels)
 
 ![](man/figures/lasso_nostruct-1.png)
 
+#### MCP (Minimax Concave Penalty)
+
+``` r
+plot(mcp(x,y, intercept=FALSE), labels=labels)
+```
+
+![](man/figures/mcp_nostruct-1.png)
+
+#### SCAD (Smoothly Clipped Absolute Deviation)
+
+``` r
+plot(scad(x,y, intercept=FALSE), labels=labels)
+```
+
+![](man/figures/scad_nostruct-1.png)
+
 #### Elastic-net ($\ell_1+\ell_2$ penalty)
 
 ``` r
-plot(elastic.net(x,y, lambda2=1, intercept=FALSE), labels=labels)
+plot(elastic_net(x,y, lambda2=1, intercept=FALSE), labels=labels)
 ```
 
 ![](man/figures/enet_nostruct-1.png)
@@ -109,15 +125,15 @@ plot(elastic.net(x,y, lambda2=1, intercept=FALSE), labels=labels)
 #### Bounded regression ($\ell_\infty$ penalty)
 
 ``` r
-plot(bounded.reg(x,y, lambda2=0, intercept=FALSE), labels=labels)
+plot(bounded_reg(x,y, lambda2=0, intercept=FALSE), labels=labels)
 ```
 
 ![](man/figures/breg_nostruct-1.png)
 
-#### Ridge + Bounded regression ($\ell_\infty+\ell_2$ penalty)
+#### Bounded regression + Ridge ($\ell_\infty+\ell_2$ penalty)
 
 ``` r
-plot(bounded.reg(x,y, lambda2=5, intercept=FALSE), labels=labels)
+plot(bounded_reg(x,y, lambda2=5, intercept=FALSE), labels=labels)
 ```
 
 ![](man/figures/bregridge_nostruct-1.png)
@@ -165,7 +181,7 @@ plot(ridge(x,y, lambda = 10^seq(4,-1,len=100), struct = L, intercept=FALSE), lab
 #### Structured/Generalized Elastic-net ($\ell_1+\ell_2$ penalty)
 
 ``` r
-plot(elastic.net(x,y, struct = L, lambda2=1, intercept=FALSE), labels=labels)
+plot(elastic_net(x,y, struct = L, lambda2=1, intercept=FALSE), labels=labels)
 ```
 
 ![](man/figures/enet_struct-1.png)
@@ -173,7 +189,7 @@ plot(elastic.net(x,y, struct = L, lambda2=1, intercept=FALSE), labels=labels)
 #### Bounded regression + structured/Generalized Ridge ($\ell_\infty+\ell_2$ penalty)
 
 ``` r
-plot(bounded.reg(x,y, struct = L, lambda2=5, intercept=FALSE), labels=labels)
+plot(bounded_reg(x,y, struct = L, lambda2=5, intercept=FALSE), labels=labels)
 ```
 
 ![](man/figures/bregridge_struct-1.png)

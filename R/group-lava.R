@@ -9,7 +9,7 @@
 #' \eqn{\ell_1/\ell_q}{l1/lq}-penalty. See details for the criterion
 #' optimized.
 #'
-#' @inheritParams elastic.net
+#' @inheritParams elastic_net
 #'
 #' @param group vector of integers indicating group belonging. Must
 #' match the number of column in \code{x}. Must be SORTED integers
@@ -123,7 +123,8 @@ group.lava <- function(x,
     group     = group,
     type      = match.arg(type),
     regParam  = list(lambda = lambda1, 
-                     gamma  = lambda2, 
+                     gamma  = lambda2,
+                     eta = 1,
                      lambda_factor = penscale, 
                      min_ratio = minratio, n_lambda = nlambda1)
   )

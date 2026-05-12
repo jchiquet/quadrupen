@@ -39,7 +39,7 @@ List lava_dense_cpp(
       sp_mat(data.p_, data.p_),
       ones(data.p_), false, false) ;
 
-  Lava<mat> lava(scaled_data, Proj, regParam, control);
+  Lava<mat,SparseNorm::L1> lava(scaled_data, Proj, regParam, control);
 
   List results = lava.solution_path(control);
 

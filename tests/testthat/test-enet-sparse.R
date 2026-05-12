@@ -40,13 +40,13 @@ test_that("Consistency of quadrupen between sparse/non-sparse encoding of the pr
   cat("\n\tThe sparsely encoded design matrix weights", round(object.size(x.sp) /(1024^2),2), "Mo.")
 
   cat("\n\tdense coding...")
-  out.enet.ns <- elastic.net(x.ns, y, lambda2=lambda2, maxfeat=max.feat, minratio=1e-3, control=list(timer=TRUE))
+  out.enet.ns <- elastic_net(x.ns, y, lambda2=lambda2, maxfeat=max.feat, minratio=1e-3, control=list(timer=TRUE))
 
   cat(" took", out.enet.ns$optim_monitoring$timer, "seconds to activate",
       colSums(out.enet.ns$coefficients!=0)[length(out.enet.ns$major_tuning)],"variables.")
 
   cat("\n\tsparse coding...")
-  out.enet.sp <- elastic.net(x.sp, y, lambda2=lambda2, maxfeat=max.feat, minratio=1e-3, control=list(timer=TRUE))
+  out.enet.sp <- elastic_net(x.sp, y, lambda2=lambda2, maxfeat=max.feat, minratio=1e-3, control=list(timer=TRUE))
   cat(" took", out.enet.sp$optim_monitoring$timer, "seconds to activate",
       colSums(out.enet.sp$coefficients!=0)[length(out.enet.sp$major_tuning)],"variables.\n")
   

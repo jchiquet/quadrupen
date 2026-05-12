@@ -8,7 +8,7 @@ Class of object returned by the fitting function \code{\link[=fusedlasso]{fusedl
 and methods of \link{QuadrupenFit}.
 }
 \seealso{
-\link{QuadrupenFit}, \code{\link[=bounded.reg]{bounded.reg()}}
+\link{QuadrupenFit}, \code{\link[=bounded_reg]{bounded_reg()}}
 }
 \section{Super class}{
 \code{\link[quadrupen:QuadrupenFit]{QuadrupenFit}} -> \code{FusedLassoFit}

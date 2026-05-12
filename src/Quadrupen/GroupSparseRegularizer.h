@@ -8,8 +8,7 @@
 
 #pragma once
 
-#include "RegularizerSparse.h"
-#include "PenaltyGroup.h"
+#include "Regularizer.h"
 #include "OptimizerGroup.h"
 
 using namespace Rcpp;
@@ -18,7 +17,7 @@ using namespace std;
 
 template <typename matrix, GroupSparseNorm norm>
 class GroupSparseRegularizer : 
-  public SparseRegularizer<matrix> {
+  public Regularizer<matrix> {
   public:
 
     using Regularizer<matrix>::intercept_ ;
@@ -30,12 +29,12 @@ class GroupSparseRegularizer :
     using Regularizer<matrix>::grad_   ;
     using Regularizer<matrix>::lambda_factor_ ;
     using Regularizer<matrix>::get_lambda_seq ;
-    using SparseRegularizer<matrix>::nzeros_   ;
-    using SparseRegularizer<matrix>::debiased_ ;
-    using SparseRegularizer<matrix>::beta_debiased_ ;
-    using SparseRegularizer<matrix>::intercept_debiased_   ;
-    using SparseRegularizer<matrix>::active_ ;
-
+    
+    vec   nzeros_ ; // contains non-zero values of all betas (for all lambda values)
+    vec debiased_ ; // contains debiased non-zero values of all betas (for all lambda values)
+    vector<uvec> active_ ; // successively activated variable (for all lambda values)
+    vector<double >intercept_debiased_ ; // debiased vector of intercept values (for all lambda values)
+    vec beta_debiased_ ; // vector of current active beta debiased (for the current lambda)
     ActiveSetGroup<matrix> set_ ; // Active set of variable and data
     GroupPenalty<norm> penalty_ ; // main penalty object 
     
@@ -55,20 +54,51 @@ class GroupSparseRegularizer :
 
     // Compute degrees of freedom for the current estimate
     double get_df() ;
+
+    const sp_mat coefficients() const {
+      vector<uword> rowA, colA ;
+      uword current_col = 0;
+      for (const auto& a : active_) {
+        rowA.insert(rowA.end(), a.begin(), a.end()) ;
+        colA.insert(colA.end(), a.n_elem, current_col) ;
+        current_col++;
+      }
+      return sp_mat(join_cols(urowvec(rowA), urowvec(colA)),
+                    nzeros_, data_.p_, active_.size(), true, false) ;
+    }
+    
+    const sp_mat debiased_coefficients() const { 
+      vector<uword> rowA, colA ;
+      uword current_col = 0;
+      for (const auto& a : active_) {
+        rowA.insert(rowA.end(), a.begin(), a.end()) ;
+        colA.insert(colA.end(), a.n_elem, current_col) ;
+        current_col++;
+      }
+      return sp_mat(join_cols(urowvec(rowA), urowvec(colA)),
+                    debiased_, data_.p_, active_.size(), true, false) ;
+    }
+    
+    const sp_mat active_var() const { 
+      vector<uword> rowA, colA ;
+      uword current_col = 0;
+      for (const auto& a : active_) {
+        rowA.insert(rowA.end(), a.begin(), a.end()) ;
+        colA.insert(colA.end(), a.n_elem, current_col) ;
+        current_col++;
+      }
+      return sp_mat(join_cols(urowvec(rowA), urowvec(colA)),
+                    vec(rowA.size(), fill::ones), data_.p_, active_.size(), true, false) ;
+    }
+    
+    const vector<double>& intercept_debiased() const { return intercept_debiased_ ; }
     
 };
 
 template <typename matrix, GroupSparseNorm norm>
 GroupSparseRegularizer<matrix,norm>::GroupSparseRegularizer(
   const RegressionData<matrix>& data, const uvec& group_ind, const List& regParam, const List& control) :
-  SparseRegularizer<matrix>::SparseRegularizer(data, regParam) {
-
-    // Set up the penalty
-    penalty_ = GroupPenalty<norm>(as<double>(regParam["alpha"])) ;
-    get_lambda_seq(get_lambda_max(), regParam) ;
-
-    // Set up the optimizer
-    solver_ = GroupOptimizer<matrix,norm>(penalty_, control);
+  Regularizer<matrix>::Regularizer(data, regParam) {
 
     // Scale the structuring matrix according to the amount of l2 penalty 
     data_.scale_struct(gamma_) ;
@@ -77,6 +107,13 @@ GroupSparseRegularizer<matrix,norm>::GroupSparseRegularizer(
     grad_ = - data_.XTy_ ;
     set_ = ActiveSetGroup(data_, group_ind, as<bool>(control["factmat"])) ;
     
+    // Set up the penalty
+    penalty_ = GroupPenalty<norm>(as<double>(regParam["alpha"])) ;
+    get_lambda_seq(penalty_.lambda_max(data_.XTy_, set_.grp_sizes_, lambda_factor_), regParam) ;
+
+    // Set up the optimizer
+    solver_ = GroupOptimizer<matrix,norm>(penalty_, control);
+
   }
 
 template <typename matrix, GroupSparseNorm norm>
@@ -108,7 +145,7 @@ List GroupSparseRegularizer<matrix,norm>::solution_path(const List& control) {
 
     // OPTIMIZER LOOP (FIX-LAMBDA VALUE): IDENTIFY THE ACTIVE SET AND SOLVE
     status.push_back(
-      solver_.solve(beta_, grad_, lambda_, lambda_factor_, gamma_, data_, set_)
+      solver_.working_set(beta_, grad_, lambda_, lambda_factor_, gamma_, data_, set_)
     ) ;
     gap.push_back(solver_.gap_) ;
     iter.push_back(solver_.iter_) ;

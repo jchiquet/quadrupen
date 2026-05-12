@@ -1,7 +1,7 @@
 Package: quadrupen
 Type: Package
 Title: Sparsity by Worst-Case Quadratic Penalties
-Version: 0.3-9950
+Version: 1.0-0
 Date: 2026-0x-xx
 Authors@R: person("Julien", "Chiquet", , "julien.chiquet@inrae.fr", role = c("aut", "cre"),
            comment = c(ORCID = "0000-0002-3629-3429"))
@@ -29,7 +29,8 @@ Imports:
     Rcpp,
     rlang,
     scales,
-    tidyr
+    tidyr,
+    lifecycle
 Suggests:
     elasticnet,
     glmnet,
@@ -51,12 +52,12 @@ Collate:
     'CrossValidation-R6Class.R'
     'InformationCriteria-R6Class.R'
     'bounded-reg.R'
-    'elastic-net.R'
     'fused-lasso.R'
+    'sparse_lm.R'
+    'sparse_lm_aliases.R'
     'group_sparse_lm.R'
     'group_sparse_lm_aliases.R'
     'group-lava.R'
-    'lasso.R'
     'lava.R'
     'utils.R'
     'ridge.R'
