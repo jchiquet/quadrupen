@@ -29,7 +29,8 @@ Imports:
     Rcpp,
     rlang,
     scales,
-    tidyr
+    tidyr,
+    lifecycle
 Suggests:
     elasticnet,
     glmnet,
@@ -51,13 +52,12 @@ Collate:
     'CrossValidation-R6Class.R'
     'InformationCriteria-R6Class.R'
     'bounded-reg.R'
-    'elastic-net.R'
     'fused-lasso.R'
     'sparse_lm.R'
+    'sparse_lm_aliases.R'
     'group_sparse_lm.R'
     'group_sparse_lm_aliases.R'
     'group-lava.R'
-    'lasso.R'
     'lava.R'
     'utils.R'
     'ridge.R'

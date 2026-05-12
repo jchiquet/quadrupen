@@ -10,7 +10,7 @@ get.enet <- function(x,y,intercept,normalize=TRUE,method="quadra",verbose=0) {
   iols <- length(enet.larsen$penalty)
   lambda1 <- enet.larsen$penalty[-iols]/2
   
-  enet.quadru <- elastic.net(x,y,intercept=intercept,normalize=normalize,
+  enet.quadru <- elastic_net(x,y,intercept=intercept,normalize=normalize,
                              lambda1=lambda1, lambda2=lambda2,
                              control = list(method=method,verbose=verbose))
   

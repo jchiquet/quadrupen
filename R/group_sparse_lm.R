@@ -6,9 +6,9 @@
 #' cooperative). We also add a (possibly structured) \eqn{\ell_2}{l2}-norm (ridge-like). 
 #' The solution path is computed on an automatically tuned  grid of values for 
 #' the sparse group penalty. The mixture coefficient and the amount of ridge-like
-#' regularization are fixed by the user. See details for the criterion
+#' regularization are fixed by the user.  See details for the criterion optimized.
 #' 
-#' @inheritParams elastic.net
+#' @inheritParams sparse_lm
 #' 
 #' @param alpha real scalar in (0,1); tunes mixture between \eqn{\ell_1}{l1} 
 #' group penalties. Default is 0.0 (standard group-lasso).
@@ -142,7 +142,7 @@ group_sparse_lm <-
                        lambda_factor = penscale, 
                        min_ratio = minratio, n_lambda = nlambda1)
     )
-    
+
     ## ============================================
     ## FIT THE MODEL WITH ACTIVE SET ALGORITHM
     ##

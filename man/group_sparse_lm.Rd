@@ -35,6 +35,7 @@ group_lasso(
   y,
   group,
   lambda1 = NULL,
+  lambda2 = 0,
   penscale = sqrt(tabulate(group)),
   intercept = TRUE,
   normalize = TRUE,
@@ -50,6 +51,7 @@ group_l1linf(
   y,
   group,
   lambda1 = NULL,
+  lambda2 = 0,
   penscale = sqrt(tabulate(group)),
   intercept = TRUE,
   normalize = TRUE,
@@ -65,6 +67,7 @@ coop_lasso(
   y,
   group,
   lambda1 = NULL,
+  lambda2 = 0,
   penscale = sqrt(tabulate(group)),
   intercept = TRUE,
   normalize = TRUE,
@@ -80,6 +83,7 @@ sparse_group_lasso(
   y,
   group,
   lambda1 = NULL,
+  lambda2 = 0,
   alpha = 0.5,
   penscale = sqrt(tabulate(group)),
   intercept = TRUE,
@@ -96,6 +100,7 @@ sparse_group_l1linf(
   y,
   group,
   lambda1 = NULL,
+  lambda2 = 0,
   alpha = 0,
   penscale = sqrt(tabulate(group)),
   intercept = TRUE,
@@ -112,6 +117,7 @@ sparse_coop_lasso(
   y,
   group,
   lambda1 = NULL,
+  lambda2 = 0,
   alpha = 0,
   penscale = sqrt(tabulate(group)),
   intercept = TRUE,
@@ -231,7 +237,7 @@ mixture of an element-wise \eqn{\ell_1}{l1} norm and a group-wise mixed-norm
 cooperative). We also add a (possibly structured) \eqn{\ell_2}{l2}-norm (ridge-like).
 The solution path is computed on an automatically tuned  grid of values for
 the sparse group penalty. The mixture coefficient and the amount of ridge-like
-regularization are fixed by the user. See details for the criterion
+regularization are fixed by the user.  See details for the criterion optimized.
 }
 \examples{
 ## Simulating multivariate Gaussian with blockwise correlation
