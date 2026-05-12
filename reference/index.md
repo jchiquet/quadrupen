@@ -4,10 +4,16 @@
 
 Functions for fitting various structured regularization models
 
-- [`bounded.reg()`](https://jchiquet.github.io/quadrupen/reference/bounded.reg.md)
+- [`bounded_reg()`](https://jchiquet.github.io/quadrupen/reference/bounded_reg.md)
+  [`bounded.reg()`](https://jchiquet.github.io/quadrupen/reference/bounded_reg.md)
   : Fit a linear model with infinity-norm plus ridge-like regularization
-- [`elastic.net()`](https://jchiquet.github.io/quadrupen/reference/elastic.net.md)
-  : Fit a linear model with elastic-net regularization
+- [`sparse_lm()`](https://jchiquet.github.io/quadrupen/reference/sparse_lm.md)
+  [`elastic.net()`](https://jchiquet.github.io/quadrupen/reference/sparse_lm.md)
+  [`elastic_net()`](https://jchiquet.github.io/quadrupen/reference/sparse_lm.md)
+  [`lasso()`](https://jchiquet.github.io/quadrupen/reference/sparse_lm.md)
+  [`mcp()`](https://jchiquet.github.io/quadrupen/reference/sparse_lm.md)
+  [`scad()`](https://jchiquet.github.io/quadrupen/reference/sparse_lm.md)
+  : Fit a linear model with sparse regularization
 - [`fusedlasso()`](https://jchiquet.github.io/quadrupen/reference/fusedlasso.md)
   : A function for fitting generalized fused-Lasso problems
 - [`group_sparse_lm()`](https://jchiquet.github.io/quadrupen/reference/group_sparse_lm.md)
@@ -22,8 +28,6 @@ Functions for fitting various structured regularization models
   : Fit a linear model with group-lava regularization
 - [`lava()`](https://jchiquet.github.io/quadrupen/reference/lava.md) :
   Fit a linear model with lava regularization
-- [`lasso()`](https://jchiquet.github.io/quadrupen/reference/lasso.md) :
-  Fit a linear model with lasso regularization
 - [`ridge()`](https://jchiquet.github.io/quadrupen/reference/ridge.md) :
   Fit a linear model with a structured ridge regularization
 
@@ -33,10 +37,10 @@ R6 Classes for the user to manipulate the ouput of the main functions
 
 - [`QuadrupenFit`](https://jchiquet.github.io/quadrupen/reference/QuadrupenFit.md)
   : Class "QuadrupenFit"
-- [`ElasticNetFit`](https://jchiquet.github.io/quadrupen/reference/ElasticNetFit.md)
-  : Class "ElasticNetFit"
 - [`FusedLassoFit`](https://jchiquet.github.io/quadrupen/reference/FusedLassoFit.md)
   : Class "FusedLassoFit"
+- [`SparseFit`](https://jchiquet.github.io/quadrupen/reference/SparseFit.md)
+  : Class "SparseFit"
 - [`SparseGroupFit`](https://jchiquet.github.io/quadrupen/reference/SparseGroupFit.md)
   : Class "SparseGroupFit"
 - [`GroupLavaFit`](https://jchiquet.github.io/quadrupen/reference/GroupLavaFit.md)

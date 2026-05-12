@@ -15,7 +15,7 @@ penalty."></head><body>
 
     <a class="navbar-brand me-2" href="../index.html">quadrupen</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3-9950</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0-0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -73,7 +73,7 @@ penalty.</p>
 
 <dl><dt id="arg-object">object<a class="anchor" aria-label="anchor" href="#arg-object"></a></dt>
 <dd><p>output of a fitting procedure of the <span class="pkg">quadrupen</span>
-package (e.g. <code><a href="elastic.net.html">elastic.net()</a></code>).</p></dd>
+package (e.g. <code><a href="sparse_lm.html">elastic_net()</a></code>).</p></dd>
 
 
 <dt id="arg-penalty">penalty<a class="anchor" aria-label="anchor" href="#arg-penalty"></a></dt>
@@ -134,10 +134,10 @@ freedom in lasso problems, Annals of Statistics, 40(2) 2012.</p>
 <span class="r-in"><span><span class="va">y</span> <span class="op">&lt;-</span> <span class="fl">10</span> <span class="op">+</span> <span class="va">x</span> <span class="op"><a href="https://rdrr.io/r/base/matmult.html" class="external-link">%*%</a></span> <span class="va">beta</span> <span class="op">+</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="va">n</span>,<span class="fl">0</span>,<span class="fl">10</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co">## Plot penalized criteria for the Elastic-net path</span></span></span>
-<span class="r-in"><span><span class="fu">criteria</span><span class="op">(</span><span class="fu"><a href="elastic.net.html">elastic.net</a></span><span class="op">(</span><span class="va">x</span>,<span class="va">y</span>, lambda2<span class="op">=</span><span class="fl">1</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu">criteria</span><span class="op">(</span><span class="fu"><a href="sparse_lm.html">elastic_net</a></span><span class="op">(</span><span class="va">x</span>,<span class="va">y</span>, lambda2<span class="op">=</span><span class="fl">1</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co">#' Plot penalized criteria for the Bounded regression</span></span></span>
-<span class="r-in"><span><span class="fu">criteria</span><span class="op">(</span><span class="fu"><a href="bounded.reg.html">bounded.reg</a></span><span class="op">(</span><span class="va">x</span>,<span class="va">y</span>, lambda2<span class="op">=</span><span class="fl">1</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu">criteria</span><span class="op">(</span><span class="fu"><a href="bounded_reg.html">bounded_reg</a></span><span class="op">(</span><span class="va">x</span>,<span class="va">y</span>, lambda2<span class="op">=</span><span class="fl">1</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="op">}</span> <span class="co"># }</span></span></span>
 <span class="r-in"><span></span></span>
 </code></pre></div>

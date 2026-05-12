@@ -29,7 +29,7 @@ criteria(
 - object:
 
   output of a fitting procedure of the quadrupen package (e.g.
-  [`elastic.net()`](https://jchiquet.github.io/quadrupen/reference/elastic.net.md)).
+  [`elastic_net()`](https://jchiquet.github.io/quadrupen/reference/sparse_lm.md)).
 
 - penalty:
 
@@ -93,9 +93,9 @@ x <- as.matrix(matrix(rnorm(95*n),n,95) %*% chol(Sigma))
 y <- 10 + x %*% beta + rnorm(n,0,10)
 
 ## Plot penalized criteria for the Elastic-net path
-criteria(elastic.net(x,y, lambda2=1))
+criteria(elastic_net(x,y, lambda2=1))
 
 #' Plot penalized criteria for the Bounded regression
-criteria(bounded.reg(x,y, lambda2=1))
+criteria(bounded_reg(x,y, lambda2=1))
 } # }
 ```

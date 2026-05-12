@@ -7,7 +7,7 @@ also add a (possibly structured) \\\ell_2\\-norm (ridge-like). The
 solution path is computed on an automatically tuned grid of values for
 the sparse group penalty. The mixture coefficient and the amount of
 ridge-like regularization are fixed by the user. See details for the
-criterion
+criterion optimized.
 
 ## Usage
 
@@ -37,6 +37,7 @@ group_lasso(
   y,
   group,
   lambda1 = NULL,
+  lambda2 = 0,
   penscale = sqrt(tabulate(group)),
   intercept = TRUE,
   normalize = TRUE,
@@ -52,6 +53,7 @@ group_l1linf(
   y,
   group,
   lambda1 = NULL,
+  lambda2 = 0,
   penscale = sqrt(tabulate(group)),
   intercept = TRUE,
   normalize = TRUE,
@@ -67,6 +69,7 @@ coop_lasso(
   y,
   group,
   lambda1 = NULL,
+  lambda2 = 0,
   penscale = sqrt(tabulate(group)),
   intercept = TRUE,
   normalize = TRUE,
@@ -82,6 +85,7 @@ sparse_group_lasso(
   y,
   group,
   lambda1 = NULL,
+  lambda2 = 0,
   alpha = 0.5,
   penscale = sqrt(tabulate(group)),
   intercept = TRUE,
@@ -98,6 +102,7 @@ sparse_group_l1linf(
   y,
   group,
   lambda1 = NULL,
+  lambda2 = 0,
   alpha = 0,
   penscale = sqrt(tabulate(group)),
   intercept = TRUE,
@@ -114,6 +119,7 @@ sparse_coop_lasso(
   y,
   group,
   lambda1 = NULL,
+  lambda2 = 0,
   alpha = 0,
   penscale = sqrt(tabulate(group)),
   intercept = TRUE,
@@ -145,9 +151,8 @@ sparse_coop_lasso(
 
 - type:
 
-  string indicating whether the \\\ell_1/\ell_2\\ or the
-  \\\ell_1/\ell\_\infty\\ group-Lasso must be fitted. Could be "linf" or
-  "l2", default is "l2"
+  string indicating the sparse-group variant to be fitted. Could be
+  "l2", "coop", or "linf". Default is "l2" (regular Group-Lasso)
 
 - lambda1:
 
@@ -300,10 +305,12 @@ plot(group_lasso(x, y, grp), label=labels)
 plot(sparse_group_lasso(x, y, grp, alpha = 0.75), label=labels)
 
 ## Sparse Group-Lasso + L2 regularization
-plot(group_sparse_lm(x, y, grp, type = "l2", alpha = .75, lambda2=.5), label=labels)
-plot(group_sparse_lm(x, y, grp, type = "l2", alpha = .75, lambda2=10), label=labels)
+plot(group_sparse_lm(x, y, grp, type = "l2", alpha = .75, lambda2=.5),
+ label=labels)
+plot(group_sparse_lm(x, y, grp, type = "l2", alpha = .75, lambda2=10),
+ label=labels)
 plot(group_sparse_lm(x, y, grp, type = "l2", alpha = .75, lambda2=10, 
-          struct=solve(Sigma)), label=labels)
+ struct=solve(Sigma)), label=labels)
 
 ## Group-Lasso L1/LINF
 plot(group_l1linf(x, y, grp), label=labels)
@@ -312,10 +319,12 @@ plot(group_l1linf(x, y, grp), label=labels)
 plot(sparse_group_l1linf(x, y, grp, alpha = 0.75), label=labels)
 
 ## Sparse L1/LINF Group-Lasso + L2 regularization
-plot(group_sparse_lm(x, y, grp, type = "linf", alpha = .75, lambda2=.5), label=labels)
-plot(group_sparse_lm(x, y, grp, type = "linf", alpha = .75, lambda2=10), label=labels)
+plot(group_sparse_lm(x, y, grp, type = "linf", alpha = .75, lambda2=.5),
+  label=labels)
+plot(group_sparse_lm(x, y, grp, type = "linf", alpha = .75, lambda2=10),
+  label=labels)
 plot(group_sparse_lm(x, y, grp, type = "linf", alpha = .75, lambda2=10, 
-          struct=solve(Sigma)), label=labels)
+  struct=solve(Sigma)), label=labels)
 
 ## Cooperative-Lasso
 plot(coop_lasso(x, y, grp), label=labels)
@@ -324,9 +333,11 @@ plot(coop_lasso(x, y, grp), label=labels)
 plot(sparse_coop_lasso(x, y, grp, alpha = 0.75), label=labels)
 
 ## Sparse Cooperative-Lasso + L2 regularization
-plot(group_sparse_lm(x, y, grp, type = "coop", alpha = .75, lambda2=.5), label=labels)
-plot(group_sparse_lm(x, y, grp, type = "coop", alpha = .75, lambda2=10), label=labels)
+plot(group_sparse_lm(x, y, grp, type = "coop", alpha = .75, lambda2=.5),
+ label=labels)
+plot(group_sparse_lm(x, y, grp, type = "coop", alpha = .75, lambda2=10),
+ label=labels)
 plot(group_sparse_lm(x, y, grp, type = "coop", alpha = .75, lambda2=10, 
-        struct=solve(Sigma)), label=labels)
+ struct=solve(Sigma)), label=labels)
 } # }
 ```

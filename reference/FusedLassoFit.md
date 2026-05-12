@@ -8,7 +8,7 @@ Inherits fields and methods of
 ## See also
 
 [QuadrupenFit](https://jchiquet.github.io/quadrupen/reference/QuadrupenFit.md),
-[`bounded.reg()`](https://jchiquet.github.io/quadrupen/reference/bounded.reg.md)
+[`bounded_reg()`](https://jchiquet.github.io/quadrupen/reference/bounded_reg.md)
 
 ## Super class
 

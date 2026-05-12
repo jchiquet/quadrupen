@@ -9,7 +9,7 @@ quadrupen fit, possibly on a grid of lambda1, lambda2."></head><body>
 
     <a class="navbar-brand me-2" href="../index.html">quadrupen</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3-9950</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0-0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -139,7 +139,7 @@ down when any switching to the proximal algorithm is required.</p>
 <span class="r-in"><span><span class="va">x</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">as.matrix</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">matrix</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="fl">95</span><span class="op">*</span><span class="va">n</span><span class="op">)</span>,<span class="va">n</span>,<span class="fl">95</span><span class="op">)</span> <span class="op"><a href="https://rdrr.io/r/base/matmult.html" class="external-link">%*%</a></span> <span class="fu"><a href="https://rdrr.io/r/base/chol.html" class="external-link">chol</a></span><span class="op">(</span><span class="va">Sigma</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">y</span> <span class="op">&lt;-</span> <span class="fl">10</span> <span class="op">+</span> <span class="va">x</span> <span class="op"><a href="https://rdrr.io/r/base/matmult.html" class="external-link">%*%</a></span> <span class="va">beta</span> <span class="op">+</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="va">n</span>,<span class="fl">0</span>,<span class="fl">10</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="va">enet</span> <span class="op">&lt;-</span> <span class="fu"><a href="elastic.net.html">elastic.net</a></span><span class="op">(</span><span class="va">x</span>, <span class="va">y</span>, nlambda1<span class="op">=</span><span class="fl">50</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">enet</span> <span class="op">&lt;-</span> <span class="fu"><a href="sparse_lm.html">elastic_net</a></span><span class="op">(</span><span class="va">x</span>, <span class="va">y</span>, nlambda1<span class="op">=</span><span class="fl">50</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co">## Use fewer lambda1 values by overwritting the default parameters</span></span></span>
 <span class="r-in"><span><span class="co">## and cross-validate over the sequences lambda1 and lambda2</span></span></span>

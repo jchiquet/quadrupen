@@ -102,7 +102,7 @@ n <- 100
 x <- as.matrix(matrix(rnorm(95*n),n,95) %*% chol(Sigma))
 y <- 10 + x %*% beta + rnorm(n,0,10)
 
-enet <- elastic.net(x, y, nlambda1=50)
+enet <- elastic_net(x, y, nlambda1=50)
 
 ## Use fewer lambda1 values by overwritting the default parameters
 ## and cross-validate over the sequences lambda1 and lambda2

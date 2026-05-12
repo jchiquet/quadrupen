@@ -1,14 +1,14 @@
 # Class "BoundedRegression"
 
 Class of object returned by the fitting function
-[`bounded.reg()`](https://jchiquet.github.io/quadrupen/reference/bounded.reg.md).
+[`bounded_reg()`](https://jchiquet.github.io/quadrupen/reference/bounded_reg.md).
 Inherits fields and methods of
 [QuadrupenFit](https://jchiquet.github.io/quadrupen/reference/QuadrupenFit.md).
 
 ## See also
 
 [QuadrupenFit](https://jchiquet.github.io/quadrupen/reference/QuadrupenFit.md),
-[`bounded.reg()`](https://jchiquet.github.io/quadrupen/reference/bounded.reg.md)
+[`bounded_reg()`](https://jchiquet.github.io/quadrupen/reference/bounded_reg.md)
 
 ## Super class
 

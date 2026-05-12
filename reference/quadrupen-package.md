@@ -10,7 +10,7 @@ increasing size.
 At the moment, two `R` fitting functions are available:
 
 1.  the
-    [`elastic.net()`](https://jchiquet.github.io/quadrupen/reference/elastic.net.md)
+    [`elastic_net()`](https://jchiquet.github.io/quadrupen/reference/sparse_lm.md)
     function, which solves a family of linear regression problems
     penalized by a mixture of \\\ell_1\\ and \\\ell_2\\ norms. It
     notably includes the LASSO (Tibshirani, 1996), the adaptive-LASSO
@@ -19,10 +19,10 @@ At the moment, two `R` fitting functions are available:
     as the available `demo(quad_enet)`.
 
 2.  the
-    [`bounded.reg()`](https://jchiquet.github.io/quadrupen/reference/bounded.reg.md)
+    [`bounded_reg()`](https://jchiquet.github.io/quadrupen/reference/bounded_reg.md)
     function, which fits a linear model penalized by a mixture of
     \\\ell\_\infty\\ and \\\ell_2\\ norms. It owns the same versatility
-    as the `elastic.net` function regarding the \\\ell_2\\ norm, yet the
+    as the `elastic_net` function regarding the \\\ell_2\\ norm, yet the
     \\\ell_1\\-norm is replaced by the infinity norm. Check
     `demo(quad_breg)` and examples.
 
@@ -32,9 +32,9 @@ The problem commonly solved for these two functions writes
 β^(T) S β,
 
 where \\q=1\\ for
-[`elastic.net()`](https://jchiquet.github.io/quadrupen/reference/elastic.net.md)
+[`elastic_net()`](https://jchiquet.github.io/quadrupen/reference/sparse_lm.md)
 and \\q=\infty\\ for
-[`bounded.reg()`](https://jchiquet.github.io/quadrupen/reference/bounded.reg.md).
+[`bounded_reg()`](https://jchiquet.github.io/quadrupen/reference/bounded_reg.md).
 The diagonal matrix \\D\\ allows different weights for the first part of
 the penalty. The structuring matrix \\S\\ can be used to introduce some
 prior information regarding the predictors. It is provided via a
@@ -64,7 +64,7 @@ and fixing \\\lambda_2\\, we may explore the whole path of solutions at
 a reasonable numerical cost, providing that \\\lambda_1\\ does not end
 up too small.
 
-For the \\\ell_1\\-based methods (available in the `elastic.net`
+For the \\\ell_1\\-based methods (available in the `elastic_net`
 function), the size of the underlying problems solved is related to the
 number of nonzero coefficients in the vector of parameters. With the
 \\\ell\_\infty\\-norm, (available in the `boundary.reg` function), we do
@@ -79,7 +79,7 @@ sub problems, which is the main purpose of this package. This strategy
 is thoroughly exposed in Grandvalet, Chiquet and Ambroise (submitted).
 Still, we also implemented the popular and versatile proximal (FISTA)
 approaches for routine checks and numerical comparisons. A coordinate
-descent approach is also included, yet only for the `elastic.net`
+descent approach is also included, yet only for the `elastic_net`
 fitting procedure.
 
 The default setting uses the quadratic approach that gives its name to
@@ -89,13 +89,13 @@ the first order methods (coordinate descent and FISTA) can be
 interesting in situations where the problem is close to singular, in
 which case the Cholesky decomposition used in the quadratic solver can
 be computationally unstable. Though it is extremely unlikely for
-[`elastic.net`](https://jchiquet.github.io/quadrupen/reference/elastic.net.md)
+[`elastic_net`](https://jchiquet.github.io/quadrupen/reference/sparse_lm.md)
 – and if so, we encourage the user to send us back any report of such an
 event –, this happens at times with
-[`bounded.reg`](https://jchiquet.github.io/quadrupen/reference/bounded.reg.md).
+[`bounded_reg`](https://jchiquet.github.io/quadrupen/reference/bounded_reg.md).
 Regarding this issue, we let the possibility for the user to run the
 optimization of the
-[`bounded.reg`](https://jchiquet.github.io/quadrupen/reference/bounded.reg.md)
+[`bounded_reg`](https://jchiquet.github.io/quadrupen/reference/bounded_reg.md)
 criterion in a (hopefully) 'bulletproof' mode: using mainly the fast and
 accurate quadratic approach, it switches to the slower but more robust
 proximal resolution when instability is detected.

@@ -13,7 +13,7 @@ problems with increasing size."></head><body>
 
     <a class="navbar-brand me-2" href="../index.html">quadrupen</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3-9950</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0-0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -52,17 +52,17 @@ problems with increasing size.</p>
 
 
 
-<p>At the moment, two <code>R</code> fitting functions are available:</p><ol><li><p>the <code><a href="elastic.net.html">elastic.net()</a></code> function, which solves a family of
+<p>At the moment, two <code>R</code> fitting functions are available:</p><ol><li><p>the <code><a href="sparse_lm.html">elastic_net()</a></code> function, which solves a family of
 linear regression problems penalized by a mixture of
 \(\ell_1\) and \(\ell_2\) norms. It notably includes
 the LASSO (Tibshirani, 1996), the adaptive-LASSO (Zou, 2006), the
 Elastic-net (Zou and Hastie, 2006) or the Structured Elastic-net
 (Slawski et al., 2010). See examples as well as the available
 <code>demo(quad_enet)</code>.</p></li>
-<li><p>the <code><a href="bounded.reg.html">bounded.reg()</a></code> function, which fits a linear model
+<li><p>the <code><a href="bounded_reg.html">bounded_reg()</a></code> function, which fits a linear model
 penalized by a mixture of \(\ell_\infty\) and
 \(\ell_2\) norms. It owns the same versatility as the
-<code>elastic.net</code> function regarding the \(\ell_2\) norm,
+<code>elastic_net</code> function regarding the \(\ell_2\) norm,
 yet the \(\ell_1\)-norm is replaced by the infinity
 norm. Check <code>demo(quad_breg)</code> and examples.</p></li>
 </ol><p>The problem commonly solved for these two functions writes
@@ -72,8 +72,8 @@ argmin<sub>β</sub> 1/2 RSS(&amp;beta) + λ<sub>1</sub>
 | D β |<sub>q</sub> + λ/2 <sub>2</sub>
 β<sup>T</sup> S β, </center>
  where
-\(q=1\) for <code><a href="elastic.net.html">elastic.net()</a></code> and
-\(q=\infty\) for <code><a href="bounded.reg.html">bounded.reg()</a></code>.  The diagonal
+\(q=1\) for <code><a href="sparse_lm.html">elastic_net()</a></code> and
+\(q=\infty\) for <code><a href="bounded_reg.html">bounded_reg()</a></code>.  The diagonal
 matrix \(D\) allows different weights for the first part of
 the penalty. The structuring matrix \(S\) can be used to
 introduce some prior information regarding the predictors. It is
@@ -106,7 +106,7 @@ for the penalty \(\lambda_1\) and fixing
 solutions at a reasonable numerical cost, providing that
 \(\lambda_1\) does not end up too small.</p>
 <p>For the \(\ell_1\)-based methods (available in the
-<code>elastic.net</code> function), the size of the underlying problems
+<code>elastic_net</code> function), the size of the underlying problems
 solved is related to the number of nonzero coefficients in the
 vector of parameters. With the \(\ell_\infty\)-norm,
 (available in the <code>boundary.reg</code> function), we do not produce
@@ -121,7 +121,7 @@ package. This strategy is thoroughly exposed in Grandvalet,
 Chiquet and Ambroise (submitted). Still, we also implemented the
 popular and versatile proximal (FISTA) approaches for routine
 checks and numerical comparisons. A coordinate descent approach is
-also included, yet only for the <code>elastic.net</code> fitting
+also included, yet only for the <code>elastic_net</code> fitting
 procedure.</p>
 <p>The default setting uses the quadratic approach that gives its
 name to the package. It has been optimized to be the method of
@@ -131,11 +131,11 @@ descent and FISTA) can be interesting in situations where the
 problem is close to singular, in which case the Cholesky
 decomposition used in the quadratic solver can be computationally
 unstable. Though it is extremely unlikely for
-<code><a href="elastic.net.html">elastic.net</a></code> – and if so, we encourage the user to
+<code><a href="sparse_lm.html">elastic_net</a></code> – and if so, we encourage the user to
 send us back any report of such an event –, this happens at times
-with <code><a href="bounded.reg.html">bounded.reg</a></code>. Regarding this issue, we let the
+with <code><a href="bounded_reg.html">bounded_reg</a></code>. Regarding this issue, we let the
 possibility for the user to run the optimization of the
-<code><a href="bounded.reg.html">bounded.reg</a></code> criterion in a (hopefully) 'bulletproof'
+<code><a href="bounded_reg.html">bounded_reg</a></code> criterion in a (hopefully) 'bulletproof'
 mode: using mainly the fast and accurate quadratic approach, it
 switches to the slower but more robust proximal resolution when
 instability is detected.</p>

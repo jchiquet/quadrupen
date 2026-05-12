@@ -5,13 +5,13 @@ mixture of an element-wise \(\ell_1\) norm and a group-wise mixed-norm
 cooperative). We also add a (possibly structured) \(\ell_2\)-norm (ridge-like).
 The solution path is computed on an automatically tuned  grid of values for
 the sparse group penalty. The mixture coefficient and the amount of ridge-like
-regularization are fixed by the user. See details for the criterion"><meta property="og:description" content="Adjust a linear model with (sparse) group regularization, that is, a
+regularization are fixed by the user.  See details for the criterion optimized."><meta property="og:description" content="Adjust a linear model with (sparse) group regularization, that is, a
 mixture of an element-wise \(\ell_1\) norm and a group-wise mixed-norm
 (either \(\ell_1/\ell_2\), \(\ell_1/\ell_\infty\) or
 cooperative). We also add a (possibly structured) \(\ell_2\)-norm (ridge-like).
 The solution path is computed on an automatically tuned  grid of values for
 the sparse group penalty. The mixture coefficient and the amount of ridge-like
-regularization are fixed by the user. See details for the criterion"></head><body>
+regularization are fixed by the user.  See details for the criterion optimized."></head><body>
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
 
 
@@ -19,7 +19,7 @@ regularization are fixed by the user. See details for the criterion"></head><bod
 
     <a class="navbar-brand me-2" href="../index.html">quadrupen</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3-9950</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0-0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -52,7 +52,7 @@ mixture of an element-wise \(\ell_1\) norm and a group-wise mixed-norm
 cooperative). We also add a (possibly structured) \(\ell_2\)-norm (ridge-like).
 The solution path is computed on an automatically tuned  grid of values for
 the sparse group penalty. The mixture coefficient and the amount of ridge-like
-regularization are fixed by the user. See details for the criterion</p>
+regularization are fixed by the user.  See details for the criterion optimized.</p>
     </div>
 
     <div class="section level2">
@@ -82,6 +82,7 @@ regularization are fixed by the user. See details for the criterion</p>
 <span>  <span class="va">y</span>,</span>
 <span>  <span class="va">group</span>,</span>
 <span>  lambda1 <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  lambda2 <span class="op">=</span> <span class="fl">0</span>,</span>
 <span>  penscale <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/MathFun.html" class="external-link">sqrt</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/tabulate.html" class="external-link">tabulate</a></span><span class="op">(</span><span class="va">group</span><span class="op">)</span><span class="op">)</span>,</span>
 <span>  intercept <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  normalize <span class="op">=</span> <span class="cn">TRUE</span>,</span>
@@ -97,6 +98,7 @@ regularization are fixed by the user. See details for the criterion</p>
 <span>  <span class="va">y</span>,</span>
 <span>  <span class="va">group</span>,</span>
 <span>  lambda1 <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  lambda2 <span class="op">=</span> <span class="fl">0</span>,</span>
 <span>  penscale <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/MathFun.html" class="external-link">sqrt</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/tabulate.html" class="external-link">tabulate</a></span><span class="op">(</span><span class="va">group</span><span class="op">)</span><span class="op">)</span>,</span>
 <span>  intercept <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  normalize <span class="op">=</span> <span class="cn">TRUE</span>,</span>
@@ -112,6 +114,7 @@ regularization are fixed by the user. See details for the criterion</p>
 <span>  <span class="va">y</span>,</span>
 <span>  <span class="va">group</span>,</span>
 <span>  lambda1 <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  lambda2 <span class="op">=</span> <span class="fl">0</span>,</span>
 <span>  penscale <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/MathFun.html" class="external-link">sqrt</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/tabulate.html" class="external-link">tabulate</a></span><span class="op">(</span><span class="va">group</span><span class="op">)</span><span class="op">)</span>,</span>
 <span>  intercept <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  normalize <span class="op">=</span> <span class="cn">TRUE</span>,</span>
@@ -127,6 +130,7 @@ regularization are fixed by the user. See details for the criterion</p>
 <span>  <span class="va">y</span>,</span>
 <span>  <span class="va">group</span>,</span>
 <span>  lambda1 <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  lambda2 <span class="op">=</span> <span class="fl">0</span>,</span>
 <span>  alpha <span class="op">=</span> <span class="fl">0.5</span>,</span>
 <span>  penscale <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/MathFun.html" class="external-link">sqrt</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/tabulate.html" class="external-link">tabulate</a></span><span class="op">(</span><span class="va">group</span><span class="op">)</span><span class="op">)</span>,</span>
 <span>  intercept <span class="op">=</span> <span class="cn">TRUE</span>,</span>
@@ -143,6 +147,7 @@ regularization are fixed by the user. See details for the criterion</p>
 <span>  <span class="va">y</span>,</span>
 <span>  <span class="va">group</span>,</span>
 <span>  lambda1 <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  lambda2 <span class="op">=</span> <span class="fl">0</span>,</span>
 <span>  alpha <span class="op">=</span> <span class="fl">0</span>,</span>
 <span>  penscale <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/MathFun.html" class="external-link">sqrt</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/tabulate.html" class="external-link">tabulate</a></span><span class="op">(</span><span class="va">group</span><span class="op">)</span><span class="op">)</span>,</span>
 <span>  intercept <span class="op">=</span> <span class="cn">TRUE</span>,</span>
@@ -159,6 +164,7 @@ regularization are fixed by the user. See details for the criterion</p>
 <span>  <span class="va">y</span>,</span>
 <span>  <span class="va">group</span>,</span>
 <span>  lambda1 <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  lambda2 <span class="op">=</span> <span class="fl">0</span>,</span>
 <span>  alpha <span class="op">=</span> <span class="fl">0</span>,</span>
 <span>  penscale <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/MathFun.html" class="external-link">sqrt</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/tabulate.html" class="external-link">tabulate</a></span><span class="op">(</span><span class="va">group</span><span class="op">)</span><span class="op">)</span>,</span>
 <span>  intercept <span class="op">=</span> <span class="cn">TRUE</span>,</span>
@@ -193,9 +199,8 @@ starting from 1.</p></dd>
 
 
 <dt id="arg-type">type<a class="anchor" aria-label="anchor" href="#arg-type"></a></dt>
-<dd><p>string indicating whether the \(\ell_1/\ell_2\) or the
-\(\ell_1/\ell_\infty\) group-Lasso must be fitted. Could be "linf" or
-"l2", default is "l2"</p></dd>
+<dd><p>string indicating the sparse-group variant to be fitted.
+Could be "l2", "coop", or "linf". Default is "l2" (regular Group-Lasso)</p></dd>
 
 
 <dt id="arg-lambda-">lambda1<a class="anchor" aria-label="anchor" href="#arg-lambda-"></a></dt>
@@ -343,10 +348,12 @@ when <code>'1'</code>, the bound derived in Grandvalet et al. is computed; when
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="fu">sparse_group_lasso</span><span class="op">(</span><span class="va">x</span>, <span class="va">y</span>, <span class="va">grp</span>, alpha <span class="op">=</span> <span class="fl">0.75</span><span class="op">)</span>, label<span class="op">=</span><span class="va">labels</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co">## Sparse Group-Lasso + L2 regularization</span></span></span>
-<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="fu">group_sparse_lm</span><span class="op">(</span><span class="va">x</span>, <span class="va">y</span>, <span class="va">grp</span>, type <span class="op">=</span> <span class="st">"l2"</span>, alpha <span class="op">=</span> <span class="fl">.75</span>, lambda2<span class="op">=</span><span class="fl">.5</span><span class="op">)</span>, label<span class="op">=</span><span class="va">labels</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="fu">group_sparse_lm</span><span class="op">(</span><span class="va">x</span>, <span class="va">y</span>, <span class="va">grp</span>, type <span class="op">=</span> <span class="st">"l2"</span>, alpha <span class="op">=</span> <span class="fl">.75</span>, lambda2<span class="op">=</span><span class="fl">10</span><span class="op">)</span>, label<span class="op">=</span><span class="va">labels</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="fu">group_sparse_lm</span><span class="op">(</span><span class="va">x</span>, <span class="va">y</span>, <span class="va">grp</span>, type <span class="op">=</span> <span class="st">"l2"</span>, alpha <span class="op">=</span> <span class="fl">.75</span>, lambda2<span class="op">=</span><span class="fl">.5</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span> label<span class="op">=</span><span class="va">labels</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="fu">group_sparse_lm</span><span class="op">(</span><span class="va">x</span>, <span class="va">y</span>, <span class="va">grp</span>, type <span class="op">=</span> <span class="st">"l2"</span>, alpha <span class="op">=</span> <span class="fl">.75</span>, lambda2<span class="op">=</span><span class="fl">10</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span> label<span class="op">=</span><span class="va">labels</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="fu">group_sparse_lm</span><span class="op">(</span><span class="va">x</span>, <span class="va">y</span>, <span class="va">grp</span>, type <span class="op">=</span> <span class="st">"l2"</span>, alpha <span class="op">=</span> <span class="fl">.75</span>, lambda2<span class="op">=</span><span class="fl">10</span>, </span></span>
-<span class="r-in"><span>          struct<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/solve.html" class="external-link">solve</a></span><span class="op">(</span><span class="va">Sigma</span><span class="op">)</span><span class="op">)</span>, label<span class="op">=</span><span class="va">labels</span><span class="op">)</span></span></span>
+<span class="r-in"><span> struct<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/solve.html" class="external-link">solve</a></span><span class="op">(</span><span class="va">Sigma</span><span class="op">)</span><span class="op">)</span>, label<span class="op">=</span><span class="va">labels</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co">## Group-Lasso L1/LINF</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="fu">group_l1linf</span><span class="op">(</span><span class="va">x</span>, <span class="va">y</span>, <span class="va">grp</span><span class="op">)</span>, label<span class="op">=</span><span class="va">labels</span><span class="op">)</span></span></span>
@@ -355,10 +362,12 @@ when <code>'1'</code>, the bound derived in Grandvalet et al. is computed; when
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="fu">sparse_group_l1linf</span><span class="op">(</span><span class="va">x</span>, <span class="va">y</span>, <span class="va">grp</span>, alpha <span class="op">=</span> <span class="fl">0.75</span><span class="op">)</span>, label<span class="op">=</span><span class="va">labels</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co">## Sparse L1/LINF Group-Lasso + L2 regularization</span></span></span>
-<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="fu">group_sparse_lm</span><span class="op">(</span><span class="va">x</span>, <span class="va">y</span>, <span class="va">grp</span>, type <span class="op">=</span> <span class="st">"linf"</span>, alpha <span class="op">=</span> <span class="fl">.75</span>, lambda2<span class="op">=</span><span class="fl">.5</span><span class="op">)</span>, label<span class="op">=</span><span class="va">labels</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="fu">group_sparse_lm</span><span class="op">(</span><span class="va">x</span>, <span class="va">y</span>, <span class="va">grp</span>, type <span class="op">=</span> <span class="st">"linf"</span>, alpha <span class="op">=</span> <span class="fl">.75</span>, lambda2<span class="op">=</span><span class="fl">10</span><span class="op">)</span>, label<span class="op">=</span><span class="va">labels</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="fu">group_sparse_lm</span><span class="op">(</span><span class="va">x</span>, <span class="va">y</span>, <span class="va">grp</span>, type <span class="op">=</span> <span class="st">"linf"</span>, alpha <span class="op">=</span> <span class="fl">.75</span>, lambda2<span class="op">=</span><span class="fl">.5</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>  label<span class="op">=</span><span class="va">labels</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="fu">group_sparse_lm</span><span class="op">(</span><span class="va">x</span>, <span class="va">y</span>, <span class="va">grp</span>, type <span class="op">=</span> <span class="st">"linf"</span>, alpha <span class="op">=</span> <span class="fl">.75</span>, lambda2<span class="op">=</span><span class="fl">10</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>  label<span class="op">=</span><span class="va">labels</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="fu">group_sparse_lm</span><span class="op">(</span><span class="va">x</span>, <span class="va">y</span>, <span class="va">grp</span>, type <span class="op">=</span> <span class="st">"linf"</span>, alpha <span class="op">=</span> <span class="fl">.75</span>, lambda2<span class="op">=</span><span class="fl">10</span>, </span></span>
-<span class="r-in"><span>          struct<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/solve.html" class="external-link">solve</a></span><span class="op">(</span><span class="va">Sigma</span><span class="op">)</span><span class="op">)</span>, label<span class="op">=</span><span class="va">labels</span><span class="op">)</span></span></span>
+<span class="r-in"><span>  struct<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/solve.html" class="external-link">solve</a></span><span class="op">(</span><span class="va">Sigma</span><span class="op">)</span><span class="op">)</span>, label<span class="op">=</span><span class="va">labels</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co">## Cooperative-Lasso</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="fu">coop_lasso</span><span class="op">(</span><span class="va">x</span>, <span class="va">y</span>, <span class="va">grp</span><span class="op">)</span>, label<span class="op">=</span><span class="va">labels</span><span class="op">)</span></span></span>
@@ -367,10 +376,12 @@ when <code>'1'</code>, the bound derived in Grandvalet et al. is computed; when
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="fu">sparse_coop_lasso</span><span class="op">(</span><span class="va">x</span>, <span class="va">y</span>, <span class="va">grp</span>, alpha <span class="op">=</span> <span class="fl">0.75</span><span class="op">)</span>, label<span class="op">=</span><span class="va">labels</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co">## Sparse Cooperative-Lasso + L2 regularization</span></span></span>
-<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="fu">group_sparse_lm</span><span class="op">(</span><span class="va">x</span>, <span class="va">y</span>, <span class="va">grp</span>, type <span class="op">=</span> <span class="st">"coop"</span>, alpha <span class="op">=</span> <span class="fl">.75</span>, lambda2<span class="op">=</span><span class="fl">.5</span><span class="op">)</span>, label<span class="op">=</span><span class="va">labels</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="fu">group_sparse_lm</span><span class="op">(</span><span class="va">x</span>, <span class="va">y</span>, <span class="va">grp</span>, type <span class="op">=</span> <span class="st">"coop"</span>, alpha <span class="op">=</span> <span class="fl">.75</span>, lambda2<span class="op">=</span><span class="fl">10</span><span class="op">)</span>, label<span class="op">=</span><span class="va">labels</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="fu">group_sparse_lm</span><span class="op">(</span><span class="va">x</span>, <span class="va">y</span>, <span class="va">grp</span>, type <span class="op">=</span> <span class="st">"coop"</span>, alpha <span class="op">=</span> <span class="fl">.75</span>, lambda2<span class="op">=</span><span class="fl">.5</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span> label<span class="op">=</span><span class="va">labels</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="fu">group_sparse_lm</span><span class="op">(</span><span class="va">x</span>, <span class="va">y</span>, <span class="va">grp</span>, type <span class="op">=</span> <span class="st">"coop"</span>, alpha <span class="op">=</span> <span class="fl">.75</span>, lambda2<span class="op">=</span><span class="fl">10</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span> label<span class="op">=</span><span class="va">labels</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="fu">group_sparse_lm</span><span class="op">(</span><span class="va">x</span>, <span class="va">y</span>, <span class="va">grp</span>, type <span class="op">=</span> <span class="st">"coop"</span>, alpha <span class="op">=</span> <span class="fl">.75</span>, lambda2<span class="op">=</span><span class="fl">10</span>, </span></span>
-<span class="r-in"><span>        struct<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/solve.html" class="external-link">solve</a></span><span class="op">(</span><span class="va">Sigma</span><span class="op">)</span><span class="op">)</span>, label<span class="op">=</span><span class="va">labels</span><span class="op">)</span></span></span>
+<span class="r-in"><span> struct<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/solve.html" class="external-link">solve</a></span><span class="op">(</span><span class="va">Sigma</span><span class="op">)</span><span class="op">)</span>, label<span class="op">=</span><span class="va">labels</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="op">}</span> <span class="co"># }</span></span></span>
 </code></pre></div>
     </div>
