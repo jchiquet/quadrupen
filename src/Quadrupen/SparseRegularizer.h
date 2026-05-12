@@ -95,17 +95,10 @@ template <typename matrix, SparseNorm norm>
 SparseRegularizer<matrix,norm>::SparseRegularizer(
   const RegressionData<matrix>& data, const List& regParam, const List& control) :
   Regularizer<matrix>::Regularizer(data, regParam) {
-    
-    // Set the penalty to l1
-    penalty_ = SparsePenalty<norm>(as<double>(regParam["eta"])) ;
-    get_lambda_seq(penalty_.lambda_max(data_.XTy_, lambda_factor_), regParam) ;
-    
-    // Set up the optimizer
-    solver_ = SparseOptimizer<matrix,norm>(penalty_, control) ;
 
     // Scale the structuring matrix according to the amount of l2 penalty 
     data_.scale_struct(gamma_) ;
-    
+
     // Initialize the active set, beta_ and the gradient
     vec beta0 = control["beta0"] ;
     uvec A0 = find(beta0) ;
@@ -118,6 +111,13 @@ SparseRegularizer<matrix,norm>::SparseRegularizer(
       grad_ += set_.XTXA_ * beta_  ;
     }
     
+    // Set the penalty to l1
+    penalty_ = SparsePenalty<norm>(as<double>(regParam["eta"])) ;
+    get_lambda_seq(penalty_.lambda_max(data_.XTy_, lambda_factor_), regParam) ;
+    
+    // Set up the optimizer
+    solver_ = SparseOptimizer<matrix,norm>(penalty_, control) ;
+
   }
 
 template <typename matrix, SparseNorm norm>

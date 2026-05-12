@@ -100,13 +100,6 @@ GroupSparseRegularizer<matrix,norm>::GroupSparseRegularizer(
   const RegressionData<matrix>& data, const uvec& group_ind, const List& regParam, const List& control) :
   Regularizer<matrix>::Regularizer(data, regParam) {
 
-    // Set up the penalty
-    penalty_ = GroupPenalty<norm>(as<double>(regParam["alpha"])) ;
-    get_lambda_seq(get_lambda_max(), regParam) ;
-
-    // Set up the optimizer
-    solver_ = GroupOptimizer<matrix,norm>(penalty_, control);
-
     // Scale the structuring matrix according to the amount of l2 penalty 
     data_.scale_struct(gamma_) ;
     
@@ -114,6 +107,13 @@ GroupSparseRegularizer<matrix,norm>::GroupSparseRegularizer(
     grad_ = - data_.XTy_ ;
     set_ = ActiveSetGroup(data_, group_ind, as<bool>(control["factmat"])) ;
     
+    // Set up the penalty
+    penalty_ = GroupPenalty<norm>(as<double>(regParam["alpha"])) ;
+    get_lambda_seq(penalty_.lambda_max(data_.XTy_, set_.grp_sizes_, lambda_factor_), regParam) ;
+
+    // Set up the optimizer
+    solver_ = GroupOptimizer<matrix,norm>(penalty_, control);
+
   }
 
 template <typename matrix, GroupSparseNorm norm>
