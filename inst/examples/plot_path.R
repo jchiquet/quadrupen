@@ -12,10 +12,10 @@ diag(Sigma) <- 1
 n <- 100
 x <- as.matrix(matrix(rnorm(95*n),n,95) %*% chol(Sigma))
 y <- 10 + x %*% beta + rnorm(n,0,10)
-lasso <- elastic.net(x,y, lambda2=0)
-enet  <- elastic.net(x,y, lambda2=10)
-breg1  <- bounded.reg(x,y, lambda2=1e-2)
-breg2  <- bounded.reg(x,y, lambda2=10)
+lasso <- elastic_net(x,y, lambda2=0)
+enet  <- elastic_net(x,y, lambda2=10)
+breg1  <- bounded_reg(x,y, lambda2=1e-2)
+breg2  <- bounded_reg(x,y, lambda2=10)
 
 ## Plot the Lasso path
 lasso$plot_path(title="Lasso solution path")

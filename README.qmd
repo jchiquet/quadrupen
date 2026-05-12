@@ -131,22 +131,34 @@ plot(ridge(x,y, intercept=FALSE), labels=labels)
 plot(lasso(x,y, intercept=FALSE), labels=labels)
 ```
 
+#### MCP  (Minimax Concave Penalty)
+
+```{r mcp_nostruct}
+plot(mcp(x,y, intercept=FALSE), labels=labels)
+```
+
+#### SCAD (Smoothly Clipped Absolute Deviation)
+
+```{r scad_nostruct}
+plot(scad(x,y, intercept=FALSE), labels=labels)
+```
+
 #### Elastic-net  ($\ell_1+\ell_2$ penalty)
 
 ```{r enet_nostruct}
-plot(elastic.net(x,y, lambda2=1, intercept=FALSE), labels=labels)
+plot(elastic_net(x,y, lambda2=1, intercept=FALSE), labels=labels)
 ```
 
 #### Bounded regression ($\ell_\infty$ penalty)
 
 ```{r breg_nostruct}
-plot(bounded.reg(x,y, lambda2=0, intercept=FALSE), labels=labels)
+plot(bounded_reg(x,y, lambda2=0, intercept=FALSE), labels=labels)
 ```
 
-#### Ridge + Bounded regression ($\ell_\infty+\ell_2$ penalty)
+#### Bounded regression + Ridge ($\ell_\infty+\ell_2$ penalty)
 
 ```{r bregridge_nostruct}
-plot(bounded.reg(x,y, lambda2=5, intercept=FALSE), labels=labels)
+plot(bounded_reg(x,y, lambda2=5, intercept=FALSE), labels=labels)
 ```
 
 #### Lava (sparse + dense signal decomposition)
@@ -178,13 +190,13 @@ plot(ridge(x,y, lambda = 10^seq(4,-1,len=100), struct = L, intercept=FALSE), lab
 #### Structured/Generalized Elastic-net  ($\ell_1+\ell_2$ penalty)
 
 ```{r enet_struct}
-plot(elastic.net(x,y, struct = L, lambda2=1, intercept=FALSE), labels=labels)
+plot(elastic_net(x,y, struct = L, lambda2=1, intercept=FALSE), labels=labels)
 ```
 
 #### Bounded regression  + structured/Generalized Ridge ($\ell_\infty+\ell_2$ penalty)
 
 ```{r bregridge_struct}
-plot(bounded.reg(x,y, struct = L, lambda2=5, intercept=FALSE), labels=labels)
+plot(bounded_reg(x,y, struct = L, lambda2=5, intercept=FALSE), labels=labels)
 ```
 
 #### Lava (sparse + structured dense)

@@ -15,12 +15,12 @@ y <- 10 + x %*% beta + rnorm(n,0,10)
   
 ## Use fewer lambda1 values by overwritting the default parameters
 ## and cross-validate over the sequences lambda1 and lambda2
-enet <- elastic.net(x, y, nlambda1 = 40, minratio = 0.01)
+enet <- elastic_net(x, y, nlambda1 = 40, minratio = 0.01)
 cvGRID <- cross_validate(enet, lambda2=10^seq(.5,-1,len=40))
 plot(cvGRID)
 
 ## Rerun simple cross-validation with the appropriate lambda2
-enet <- elastic.net(x, y, lambda2 = cvGRID$lambda2_min)
+enet <- elastic_net(x, y, lambda2 = cvGRID$lambda2_min)
 cv10K <- cross_validate(enet)
 plot(cv10K)
 beta10K <- enet$get_model("CV_min")[-1]

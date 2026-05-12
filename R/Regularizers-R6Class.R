@@ -1,9 +1,9 @@
 #' Class "SparseFit"
 #' 
-#' Class of object returned by the fitting function [elastic.net()]. Inherits fields
+#' Class of object returned by the fitting function [elastic_net()]. Inherits fields
 #' and methods of [QuadrupenFit]
 #' 
-#' @seealso [QuadrupenFit], [elastic.net()]
+#' @seealso [QuadrupenFit], [elastic_net()]
 #' 
 #' @export
 #' 
@@ -52,17 +52,17 @@ SparseFit <- R6::R6Class(
 
 #' Class "BoundedRegression"
 #' 
-#' Class of object returned by the fitting function [bounded.reg()]. Inherits fields
+#' Class of object returned by the fitting function [bounded_reg()]. Inherits fields
 #' and methods of [QuadrupenFit].
 #' 
-#' @seealso [QuadrupenFit], [bounded.reg()]
+#' @seealso [QuadrupenFit], [bounded_reg()]
 #' 
 #' @export
 BoundedRegressionFit <- R6::R6Class(
   classname = "BoundedRegressionFit",
   inherit = QuadrupenFit,
   #' @field penalty character describing the regularizer/penalty
-  active  = list(penalty = function(value) "bounded.reg"),
+  active  = list(penalty = function(value) "bounded_reg"),
   #' @description Initialize a [`BoundedRegressionFit`] model
   #' @param data a [`DataModel`] object
   #' @param intercept a logical; should an intercept be included in the mode?
@@ -108,7 +108,7 @@ RidgeRegressionFit <- R6::R6Class(
 #' Class of object returned by the fitting function [fusedlasso()]. Inherits fields
 #' and methods of [QuadrupenFit].
 #' 
-#' @seealso [QuadrupenFit], [bounded.reg()]
+#' @seealso [QuadrupenFit], [bounded_reg()]
 #' 
 #' @export
 FusedLassoFit <- R6::R6Class(

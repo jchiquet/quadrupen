@@ -17,8 +17,8 @@ y <- 10 + x %*% beta + rnorm(n,0,10)
 ## Comparing the solution path of the LASSO, the Elastic-net and the
 ## Structured Elastic.net
 LASSO <- lasso(x,y, minratio = 1e-2)
-ENET  <- elastic.net(x,y, minratio = 1e-2, lambda2 = 2)
-SENET <- elastic.net(x,y, minratio = 1e-2, lambda2 = 1, struct=solve(cov(x)) + diag(1e-3, p, p))
+ENET  <- elastic_net(x,y, minratio = 1e-2, lambda2 = 2)
+SENET <- elastic_net(x,y, minratio = 1e-2, lambda2 = 1, struct=solve(cov(x)) + diag(1e-3, p, p))
 
 plot(LASSO, label=labels) ## a mess
 plot(ENET , label=labels) ## a lot better

@@ -5,7 +5,7 @@
 #' at a grid of values for the \eqn{\ell_2}{l2}-penalty. See details
 #' for the criterion optimized.
 #'
-#' @inheritParams elastic.net
+#' @inheritParams elastic_net
 #' 
 #' @param lambda sequence of decreasing \eqn{\ell_2}{l2}-penalty
 #' levels. If `NULL` (the default), a vector is generated with

@@ -9,7 +9,7 @@
 #' \eqn{\ell_1/\ell_q}{l1/lq}-penalty. See details for the criterion
 #' optimized.
 #'
-#' @inheritParams elastic.net
+#' @inheritParams elastic_net
 #'
 #' @param group vector of integers indicating group belonging. Must
 #' match the number of column in \code{x}. Must be SORTED integers

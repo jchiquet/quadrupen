@@ -10,7 +10,7 @@
 #' At the moment, two \code{R} fitting functions are available:
 #' \enumerate{%
 #'
-#' \item the [elastic.net()] function, which solves a family of
+#' \item the [elastic_net()] function, which solves a family of
 #' linear regression problems penalized by a mixture of
 #' \eqn{\ell_1}{l1} and \eqn{\ell_2}{l2} norms. It notably includes
 #' the LASSO (Tibshirani, 1996), the adaptive-LASSO (Zou, 2006), the
@@ -18,10 +18,10 @@
 #' (Slawski et al., 2010). See examples as well as the available
 #' \code{demo(quad_enet)}.
 #'
-#' \item the [bounded.reg()] function, which fits a linear model
+#' \item the [bounded_reg()] function, which fits a linear model
 #' penalized by a mixture of \eqn{\ell_\infty}{infinity} and
 #' \eqn{\ell_2}{l2} norms. It owns the same versatility as the
-#' \code{elastic.net} function regarding the \eqn{\ell_2}{l2} norm,
+#' \code{elastic_net} function regarding the \eqn{\ell_2}{l2} norm,
 #' yet the \eqn{\ell_1}{l1}-norm is replaced by the infinity
 #' norm. Check \code{demo(quad_breg)} and examples.}
 #'
@@ -36,8 +36,8 @@
 #' &beta;<sup>T</sup> S &beta;, </center> }}
 #' \if{text}{\deqn{beta.hat(lambda1, lambda2) = argmin_beta 1/2
 #' RSS(beta) + lambda1 |D beta|_q + lambda2 beta' S beta,}} where
-#' \eqn{q=1}{q=1} for [elastic.net()] and
-#' \eqn{q=\infty}{q=infinity} for [bounded.reg()].  The diagonal
+#' \eqn{q=1}{q=1} for [elastic_net()] and
+#' \eqn{q=\infty}{q=infinity} for [bounded_reg()].  The diagonal
 #' matrix \eqn{D}{D} allows different weights for the first part of
 #' the penalty. The structuring matrix \eqn{S}{S} can be used to
 #' introduce some prior information regarding the predictors. It is
@@ -70,7 +70,7 @@
 #' \eqn{\lambda_1}{lambda1} does not end up too small.
 #'
 #' For the \eqn{\ell_1}{l1}-based methods (available in the
-#' \code{elastic.net} function), the size of the underlying problems
+#' \code{elastic_net} function), the size of the underlying problems
 #' solved is related to the number of nonzero coefficients in the
 #' vector of parameters. With the \eqn{\ell_\infty}{infinity}-norm,
 #' (available in the \code{boundary.reg} function), we do not produce
@@ -86,7 +86,7 @@
 #' Chiquet and Ambroise (submitted). Still, we also implemented the
 #' popular and versatile proximal (FISTA) approaches for routine
 #' checks and numerical comparisons. A coordinate descent approach is
-#' also included, yet only for the \code{elastic.net} fitting
+#' also included, yet only for the \code{elastic_net} fitting
 #' procedure.
 #'
 #' The default setting uses the quadratic approach that gives its
@@ -97,11 +97,11 @@
 #' problem is close to singular, in which case the Cholesky
 #' decomposition used in the quadratic solver can be computationally
 #' unstable. Though it is extremely unlikely for
-#' \code{\link{elastic.net}} -- and if so, we encourage the user to
+#' \code{\link{elastic_net}} -- and if so, we encourage the user to
 #' send us back any report of such an event --, this happens at times
-#' with \code{\link{bounded.reg}}. Regarding this issue, we let the
+#' with \code{\link{bounded_reg}}. Regarding this issue, we let the
 #' possibility for the user to run the optimization of the
-#' \code{\link{bounded.reg}} criterion in a (hopefully) 'bulletproof'
+#' \code{\link{bounded_reg}} criterion in a (hopefully) 'bulletproof'
 #' mode: using mainly the fast and accurate quadratic approach, it
 #' switches to the slower but more robust proximal resolution when
 #' instability is detected.

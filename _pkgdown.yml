@@ -7,8 +7,8 @@ reference:
   desc: >
     Functions for fitting various structured regularization models
   contents: 
-  - bounded.reg
-  - elastic.net
+  - bounded_reg
+  - elastic_net
   - fusedlasso
   - group_sparse_lm
   - group_lasso

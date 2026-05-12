@@ -103,7 +103,7 @@ labels <- rep("irrelevant", length(beta))
 labels[beta != 0] <- c("relevant")
 labels <- factor(labels, ordered=TRUE, levels=c("relevant","irrelevant"))
 
-enet <- elastic.net(x, y, lambda2 = 10, struct = solve(Sigma), minratio = 1e-2)
+enet <- elastic_net(x, y, lambda2 = 10, struct = solve(Sigma), minratio = 1e-2)
 stab <- stability(enet, n_subsamples = 200)
 
 ## Build the plot an recover the selected variable

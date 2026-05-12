@@ -92,7 +92,7 @@ deviance.QuadrupenFit <- function(object, ...){
 #' penalty.
 #'
 #' @param object output of a fitting procedure of the \pkg{quadrupen}
-#' package (e.g. [elastic.net()]).
+#' package (e.g. [elastic_net()]).
 #' @param penalty a vector with as many penalties a desired. The
 #' default contains the penalty corresponding to the AIC and the BIC
 #' (\eqn{2}{2} and \eqn{\log(n)}{log(n)}). Setting the "names"
@@ -142,10 +142,10 @@ deviance.QuadrupenFit <- function(object, ...){
 #' y <- 10 + x %*% beta + rnorm(n,0,10)
 #'
 #' ## Plot penalized criteria for the Elastic-net path
-#' criteria(elastic.net(x,y, lambda2=1))
+#' criteria(elastic_net(x,y, lambda2=1))
 #'
 #' #' Plot penalized criteria for the Bounded regression
-#' criteria(bounded.reg(x,y, lambda2=1))
+#' criteria(bounded_reg(x,y, lambda2=1))
 #' }
 #'
 #' @importFrom stats setNames
@@ -224,7 +224,7 @@ criteria.QuadrupenFit <-
 #' x <- as.matrix(matrix(rnorm(95*n),n,95) %*% chol(Sigma))
 #' y <- 10 + x %*% beta + rnorm(n,0,10)
 #' 
-#' enet <- elastic.net(x, y, nlambda1=50)
+#' enet <- elastic_net(x, y, nlambda1=50)
 #' 
 #' ## Use fewer lambda1 values by overwritting the default parameters
 #' ## and cross-validate over the sequences lambda1 and lambda2
@@ -337,7 +337,7 @@ cross_validate.QuadrupenFit <-
 #' labels[beta != 0] <- c("relevant")
 #' labels <- factor(labels, ordered=TRUE, levels=c("relevant","irrelevant"))
 #'
-#' enet <- elastic.net(x, y, lambda2 = 10, struct = solve(Sigma), minratio = 1e-2)
+#' enet <- elastic_net(x, y, lambda2 = 10, struct = solve(Sigma), minratio = 1e-2)
 #' stab <- stability(enet, n_subsamples = 200)
 #'
 #' ## Build the plot an recover the selected variable

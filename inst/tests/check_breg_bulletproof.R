@@ -23,5 +23,5 @@ x <- as.matrix(matrix(rnorm(95*n),n,95) %*% chol(Sigma))
 y <- mu + x %*% beta + rnorm(n,0,10)
 
 ## fails of the quadratic solver, correctly handled by 'bullet proof' mode (now forced)...
-fit11 <- bounded.reg(x,y, lambda2=0, minratio=1e-4)
-fit12 <- bounded.reg(x,y, lambda2=0.1, minratio=1e-4)
+fit11 <- bounded_reg(x,y, lambda2=0, minratio=1e-4)
+fit12 <- bounded_reg(x,y, lambda2=0.1, minratio=1e-4)

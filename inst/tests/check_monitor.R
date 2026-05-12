@@ -24,8 +24,8 @@ y <- 10 + x %*% beta + rnorm(n,0,10)
 subset <- sample(1:n, p/2)
 
 lambda2 <- 0.01
-fenchel <- elastic.net(x[subset, ], y[subset], lambda2=lambda2, nlambda1=6, control=list(monitor=2))
-grandvt <- elastic.net(x[subset, ], y[subset], lambda2=lambda2, nlambda1=6, control=list(monitor=1))
+fenchel <- elastic_net(x[subset, ], y[subset], lambda2=lambda2, nlambda1=6, control=list(monitor=2))
+grandvt <- elastic_net(x[subset, ], y[subset], lambda2=lambda2, nlambda1=6, control=list(monitor=1))
 
 ## TRICK FOR FOR LOG-SCALE...
 delta_fenchel <- fenchel$optim_monitoring$delta_hat

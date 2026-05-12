@@ -6,7 +6,7 @@
 #' computed at a grid of values for the \eqn{\ell_1}{l1}-penalty. See
 #' details for the criterion optimized.
 #'
-#' @inheritParams elastic.net
+#' @inheritParams elastic_net
 #'
 #' @return an object with class [QuadrupenFit].
 #'

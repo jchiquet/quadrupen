@@ -5,8 +5,8 @@
 \title{Class "QuadrupenFit"}
 \description{
 Class of object returned by any fitting function of the
-\pkg{quadrupen} package (\code{elastic.net} or
-\code{bounded.reg}).
+\pkg{quadrupen} package (\code{elastic_net} or
+\code{bounded_reg}).
 
 This class comes with the usual \code{\link[=predict]{predict()}}, \code{\link[=fitted]{fitted()}}, \code{\link[=coef]{coef()}},
 \code{\link[=residuals]{residuals()}}, \code{\link[=show]{show()}}, \code{\link[=print]{print()}} and \code{\link[=deviance]{deviance()}} S3 methods.
@@ -51,11 +51,11 @@ y <- 10 + x \%*\% beta + rnorm(n,0,10)
 ## Plot the Lasso path
 plot(lasso(x,y), title="Lasso solution path")
 ## Plot the Elastic-net path
-plot(elastic.net(x,y), title = "Elastic-net solution path")
+plot(elastic_net(x,y), title = "Elastic-net solution path")
 ## Plot the Elastic-net path (fraction on X-axis, unstandardized coefficient)
-plot(elastic.net(x,y, lambda2=10), standardize=FALSE, xvar="fraction")
+plot(elastic_net(x,y, lambda2=10), standardize=FALSE, xvar="fraction")
 ## Plot the Bounded regression path (fraction on X-axis)
-plot(bounded.reg(x,y, lambda2=10), xvar="fraction")
+plot(bounded_reg(x,y, lambda2=10), xvar="fraction")
 }
 
 }
@@ -466,11 +466,11 @@ y <- 10 + x \%*\% beta + rnorm(n,0,10)
 ## Plot the Lasso path
 plot(lasso(x,y), title="Lasso solution path")
 ## Plot the Elastic-net path
-plot(elastic.net(x,y), title = "Elastic-net solution path")
+plot(elastic_net(x,y), title = "Elastic-net solution path")
 ## Plot the Elastic-net path (fraction on X-axis, unstandardized coefficient)
-plot(elastic.net(x,y, lambda2=10), standardize=FALSE, xvar="fraction")
+plot(elastic_net(x,y, lambda2=10), standardize=FALSE, xvar="fraction")
 ## Plot the Bounded regression path (fraction on X-axis)
-plot(bounded.reg(x,y, lambda2=10), xvar="fraction")
+plot(bounded_reg(x,y, lambda2=10), xvar="fraction")
 }
     \if{html}{\out{</div>}}
   }

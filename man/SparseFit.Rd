@@ -4,11 +4,11 @@
 \alias{SparseFit}
 \title{Class "SparseFit"}
 \description{
-Class of object returned by the fitting function \code{\link[=elastic.net]{elastic.net()}}. Inherits fields
+Class of object returned by the fitting function \code{\link[=elastic_net]{elastic_net()}}. Inherits fields
 and methods of \link{QuadrupenFit}
 }
 \seealso{
-\link{QuadrupenFit}, \code{\link[=elastic.net]{elastic.net()}}
+\link{QuadrupenFit}, \code{\link[=elastic_net]{elastic_net()}}
 }
 \section{Super class}{
 \code{\link[quadrupen:QuadrupenFit]{QuadrupenFit}} -> \code{SparseFit}
