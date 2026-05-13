@@ -61,74 +61,72 @@ double Optimizer::estimate_lipschitz(
 }
 
 uword Optimizer::pgd(
-  vec& beta,
-  const double& lambda,
-  const vec& XTy,
-  const mat& XTX,
-  std::function<vec(const vec&, double)> proximal_operator, 
-  const double& accuracy,
-  const uword& max_iter,
-  const uword m) { // m est la taille de la mémoire (typiquement 3 à 5)
+    vec& beta,
+    const double& lambda,
+    const vec& XTy,
+    const mat& XTX,
+    std::function<vec(const vec&, double)> proximal_operator, 
+    const double& accuracy,
+    const uword& max_iter,
+    const uword m) {
   
   uword p = beta.n_elem;
-  vec betak = beta;
-  vec g_k, g_prev;
+  mat mat_F(p, m, fill::zeros); 
+  mat mat_X(p, m, fill::zeros); 
   
-  // Anderson acceleration
-  mat mat_F(p, m, fill::zeros); // Stock fix-point residuals f_i = G(x_i) - x_i
-  mat mat_X(p, m, fill::zeros); // Stock iterates x_i
-  
-  // Estimation of Lipschitz constant (Power Iteration)
-  double L = estimate_lipschitz(XTX); 
-  double invL = 1.0 / L;
-  
+  double invL = 1.0 / estimate_lipschitz(XTX); 
   uword iter = 0;
   double delta = 2.0 * accuracy;
   
   while (delta > accuracy && iter < max_iter) {
-    // Standard Proximal Gradient Descent (PGD)
-    vec beta_next = proximal_operator(beta - (XTX * beta -XTy) * invL, lambda * invL);
-    
-    // fix-point residual : f = prox(x - grad/L) - x
+    // 1. Point fixe standard (G(x))
+    vec beta_next = proximal_operator(beta - (XTX * beta - XTy) * invL, lambda * invL);
     vec f_k = beta_next - beta;
     
-    // Anderson Acceleration
-    if (iter == 0) {
+    delta = norm(f_k, 2);
+    
+    if (iter == 0 || m == 0) {
       beta = beta_next;
     } else {
-      // Circular buffers
-      uword col_idx = iter % m;
-      mat_X.col(col_idx) = beta;
-      mat_F.col(col_idx) = f_k;
+      // 2. Préparation des données pour l'accélération
+      uword col_idx = (iter - 1) % m; // On stocke l'itéré PRÉCÉDENT
+      mat_X.col(col_idx) = beta;      // l'itéré x_k
+      mat_F.col(col_idx) = f_k;       // son résidu f_k
       
-      // Nombre d'itérés disponibles dans l'historique
       uword current_m = std::min(iter, m);
       
-      // Solve for mixture parmaters
-      // minimise ||f_k - (F_k - f_k*1^T) * gamma||
-      mat F_delta = mat_F.cols(0, current_m - 1);
-      for(uword j=0; j<current_m; ++j) F_delta.col(j) -= f_k;
-      vec gamma;
-      bool success = solve(gamma, F_delta, -f_k);
-      
-      if (success) {
-        // Update accelerated estimate
-        vec beta_accel = beta_next;
-        for(uword j=0; j<current_m; ++j) {
-          beta_accel += gamma(j) * (mat_X.col(j) + mat_F.col(j) - beta_next);
+      // On résout le système sur l'historique disponible
+      if (current_m > 1) {
+        mat F_delta(p, current_m - 1);
+        mat X_delta(p, current_m - 1);
+        
+        // On calcule les différences par rapport au résidu actuel
+        for (uword j = 0; j < current_m; ++j) {
+          // Optionnel : tu peux ici reconstruire proprement les différences 
+          // f_{j+1} - f_j pour une version plus standard d'Anderson
         }
-        beta = beta_accel;
+        
+        // Raccourci efficace : 
+        mat dF = mat_F.cols(0, current_m - 1);
+        dF.each_col() -= f_k; 
+        
+        vec gamma;
+        if (solve(gamma, dF, -f_k, solve_opts::fast)) {
+          vec beta_accel = beta_next;
+          for (uword j = 0; j < current_m; ++j) {
+            beta_accel += gamma(j) * (mat_X.col(j) + mat_F.col(j) - beta_next);
+          }
+          beta = beta_accel;
+        } else {
+          beta = beta_next;
+        }
       } else {
-        beta = beta_next; // Fallback on standard PGD if failure
+        beta = beta_next;
       }
     }
-    
-    delta = norm(f_k, 2); // fix-point residual at optimum
     iter++;
-    
     if (iter % 100 == 0) R_CheckUserInterrupt();
   }
-  
   return iter;
 }
 

@@ -8,6 +8,25 @@
 using namespace Rcpp;
 using namespace arma;
 
+// ─────────────────────────────────────────────
+// Shared Helpers 
+// ─────────────────────────────────────────────
+namespace {
+
+// Violation KKT d'une variable inactive : identique L1/SCAD/MCP au voisinage de 0
+inline double violation_inactive(double gj, double wj, double lambda) {
+  return std::abs(gj) / wj - lambda;  // > 0  ↔  violation
+}
+
+// Violation KKT d'une variable active pour une pénalité quelconque :
+// |g_j + d_j * sign(β_j)|  où d_j est la dérivée effective de la pénalité
+inline double violation_active(double gj, double bj, double dj) {
+  double sj = (bj >= 0.0) ? 1.0 : -1.0;
+  return std::abs(gj + dj * sj);
+}
+
+} // namespace
+
 // ______________________________________________________
 // L1 NORM A.K.A LASSO
 template<>
@@ -23,6 +42,28 @@ vec SparsePenalty<SparseNorm::L1>::proximal(const vec& x, double lambda, const v
 template<>
 vec SparsePenalty<SparseNorm::L1>::derivative(const vec& beta, double lambda, const vec& w) {
   return lambda * w;
+}
+
+template<>
+vec SparsePenalty<SparseNorm::L1>::optimality(
+    const vec& grad, double lambda, const vec& w,
+    const vec& beta, const uvec& A) const {
+  
+  // Condition par défaut : violation L1 pour toutes les variables
+  vec viol = arma::abs(grad) / w - lambda;
+  
+  // Correction pour les variables actives
+  // KKT exacte : g_j + λ w_j sign(β_j) = 0
+  if (!beta.is_empty() && !A.is_empty()) {
+    for (uword k = 0; k < A.n_elem; ++k) {
+      double bj = beta[k];
+      if (std::abs(bj) > 0.0) {
+        double dj = lambda * w[A[k]];  // dérivée L1
+        viol[A[k]] = violation_active(grad[A[k]], bj, dj);
+      }
+    }
+  }
+  return viol;
 }
 
 // ______________________________________________________
@@ -73,6 +114,41 @@ vec SparsePenalty<SparseNorm::MCP>::derivative(const vec& beta, double lambda, c
   return d;
 }
 
+// ─────────────────────────────────────────────
+// MCP  (paramètre γ = eta_ > 1)
+//
+// Dérivée effective selon |β_j| :
+//   |β| ≤ γλw  →  d = λw − |β|/γ   (zone linéaire décroissante)
+//   |β| > γλw  →  d = 0             (plateau)
+// ─────────────────────────────────────────────
+template<>
+vec SparsePenalty<SparseNorm::MCP>::optimality(
+    const vec& grad, double lambda, const vec& w,
+    const vec& beta, const uvec& A) const {
+  
+  vec viol = arma::abs(grad) / w - lambda;
+  
+  if (!beta.is_empty() && !A.is_empty()) {
+    for (uword k = 0; k < A.n_elem; ++k) {
+      uword j   = A[k];
+      double bj = beta[k];
+      if (std::abs(bj) < 1e-10) continue;
+      
+      double abs_bj = std::abs(bj);
+      double lj     = lambda * w[j];
+      double dj;
+      
+      if (abs_bj <= eta_ * lj) {
+        dj = lj - abs_bj / eta_;   // zone MCP
+      } else {
+        dj = 0.0;                  // plateau
+      }
+      
+      viol[j] = violation_active(grad[j], bj, dj);
+    }
+  }
+  return viol;
+}
 // ______________________________________________________
 // SCAD
 
@@ -133,4 +209,43 @@ vec SparsePenalty<SparseNorm::SCAD>::derivative(const vec& beta, double lambda, 
     }
   }
   return d;
+}
+
+// ─────────────────────────────────────────────
+// SCAD  (paramètre a = eta_ > 2, typiquement 3.7)
+//
+// Dérivée effective selon |β_j| :
+//   |β| ≤ λw        →  d = λw           (zone L1)
+//   λw < |β| ≤ aλw  →  d = (aλw−|β|)/(a−1)  (zone concave)
+//   |β| > aλw       →  d = 0            (plateau : pas de pénalité)
+// ─────────────────────────────────────────────
+template<>
+vec SparsePenalty<SparseNorm::SCAD>::optimality(
+    const vec& grad, double lambda, const vec& w,
+    const vec& beta, const uvec& A) const {
+  
+  vec viol = arma::abs(grad) / w - lambda;  // condition inactive (L1 en 0)
+  
+  if (!beta.is_empty() && !A.is_empty()) {
+    for (uword k = 0; k < A.n_elem; ++k) {
+      uword j   = A[k];
+      double bj = beta[k];
+      if (std::abs(bj) < 1e-10) continue; // considered inactive
+      
+      double abs_bj = std::abs(bj);
+      double lj     = lambda * w[j];
+      double dj;
+      
+      if (abs_bj <= lj) {
+        dj = lj;                                   // zone L1
+      } else if (abs_bj <= eta_ * lj) {
+        dj = (eta_ * lj - abs_bj) / (eta_ - 1.0);  // zone concave
+      } else {
+        dj = 0.0;                                  // plateau
+      }
+      
+      viol[j] = violation_active(grad[j], bj, dj);
+    }
+  }
+  return viol;
 }

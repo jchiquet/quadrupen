@@ -97,30 +97,30 @@ test_that("Elastic-net is correct w.r.t a reference solution - FISTA", {
 
 })
 
-# test_that("Elastic-net is correct w.r.t a reference solution - PGD", {
-# 
-#   tol <- 1e-2
-# 
-#   ## PROSTATE DATA SET
-#   x <- testDataEnet$x_prostate
-#   y <- testDataEnet$y_prostate
-#   
-#   ## Run the tests...
-#   with.intercept <- get.enet(x,y,intercept=TRUE, method="pgd")
-#   expect_equal(with.intercept$quad,
-#                with.intercept$enet, check.attributes = FALSE, tolerance = tol)
-# 
-#   with.intercept <- get.enet(x,y,intercept=TRUE,normalize=FALSE, method="pgd")
-#   expect_equal(with.intercept$quad,
-#                with.intercept$enet, check.attributes = FALSE, tolerance = tol)
-# 
-#   ## Run the tests...
-#   without.intercept <- get.enet(x,y,intercept=FALSE, method="pgd")
-#   expect_equal(without.intercept$quad,
-#                without.intercept$enet, check.attributes = FALSE, tolerance = tol)
-# 
-#   without.intercept <- get.enet(x,y,intercept=FALSE,normalize=FALSE, method="pgd")
-#   expect_equal(without.intercept$quad,
-#                without.intercept$enet, check.attributes = FALSE, tolerance = tol)
-# 
-# })
+test_that("Elastic-net is correct w.r.t a reference solution - PGD", {
+
+  tol <- 1e-2
+
+  ## PROSTATE DATA SET
+  x <- testDataEnet$x_prostate
+  y <- testDataEnet$y_prostate
+
+  ## Run the tests...
+  with.intercept <- get.enet(x,y,intercept=TRUE, method="pgd")
+  expect_equal(with.intercept$quad,
+               with.intercept$enet, check.attributes = FALSE, tolerance = tol)
+
+  with.intercept <- get.enet(x,y,intercept=TRUE,normalize=FALSE, method="pgd")
+  expect_equal(with.intercept$quad,
+               with.intercept$enet, check.attributes = FALSE, tolerance = tol)
+
+  ## Run the tests...
+  without.intercept <- get.enet(x,y,intercept=FALSE, method="pgd")
+  expect_equal(without.intercept$quad,
+               without.intercept$enet, check.attributes = FALSE, tolerance = tol)
+
+  without.intercept <- get.enet(x,y,intercept=FALSE,normalize=FALSE, method="pgd")
+  expect_equal(without.intercept$quad,
+               without.intercept$enet, check.attributes = FALSE, tolerance = tol)
+
+})
