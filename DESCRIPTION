@@ -38,6 +38,7 @@ Suggests:
     igraph,
     lars,
     MASS,
+    ncvreg,
     testthat
 LinkingTo: 
     Rcpp,
