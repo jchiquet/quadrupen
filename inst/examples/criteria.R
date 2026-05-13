@@ -13,6 +13,8 @@ y <- 10 + x %*% beta + rnorm(n,0,10)
 ## Plot penalized criteria for the Elastic-net path
 enet <- elastic_net(x,y, lambda2=1, refit = TRUE)
 enet$information_criteria$plot()
+enet$information_criteria$plot("BIC")
+enet$information_criteria$plot(c("AIC", "BIC"))
 
 ## Plot penalized criteria for the Elastic-net path
 enet <- elastic_net(x,y, lambda2=1, refit = FALSE)

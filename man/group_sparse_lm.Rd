@@ -275,13 +275,12 @@ plot(group_sparse_lm(x, y, grp, type = "l2", alpha = .75, lambda2=10,
 }
 
 ## Group-Lasso L1/LINF
-
 plot(group_l1linf(x, y, grp), label=labels)
 
 ## Sparse Group-Lasso L1/LINF
 plot(sparse_group_l1linf(x, y, grp, alpha = 0.75), label=labels)
 
-#' \dontrun{
+\dontrun{
 ## Sparse L1/LINF Group-Lasso + L2 regularization
 plot(group_sparse_lm(x, y, grp, type = "linf", alpha = .75, lambda2=.5),
   label=labels)
@@ -297,8 +296,7 @@ plot(coop_lasso(x, y, grp), label=labels)
 ## Sparse Cooperative-Lasso
 plot(sparse_coop_lasso(x, y, grp, alpha = 0.75), label=labels)
 
-#' \dontrun{
-
+\dontrun{
 ## Sparse Cooperative-Lasso + L2 regularization
 plot(group_sparse_lm(x, y, grp, type = "coop", alpha = .75, lambda2=.5),
  label=labels)
