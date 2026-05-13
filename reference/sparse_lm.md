@@ -1,10 +1,10 @@
 # Fit a linear model with sparse regularization
 
-Adjust a linear model with sparse regularization (either, LASSO, MCP or
-SCAD penalty). We also add a (possibly structured) \\\ell_2\\-norm
-(ridge-like). The solution path is computed at a grid of values for the
-\\\ell_1\\-penalty, fixing the amount of \\\ell_2\\ regularization. See
-details for the criterion optimized.
+Adjust a linear model with sparse regularization. We also add a
+(possibly structured) \\\ell_2\\-norm (ridge-like). The solution path is
+computed at a grid of values for the \\\ell_1\\-penalty, fixing the
+amount of \\\ell_2\\ regularization. See details for the criterion
+optimized.
 
 ## Usage
 
@@ -129,7 +129,8 @@ scad(
 - type:
 
   string indicating the sparse variant to be fitted. Could be "l1",
-  "mcp" or "scad". Default is "l1".
+  "mcp" or "scad". Default is "l1". be careful as scad and mcp are still
+  experimental and have not been fully tested yet
 
 - lambda1:
 
@@ -287,10 +288,12 @@ plot(lasso(x, y), label=labels)
 
 ## SCAD
 plot(scad(x, y), label=labels)
+#> Warning: SCAD and MCP are still highly experimental and in development
 
 
 ## MCP
 plot(mcp(x, y), label=labels)
+#> Warning: SCAD and MCP are still highly experimental and in development
 
 
 ## Elastic-net
@@ -303,9 +306,11 @@ plot(elastic_net(x,y,lambda2=3,struct=solve(Sigma)), label=labels)
 
 ## SCAD + L2
 plot(scad(x,y, eta = 3.7, lambda2=1), label=labels)
+#> Warning: SCAD and MCP are still highly experimental and in development
 
 
 ## MCP + L2
 plot(mcp(x, y, eta = 3, lambda2=1), label=labels)
+#> Warning: SCAD and MCP are still highly experimental and in development
 
 ```
