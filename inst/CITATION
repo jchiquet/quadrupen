@@ -1,9 +1,20 @@
 citHeader("To cite 'quadrupen' in publications, please use:")
 
-citEntry(entry = "TechReport",
-  author = "Yves Grandvalet, Julien Chiquet and Christophe Ambroise",
+bibentry(
+  bibtype = "Manual",
+  author = person(given = "Julien ", family = "Chiquet"),
+  title = "Quadrupen: Sparse and Group Sparse Linear Models",
+  year = "2026",
+  url = "https://github.com/jchiquet/quadrupen",
+  textVersion = "Julien Chiquet. Quadrupen: Sparse and Group Sparse Linear Models, R Package, 2026."
+)
+
+bibentry(
+  bibtype = "article",
+  key = "quadrupen",
   title = "Sparsity by Worst-Case Quadratic Penalties",
-  institution = "arXiv preprint",
+  author = c("Yves Grandvalet", "Julien Chiquet", "Christophe Ambroise"),
+  journal = "arXiv preprint",
   year = "2012",
   url = "http://arxiv.org/abs/1210.2077",
   textVersion = "Y. Grandvalet, J. Chiquet and C. Ambroise. Sparsity by Worst-Case Quadratic Penalties, arXiv preprint, 2012."

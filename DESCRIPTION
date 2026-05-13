@@ -1,14 +1,15 @@
 Package: quadrupen
 Type: Package
-Title: Sparsity by Worst-Case Quadratic Penalties
+Title: Sparse and Group Sparse Linear Models
 Version: 1.0-0
-Date: 2026-0x-xx
+Date: 2026-05-xx
 Authors@R: person("Julien", "Chiquet", , "julien.chiquet@inrae.fr", role = c("aut", "cre"),
            comment = c(ORCID = "0000-0002-3629-3429"))
-Description: This package fits classical sparse regression models with
-    efficient active set algorithms by solving quadratic problems. Also
-    provides a few methods for model selection purpose (cross-validation,
-    stability selection).
+Description: This package fits the solution paths of classical sparse regression 
+  models with efficient active set algorithms by solving small sub-problems. 
+  Include LASSO, SCAD, MCP, (Sparse) Group-LASSO, Cooperative-LASSO, LAVA and 
+  Elastic-Net variants. Also provides a few methods for model selection purpose 
+  (cross-validation, stability selection).
 URL: https://github.com/jchiquet/quadrupen, https://jchiquet.github.io/quadrupen/
 BugReports: https://github.com/jchiquet/quadrupen/issues
 License: GPL (>= 3)

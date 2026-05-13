@@ -4,7 +4,7 @@
 \alias{FusedLassoFit}
 \title{Class "FusedLassoFit"}
 \description{
-Class of object returned by the fitting function \code{\link[=fusedlasso]{fusedlasso()}}. Inherits fields
+Class of object returned by the fitting function \code{\link[=fused_lasso]{fused_lasso()}}. Inherits fields
 and methods of \link{QuadrupenFit}.
 }
 \seealso{

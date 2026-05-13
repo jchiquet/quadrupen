@@ -105,7 +105,7 @@ RidgeRegressionFit <- R6::R6Class(
 
 #' Class "FusedLassoFit"
 #' 
-#' Class of object returned by the fitting function [fusedlasso()]. Inherits fields
+#' Class of object returned by the fitting function [fused_lasso()]. Inherits fields
 #' and methods of [QuadrupenFit].
 #' 
 #' @seealso [QuadrupenFit], [bounded_reg()]
@@ -322,10 +322,10 @@ LavaFit <- R6::R6Class(
 
 #' Class "GroupLavaFit"
 #' 
-#' Class of object returned by the fitting function [group.lava()]. Inherits fields
+#' Class of object returned by the fitting function [group_lava()]. Inherits fields
 #' and methods of [QuadrupenFit] and [LavaFit]
 #' 
-#' @seealso [QuadrupenFit], [group.lava()]
+#' @seealso [QuadrupenFit], [group_lava()]
 #' 
 #' @export
 #' 

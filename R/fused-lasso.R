@@ -1,7 +1,7 @@
 #' A function for fitting generalized fused-Lasso problems
 #' 
 #' This function fits the standard version of the fused lasso. 
-#' It can take a general matrix x and provides for possible weights on the 
+#' It can take a general matrix x and allows for possible weights on the 
 #' `lambda1` and `lambda2` penalties. 
 #' 
 #' @inheritParams elastic_net
@@ -21,7 +21,7 @@
 #' * `maxiterout` Maximum number of iterations in the outer loop to run.
 #' * `maxactivation` Maximum number of previously inactive variables to activate at the same time
 #' * `accuracy` Accuracy at which the algorithm will stop.
-#' * `fusioncheck` Should the fused sets be checked for breaking up? 
+#' * `fusioncheck` Should the fused sets be checked for separation?
 #' * `verbose` Should the function give some output what it is doing?
 #' 
 #' @return an object with class [FusedLassoFit], inheriting from [QuadrupenFit].
@@ -29,7 +29,7 @@
 #' @details The optimized criterion is the following: \if{latex}{\deqn{%
 #' \hat{\beta}_{\lambda_1,\lambda_2} = \arg \min_{\beta} \frac{1}{2}
 #' (y - X \beta)^T (y - X \beta) + \lambda_1 \|w \circ \beta \|_{1} +
-#' \frac{\lambda_1}{2} \sum_{i \tilde j} w_{ij} |\beta_i - _beta_j|, }} \if{html}{\out{ <center>
+#' \frac{\lambda_2}{2} \sum_{i \sim j} w_{ij} |\beta_i - \beta_j|, }} \if{html}{\out{ <center>
 #' &beta;<sup>hat</sup>
 #' <sub>&lambda;<sub>1</sub>,&lambda;<sub>2</sub></sub> =
 #' argmin<sub>&beta;</sub> 1/2 RSS(&beta) + &lambda;<sub>1</sub>
@@ -55,9 +55,9 @@
 #' x <- as.matrix(matrix(rnorm(95*n),n,95) %*% chol(Sigma))
 #' y <- 10 + x %*% beta + rnorm(n,0,10)
 #' 
-#' res <- fusedlasso(x, y, lambda2=5)
+#' res <- fused_lasso(x, y, lambda2=5)
 #' G <- igraph::make_ring(ncol(x)) |> igraph::as_adjacency_matrix(sparse = FALSE)
-#' resG <- fusedlasso(x, y, lambda2=5, struct = G)
+#' resG <- fused_lasso(x, y, lambda2=5, struct = G)
 #' plot(res)
 #' plot(resG)
 #' 
@@ -65,7 +65,7 @@
 #' 
 #' @importFrom methods as
 #' @export 
-fusedlasso <- function(
+fused_lasso <- function(
     x, 
     y, 
     lambda1   = NULL,                       

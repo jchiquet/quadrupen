@@ -37,7 +37,7 @@ bounded.reg(
 }
 \arguments{
 \item{x}{matrix of features, possibly sparsely encoded
-(experimental). Do NOT include intercept. When normalized os
+(experimental). Do NOT include intercept. When normalized is
 \code{TRUE}, coefficients will then be rescaled to the original
 scale.}
 
@@ -53,7 +53,7 @@ shrunken to \code{minratio*lambda1.max}.}
 the Elastic-net. Default is 0.01. Set to 0 to recover the Lasso.}
 
 \item{penscale}{vector with real positive values that weight the
-\eqn{\ell_1}{l1}-penalty of each feature. Default set all weights
+\eqn{\ell_1}{l1}-penalty of each feature. Default sets all weights
 to 1.}
 
 \item{struct}{matrix structuring the coefficients, possibly
@@ -122,7 +122,7 @@ an object with class \link{QuadrupenFit}.
 an object with class \link{BoundedRegressionFit}, inheriting from \link{QuadrupenFit}.
 }
 \description{
-Adjust a linear model penalized by a mixture of a (possibly
+Adjust a linear model penalized by a (possibly
 weighted) \eqn{\ell_\infty}{l-infinity}-norm (bounding the
 magnitude of the parameters) and a (possibly structured)
 \eqn{\ell_2}{l2}-norm (ridge-like). The solution path is computed

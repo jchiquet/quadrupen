@@ -1,7 +1,9 @@
 url: https://jchiquet.github.io/quadrupen/
 template:
   bootstrap: 5
-
+  mathjax: true
+  math-rendering: mathjax
+  
 reference:
 - title: "Main functions for user"
   desc: >
@@ -11,7 +13,7 @@ reference:
   - elastic_net
   - scad
   - mcp
-  - fusedlasso
+  - fused_lasso
   - sparse_lm
   - group_sparse_lm
   - group_lasso
@@ -20,7 +22,7 @@ reference:
   - sparse_group_l1linf
   - coop_lasso
   - sparse_coop_lasso
-  - group.lava
+  - group_lava
   - lava
   - lasso
   - ridge

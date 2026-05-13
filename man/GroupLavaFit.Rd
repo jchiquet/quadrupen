@@ -4,11 +4,11 @@
 \alias{GroupLavaFit}
 \title{Class "GroupLavaFit"}
 \description{
-Class of object returned by the fitting function \code{\link[=group.lava]{group.lava()}}. Inherits fields
+Class of object returned by the fitting function \code{\link[=group_lava]{group_lava()}}. Inherits fields
 and methods of \link{QuadrupenFit} and \link{LavaFit}
 }
 \seealso{
-\link{QuadrupenFit}, \code{\link[=group.lava]{group.lava()}}
+\link{QuadrupenFit}, \code{\link[=group_lava]{group_lava()}}
 }
 \section{Super classes}{
 \code{\link[quadrupen:QuadrupenFit]{QuadrupenFit}} -> \code{\link[quadrupen:LavaFit]{LavaFit}} -> \code{GroupLavaFit}

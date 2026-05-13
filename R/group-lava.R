@@ -57,26 +57,26 @@
 #' 
 #' \dontrun{
 #' ## Standard Group-Lasso
-#' plot(group.lava(x,y,grp), label=labels)
-#' plot(group.lava(x,y,grp, lambda2=.5), label=labels)
-#' plot(group.lava(x,y,grp, lambda2=10), label=labels)
-#' plot(group.lava(x,y,grp, lambda2=10,struct=solve(Sigma)), label=labels)
+#' plot(group_lava(x,y,grp), label=labels)
+#' plot(group_lava(x,y,grp, lambda2=.5), label=labels)
+#' plot(group_lava(x,y,grp, lambda2=10), label=labels)
+#' plot(group_lava(x,y,grp, lambda2=10,struct=solve(Sigma)), label=labels)
 #' 
 #' ## L1/LINF Group-Lasso
-#' plot(group.lava(x, y, grp, type = "linf"), label=labels)
-#' plot(group.lava(x, y, grp, type = "linf", lambda2=.5), label=labels)
-#' plot(group.lava(x, y, grp, type = "linf", lambda2=10), label=labels)
-#' plot(group.lava(x, y, grp, type = "linf", lambda2=10,struct=solve(Sigma)), label=labels)
+#' plot(group_lava(x, y, grp, type = "linf"), label=labels)
+#' plot(group_lava(x, y, grp, type = "linf", lambda2=.5), label=labels)
+#' plot(group_lava(x, y, grp, type = "linf", lambda2=10), label=labels)
+#' plot(group_lava(x, y, grp, type = "linf", lambda2=10,struct=solve(Sigma)), label=labels)
 #' 
 #' ## Cooperative-Lasso
-#' plot(group.lava(x, y, grp, type = "coop"), label=labels)
-#' plot(group.lava(x, y, grp, type = "coop", lambda2=.5), label=labels)
-#' plot(group.lava(x, y, grp, type = "coop", lambda2=10), label=labels)
-#' plot(group.lava(x, y, grp, type = "coop", lambda2=10,struct=solve(Sigma)), label=labels)
+#' plot(group_lava(x, y, grp, type = "coop"), label=labels)
+#' plot(group_lava(x, y, grp, type = "coop", lambda2=.5), label=labels)
+#' plot(group_lava(x, y, grp, type = "coop", lambda2=10), label=labels)
+#' plot(group_lava(x, y, grp, type = "coop", lambda2=10,struct=solve(Sigma)), label=labels)
 #' }
 #'
 #' @export
-group.lava <- function(x,
+group_lava <- function(x,
                        y,
                        group,
                        type        = c("l2", "coop", "linf"),

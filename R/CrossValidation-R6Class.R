@@ -40,7 +40,7 @@ CrossValidation <- R6::R6Class(
     #' minimum.
     lambda1_1se = function(value) max(private$cv_1se$lambda1),
     #' @field lambda2_1se largest level of \eqn{\lambda_2}{lambda2}
-    #'the cross-validated error is within 1 standard error of the
+    #' such that the cross-validated error is within 1 standard error of the
     #' minimum (only relevant for ridge regression).
     lambda2_1se = function(value) max(private$cv_1se$lambda2)
   ),

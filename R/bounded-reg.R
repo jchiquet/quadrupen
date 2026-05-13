@@ -1,6 +1,6 @@
 #' Fit a linear model with infinity-norm plus ridge-like regularization
 #'
-#' Adjust a linear model penalized by a mixture of a (possibly
+#' Adjust a linear model penalized by a (possibly
 #' weighted) \eqn{\ell_\infty}{l-infinity}-norm (bounding the
 #' magnitude of the parameters) and a (possibly structured)
 #' \eqn{\ell_2}{l2}-norm (ridge-like). The solution path is computed

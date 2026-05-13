@@ -20,7 +20,7 @@ ridge(
 }
 \arguments{
 \item{x}{matrix of features, possibly sparsely encoded
-(experimental). Do NOT include intercept. When normalized os
+(experimental). Do NOT include intercept. When normalized is
 \code{TRUE}, coefficients will then be rescaled to the original
 scale.}
 
@@ -38,7 +38,7 @@ checked internally). If \code{NULL} (the default), the identity matrix is
 used. See details below.}
 
 \item{penscale}{vector with real positive values that weight the
-\eqn{\ell_1}{l1}-penalty of each feature. Default set all weights
+\eqn{\ell_1}{l1}-penalty of each feature. Default sets all weights
 to 1.}
 
 \item{intercept}{logical; indicates if an intercept should be

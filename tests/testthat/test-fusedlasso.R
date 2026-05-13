@@ -6,7 +6,7 @@ tol <- 2e-4
 
 test_that("Fused-Lasso - p=20, n=10, no intercept, Gaussian data, chain graph", {
 
-  res <- fusedlasso(
+  res <- fused_lasso(
     testData$Exn10p20X,
     testData$Exn10p20y,
     lambda1 = testData$Exn10p20Lambda1 * nrow(testData$Exn10p20X),
@@ -20,7 +20,7 @@ test_that("Fused-Lasso - p=20, n=10, no intercept, Gaussian data, chain graph", 
   
 test_that("Fused-Lasso - p=1000, n=20, no intercept, Gaussian data, chain graph", {
 
-  res <- fusedlasso(
+  res <- fused_lasso(
     testData$Exn20p1000X, 
     testData$Exn20p1000y,
     lambda1=testData$Exn20p1000Lambda1 * nrow(testData$Exn20p1000X),
@@ -35,7 +35,7 @@ test_that("Fused-Lasso - p=1000, n=20, no intercept, Gaussian data, chain graph"
 })
 
 test_that("Fused-Lasso - p=100, n=10, no intercept, Gaussian data, chain graph", {
-  res <- fusedlasso(
+  res <- fused_lasso(
     testData$Exn20p100X, 
     testData$Exn20p100y,
     lambda1 = testData$Exn20p100Lambda1 * nrow(testData$Exn20p100X), 
@@ -53,7 +53,7 @@ test_that("Fused-Lasso - p=100, n=10, no intercept, Gaussian data, chain graph",
 #   
 #   G <- igraph::make_lattice(c(10,10)) |> igraph::as_adjacency_matrix(sparse = FALSE)
 #   
-#   res <- fusedlasso(
+#   res <- fused_lasso(
 #     testData$Exn20p100X, 
 #     testData$Exn20p100y,
 #     lambda1 = testData$Exn20p100Lambda1 * nrow(testData$Exn20p100X),
@@ -70,7 +70,7 @@ test_that("Fused-Lasso - p=100, n=10, no intercept, Gaussian data, chain graph",
 
 test_that("Fused-Lasso - p=50, n=20, no intercept, Gaussian data, chain graph", {
   res <- 
-    fusedlasso(
+    fused_lasso(
       testData$Exn50p20X,
       testData$Exn50p20y,
       lambda1 = testData$Exn50p20Lambda1 * nrow(testData$Exn50p20X), 

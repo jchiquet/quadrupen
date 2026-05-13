@@ -35,7 +35,7 @@ the cross-validated error is within 1 standard error of the
 minimum.}
 
     \item{\code{lambda2_1se}}{largest level of \eqn{\lambda_2}{lambda2}
-the cross-validated error is within 1 standard error of the
+such that the cross-validated error is within 1 standard error of the
 minimum (only relevant for ridge regression).}
   }
   \if{html}{\out{</div>}}

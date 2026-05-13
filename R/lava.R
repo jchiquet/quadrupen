@@ -1,6 +1,6 @@
 #' Fit a linear model with lava regularization
 #'
-#' Adjust a the lava regularized linear models, that is a lava transformation 
+#' Adjust a lava regularized linear model, that is a lava transformation 
 #' of the data followed by a 
 #' (possibly weighted) \eqn{\ell_1}{l1}-norm. The solution path is
 #' computed at a grid of values for the \eqn{\ell_1}{l1}-penalty. See
@@ -15,7 +15,7 @@
 #' (\beta + \delta))^T (y - X (\beta + \delta)) + \lambda_1 \| \beta \|_{1} + \frac{\lambda_2}{2} \delta^T S \delta, }}
 #' \if{html}{\out{ <center> &beta;<sup>hat</sup>
 #' <sub>&lambda;<sub>1</sub></sub> =
-#' argmin<sub>&theta = &beta+&delta;</sub> 1/2n RSS(&beta + &delta) + &lambda;<sub>1</sub>
+#' argmin<sub>&theta; = &beta;+&delta;</sub> 1/2n RSS(&beta; + &delta;) + &lambda;<sub>1</sub>
 #' &#124; &beta; &#124;<sub>1</sub> + &lambda;/2 <sub>2</sub> &delta;<sup>T</sup> S
 #' &delta;, </center> }}
 #' \if{text}{\deqn{theta.hat(lambda1,lambda2) = argmin_{theta = beta + delta} 1/2n
@@ -45,7 +45,9 @@
 #' labels <- rep("irrelevant", length(beta))
 #' labels[beta != 0] <- "relevant"
 #' ## The solution path of the LAVA
-#' plot(lava(x,y), label=labels)
+#' out <- lava(x,y)
+#' out$plot_path(component = "sparse", labels=labels)
+#' out$plot_path(component = "dense", labels=labels)
 #'
 #' @export
 lava <- function(x,
