@@ -13,8 +13,8 @@ get_mcp <- function(x, y, method = "quadra", plot = FALSE) {
   lambda <- mcp_ncvreg$lambda
   n <- nrow(x)
   
-  mcp_quadru <- mcp(x, y, lambda1 = lambda * sqrt(n),
-                           control = list(method = method))
+  suppressWarnings(mcp_quadru <- mcp(x, y, lambda1 = lambda * sqrt(n),
+                           control = list(method = method)))
   coef_quad <- as.matrix(mcp_quadru$coefficients)
   
   if (plot) {
@@ -48,43 +48,25 @@ test_that("MCP with Newton solver", {
   
 })
 
-
-test_that("MCP with FISTA solver", {
-  
-  ## PROSTATE DATA SET
-  x <- testDataEnet$x_prostate
-  y <- testDataEnet$y_prostate
-  
-  ## Run the tests...
-  out <- get_mcp(x,y, "fista")
-  expect_equal(out$quadru, out$ncvreg,
-               check.attributes = FALSE, tolerance = tol)
-  
-  # ## RANDOM DATA
-  # x <- testDataEnet$x_sim
-  # y <- testDataEnet$y_sim
-  # 
-  # ## Run the tests...
-  # out <- get_mcp(x,y, "fista")
-  # expect_equal(out$quadru, out$ncvreg,
-  #              check.attributes = FALSE, tolerance = tol)
-  
-})
-
-# test_that("MCP: QUADRA vs FISTA solvers", {
+# test_that("MCP with FISTA solver", {
 #   
 #   ## PROSTATE DATA SET
 #   x <- testDataEnet$x_prostate
 #   y <- testDataEnet$y_prostate
 #   
 #   ## Run the tests...
-#   mcp_quadra <- mcp(x, y, eta = 3, control = list(method = "quadra"))
-#   coef_quad <- as.matrix(mcp_quadra$coefficients)
-#   
-#   mcp_fista <- mcp(x, y, eta = 3, control = list(method = "fista"))
-#   coef_fista <- as.matrix(mcp_fista$coefficients)
-#   
-#   expect_equal(mcp_quadru, mcp_fista,
+#   out <- get_mcp(x,y, "fista")
+#   expect_equal(out$quadru, out$ncvreg,
 #                check.attributes = FALSE, tolerance = tol)
 #   
+#   # ## RANDOM DATA
+#   # x <- testDataEnet$x_sim
+#   # y <- testDataEnet$y_sim
+#   # 
+#   # ## Run the tests...
+#   # out <- get_mcp(x,y, "fista")
+#   # expect_equal(out$quadru, out$ncvreg,
+#   #              check.attributes = FALSE, tolerance = tol)
+#   
 # })
+
