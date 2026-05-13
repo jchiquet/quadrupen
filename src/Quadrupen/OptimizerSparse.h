@@ -80,14 +80,15 @@ uword SparseOptimizer<matrix, norm>::quadratic(
   uword iter = 0 ;
   bool signs_stable = false;
   
-  while (!signs_stable && iter < 10 && set.size() > 0) { // Max 10 swaps
+  while (!signs_stable && iter < 50 && set.size() > 0) { // Max 10 swaps
     iter++;
     vec beta_old = beta;
     
     // Local weights for local linear approximation (LLA)
     // For MCP/SCAD, effective weights changes according to the current beta
     vec local_w = penalty_.derivative(beta_old, lambda, weights.elem(set.A_));
-    vec theta = sign(beta_old);    
+    vec theta = sign(beta_old);
+    theta.replace(0.0, 1.0);  // In order to handle variable that has just been zeroed
     
     // Solving the quadratic problem (KKT Newton)
     // (XA'XA) beta = XA'y - local_w * sign(beta)
@@ -100,7 +101,7 @@ uword SparseOptimizer<matrix, norm>::quadratic(
       betak = arma::solve(trimatu(set.R_), tmp);
     } else {
       betak = beta_old ; // warm start for CG
-      this->conjugate_gradient(beta, set.XATXA_, 
+      this->conjugate_gradient(betak, set.XATXA_, 
                                XTy(set.A_) - local_w % theta, 
                                accuracy, max_iter);
     }
@@ -125,8 +126,8 @@ uword SparseOptimizer<matrix, norm>::quadratic(
       if (verbosity_) Rprintf("\tremoving variables %i\n", set.A_(idx_to_remove)) ;
       set.del_var(idx_to_remove, beta) ; 
       
-      // // Update theta on the new set
-      // theta = sign(beta);      
+      // Update theta on the new set
+      // theta = sign(beta);
     }
   }
   
