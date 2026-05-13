@@ -122,7 +122,8 @@ scale.}
 \item{y}{response vector.}
 
 \item{type}{string indicating the sparse variant to be fitted.
-Could be "l1", "mcp" or "scad". Default is "l1".}
+Could be "l1", "mcp" or "scad". Default is "l1".
+be careful as scad and mcp are still experimental and have not been fully tested yet}
 
 \item{lambda1}{sequence of decreasing \eqn{\ell_1}{l1}-penalty
 levels. If \code{NULL} (the default), a vector is generated with
@@ -211,8 +212,8 @@ when \code{'1'}, the bound derived in Grandvalet et al. is computed; when
 an object with class \link{SparseFit}, inheriting from \link{QuadrupenFit}.
 }
 \description{
-Adjust a linear model with sparse regularization (either, LASSO,
-MCP or SCAD penalty). We also add a (possibly structured) \eqn{\ell_2}{l2}-norm
+Adjust a linear model with sparse regularization.
+We also add a (possibly structured) \eqn{\ell_2}{l2}-norm
 (ridge-like). The solution path is computed at a grid of values for the
 \eqn{\ell_1}{l1}-penalty, fixing the amount of \eqn{\ell_2}{l2}
 regularization. See details for the criterion optimized.

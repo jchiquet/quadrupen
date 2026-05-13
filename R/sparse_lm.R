@@ -1,7 +1,7 @@
 #' Fit a linear model with sparse regularization
 #'
-#' Adjust a linear model with sparse regularization (either, LASSO,
-#' MCP or SCAD penalty). We also add a (possibly structured) \eqn{\ell_2}{l2}-norm
+#' Adjust a linear model with sparse regularization. 
+#' We also add a (possibly structured) \eqn{\ell_2}{l2}-norm
 #' (ridge-like). The solution path is computed at a grid of values for the
 #' \eqn{\ell_1}{l1}-penalty, fixing the amount of \eqn{\ell_2}{l2}
 #' regularization. See details for the criterion optimized.
@@ -92,7 +92,8 @@
 #' `'>1'`, the Fenchel duality gap is computed along the algorithm.
 #' 
 #' @param type string indicating the sparse variant to be fitted. 
-#' Could be "l1", "mcp" or "scad". Default is "l1".
+#' Could be "l1", "mcp" or "scad". Default is "l1". 
+#' be careful as scad and mcp are still experimental and have not been fully tested yet
 #' 
 #' @param eta real positive scalar for tuning SCAD or MCP penalties. 
 #' Default is 3.7. Ignored when type == "l1".
@@ -177,7 +178,8 @@ sparse_lm <- function(x,
   type <- match.arg(type)
   if (type == "mcp") stopifnot(eta > 1)
   if (type == "scad") stopifnot(eta > 2)
-
+  if (type != "l1") warning("SCAD and MCP are still highly experimental and in development")
+    
   ## ============================================
   ## RECOVER LOW LEVEL CONFIGURATION
   ##

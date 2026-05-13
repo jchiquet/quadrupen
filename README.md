@@ -19,25 +19,25 @@ algorithms. Also provides a few methods for model selection purpose
 **Quadrupen** covers the following regularizers
 
 - LASSO[^1] (Least Absolute Shrinkage and Selection Operator)
-- SCAD[^2] (Smoothly Clip Absolute Deviation)
-- MCP[^3] (Minimax Concave Penalty)
-- Group-LASSO[^4] ($\ell_1/\ell_2$ or $\ell_1/\ell_\infty$)
-- Cooperative-LASSO[^5]
-- Sparse Group-LASSO[^6] and Sparse Cooperative-LASSO
+  <!-- - SCAD^[2] (Smoothly Clip Absolute Deviation) -->
+  <!-- - MCP^[3] (Minimax Concave Penalty) -->
+- Group-LASSO[^2] ($\ell_1/\ell_2$ or $\ell_1/\ell_\infty$)
+- Cooperative-LASSO[^3]
+- Sparse Group-LASSO[^4] and Sparse Cooperative-LASSO
 - Bounded Regression ($\ell_\infty$-norm).
 
 For all these regularizers, **Quadrupen** offers the possibility to add
 an $\ell_2$/ridge-like “structured” penalty to embed some external
 knowledge about the statistical dependence between the features. This is
-sometimes referred to as the “Structured Elastic-Net”[^7].
+sometimes referred to as the “Structured Elastic-Net”[^5].
 
 We also provide in the package the implementation of the Generalized
-Fused-LASSO[^8] originally proposed by Holger Höfling now archived from
+Fused-LASSO[^6] originally proposed by Holger Höfling now archived from
 CRAN ([original repo here](https://github.com/cran/FusedLasso)).
 
 The original version of **Quadrupen** only includes Lasso, Elastic-Net
 and Bounded regression. It was used as an illustration for our paper
-*“Sparsity by worst-case penalties”*[^9]. I eventually used it to
+*“Sparsity by worst-case penalties”*[^7]. I eventually used it to
 include my personal implementation of sparse methods for linear
 regression.
 
@@ -132,21 +132,21 @@ plot(lasso(x,y, intercept=FALSE), labels=labels)
 
 ![](man/figures/lasso_nostruct-1.png)
 
-#### MCP (Minimax Concave Penalty)
+<!-- #### MCP  (Minimax Concave Penalty) -->
 
-``` r
-plot(mcp(x,y, intercept=FALSE), labels=labels)
-```
+<!-- ```{r mcp_nostruct} -->
 
-![](man/figures/mcp_nostruct-1.png)
+<!-- plot(mcp(x,y, intercept=FALSE), labels=labels) -->
 
-#### SCAD (Smoothly Clipped Absolute Deviation)
+<!-- ``` -->
 
-``` r
-plot(scad(x,y, intercept=FALSE), labels=labels)
-```
+<!-- #### SCAD (Smoothly Clipped Absolute Deviation) -->
 
-![](man/figures/scad_nostruct-1.png)
+<!-- ```{r scad_nostruct} -->
+
+<!-- plot(scad(x,y, intercept=FALSE), labels=labels) -->
+
+<!-- ``` -->
 
 #### Elastic-net ($\ell_1+\ell_2$ penalty)
 
@@ -342,30 +342,25 @@ plot(group_sparse_lm(x, y, group, type = "coop", alpha = 0.5, lambda2 = 2, struc
 
 ## References
 
-1.  Tibshirani, Robert. “Regression shrinkage and selection via the
-    lasso.” Journal of the Royal Statistical Society Series B:
-    Statistical Methodology 58.1 (1996): 267-288.
-2.  Fan, Jianqing, and Runze Li. “Variable selection via nonconcave
-    penalized likelihood and its oracle properties.” Journal of the
-    American statistical Association 96.456 (2001): 1348-1360.
-3.  Zhang, C. H. Nearly unbiased variable selection under minimax
-    concave penalty. The Annals of Statistics, 38(2), (2010): 894-942.
-4.  Yuan, Ming, and Yi Lin. “Model selection and estimation in
-    regression with grouped variables.” Journal of the Royal Statistical
-    Society Series B: Statistical Methodology 68.1 (2006): 49-67.
-5.  Chiquet, Julien, Yves Grandvalet, and Camille Charbonnier. “Sparsity
-    with sign-coherent groups of variables via the cooperative-lasso.”
-    (2012): 795-830.
-6.  Simon, Noah, et al. “A sparse-group lasso.” Journal of computational
-    and graphical statistics 22.2 (2013): 231-245.
-7.  Slawski, Martin. “The structured elastic net for quantile regression
-    and support vector classification.” Statistics and Computing 22.1
-    (2012): 153-168.
-8.  Hoefling, Holger. “A path algorithm for the fused lasso signal
-    approximator.” Journal of Computational and Graphical Statistics
-    19.4 (2010): 984-1006.
-9.  Grandvalet, Yves, Julien Chiquet, and Christophe Ambroise. “Sparsity
-    by worst-case penalties.” arXiv preprint arXiv:1210.2077 (2012).
+[^8]: Tibshirani, Robert. “Regression shrinkage and selection via the
+lasso.” Journal of the Royal Statistical Society Series B: Statistical
+Methodology 58.1 (1996): 267-288.
+<!-- ^[2]: Fan, Jianqing, and Runze Li. "Variable selection via nonconcave penalized likelihood and its oracle properties." Journal of the American statistical Association 96.456 (2001): 1348-1360. -->
+<!-- ^[3]: Zhang, C. H. Nearly unbiased variable selection under minimax concave penalty. The Annals of Statistics, 38(2), (2010): 894-942. -->
+[^9]: Yuan, Ming, and Yi Lin. “Model selection and estimation in
+regression with grouped variables.” Journal of the Royal Statistical
+Society Series B: Statistical Methodology 68.1 (2006): 49-67. [^10]:
+Chiquet, Julien, Yves Grandvalet, and Camille Charbonnier. “Sparsity
+with sign-coherent groups of variables via the cooperative-lasso.”
+(2012): 795-830. [^11]: Simon, Noah, et al. “A sparse-group lasso.”
+Journal of computational and graphical statistics 22.2 (2013): 231-245.
+[^12]: Slawski, Martin. “The structured elastic net for quantile
+regression and support vector classification.” Statistics and Computing
+22.1 (2012): 153-168. [^13]: Hoefling, Holger. “A path algorithm for the
+fused lasso signal approximator.” Journal of Computational and Graphical
+Statistics 19.4 (2010): 984-1006. [^14]: Grandvalet, Yves, Julien
+Chiquet, and Christophe Ambroise. “Sparsity by worst-case penalties.”
+arXiv preprint arXiv:1210.2077 (2012).
 
 ## Appendix: functions for data generation
 
@@ -420,18 +415,28 @@ rPred.block <- function(n, p, sizes=rmultinom(1,p,rep(p/K,K)), rho=rep(0.75,4)) 
 
 [^1]: 1
 
-[^2]: 2
+[^2]: 4
 
-[^3]: 3
+[^3]: 5
 
-[^4]: 4
+[^4]: 6
 
-[^5]: 5
+[^5]: 7
 
-[^6]: 6
+[^6]: 8
 
-[^7]: 7
+[^7]: 9
 
-[^8]: 8
+[^8]: 1
 
-[^9]: 9
+[^9]: 4
+
+[^10]: 5
+
+[^11]: 6
+
+[^12]: 7
+
+[^13]: 8
+
+[^14]: 9
