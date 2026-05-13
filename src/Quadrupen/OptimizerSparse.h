@@ -80,14 +80,15 @@ uword SparseOptimizer<matrix, norm>::quadratic(
   uword iter = 0 ;
   bool signs_stable = false;
   
-  while (!signs_stable && iter < 10 && set.size() > 0) { // Max 10 swaps
+  while (!signs_stable && iter < 50 && set.size() > 0) { // Max 10 swaps
     iter++;
     vec beta_old = beta;
     
     // Local weights for local linear approximation (LLA)
     // For MCP/SCAD, effective weights changes according to the current beta
     vec local_w = penalty_.derivative(beta_old, lambda, weights.elem(set.A_));
-    vec theta = sign(beta_old);    
+    vec theta = sign(beta_old);
+    theta.replace(0.0, 1.0);  // In order to handle variable that has just been zeroed
     
     // Solving the quadratic problem (KKT Newton)
     // (XA'XA) beta = XA'y - local_w * sign(beta)
@@ -100,7 +101,7 @@ uword SparseOptimizer<matrix, norm>::quadratic(
       betak = arma::solve(trimatu(set.R_), tmp);
     } else {
       betak = beta_old ; // warm start for CG
-      this->conjugate_gradient(beta, set.XATXA_, 
+      this->conjugate_gradient(betak, set.XATXA_, 
                                XTy(set.A_) - local_w % theta, 
                                accuracy, max_iter);
     }
@@ -125,8 +126,8 @@ uword SparseOptimizer<matrix, norm>::quadratic(
       if (verbosity_) Rprintf("\tremoving variables %i\n", set.A_(idx_to_remove)) ;
       set.del_var(idx_to_remove, beta) ; 
       
-      // // Update theta on the new set
-      // theta = sign(beta);      
+      // Update theta on the new set
+      // theta = sign(beta);
     }
   }
   
@@ -147,7 +148,8 @@ uword SparseOptimizer<matrix,norm>::working_set(
   if (verbosity_) Rprintf("\n current penalty = %f",lambda) ;
   if (verbosity_) Rprintf("\n nb active variables = %i\n", set.size()) ;
 
-  vec optimality = penalty_.optimality(grad, lambda, weights) ;
+  vec optimality = penalty_.optimality(grad, lambda, weights, beta, set.A_);
+  // penalty_.optimality(grad, lambda, weights) ;
   uword var_in = optimality.index_max() ; // highest violation of KKT conditions 
   uword status = 0 ; iter_ = 0 ; bool success = true ; 
   gap_ = std::max(0.0, optimality(var_in)) ;
@@ -191,10 +193,18 @@ uword SparseOptimizer<matrix,norm>::working_set(
         );
       }
       grad += set.XTXA_ * (beta - beta_old); // Incremental update of the gradient
-      uvec vanish = find( // Variable deletion if applicable
-        penalty_.optimality(grad.elem(set.A_), lambda, weights.elem(set.A_)) <= accuracy_ &&
-          abs(beta) < accuracy_/10 * weights.elem(set.A_)
-      ) ;
+      
+      uvec local_A = regspace<uvec>(0, set.size() - 1);  // indices locaux
+      vec kkt_res  = penalty_.optimality(
+        grad.elem(set.A_), lambda, weights.elem(set.A_),
+        beta, local_A   // beta[k] ↔ variable A_[k]
+      );
+      uvec vanish = find(kkt_res <= accuracy_ && abs(beta) < accuracy_/10 * weights.elem(set.A_));
+      
+      // uvec vanish = find( // Variable deletion if applicable
+      //   penalty_.optimality(grad.elem(set.A_), lambda, weights.elem(set.A_)) <= accuracy_ &&
+      //     abs(beta) < accuracy_/10 * weights.elem(set.A_)
+      // ) ;
       if (!vanish.is_empty()) {
         if (verbosity_) {set.A_(vanish).t().print("Removing variables");}
         set.del_vars(vanish, beta) ;
@@ -202,7 +212,8 @@ uword SparseOptimizer<matrix,norm>::working_set(
     }
 
     // OPTIMALITY TESTING
-    optimality = penalty_.optimality(grad, lambda, weights) ;
+    optimality = penalty_.optimality(grad, lambda, weights, beta, set.A_);
+    // optimality = penalty_.optimality(grad, lambda, weights) ;
     var_in = optimality.index_max() ;
     gap_ = std::max(0.0, optimality(var_in)) ;
     
