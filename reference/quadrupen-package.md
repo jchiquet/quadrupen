@@ -1,59 +1,78 @@
 # Sparsity by Worst-Case Quadratic Penalties
 
-This package is designed to fit accurately several popular penalized
-linear regression models using the algorithm proposed in Grandvalet,
-Chiquet and Ambroise (submitted) by solving quadratic problems with
-increasing size.
+Fits the solution paths of classical sparse regression models with
+efficient active set algorithms by solving small sub-problems. Depending
+on the penalty, the sub-problems can be solved exactly (*i.e.* for the
+LASSO) or with generic solvers. The available optimizer includes
+quadratic solvers, Newton-based approaches and generic FISTA or PGD
+algorithms. Also provides a few methods for model selection purpose
+(information criteria, cross-validation, stability selection).
 
-## Features
+## Details
 
-At the moment, two `R` fitting functions are available:
+**Quadrupen** covers the following regularizers
 
-1.  the
-    [`elastic_net()`](https://jchiquet.github.io/quadrupen/reference/sparse_lm.md)
-    function, which solves a family of linear regression problems
-    penalized by a mixture of \\\ell_1\\ and \\\ell_2\\ norms. It
-    notably includes the LASSO (Tibshirani, 1996), the adaptive-LASSO
-    (Zou, 2006), the Elastic-net (Zou and Hastie, 2006) or the
-    Structured Elastic-net (Slawski et al., 2010). See examples as well
-    as the available `demo(quad_enet)`.
+- LASSO (Least Absolute Shrinkage and Selection Operator)
 
-2.  the
-    [`bounded_reg()`](https://jchiquet.github.io/quadrupen/reference/bounded_reg.md)
-    function, which fits a linear model penalized by a mixture of
-    \\\ell\_\infty\\ and \\\ell_2\\ norms. It owns the same versatility
-    as the `elastic_net` function regarding the \\\ell_2\\ norm, yet the
-    \\\ell_1\\-norm is replaced by the infinity norm. Check
-    `demo(quad_breg)` and examples.
+- SCAD (Smoothly Clip Absolute Deviation)
 
-The problem commonly solved for these two functions writes
+- MCP (Minimax Concave Penalty)
 
-β^(hat)_(λ₁,λ₂) = argmin_(β) 1/2 RSS(&beta) + λ₁ \| D β \|_(q) + λ/2 ₂
-β^(T) S β,
+- Group-LASSO (L1/L2 or L1/Linfty)
 
-where \\q=1\\ for
-[`elastic_net()`](https://jchiquet.github.io/quadrupen/reference/sparse_lm.md)
-and \\q=\infty\\ for
-[`bounded_reg()`](https://jchiquet.github.io/quadrupen/reference/bounded_reg.md).
-The diagonal matrix \\D\\ allows different weights for the first part of
-the penalty. The structuring matrix \\S\\ can be used to introduce some
-prior information regarding the predictors. It is provided via a
-positive semidefinite matrix.
+- Cooperative-LASSO
 
-The R6 objects produced by the fitting procedures own the classical
-methods for linear model in `R`, as well as methods for plotting,
-(double) cross-validation and for the stability selection procedure of
-Meinshausen and Buhlmann (2010).
+- Sparse Group-LASSO and Sparse Cooperative-LASSO
 
-All the examples of this documentation have been included to the package
-source, in the 'examples' directory. Some (too few!) routine testing
-scripts using the testhat package are also present in the 'tests'
-directory, where we check basic functionalities of the code, especially
-the reproducibility of the Lasso/Elastic-net solution path with the
-lars, elasticnet and glmnet packages. We also check the handling of
-runtime errors or instabilities.
+- Bounded Regression (L-infty norm).
 
-## Algorithm
+For all these regularizers, **Quadrupen** offers the possibility to add
+an ridge-like "structured" penalty to embed some external knowledge
+about the statistical dependence between the features. This is sometimes
+referred to as the "Structured Elastic-Net".
+
+We also provide in the package the implementation of the Generalized
+Fused-LASSO originally proposed by Holger Höfling now archived from CRAN
+([original repo here](https://github.com/cran/FusedLasso)).
+
+While likely not as fast as highly specialized packages like *glmnet*,
+the use of a working set algorithm combined with efficient solvers,
+sparse matrix support when applicable, and templated C++ code makes it
+both competitive and versatile.
+
+### Features:
+
+The more important functions of the package are
+[`sparse_lm()`](https://jchiquet.github.io/quadrupen/reference/sparse_lm.md)
+and
+[`group_sparse_lm()`](https://jchiquet.github.io/quadrupen/reference/group_sparse_lm.md)
+functions, which fits a linear model either with element-wise or
+group-wise sparsity. The functions
+[`lasso()`](https://jchiquet.github.io/quadrupen/reference/sparse_lm.md),
+[`elastic_net()`](https://jchiquet.github.io/quadrupen/reference/sparse_lm.md),
+[`scad()`](https://jchiquet.github.io/quadrupen/reference/sparse_lm.md),
+[`mcp()`](https://jchiquet.github.io/quadrupen/reference/sparse_lm.md)
+and
+[`group_lasso()`](https://jchiquet.github.io/quadrupen/reference/group_sparse_lm.md),
+[`group_l1linf()`](https://jchiquet.github.io/quadrupen/reference/group_sparse_lm.md),
+[`coop_lasso()`](https://jchiquet.github.io/quadrupen/reference/group_sparse_lm.md),
+[`sparse_group_lasso()`](https://jchiquet.github.io/quadrupen/reference/group_sparse_lm.md),
+[`sparse_coop_lasso()`](https://jchiquet.github.io/quadrupen/reference/group_sparse_lm.md)
+are only aliases for these two main functions.
+
+The functions
+[`lava()`](https://jchiquet.github.io/quadrupen/reference/lava.md),
+[`group_lava()`](https://jchiquet.github.io/quadrupen/reference/group_lava.md),
+[`fused_lasso()`](https://jchiquet.github.io/quadrupen/reference/fused_lasso.md)
+and
+[`bounded_reg()`](https://jchiquet.github.io/quadrupen/reference/bounded_reg.md)
+are also available and specific.
+
+We also included R6 and S3 methods for plotting, cross-validation and
+for the stability selection procedure of Meinshausen and Buhlmann
+(2010).
+
+### Algorithm:
 
 The general strategy of the algorithm relies on maintaining an active
 set of variables, starting from a vector of zeros. The underlying
@@ -74,64 +93,53 @@ the current penalty level, which is quite smaller than the number of
 predictors for a reasonable \\\lambda_1\\. The same kind of proposal was
 made in Zhao, Rocha and Yu (2009).
 
-Underlying optimization is performed by direct resolution of quadratic
-sub problems, which is the main purpose of this package. This strategy
-is thoroughly exposed in Grandvalet, Chiquet and Ambroise (submitted).
-Still, we also implemented the popular and versatile proximal (FISTA)
-approaches for routine checks and numerical comparisons. A coordinate
-descent approach is also included, yet only for the `elastic_net`
-fitting procedure.
+Underlying optimization is performed by direct resolution of (quadratic)
+sub problems, which is the main purpose of this package. We also
+implemented the popular and versatile proximal (FISTA) approaches for
+routine checks and numerical comparisons. A Proximal Gradient Descent
+approach with Anderson acceleration is also included.
 
-The default setting uses the quadratic approach that gives its name to
-the package. It has been optimized to be the method of choice for small
-and medium scale problems, and produce very accurate solutions. However,
-the first order methods (coordinate descent and FISTA) can be
-interesting in situations where the problem is close to singular, in
-which case the Cholesky decomposition used in the quadratic solver can
-be computationally unstable. Though it is extremely unlikely for
-[`elastic_net`](https://jchiquet.github.io/quadrupen/reference/sparse_lm.md)
-– and if so, we encourage the user to send us back any report of such an
-event –, this happens at times with
-[`bounded_reg`](https://jchiquet.github.io/quadrupen/reference/bounded_reg.md).
-Regarding this issue, we let the possibility for the user to run the
-optimization of the
-[`bounded_reg`](https://jchiquet.github.io/quadrupen/reference/bounded_reg.md)
-criterion in a (hopefully) 'bulletproof' mode: using mainly the fast and
-accurate quadratic approach, it switches to the slower but more robust
-proximal resolution when instability is detected.
-
-## Technical remarks
-
-Most of the numerical work is done in C++, relying on the RcppArmadillo
-package. We also provide a (double) cross-validation procedure and
-functions for stability selection, both using the multi-core capability
-of the computer, through the parallel package. This feature is not
-available for Windows user, though. Finally, note that the plot methods
-enjoy some of the capabilities of the ggplot2 package.
-
-We hope to enrich quadrupen with other popular fitting procedures and
-develop other statistical tools, particularly towards bootstrapping and
-model selection purpose. Sparse matrix encoding is partially supported
-at the moment, and will hopefully be thoroughly available in the future,
-thanks to upcoming updates of the great RcppArmadillo package.
+The default setting uses the most appropriate solver (quadratic or
+FISTA). The quadratic approach, which gave its name to the package, has
+been optimized to be the method of choice for small and medium scale
+problems, and produce very accurate solutions (in particular for
+Elastic-Net/Lasso, Group-Lasso and Bounded Regression). However, the
+first order methods (PGD and FISTA) remain competitive in particular in
+situations where the problem is close to singular, in which case the
+Cholesky/Eigen value decomposition used in the quadratic solver can be
+computationally unstable.
 
 ## References
 
-Yves Grandvalet, Julien Chiquet and Christophe Ambroise, [Sparsity by
-Worst-case Quadratic Penalties](http://arxiv.org/abs/1210.2077), arXiv
-preprint, 2012.
+- Yves Grandvalet, Julien Chiquet and Christophe Ambroise, [Sparsity by
+  Worst-case Quadratic Penalties](http://arxiv.org/abs/1210.2077), arXiv
+  preprint, 2012.
+
+- Fan, Jianqing, and Runze Li. “Variable selection via nonconcave
+  penalized likelihood and its oracle properties.” JASA, 2001
 
 - Nicolas Meinshausen and Peter Buhlmann. Stability Selection, JRSS(B),
   2010.
 
+- Hoefling, Holger. “A path algorithm for the fused lasso signal
+  approximator.” JCGS, 2010.
+
 - Martin Slawski, Wolfgang zu Castell, and Gerhard Tutz. Feature
-  selection guided by structural information, AOAS, 2010.
+  selection guided by structural information, AOAS,
+
+1.  
+
+- Zhang, C. H. Nearly unbiased variable selection under minimax concave
+  penalty. The Annals of Statistics, 2010.
+
+- Yuan, Ming, and Yi Lin. “Model selection and estimation in regression
+  with grouped variables.”, JRSS(B), 2006.
+
+- Simon, Noah, et al. “A sparse-group lasso.” JCGS, 2013
 
 - Peng Zhao, Guillerme Rocha and Bin Yu. The composite absolute
   penalties family for grouped and hierarchical variable selection, The
   Annals of Statistics, 2009.
-
-- Hui Zou. The Adaptive Lasso and Its Oracle Properties, JASA, 2006.
 
 - Hui Zou and Trevor Hastie. Regularization and variable selection via
   the elastic net, JRSS(B), 2006.

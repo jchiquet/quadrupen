@@ -137,7 +137,7 @@ sparse_coop_lasso(
 - x:
 
   matrix of features, possibly sparsely encoded (experimental). Do NOT
-  include intercept. When normalized os `TRUE`, coefficients will then
+  include intercept. When normalized is `TRUE`, coefficients will then
   be rescaled to the original scale.
 
 - y:
@@ -174,7 +174,7 @@ sparse_coop_lasso(
 - penscale:
 
   vector with real positive values that weight the \\\ell_1\\-penalty of
-  each feature. Default set all weights to 1.
+  each feature. Default sets all weights to 1.
 
 - struct:
 
@@ -296,14 +296,15 @@ y <- 10 + x %*% beta + rnorm(n,0,10)
 labels <- rep("irrelevant", length(beta))
 labels[beta != 0] <- "relevant"
 
-if (FALSE) { # \dontrun{
-
 ## Group-Lasso
 plot(group_lasso(x, y, grp), label=labels)
+
 
 ## Sparse Group-Lasso
 plot(sparse_group_lasso(x, y, grp, alpha = 0.75), label=labels)
 
+
+if (FALSE) { # \dontrun{
 ## Sparse Group-Lasso + L2 regularization
 plot(group_sparse_lm(x, y, grp, type = "l2", alpha = .75, lambda2=.5),
  label=labels)
@@ -311,13 +312,17 @@ plot(group_sparse_lm(x, y, grp, type = "l2", alpha = .75, lambda2=10),
  label=labels)
 plot(group_sparse_lm(x, y, grp, type = "l2", alpha = .75, lambda2=10, 
  struct=solve(Sigma)), label=labels)
+} # }
 
 ## Group-Lasso L1/LINF
 plot(group_l1linf(x, y, grp), label=labels)
 
+
 ## Sparse Group-Lasso L1/LINF
 plot(sparse_group_l1linf(x, y, grp, alpha = 0.75), label=labels)
 
+
+if (FALSE) { # \dontrun{
 ## Sparse L1/LINF Group-Lasso + L2 regularization
 plot(group_sparse_lm(x, y, grp, type = "linf", alpha = .75, lambda2=.5),
   label=labels)
@@ -325,13 +330,17 @@ plot(group_sparse_lm(x, y, grp, type = "linf", alpha = .75, lambda2=10),
   label=labels)
 plot(group_sparse_lm(x, y, grp, type = "linf", alpha = .75, lambda2=10, 
   struct=solve(Sigma)), label=labels)
+} # }
 
 ## Cooperative-Lasso
 plot(coop_lasso(x, y, grp), label=labels)
 
+
 ## Sparse Cooperative-Lasso
 plot(sparse_coop_lasso(x, y, grp, alpha = 0.75), label=labels)
 
+
+if (FALSE) { # \dontrun{
 ## Sparse Cooperative-Lasso + L2 regularization
 plot(group_sparse_lm(x, y, grp, type = "coop", alpha = .75, lambda2=.5),
  label=labels)

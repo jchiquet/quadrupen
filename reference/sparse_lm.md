@@ -119,7 +119,7 @@ scad(
 - x:
 
   matrix of features, possibly sparsely encoded (experimental). Do NOT
-  include intercept. When normalized os `TRUE`, coefficients will then
+  include intercept. When normalized is `TRUE`, coefficients will then
   be rescaled to the original scale.
 
 - y:
@@ -151,7 +151,7 @@ scad(
 - penscale:
 
   vector with real positive values that weight the \\\ell_1\\-penalty of
-  each feature. Default set all weights to 1.
+  each feature. Default sets all weights to 1.
 
 - struct:
 
@@ -251,7 +251,7 @@ inheriting from
 
 The optimized criterion is the following:
 
-β^(hat)_(λ₁,λ₂) = argmin_(β) 1/2 RSS(&beta) + λ₁ \| D β \|₁ + λ/2 ₂
+β^(hat)_(λ₁,λ₂) = argmin_(β) 1/2 RSS(&beta) + λ₁ pen_(η)(D β) + λ/2 ₂
 β^(T) S β,
 
 where \\D\\ is a diagonal matrix, whose diagonal terms are provided as a
@@ -262,7 +262,7 @@ matrix (possibly of class `Matrix`).
 ## See also
 
 See also
-[QuadrupenFit](https://jchiquet.github.io/quadrupen/reference/QuadrupenFit.md)
+[SparseFit](https://jchiquet.github.io/quadrupen/reference/SparseFit.md)
 
 ## Examples
 

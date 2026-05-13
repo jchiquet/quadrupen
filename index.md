@@ -2,18 +2,53 @@
 
 ## Description
 
-Fits classical sparse regression models with efficient active set
-algorithms by solving quadratic problems. Also provides a few methods
-for model selection purpose (cross-validation, stability selection).
+Fits the solution paths of classical sparse regression models with
+efficient active set algorithms by solving small sub-problems. Depending
+on the penalty, the sub-problems can be solved exactly (*i.e.* for the
+LASSO) or with generic solvers. The available optimizer includes
+quadratic solvers, Newton-based approaches and generic FISTA or PGD
+algorithms. Also provides a few methods for model selection purpose
+(information criteria, cross-validation, stability selection).
+
+**Quadrupen** covers the following regularizers
+
+- LASSO[^1] (Least Absolute Shrinkage and Selection Operator)
+- SCAD[^2] (Smoothly Clip Absolute Deviation)
+- MCP[^3] (Minimax Concave Penalty)
+- Group-LASSO[^4] (\\\ell_1/\ell_2\\ or \\\ell_1/\ell\_\infty\\)
+- Cooperative-LASSO[^5]
+- Sparse Group-LASSO[^6] and Sparse Cooperative-LASSO
+- Bounded Regression (\\\ell\_\infty\\-norm).
+
+For all these regularizers, **Quadrupen** offers the possibility to add
+an \\\ell_2\\/ridge-like “structured” penalty to embed some external
+knowledge about the statistical dependence between the features. This is
+sometimes referred to as the “Structured Elastic-Net”[^7].
+
+We also provide in the package the implementation of the Generalized
+Fused-LASSO[^8] originally proposed by Holger Höfling now archived from
+CRAN ([original repo here](https://github.com/cran/FusedLasso)).
+
+The original version of **Quadrupen** only includes Lasso, Elastic-Net
+and Bounded regression. It was used as an illustration for our paper
+*“Sparsity by worst-case penalties”*[^9]. I eventually used it to
+include my personal implementation of sparse methods for linear
+regression.
+
+While likely not as fast as highly specialized packages like *glmnet*,
+the use of a working set algorithm combined with efficient solvers,
+sparse matrix support when applicable, and templated C++ code makes it
+both competitive and versatile.
 
 ## Installation
 
 ``` r
-devtools::install_github("jchiquet/quadrupen").
+
+devtools::install_github("jchiquet/quadrupen")
 ```
 
-Many examples and demos can be found in the `inst` repositories. Here is
-a more illustrative one:
+Many examples and demos can be found in the `inst` directory. Here is a
+more illustrative one:
 
 ## Example: structured penalized regression
 
@@ -21,7 +56,7 @@ This example is extracted form chapter 1 of my
 [habilitation](https://tel.archives-ouvertes.fr/tel-01288976/). You can
 get more insight by reading pages 65-66, 70-71.
 
-Ok first load the package
+First, load the package
 
 ``` r
 
@@ -54,7 +89,7 @@ p <- 192
 
 ## model settings: block wise
 mu <- 0
-group  <- c(p/4,p/8,p/4,p/8,p/4)
+group <- c(p/4,p/8,p/4,p/8,p/4)
 labels <- factor(rep(paste("group", 1:5), group))
 beta   <- rep(c(0.25,1,-0.25,-1,0.25), group)
 x <- rPred.block(n, p, sizes = group, rho=c(0.25, 0.75, 0.25, 0.75, 0.25))
@@ -66,7 +101,7 @@ strong pattern:
 ![](reference/figures/unnamed-chunk-3-1.png)
 
 We draw the response variable by fixing the variance of the noise ratio
-to get an $`R^2`$ equal to $`0.8`$.
+to get an \\R^2\\ equal to \\0.8\\.
 
 ``` r
 
@@ -77,10 +112,10 @@ sigma <- dat$sigma
 
 ### Regularization without prior knowledge
 
-No we try the available penalized regression method in `quadrupen` to
+Now we try the available penalized regression methods in `quadrupen` to
 fit the regularization path to this data set
 
-#### Ridge regression ($`\ell_2`$ penalty)
+#### Ridge regression (\\\ell_2\\ penalty)
 
 ``` r
 
@@ -89,7 +124,7 @@ plot(ridge(x,y, intercept=FALSE), labels=labels)
 
 ![](reference/figures/ridge_nostruct-1.png)
 
-#### Lasso ($`\ell_1`$ penalty)
+#### Lasso (\\\ell_1\\ penalty)
 
 ``` r
 
@@ -116,7 +151,7 @@ plot(scad(x,y, intercept=FALSE), labels=labels)
 
 ![](reference/figures/scad_nostruct-1.png)
 
-#### Elastic-net ($`\ell_1+\ell_2`$ penalty)
+#### Elastic-net (\\\ell_1+\ell_2\\ penalty)
 
 ``` r
 
@@ -125,7 +160,7 @@ plot(elastic_net(x,y, lambda2=1, intercept=FALSE), labels=labels)
 
 ![](reference/figures/enet_nostruct-1.png)
 
-#### Bounded regression ($`\ell_\infty`$ penalty)
+#### Bounded regression (\\\ell\_\infty\\ penalty)
 
 ``` r
 
@@ -134,7 +169,7 @@ plot(bounded_reg(x,y, lambda2=0, intercept=FALSE), labels=labels)
 
 ![](reference/figures/breg_nostruct-1.png)
 
-#### Bounded regression + Ridge ($`\ell_\infty+\ell_2`$ penalty)
+#### Bounded regression + Ridge (\\\ell\_\infty+\ell_2\\ penalty)
 
 ``` r
 
@@ -162,10 +197,10 @@ out_lava$plot_path(component = "dense", labels=labels)
 
 ### Regularization with smooth prior knowledge
 
-Now let use define the graph associated with the groups of the regressor
-and compute the Graph Laplacian. We add a small value on the diagonal
-ton ensure strict positive definiteness (in he future, this matrix
-should preferentially be defined with a graph).
+Now let’s define the graph associated with the groups of the regressor
+and compute the Graph Laplacian. We add a small value on the diagonal to
+ensure strict positive definiteness (in the future, this matrix should
+preferentially be defined with a graph).
 
 ``` r
 
@@ -173,12 +208,12 @@ A <- Matrix::bdiag(lapply(group, function(s) matrix(1,s,s))) ; diag(A) <- 0
 L <- -A; diag(L) <- Matrix::colSums(A) + 1e-2
 ```
 
-Now, we run all the method having a ridge-like regularization by
-replacing the ridge penalty \$\\ \code \\\_2^2\$ with \$\\ \code
-\\\_{\mathbf{L}}^2\$ to enforce some structure in the regularization:
+Now, we run all the methods having a ridge-like regularization by
+replacing the ridge penalty \\\\ \cdot \\\_2^2\\ with \\\\ \cdot
+\\\_{\mathbf{L}}^2\\ to enforce some structure in the regularization:
 the solution paths look a lot more convincing.
 
-#### Structured/Generalized Ridge regression ($`\ell_2`$ penalty)
+#### Structured/Generalized Ridge regression (\\\ell_2\\ penalty)
 
 ``` r
 
@@ -187,7 +222,7 @@ plot(ridge(x,y, lambda = 10^seq(4,-1,len=100), struct = L, intercept=FALSE), lab
 
 ![](reference/figures/ridge_struct-1.png)
 
-#### Structured/Generalized Elastic-net ($`\ell_1+\ell_2`$ penalty)
+#### Structured/Generalized Elastic-net (\\\ell_1+\ell_2\\ penalty)
 
 ``` r
 
@@ -196,7 +231,7 @@ plot(elastic_net(x,y, struct = L, lambda2=1, intercept=FALSE), labels=labels)
 
 ![](reference/figures/enet_struct-1.png)
 
-#### Bounded regression + structured/Generalized Ridge ($`\ell_\infty+\ell_2`$ penalty)
+#### Bounded regression + structured/Generalized Ridge (\\\ell\_\infty+\ell_2\\ penalty)
 
 ``` r
 
@@ -227,14 +262,16 @@ out_lava$plot_path(component = "dense", labels=labels)
 We can use the correlation structure as a proxy for forming groups of
 variables, and use group-sparse regularization. We offer three variants
 of group sparse regularization in `quadrupen`: standard group-lasso
-($`\ell_1/\ell_2`$ mixed norm), type 2 group Lasso (
-($`\ell_1/\ell_\infty`$ mixed norm)) and the
+(\\\ell_1/\ell_2\\ mixed norm), type 2 group Lasso (
+(\\\ell_1/\ell\_\infty\\ mixed norm)) and the
 [cooperative-lasso](https://jchiquet.github.io/quadrupen/doi.org/10.1214/11-AOAS520),
 an original proposition.
 
+We first define a group index vector to encode the group memberships:
+
 ``` r
 
-group <- rep(1:5, c(25,10,25,10,25)) 
+group <- rep(1:length(group), group)
 ```
 
 #### Group Lasso (group sparse L1/L2)
@@ -293,13 +330,13 @@ plot(sparse_coop_lasso(x, y, group, alpha = 0.75, intercept=FALSE), labels=label
 
 ### Regularization mixing smooth and hard prior knowledge
 
-We let the possibility to add structured-$`\ell_2`$ penalty to this
+We let the possibility to add structured-\\\ell_2\\ penalty to this
 mixed-group penalties, in order to introduce additional smoothing prior
 in the regularization, just like in the structured version of the
 Elastic-Net and Ridge regression. For this, the function
 `group_sparse_lm` is the more generic group-wise function, which
 generalize all the above model by letting the possibility to add an
-$`\ell_2`$-structured penalty.
+\\\ell_2\\-structured penalty.
 
 #### Sparse Group-Lasso L2 + Structured ElasticNet (group sparse L1/L2 + structured L2)
 
@@ -327,6 +364,33 @@ plot(group_sparse_lm(x, y, group, type = "coop", alpha = 0.5, lambda2 = 2, struc
 ```
 
 ![](reference/figures/sparse-coopenet-1.png)
+
+## References
+
+1.  Tibshirani, Robert. “Regression shrinkage and selection via the
+    lasso.” Journal of the Royal Statistical Society Series B:
+    Statistical Methodology 58.1 (1996): 267-288.
+2.  Fan, Jianqing, and Runze Li. “Variable selection via nonconcave
+    penalized likelihood and its oracle properties.” Journal of the
+    American statistical Association 96.456 (2001): 1348-1360.
+3.  Zhang, C. H. Nearly unbiased variable selection under minimax
+    concave penalty. The Annals of Statistics, 38(2), (2010): 894-942.
+4.  Yuan, Ming, and Yi Lin. “Model selection and estimation in
+    regression with grouped variables.” Journal of the Royal Statistical
+    Society Series B: Statistical Methodology 68.1 (2006): 49-67.
+5.  Chiquet, Julien, Yves Grandvalet, and Camille Charbonnier. “Sparsity
+    with sign-coherent groups of variables via the cooperative-lasso.”
+    (2012): 795-830.
+6.  Simon, Noah, et al. “A sparse-group lasso.” Journal of computational
+    and graphical statistics 22.2 (2013): 231-245.
+7.  Slawski, Martin. “The structured elastic net for quantile regression
+    and support vector classification.” Statistics and Computing 22.1
+    (2012): 153-168.
+8.  Hoefling, Holger. “A path algorithm for the fused lasso signal
+    approximator.” Journal of Computational and Graphical Statistics
+    19.4 (2010): 984-1006.
+9.  Grandvalet, Yves, Julien Chiquet, and Christophe Ambroise. “Sparsity
+    by worst-case penalties.” arXiv preprint arXiv:1210.2077 (2012).
 
 ## Appendix: functions for data generation
 
@@ -379,3 +443,21 @@ rPred.block <- function(n, p, sizes=rmultinom(1,p,rep(p/K,K)), rho=rep(0.75,4)) 
   return(t(replicate(n, rmv(), simplify=TRUE)))
 }
 ```
+
+[^1]: 1
+
+[^2]: 2
+
+[^3]: 3
+
+[^4]: 4
+
+[^5]: 5
+
+[^6]: 6
+
+[^7]: 7
+
+[^8]: 8
+
+[^9]: 9

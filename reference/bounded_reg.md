@@ -1,6 +1,6 @@
 # Fit a linear model with infinity-norm plus ridge-like regularization
 
-Adjust a linear model penalized by a mixture of a (possibly weighted)
+Adjust a linear model penalized by a (possibly weighted)
 \\\ell\_\infty\\-norm (bounding the magnitude of the parameters) and a
 (possibly structured) \\\ell_2\\-norm (ridge-like). The solution path is
 computed at a grid of values for the infinity-penalty, fixing the amount
@@ -45,7 +45,7 @@ bounded.reg(
 - x:
 
   matrix of features, possibly sparsely encoded (experimental). Do NOT
-  include intercept. When normalized os `TRUE`, coefficients will then
+  include intercept. When normalized is `TRUE`, coefficients will then
   be rescaled to the original scale.
 
 - y:
@@ -67,7 +67,7 @@ bounded.reg(
 - penscale:
 
   vector with real positive values that weight the \\\ell_1\\-penalty of
-  each feature. Default set all weights to 1.
+  each feature. Default sets all weights to 1.
 
 - struct:
 

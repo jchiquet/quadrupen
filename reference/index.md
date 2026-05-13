@@ -14,7 +14,7 @@ Functions for fitting various structured regularization models
   [`mcp()`](https://jchiquet.github.io/quadrupen/reference/sparse_lm.md)
   [`scad()`](https://jchiquet.github.io/quadrupen/reference/sparse_lm.md)
   : Fit a linear model with sparse regularization
-- [`fusedlasso()`](https://jchiquet.github.io/quadrupen/reference/fusedlasso.md)
+- [`fused_lasso()`](https://jchiquet.github.io/quadrupen/reference/fused_lasso.md)
   : A function for fitting generalized fused-Lasso problems
 - [`group_sparse_lm()`](https://jchiquet.github.io/quadrupen/reference/group_sparse_lm.md)
   [`group_lasso()`](https://jchiquet.github.io/quadrupen/reference/group_sparse_lm.md)
@@ -24,7 +24,7 @@ Functions for fitting various structured regularization models
   [`sparse_group_l1linf()`](https://jchiquet.github.io/quadrupen/reference/group_sparse_lm.md)
   [`sparse_coop_lasso()`](https://jchiquet.github.io/quadrupen/reference/group_sparse_lm.md)
   : Fit a linear model with (sparse) group regularisation
-- [`group.lava()`](https://jchiquet.github.io/quadrupen/reference/group.lava.md)
+- [`group_lava()`](https://jchiquet.github.io/quadrupen/reference/group_lava.md)
   : Fit a linear model with group-lava regularization
 - [`lava()`](https://jchiquet.github.io/quadrupen/reference/lava.md) :
   Fit a linear model with lava regularization

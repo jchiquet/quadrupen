@@ -27,7 +27,7 @@ ridge(
 - x:
 
   matrix of features, possibly sparsely encoded (experimental). Do NOT
-  include intercept. When normalized os `TRUE`, coefficients will then
+  include intercept. When normalized is `TRUE`, coefficients will then
   be rescaled to the original scale.
 
 - y:
@@ -50,7 +50,7 @@ ridge(
 - penscale:
 
   vector with real positive values that weight the \\\ell_1\\-penalty of
-  each feature. Default set all weights to 1.
+  each feature. Default sets all weights to 1.
 
 - intercept:
 

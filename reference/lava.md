@@ -1,9 +1,9 @@
 # Fit a linear model with lava regularization
 
-Adjust a the lava regularized linear models, that is a lava
-transformation of the data followed by a (possibly weighted)
-\\\ell_1\\-norm. The solution path is computed at a grid of values for
-the \\\ell_1\\-penalty. See details for the criterion optimized.
+Adjust a lava regularized linear model, that is a lava transformation of
+the data followed by a (possibly weighted) \\\ell_1\\-norm. The solution
+path is computed at a grid of values for the \\\ell_1\\-penalty. See
+details for the criterion optimized.
 
 ## Usage
 
@@ -31,7 +31,7 @@ lava(
 - x:
 
   matrix of features, possibly sparsely encoded (experimental). Do NOT
-  include intercept. When normalized os `TRUE`, coefficients will then
+  include intercept. When normalized is `TRUE`, coefficients will then
   be rescaled to the original scale.
 
 - y:
@@ -53,7 +53,7 @@ lava(
 - penscale:
 
   vector with real positive values that weight the \\\ell_1\\-penalty of
-  each feature. Default set all weights to 1.
+  each feature. Default sets all weights to 1.
 
 - struct:
 
@@ -156,8 +156,8 @@ inheriting from
 
 The optimized criterion is the following:
 
-β^(hat)_(λ₁) = argmin_(&theta = &beta+δ) 1/2n RSS(&beta + &delta) + λ₁
-\| β \|₁ + λ/2 ₂ δ^(T) S δ,
+β^(hat)_(λ₁) = argmin_(θ = β+δ) 1/2n RSS(β + δ) + λ₁ \| β \|₁ + λ/2 ₂
+δ^(T) S δ,
 
 .
 
@@ -186,6 +186,9 @@ y <- 10 + x %*% beta + rnorm(n,0,10)
 labels <- rep("irrelevant", length(beta))
 labels[beta != 0] <- "relevant"
 ## The solution path of the LAVA
-plot(lava(x,y), label=labels)
+out <- lava(x,y)
+out$plot_path(component = "sparse", labels=labels)
+
+out$plot_path(component = "dense", labels=labels)
 
 ```

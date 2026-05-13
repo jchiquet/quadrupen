@@ -1,7 +1,7 @@
 # Class "GroupLavaFit"
 
 Class of object returned by the fitting function
-[`group.lava()`](https://jchiquet.github.io/quadrupen/reference/group.lava.md).
+[`group_lava()`](https://jchiquet.github.io/quadrupen/reference/group_lava.md).
 Inherits fields and methods of
 [QuadrupenFit](https://jchiquet.github.io/quadrupen/reference/QuadrupenFit.md)
 and [LavaFit](https://jchiquet.github.io/quadrupen/reference/LavaFit.md)
@@ -9,7 +9,7 @@ and [LavaFit](https://jchiquet.github.io/quadrupen/reference/LavaFit.md)
 ## See also
 
 [QuadrupenFit](https://jchiquet.github.io/quadrupen/reference/QuadrupenFit.md),
-[`group.lava()`](https://jchiquet.github.io/quadrupen/reference/group.lava.md)
+[`group_lava()`](https://jchiquet.github.io/quadrupen/reference/group_lava.md)
 
 ## Super classes
 

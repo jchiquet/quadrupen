@@ -1,7 +1,7 @@
 # Class "FusedLassoFit"
 
 Class of object returned by the fitting function
-[`fusedlasso()`](https://jchiquet.github.io/quadrupen/reference/fusedlasso.md).
+[`fused_lasso()`](https://jchiquet.github.io/quadrupen/reference/fused_lasso.md).
 Inherits fields and methods of
 [QuadrupenFit](https://jchiquet.github.io/quadrupen/reference/QuadrupenFit.md).
 

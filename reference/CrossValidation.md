@@ -45,8 +45,9 @@ function. Owns [`print()`](https://rdrr.io/r/base/print.html) and
 
 - `lambda2_1se`:
 
-  largest level of \\\lambda_2\\ the cross-validated error is within 1
-  standard error of the minimum (only relevant for ridge regression).
+  largest level of \\\lambda_2\\ such that the cross-validated error is
+  within 1 standard error of the minimum (only relevant for ridge
+  regression).
 
 ## Methods
 
