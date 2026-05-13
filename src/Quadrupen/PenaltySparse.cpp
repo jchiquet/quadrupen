@@ -99,17 +99,23 @@ vec SparsePenalty<SparseNorm::SCAD>::proximal(const vec& x, double lambda, const
   for (uword i = 0; i < x.n_elem; ++i) {
     double abs_xi = std::abs(x[i]);
     double l = lambda * w[i];
-    if (abs_xi <= 2.0 * l) {
-      // Soft-thresholding classique
-      res[i] = std::copysign(std::max(0.0, abs_xi - l), x[i]);
+    if (abs_xi <= l) {
+      // Case 1 : Sparse zone (Lasso)
+      res[i] = 0.0;
+    } else if (abs_xi <= 2.0 * l) {
+      // Case 2 : Soft-thresholding standard
+      res[i] = std::copysign(abs_xi - l, x[i]);
     } else if (abs_xi <= eta_ * l) {
-      // Zone intermédiaire (interpolation)
-      res[i] = ((eta_ - 1.0) * x[i] - std::copysign(eta_ * l, x[i])) / (eta_ - 2.0);
+      // Case 3 : Transition (SCAD Threshoholding
+      // ((eta - 1) * x - sign(x) * eta * l) / (eta - 2)
+      double val = ((eta_ - 1.0) * abs_xi - eta_ * l) / (eta_ - 2.0);
+      res[i] = std::copysign(std::max(0.0, val), x[i]);
     } else {
-      res[i] = x[i]; // Pas de biais
+      // Case 4 : No bias
+      res[i] = x[i];
     }
   }
-  return res;
+  return res;  
 }
 
 template<>

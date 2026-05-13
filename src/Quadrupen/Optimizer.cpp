@@ -106,7 +106,7 @@ uword Optimizer::pgd(
       
       // Solve for mixture parmaters
       // minimise ||f_k - (F_k - f_k*1^T) * gamma||
-        mat F_delta = mat_F.cols(0, current_m - 1);
+      mat F_delta = mat_F.cols(0, current_m - 1);
       for(uword j=0; j<current_m; ++j) F_delta.col(j) -= f_k;
       vec gamma;
       bool success = solve(gamma, F_delta, -f_k);
