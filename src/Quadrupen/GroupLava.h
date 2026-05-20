@@ -39,7 +39,7 @@ public:
   mat Proj_           ; // Lava projector matrix
   
   // Compute degrees of freedom for the current estimate
-  double get_df() ;
+  double get_df() override ;
   
 };
 
