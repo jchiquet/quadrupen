@@ -65,16 +65,17 @@ uword Optimizer::pgd(
     const double& lambda,
     const vec& XTy,
     const mat& XTX,
-    std::function<vec(const vec&, double)> proximal_operator, 
+    std::function<vec(const vec&, double)> proximal_operator,
     const double& accuracy,
     const uword& max_iter,
-    const uword m) {
-  
+    const uword m,
+    double L_cache) {
+
   uword p = beta.n_elem;
-  mat mat_F(p, m, fill::zeros); 
-  mat mat_X(p, m, fill::zeros); 
-  
-  double invL = 1.0 / estimate_lipschitz(XTX); 
+  mat mat_F(p, m, fill::zeros);
+  mat mat_X(p, m, fill::zeros);
+
+  double invL = 1.0 / ((L_cache > 0) ? L_cache : estimate_lipschitz(XTX)); 
   uword iter = 0;
   double delta = 2.0 * accuracy;
   
@@ -126,17 +127,17 @@ uword Optimizer::fista(
   const double& lambda,
   const vec& XTy,
   const mat& XTX,
-  std::function<vec(const vec&, double)> proximal_operator, 
+  std::function<vec(const vec&, double)> proximal_operator,
   const double& accuracy,
-  const uword& max_iter) {
-  
-  // Computing Lipschitz constant (largest eigen value in XA^T XA)
-  double L = estimate_lipschitz(XTX); 
-  
-  vec betak; 
+  const uword& max_iter,
+  double L_cache) {
+
+  double L = (L_cache > 0) ? L_cache : estimate_lipschitz(XTX);
+
+  vec betak;
   vec betal = beta;
   double delta = 2.0 * accuracy;
-  
+
   double t0 = 1.0, tk;
   uword iter = 0;
   double invL = 1.0 / L;

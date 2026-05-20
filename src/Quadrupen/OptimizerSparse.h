@@ -151,6 +151,9 @@ uword SparseOptimizer<matrix,norm>::working_set(
   gap_ = std::max(0.0, optimality(var_in)) ;
   J_ = arma::datum::inf ; D_ = arma::datum::inf ;
 
+  double cached_L = -1.0 ; // Lipschitz constant cache; -1 means stale/not yet computed
+  bool set_changed = true ; // active set changed since last Lipschitz computation
+
   while ((gap_ > accuracy_) && (iter_ <= maxiter_)) {
     R_CheckUserInterrupt();
     iter_++;
@@ -165,6 +168,9 @@ uword SparseOptimizer<matrix,norm>::working_set(
         beta.tail(1).fill(0.0);
       }
       if (verbosity_) {Rprintf("\tnewly added variable %i\n",var_in);}
+      set_changed = true ;
+    } else {
+      set_changed = false ;
     }
 
     // OPTIMIZATION OVER THE CURRENTLY ACTIVATED VARIABLES
@@ -175,17 +181,18 @@ uword SparseOptimizer<matrix,norm>::working_set(
       grad = - data.XTy_ + set.XTXA_ * beta ;
     }
     else { // Proximal-based solvers
+      if (set_changed) cached_L = estimate_lipschitz(set.XATXA_) ;
       auto prox = [this, &set, &weights](const vec& x, double l) {
         return(penalty_.proximal(x, l, weights.elem(set.A_)));
       };
       vec beta_old = beta ;
       if (algorithm_ == FISTA) {
         inner_iter_.push_back(
-          fista(beta, lambda, data.XTy_.elem(set.A_), set.XATXA_, prox, 1e-7, 3000)
+          fista(beta, lambda, data.XTy_.elem(set.A_), set.XATXA_, prox, 1e-7, 3000, cached_L)
         );
       } else if (algorithm_ == PGD) {
         inner_iter_.push_back(
-          pgd(beta, lambda, data.XTy_.elem(set.A_), set.XATXA_, prox, 1e-7, 3000, 5)
+          pgd(beta, lambda, data.XTy_.elem(set.A_), set.XATXA_, prox, 1e-7, 3000, 5, cached_L)
         );
       }
       grad += set.XTXA_ * (beta - beta_old); // Incremental update of the gradient
@@ -201,6 +208,7 @@ uword SparseOptimizer<matrix,norm>::working_set(
       if (!vanish.is_empty()) {
         if (verbosity_) {set.A_(vanish).t().print("Removing variables");}
         set.del_vars(vanish, beta) ;
+        set_changed = true ;
       }
     }
 

@@ -178,6 +178,9 @@ uword GroupOptimizer<matrix,norm>::working_set(
   gap_ = std::max(0.0, optimality(grp_in)) ;
   J_ = arma::datum::inf ; D_ = arma::datum::inf ;
 
+  double cached_L = -1.0 ; // Lipschitz constant cache; -1 means stale/not yet computed
+  bool set_changed = true ; // active set changed since last Lipschitz computation
+
   while ((gap_ > accuracy_) && (iter_ <= maxiter_)) {
     R_CheckUserInterrupt();
     iter_++;
@@ -193,6 +196,9 @@ uword GroupOptimizer<matrix,norm>::working_set(
         beta.tail(set.grp_sizes_(grp_in)).fill(0.0);
       }
       if (verbosity_) {Rprintf("\tnewly added group %i\n",grp_in);}
+      set_changed = true ;
+    } else {
+      set_changed = false ;
     }
 
     // OPTIMIZATION OVER THE CURRENTLY ACTIVATED VARIABLES
@@ -202,17 +208,18 @@ uword GroupOptimizer<matrix,norm>::working_set(
       );
       grad = - data.XTy_ + set.XTXA_ * beta ;
     } else {
+      if (set_changed) cached_L = estimate_lipschitz(set.XATXA_) ;
       auto prox = [this, &set, &weights](const vec& x, const double l) {
         return(penalty_.proximal(x, l, set.grp_sizes_(set.G_), weights(set.G_)));
       } ;
       vec beta_old = beta ;
       if (algorithm_ == FISTA) {
         inner_iter_.push_back(
-          fista(beta, lambda, data.XTy_(set.A_), set.XATXA_, prox, current_tol, 3000)
+          fista(beta, lambda, data.XTy_(set.A_), set.XATXA_, prox, current_tol, 3000, cached_L)
         );
       } else if (algorithm_ == PGD) {
         inner_iter_.push_back(
-          pgd(beta, lambda, data.XTy_(set.A_), set.XATXA_, prox, current_tol, 3000, 3)
+          pgd(beta, lambda, data.XTy_(set.A_), set.XATXA_, prox, current_tol, 3000, 3, cached_L)
         );
       }
       grad += set.XTXA_ * (beta - beta_old);
@@ -226,6 +233,7 @@ uword GroupOptimizer<matrix,norm>::working_set(
     if (!vanish.is_empty()) {
       if (verbosity_) set.G_(vanish).print("\tremoved group %i\n") ;
       set.del_groups(vanish, beta) ;
+      set_changed = true ;
     }
 
     // OPTIMALITY TESTING

@@ -45,12 +45,13 @@ public:
   
   uword fista(
       vec& beta,
-      const double& lambda, 
+      const double& lambda,
       const vec& XTy,
       const mat& XTX,
-      std::function<vec(const vec&, double)> proximal_operator, 
-      const double& accuracy, 
-      const uword& max_iter
+      std::function<vec(const vec&, double)> proximal_operator,
+      const double& accuracy,
+      const uword& max_iter,
+      double L_cache = -1.0  // pre-computed Lipschitz constant; negative means auto-compute
   ) ;
 
   uword pgd(
@@ -58,10 +59,11 @@ public:
       const double& lambda,
       const vec& XTy,
       const mat& XTX,
-      std::function<vec(const vec&, double)> proximal_operator, 
+      std::function<vec(const vec&, double)> proximal_operator,
       const double& accuracy,
       const uword& max_iter,
-      const uword m = 3
+      const uword m = 3,
+      double L_cache = -1.0  // pre-computed Lipschitz constant; negative means auto-compute
   ) ;
 
   void optimality_violation(
