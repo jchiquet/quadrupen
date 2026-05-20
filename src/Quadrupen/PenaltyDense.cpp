@@ -33,44 +33,38 @@ double DensePenalty<DenseNorm::LINF>::dual_norm(const vec& x, const vec& w, doub
 template<>
 vec DensePenalty<DenseNorm::LINF>::proximal(const vec& x, double lambda, const vec& w) {
   uword p = x.n_elem;
-  vec abs_x_w = arma::abs(x) / w;
-  
-  if (accu(abs_x_w) <= lambda) {
+  vec abs_x = arma::abs(x);
+
+  // If x is already in the dual ball {y: sum(|y_i|/w_i) <= lambda}, proximal is 0
+  if (accu(abs_x / w) <= lambda) {
     return zeros<vec>(p);
   }
-  
-  // Project onto the l1 ball
-  
-  // Reordering absolute values
-  vec u = sort(abs_x_w, "descend");
-  
-  // values of the projected coordinate if non zero (dual problem)
-  // vec proj = (cumsum(u) - lambda)/linspace<vec>(1,p,p);
-  // 
-  // find critical index
-  // uword i = max(find(u - proj >= 0)) ;
-  
-  double cumsum_u_w = 0.0;
-  double cumsum_w_sq = 0.0;
-  double rho = 0.0;
-  
+
+  // Project x onto {y : sum(|y_i|/w_i) <= lambda} via KKT conditions:
+  //   y_i = sign(x_i) * (|x_i| - mu/w_i)_+
+  // where mu satisfies sum((|x_i|/w_i - mu/w_i^2)_+) = lambda.
+  // Breakpoints are at mu = |x_i|*w_i; sort these descending.
+  uvec ord = sort_index(abs_x % w, "descend");
+
+  double cumsum_z   = 0.0;  // sum of |x_i|/w_i for the active set
+  double cumsum_iw2 = 0.0;  // sum of 1/w_i^2 for the active set
+  double mu = 0.0;
+
   for (uword j = 0; j < p; ++j) {
-    
-    cumsum_u_w += u(j) * (w(j) * w(j)); //
-    cumsum_w_sq += w(j) * w(j);
-    
-    double t = (cumsum_u_w - lambda) / cumsum_w_sq;
-    
-    if (j < p - 1 && u(j + 1) <= t) {
-      rho = t;
+    uword k = ord(j);
+    cumsum_z   += abs_x(k) / w(k);
+    cumsum_iw2 += 1.0 / (w(k) * w(k));
+    double t = (cumsum_z - lambda) / cumsum_iw2;
+
+    if (j < p - 1 && abs_x(ord(j + 1)) * w(ord(j + 1)) <= t) {
+      mu = t;
       break;
     }
-    if (j == p - 1) rho = t;
+    if (j == p - 1) mu = t;
   }
-  
-  vec res = sign(x) % min(abs(x), rho * w );
-  
-  return(res);
+
+  // prox_i = x_i - y_i = sign(x_i) * min(|x_i|, mu/w_i)
+  return sign(x) % arma::min(abs_x, mu / w);
 }
 
 // ______________________________________________________
