@@ -30,8 +30,8 @@ class GroupSparseRegularizer :
     using Regularizer<matrix>::lambda_factor_ ;
     using Regularizer<matrix>::get_lambda_seq ;
     
-    vec   nzeros_ ; // contains non-zero values of all betas (for all lambda values)
-    vec debiased_ ; // contains debiased non-zero values of all betas (for all lambda values)
+    std::vector<double> nzeros_  ; // contains non-zero values of all betas (for all lambda values)
+    std::vector<double> debiased_ ; // contains debiased non-zero values of all betas (for all lambda values)
     vector<uvec> active_ ; // successively activated variable (for all lambda values)
     vector<double >intercept_debiased_ ; // debiased vector of intercept values (for all lambda values)
     vec beta_debiased_ ; // vector of current active beta debiased (for the current lambda)
@@ -64,10 +64,10 @@ class GroupSparseRegularizer :
         current_col++;
       }
       return sp_mat(join_cols(urowvec(rowA), urowvec(colA)),
-                    nzeros_, data_.p_, active_.size(), true, false) ;
+                    vec(nzeros_), data_.p_, active_.size(), true, false) ;
     }
-    
-    const sp_mat debiased_coefficients() const { 
+
+    const sp_mat debiased_coefficients() const {
       vector<uword> rowA, colA ;
       uword current_col = 0;
       for (const auto& a : active_) {
@@ -76,7 +76,7 @@ class GroupSparseRegularizer :
         current_col++;
       }
       return sp_mat(join_cols(urowvec(rowA), urowvec(colA)),
-                    debiased_, data_.p_, active_.size(), true, false) ;
+                    vec(debiased_), data_.p_, active_.size(), true, false) ;
     }
     
     const sp_mat active_var() const { 
@@ -138,7 +138,6 @@ List GroupSparseRegularizer<matrix,norm>::solution_path(const List& control) {
   
   vector<double> gap, timing ; // timings and optimality measures
   vector<uword> status, iter ; // convergence and # of inner/outer iterates
-  
   // LAMBDA LOOP
   wall_clock timer ; timer.tic(); // clock
   for(auto lambda_ : lambdas_) {
@@ -155,12 +154,14 @@ List GroupSparseRegularizer<matrix,norm>::solution_path(const List& control) {
       break;
     } else {
       // store current coefficients
-      nzeros_ = join_cols(nzeros_, beta_/data_.norm_X_(set_.A_));
+      vec nz = beta_ / data_.norm_X_(set_.A_) ;
+      nzeros_.insert(nzeros_.end(), nz.begin(), nz.end()) ;
       intercept_.push_back(data_.y_bar_ - dot(beta_, data_.X_bar_(set_.A_))); // X_bar is scaled
       // compute and store debiased coefficients
       set_.inverse_Gram() ;
       beta_debiased_ = set_.XATXAinv_ * (data_.XTy_(set_.A_) - data_.X_bar_(set_.A_) * accu(data_.y_)) ;
-      debiased_ = join_cols(debiased_, beta_debiased_/data_.norm_X_(set_.A_));
+      vec db = beta_debiased_ / data_.norm_X_(set_.A_) ;
+      debiased_.insert(debiased_.end(), db.begin(), db.end()) ;
       intercept_debiased_.push_back(data_.y_bar_ - dot(beta_debiased_, data_.X_bar_(set_.A_))) ; // X_bar is scaled
       // store degrees fo freedom and current active set
       df_.push_back(this->get_df()) ;
@@ -169,7 +170,6 @@ List GroupSparseRegularizer<matrix,norm>::solution_path(const List& control) {
 
     timing.push_back(timer.toc()) ;
   } // END OF THE LOOP OVER LAMBDA
-
   lambdas_.resize(df_.size()) ;
   
   return(

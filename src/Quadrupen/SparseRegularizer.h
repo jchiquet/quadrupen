@@ -26,8 +26,8 @@ class SparseRegularizer :
     using Regularizer<matrix>::lambda_factor_ ;
     using Regularizer<matrix>::get_lambda_seq ;
     
-    vec   nzeros_ ; // contains non-zero values of all betas (for all lambda values)
-    vec debiased_ ; // contains debiased non-zero values of all betas (for all lambda values)
+    std::vector<double> nzeros_  ; // contains non-zero values of all betas (for all lambda values)
+    std::vector<double> debiased_ ; // contains debiased non-zero values of all betas (for all lambda values)
     vector<uvec> active_ ; // successively activated variable (for all lambda values)
     vector<double >intercept_debiased_ ; // debiased vector of intercept values (for all lambda values)
     vec beta_debiased_ ; // vector of current active beta debiased (for the current lambda)
@@ -60,10 +60,10 @@ class SparseRegularizer :
         current_col++;
       }
       return sp_mat(join_cols(urowvec(rowA), urowvec(colA)),
-                    nzeros_, data_.p_, active_.size(), true, false) ;
+                    vec(nzeros_), data_.p_, active_.size(), true, false) ;
     }
-    
-    const sp_mat debiased_coefficients() const { 
+
+    const sp_mat debiased_coefficients() const {
       vector<uword> rowA, colA ;
       uword current_col = 0;
       for (const auto& a : active_) {
@@ -72,7 +72,7 @@ class SparseRegularizer :
         current_col++;
       }
       return sp_mat(join_cols(urowvec(rowA), urowvec(colA)),
-                    debiased_, data_.p_, active_.size(), true, false) ;
+                    vec(debiased_), data_.p_, active_.size(), true, false) ;
     }
     
     const sp_mat active_var() const { 
@@ -145,38 +145,38 @@ List SparseRegularizer<matrix,norm>::solution_path(const List& control) {
   
   vector<double> gap, timing ; // timings and optimality measures
   vector<uword> status, iter ; // convergence and # of inner/outer iterates
-  
   // LAMBDA LOOP
   wall_clock timer ; timer.tic(); // clock
   for(auto lambda_ : lambdas_) {
-    
+
     // OPTIMIZER LOOP (FIX-LAMBDA VALUE): IDENTIFY THE ACTIVE SET AND SOLVE
     status.push_back(
       solver_.working_set(beta_, grad_, lambda_, lambda_factor_, gamma_, data_, set_)
     ) ;
     gap.push_back(solver_.gap_) ;
     iter.push_back(solver_.iter_) ;
-    
+
     // Preparing next value of the penalty
     if (status.back() >= 2) {
       break;
     } else {
       // store current coefficients
-      nzeros_ = join_cols(nzeros_, beta_/(data_.norm_X_(set_.A_)));
+      vec nz = beta_ / data_.norm_X_(set_.A_) ;
+      nzeros_.insert(nzeros_.end(), nz.begin(), nz.end()) ;
       intercept_.push_back(data_.y_bar_ - dot(beta_, data_.X_bar_(set_.A_))); // X_bar is scaled
       // compute and store debiased coefficients
       set_.inverse_Gram() ;
       beta_debiased_ = set_.XATXAinv_ * (data_.XTy_(set_.A_) - data_.X_bar_(set_.A_) * accu(data_.y_)) ;
-      debiased_ = join_cols(debiased_, beta_debiased_/(data_.norm_X_(set_.A_)));
+      vec db = beta_debiased_ / data_.norm_X_(set_.A_) ;
+      debiased_.insert(debiased_.end(), db.begin(), db.end()) ;
       intercept_debiased_.push_back(data_.y_bar_ - dot(beta_debiased_, data_.X_bar_(set_.A_))) ;
       // store degrees fo freedom and current active set
       df_.push_back(get_df()) ;
       active_.push_back(set_.A_) ;
     }
-    
+
     timing.push_back(timer.toc()) ;
   } // END OF THE LOOP OVER LAMBDA
-  
   lambdas_.resize(df_.size()) ;
   
   return(
