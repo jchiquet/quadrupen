@@ -48,7 +48,7 @@ Regularizer<matrix>::Regularizer(
 
 template <typename matrix>
 void Regularizer<matrix>::get_lambda_seq(double lambda_max, const List& regParam) {
-  if (regParam[0] != R_NilValue) {
+  if (regParam["lambda"] != R_NilValue) {
     lambdas_  = as<vector<double>>(regParam["lambda"]) ;
   } else {
     lambdas_ = conv_to<vector<double>>::from(

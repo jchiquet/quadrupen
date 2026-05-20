@@ -52,6 +52,8 @@ ActiveSetGroup<matrix>::ActiveSetGroup(const RegressionData<matrix>& data, const
     grp_sizes_.zeros(nb_grp);
     
     for (uword i = 0; i < group_ind.n_elem; ++i) {
+      if (group_ind[i] == 0)
+        Rcpp::stop("group indices must be 1-based; received 0 at position %d", (int)i);
       grp_sizes_[group_ind[i] - 1]++;
     }
     

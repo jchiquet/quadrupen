@@ -124,7 +124,8 @@ List BoundedRegression::solution_path(const List& control) {
     } else {
       coef_ = join_rows(coef_, beta_/data_.norm_X_) ;
       intercept_.push_back(data_.y_bar_ - dot(beta_, data_.X_bar_));
-      bounded_.push_back(find(abs(beta_) == max(abs(beta_)))) ;
+      double max_abs = max(abs(beta_));
+      bounded_.push_back(find(abs(beta_) >= max_abs * (1.0 - 1e-10))) ;
       df_.push_back(get_df()) ;
     }
 
