@@ -4,7 +4,7 @@
  */
 
 // ====================================================
-// Group-Sparse Regularizers       
+// Group-Sparse Regularizers
 
 #pragma once
 
@@ -23,7 +23,7 @@ using Rcpp::as;
 using std::vector;
 
 template <typename matrix, GroupSparseNorm norm>
-class GroupSparseRegularizer : 
+class GroupSparseRegularizer :
   public Regularizer<matrix> {
   public:
 
@@ -36,16 +36,17 @@ class GroupSparseRegularizer :
     using Regularizer<matrix>::grad_   ;
     using Regularizer<matrix>::lambda_factor_ ;
     using Regularizer<matrix>::get_lambda_seq ;
-    
+    using Regularizer<matrix>::build_sp_locations ;
+
     std::vector<double> nzeros_  ; // contains non-zero values of all betas (for all lambda values)
     std::vector<double> debiased_ ; // contains debiased non-zero values of all betas (for all lambda values)
     vector<uvec> active_ ; // successively activated variable (for all lambda values)
     vector<double >intercept_debiased_ ; // debiased vector of intercept values (for all lambda values)
     vec beta_debiased_ ; // vector of current active beta debiased (for the current lambda)
     ActiveSetGroup<matrix> set_ ; // Active set of variable and data
-    GroupPenalty<norm> penalty_ ; // main penalty object 
-    
-    double get_lambda_max() 
+    GroupPenalty<norm> penalty_ ; // main penalty object
+
+    double get_lambda_max()
     {
       return(
         penalty_.lambda_max(data_.XTy_, set_.grp_sizes_, lambda_factor_)
@@ -53,9 +54,9 @@ class GroupSparseRegularizer :
     }
 
     GroupSparseRegularizer(const RegressionData<matrix>&, const uvec&, const List&, const List&);
-  
+
     List solution_path(const List&);
-    
+
     // Specific to Group Lasso regularization
     GroupOptimizer<matrix,norm> solver_ ; // Solvers for Group Sparse penalty
 
@@ -77,9 +78,9 @@ class GroupSparseRegularizer :
       return sp_mat(locs, arma::ones<vec>(locs.n_cols),
                     data_.p_, active_.size(), true, false) ;
     }
-    
+
     const vector<double>& intercept_debiased() const { return intercept_debiased_ ; }
-    
+
 };
 
 template <typename matrix, GroupSparseNorm norm>
@@ -87,13 +88,13 @@ GroupSparseRegularizer<matrix,norm>::GroupSparseRegularizer(
   const RegressionData<matrix>& data, const uvec& group_ind, const List& regParam, const List& control) :
   Regularizer<matrix>::Regularizer(data, regParam) {
 
-    // Scale the structuring matrix according to the amount of l2 penalty 
+    // Scale the structuring matrix according to the amount of l2 penalty
     data_.scale_struct(gamma_) ;
-    
+
     // Initialize the active set and the gradient
     grad_ = - data_.XTy_ ;
     set_ = ActiveSetGroup(data_, group_ind, as<bool>(control["factmat"])) ;
-    
+
     // Set up the penalty
     penalty_ = GroupPenalty<norm>(as<double>(regParam["alpha"])) ;
     get_lambda_seq(penalty_.lambda_max(data_.XTy_, set_.grp_sizes_, lambda_factor_), regParam) ;
@@ -112,17 +113,17 @@ double GroupSparseRegularizer<matrix,norm>::get_df() {
     // approximate degrees of freedom
     vec active_grp_norm = penalty_.elt_norm(beta_, set_.grp_sizes_(set_.G_), ones(set_.size_grp())) ;
     vec active_grp_norm_ols = penalty_.elt_norm(beta_debiased_, set_.grp_sizes_(set_.G_), ones(set_.size_grp())) / (1 + gamma_) ;
-    
-    df = df + 
+
+    df = df +
       accu(1 + (active_grp_norm / active_grp_norm_ols) % (set_.grp_sizes_(set_.G_) - 1)) ;
-  }  
+  }
 
   return(df);
 }
 
 template <typename matrix, GroupSparseNorm norm>
 List GroupSparseRegularizer<matrix,norm>::solution_path(const List& control) {
-  
+
   vector<double> gap, timing ; // timings and optimality measures
   vector<uword> status, iter ; // convergence and # of inner/outer iterates
   // LAMBDA LOOP
@@ -159,7 +160,7 @@ List GroupSparseRegularizer<matrix,norm>::solution_path(const List& control) {
     timing.push_back(timer.toc()) ;
   } // END OF THE LOOP OVER LAMBDA
   lambdas_.resize(df_.size()) ;
-  
+
   return(
     List::create(
       Named("it_active")      = iter,
@@ -172,5 +173,3 @@ List GroupSparseRegularizer<matrix,norm>::solution_path(const List& control) {
     )
   );
 }
-
-

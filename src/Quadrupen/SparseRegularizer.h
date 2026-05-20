@@ -19,10 +19,10 @@ using Rcpp::as;
 using std::vector;
 
 template <typename matrix, SparseNorm norm>
-class SparseRegularizer : 
+class SparseRegularizer :
   public Regularizer<matrix>{
   public:
-    
+
     using Regularizer<matrix>::intercept_ ;
     using Regularizer<matrix>::lambdas_   ;
     using Regularizer<matrix>::gamma_   ;
@@ -32,29 +32,30 @@ class SparseRegularizer :
     using Regularizer<matrix>::grad_   ;
     using Regularizer<matrix>::lambda_factor_ ;
     using Regularizer<matrix>::get_lambda_seq ;
-    
+    using Regularizer<matrix>::build_sp_locations ;
+
     std::vector<double> nzeros_  ; // contains non-zero values of all betas (for all lambda values)
     std::vector<double> debiased_ ; // contains debiased non-zero values of all betas (for all lambda values)
     vector<uvec> active_ ; // successively activated variable (for all lambda values)
     vector<double >intercept_debiased_ ; // debiased vector of intercept values (for all lambda values)
     vec beta_debiased_ ; // vector of current active beta debiased (for the current lambda)
-    SparsePenalty<norm> penalty_ ; // main penalty object 
+    SparsePenalty<norm> penalty_ ; // main penalty object
     ActiveSet<matrix> set_       ; // Active set of variable and data
-    
-    double get_lambda_max() 
+
+    double get_lambda_max()
     {
       return(penalty_.lambda_max(data_.XTy_, lambda_factor_));
     }
-    
+
     SparseRegularizer(const RegressionData<matrix>&, const List&, const List&);
-    
+
     List solution_path(const List&);
-    
+
     // Specific to Elastic-Net regularization
     SparseOptimizer<matrix, norm> solver_ ; // Solvers for L1 penalty
-    
+
     void optimality_violation(double lambda_, uword type) ;
-    
+
     // Compute degrees of freedom for the current estimate
     double get_df() ;
 
@@ -73,7 +74,7 @@ class SparseRegularizer :
       return sp_mat(locs, arma::ones<vec>(locs.n_cols),
                     data_.p_, active_.size(), true, false) ;
     }
-    
+
     const vector<double>& intercept_debiased() const { return intercept_debiased_ ; }
 
 };
@@ -83,7 +84,7 @@ SparseRegularizer<matrix,norm>::SparseRegularizer(
   const RegressionData<matrix>& data, const List& regParam, const List& control) :
   Regularizer<matrix>::Regularizer(data, regParam) {
 
-    // Scale the structuring matrix according to the amount of l2 penalty 
+    // Scale the structuring matrix according to the amount of l2 penalty
     data_.scale_struct(gamma_) ;
 
     // Initialize the active set, beta_ and the gradient
@@ -97,11 +98,11 @@ SparseRegularizer<matrix,norm>::SparseRegularizer(
       beta_ = beta0(A0) ;
       grad_ += set_.XTXA_ * beta_  ;
     }
-    
+
     // Set the penalty to l1
     penalty_ = SparsePenalty<norm>(as<double>(regParam["eta"])) ;
     get_lambda_seq(penalty_.lambda_max(data_.XTy_, lambda_factor_), regParam) ;
-    
+
     // Set up the optimizer
     solver_ = SparseOptimizer<matrix,norm>(penalty_, control) ;
 
@@ -129,7 +130,7 @@ double SparseRegularizer<matrix,norm>::get_df() {
 
 template <typename matrix, SparseNorm norm>
 List SparseRegularizer<matrix,norm>::solution_path(const List& control) {
-  
+
   vector<double> gap, timing ; // timings and optimality measures
   vector<uword> status, iter ; // convergence and # of inner/outer iterates
   // LAMBDA LOOP
@@ -166,7 +167,7 @@ List SparseRegularizer<matrix,norm>::solution_path(const List& control) {
     timing.push_back(timer.toc()) ;
   } // END OF THE LOOP OVER LAMBDA
   lambdas_.resize(df_.size()) ;
-  
+
   return(
     List::create(
       Named("it_active")      = iter,
@@ -179,4 +180,3 @@ List SparseRegularizer<matrix,norm>::solution_path(const List& control) {
     )
   );
 }
-

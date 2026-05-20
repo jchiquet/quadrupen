@@ -20,7 +20,7 @@ using std::vector;
 template <typename matrix>
 class Regularizer {
 public:
-  
+
   Regularizer() {} ;
   Regularizer(const RegressionData<matrix>&, const List&);
 
@@ -43,7 +43,6 @@ public:
   const vector<double>& path_tuning()     const { return lambdas_   ; }
   const vector<double>& degrees_freedom() const { return df_        ; }
 
-protected:
   // Build (row, col) location matrix for sp_mat construction from a sequence
   // of active index sets. Row 0 = variable indices, Row 1 = lambda-step index.
   static umat build_sp_locations(const vector<uvec>& groups) {
@@ -61,7 +60,7 @@ protected:
 
 template <typename matrix>
 Regularizer<matrix>::Regularizer(
-  const RegressionData<matrix>& data, const List& regParam) : 
+  const RegressionData<matrix>& data, const List& regParam) :
   data_ (data),
   gamma_(as<double>(regParam["gamma"])),
   lambda_factor_(as<vec>(regParam["lambda_factor"]))
@@ -81,4 +80,3 @@ void Regularizer<matrix>::get_lambda_seq(double lambda_max, const List& regParam
     );
   }
 }
-
