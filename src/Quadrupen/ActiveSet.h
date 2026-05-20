@@ -71,49 +71,67 @@ void ActiveSet<matrix>::reset() {
 
 template <typename matrix>
 void ActiveSet<matrix>::add_var(uword var_in, const RegressionData<matrix>& data) {
-  A_.resize(size() + 1) ;
-  A_.tail(1) = var_in   ;
-  is_in_[var_in] = 1    ;
+  uword k = size() ;
+  A_.resize(k + 1) ;
+  A_(k) = var_in   ;
+  is_in_[var_in] = 1 ;
 
-  vec new_col = data.X_.t() * data.X_.col(var_in) - 
+  vec new_col = data.X_.t() * data.X_.col(var_in) -
     data.n_ * data.X_bar_ * as_scalar(data.X_bar_[var_in]) + data.S_.col(var_in) ;
 
-  if (!XATXA_.is_empty()) {
-    XATXA_ = join_cols(XATXA_, XTXA_.row(var_in)) ;
+  // Single allocation for XTXA_: copy old columns then set new one
+  mat new_XTXA_(data.p_, k + 1, fill::none) ;
+  if (k > 0) new_XTXA_.cols(0, k - 1) = XTXA_ ;
+  new_XTXA_.col(k) = new_col ;
+  XTXA_ = std::move(new_XTXA_) ;
+
+  // Single allocation for XATXA_: fill four blocks directly
+  mat new_XATXA_(k + 1, k + 1, fill::none) ;
+  if (k > 0) {
+    vec cross = new_col.elem(A_.head(k)) ; // cross-products with previously active variables
+    new_XATXA_.submat(0, 0, k-1, k-1) = XATXA_ ;
+    new_XATXA_.col(k).head(k)  = cross ;
+    new_XATXA_.row(k).head(k)  = cross.t() ;
   }
-  XTXA_  = join_rows(XTXA_ , new_col) ;
-  XATXA_ = join_rows(XATXA_, trans(XTXA_.row(var_in))) ;
+  new_XATXA_(k, k) = new_col(var_in) ;
+  XATXA_ = std::move(new_XATXA_) ;
 
   if (use_chol_) update_Cholesky() ;
 }
 
 template <typename matrix>
 void ActiveSet<matrix>::add_vars(uvec vars, const RegressionData<matrix>& data) {
-  uword n_new = vars.n_elem;
-  uword p_old = size();
-  
-  for(uword v : vars) is_in_[v] = 1;
-  A_.resize(p_old + n_new);
-  A_.tail(n_new) = vars;
+  uword n_new   = vars.n_elem ;
+  uword p_old   = size() ;
+  uword p_total = p_old + n_new ;
 
-  // new columns for XTXA_ (p x n_new)
-  mat new_cols = data.X_.t() * data.X_.cols(vars) - 
-    data.n_ * data.X_bar_ * data.X_bar_.rows(vars).t() + 
-    data.S_.cols(vars);
+  for (uword v : vars) is_in_[v] = 1 ;
+  A_.resize(p_total) ;
+  A_.tail(n_new) = vars ;
 
-  if (p_old == 0) { // If empty matrix
-    XTXA_  = new_cols;
-    XATXA_ = new_cols.rows(vars);
-  } else { // Add to existing set of variables
-    mat bottom_left = XTXA_.rows(vars); 
-    
-    XTXA_ = join_rows(XTXA_, new_cols);
-    // [ XATXA_old   | bottom_left.t() ]
-    // [ bottom_left | new_cols.rows(vars) ]
-    mat bottom_right = new_cols.rows(vars);
-    XATXA_ = join_cols(join_rows(XATXA_, bottom_left.t()), 
-                       join_rows(bottom_left, bottom_right));
+  mat new_cols = data.X_.t() * data.X_.cols(vars) -
+    data.n_ * data.X_bar_ * data.X_bar_.rows(vars).t() +
+    data.S_.cols(vars) ;
+
+  // Single allocation for XTXA_
+  mat new_XTXA_(data.p_, p_total, fill::none) ;
+  if (p_old > 0) new_XTXA_.cols(0, p_old - 1) = XTXA_ ;
+  new_XTXA_.cols(p_old, p_total - 1) = new_cols ;
+  XTXA_ = std::move(new_XTXA_) ;
+
+  // Single allocation for XATXA_: fill four blocks directly
+  // [ XATXA_old | cross        ]
+  // [ cross.t() | new_cols.rows(vars) ]
+  mat new_XATXA_(p_total, p_total, fill::none) ;
+  if (p_old > 0) {
+    mat cross = new_cols.rows(A_.head(p_old)) ; // p_old x n_new cross-products
+    new_XATXA_.submat(0,     0,     p_old-1,   p_old-1)   = XATXA_ ;
+    new_XATXA_.submat(0,     p_old, p_old-1,   p_total-1) = cross ;
+    new_XATXA_.submat(p_old, 0,     p_total-1, p_old-1)   = cross.t() ;
   }
+  new_XATXA_.submat(p_old, p_old, p_total-1, p_total-1) = new_cols.rows(vars) ;
+  XATXA_ = std::move(new_XATXA_) ;
+
   if (use_chol_) update_Cholesky_block(n_new) ;
 }
 
@@ -141,44 +159,50 @@ void ActiveSet<matrix>::del_vars(uvec ivars, vec& beta) {
 template <typename matrix>
 void ActiveSet<matrix>::update_Cholesky() {
   uword p = XATXA_.n_cols ;
-  
+
   if (p == 1) {
-    R_ = sqrt(XATXA_);
+    R_ = sqrt(XATXA_) ;
   } else {
-    colvec rp  = zeros<colvec>(p,1);
-    rp.subvec(0, p-2) = solve(trimatu(R_.submat(0,0,p-2,p-2)).t(), 
-              XATXA_.submat(0, p-1, p-2, p-1), 
-              solve_opts::fast);
-    rp(p-1) = sqrt(XATXA_(p-1,p-1) - dot(rp,rp));
-    R_ = join_rows( join_cols(R_, zeros<mat>(1,p-1)) , rp);
+    // Solve R_old^T * rp[0..p-2] = XATXA_[0..p-2, p-1]
+    colvec rp(p, fill::zeros) ;
+    rp.head(p-1) = solve(trimatu(R_).t(),
+                         XATXA_.col(p-1).head(p-1),
+                         solve_opts::fast) ;
+    rp(p-1) = std::sqrt(XATXA_(p-1, p-1) - dot(rp.head(p-1), rp.head(p-1))) ;
+
+    // Single allocation: extend R_ from (p-1)x(p-1) to pxp
+    mat new_R_(p, p, fill::zeros) ; // lower-triangular part stays zero
+    new_R_.submat(0, 0, p-2, p-2) = R_ ;
+    new_R_.col(p-1) = rp ;
+    R_ = std::move(new_R_) ;
   }
 }
 
 template <typename matrix>
 void ActiveSet<matrix>::update_Cholesky_block(uword n_new) {
-  uword p_total = XATXA_.n_cols;
-  uword p_old = p_total - n_new;
-  
+  uword p_total = XATXA_.n_cols ;
+  uword p_old   = p_total - n_new ;
+
   if (p_old == 0) {
-    R_ = chol(XATXA_);
+    R_ = chol(XATXA_) ;
   } else {
-    // Solve R_old.t() * R_new_block = XATXA_joint
-    // XATXA_joint is the upper right block (p_old x n_new)
-    mat R_new_cols = solve(trimatu(R_).t(), 
-                           XATXA_.submat(0, p_old, p_old - 1, p_total - 1), 
-                           solve_opts::fast);
-    
-    // Compute the Schur complement for the new diagonal block
-    // S = XATXA_new - R_new_cols.t() * R_new_cols
-    mat S = XATXA_.submat(p_old, p_old, p_total - 1, p_total - 1) - 
-      R_new_cols.t() * R_new_cols;
-    mat R_bottom_right = chol(S);
-    
-    // Final assembly
+    // Solve R_old^T * R_new_cols = XATXA_[0..p_old-1, p_old..p_total-1]
+    mat R_new_cols = solve(trimatu(R_).t(),
+                           XATXA_.submat(0, p_old, p_old-1, p_total-1),
+                           solve_opts::fast) ;
+
+    // Schur complement for the new diagonal block
+    mat R_bottom_right = chol(XATXA_.submat(p_old, p_old, p_total-1, p_total-1) -
+                              R_new_cols.t() * R_new_cols) ;
+
+    // Single allocation: extend R_ from p_old×p_old to p_total×p_total
     // [ R_old | R_new_cols     ]
     // [ 0     | R_bottom_right ]
-    R_ = join_rows(join_cols(R_, zeros<mat>(n_new, p_old)), 
-                   join_cols(R_new_cols, R_bottom_right));
+    mat new_R_(p_total, p_total, fill::zeros) ; // lower-triangular part stays zero
+    new_R_.submat(0,     0,     p_old-1,   p_old-1)   = R_ ;
+    new_R_.submat(0,     p_old, p_old-1,   p_total-1) = R_new_cols ;
+    new_R_.submat(p_old, p_old, p_total-1, p_total-1) = R_bottom_right ;
+    R_ = std::move(new_R_) ;
   }
 }
 template <typename matrix>
