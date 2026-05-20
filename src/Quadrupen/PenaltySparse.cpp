@@ -92,7 +92,8 @@ vec SparsePenalty<SparseNorm::MCP>::proximal(const vec& x, double lambda, const 
     if (abs_xi <= l) {
       res[i] = 0.0;
     } else if (abs_xi <= eta_ * l) {
-      res[i] = std::copysign(abs_xi - l, x[i]) / (1.0 - 1.0/eta_);
+      // equivalent to / (1 - 1/eta_), but avoids singularity at eta_=1
+      res[i] = std::copysign((abs_xi - l) * eta_ / (eta_ - 1.0), x[i]);
     } else {
       res[i] = x[i];
     }

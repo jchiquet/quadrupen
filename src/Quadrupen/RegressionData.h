@@ -7,7 +7,6 @@
 
 #pragma once
 
-#define ARMA_NO_DEBUG
 #define ARMA_USE_LAPACK
 #define ARMA_USE_BLAS
 
@@ -138,6 +137,7 @@ void RegressionData<matrix>::standardize() {
   
   if (scaled_) {
     norm_X_ = sqrt(trans(sum(square(X_))) - n_ * square(X_bar_));
+    norm_X_.replace(0.0, 1.0);  // constant columns: leave unchanged (avoid div by zero)
     X_ = X_ * diagmat(1/norm_X_) ;
     X_bar_ /= norm_X_ ;
   } else {

@@ -94,21 +94,12 @@ uword Optimizer::pgd(
       mat_F.col(col_idx) = f_k;       // son résidu f_k
       
       uword current_m = std::min(iter, m);
-      
-      // On résout le système sur l'historique disponible
+
       if (current_m > 1) {
-        mat F_delta(p, current_m - 1);
-        mat X_delta(p, current_m - 1);
-        
-        // On calcule les différences par rapport au résidu actuel
-        for (uword j = 0; j < current_m; ++j) {
-          // Optionnel : tu peux ici reconstruire proprement les différences 
-          // f_{j+1} - f_j pour une version plus standard d'Anderson
-        }
-        
-        // Raccourci efficace : 
+        // Anderson mixing (type II): dF(:,j) = f_j - f_k (differences from current residual)
+        // mat_X.col(j) + mat_F.col(j) = beta_j + (beta_{j+1} - beta_j) = beta_{j+1}
         mat dF = mat_F.cols(0, current_m - 1);
-        dF.each_col() -= f_k; 
+        dF.each_col() -= f_k;
         
         vec gamma;
         if (solve(gamma, dF, -f_k, solve_opts::fast)) {

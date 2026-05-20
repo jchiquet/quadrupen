@@ -166,7 +166,8 @@ List SparseRegularizer<matrix,norm>::solution_path(const List& control) {
       intercept_.push_back(data_.y_bar_ - dot(beta_, data_.X_bar_(set_.A_))); // X_bar is scaled
       // compute and store debiased coefficients
       set_.inverse_Gram() ;
-      beta_debiased_ = set_.XATXAinv_ * (data_.XTy_(set_.A_) - data_.X_bar_(set_.A_) * accu(data_.y_)) ;
+      // XTy_(A) = X_A'(y - y_bar) already incorporates centering; no further correction needed
+      beta_debiased_ = set_.XATXAinv_ * data_.XTy_(set_.A_) ;
       vec db = beta_debiased_ / data_.norm_X_(set_.A_) ;
       debiased_.insert(debiased_.end(), db.begin(), db.end()) ;
       intercept_debiased_.push_back(data_.y_bar_ - dot(beta_debiased_, data_.X_bar_(set_.A_))) ;
