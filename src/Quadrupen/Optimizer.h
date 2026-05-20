@@ -24,11 +24,12 @@ public:
   Optimizer(const List& control) ;
 
   SolverType algorithm_ ;
-  double accuracy_, gap_, J_, D_ ; 
+  double accuracy_, gap_, J_, D_ ;
   bool verbosity_       ;
   uword iter_, maxiter_, maxfeat_, monitoring_ ;
-  vector<uword> inner_iter_   ; 
-  vector<double> J_vec_, D_vec_ ;   
+  vector<uword> inner_iter_   ;
+  vector<double> J_vec_, D_vec_ ;
+  vec q_lipschitz_ ; // warm-start eigenvector for power iteration in estimate_lipschitz
   
   uword conjugate_gradient(
       vec& x0,

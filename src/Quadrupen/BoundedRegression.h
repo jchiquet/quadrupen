@@ -11,10 +11,9 @@
 using arma::mat;
 using arma::sp_mat;
 using arma::uvec;
-using arma::urowvec;
+using arma::umat;
 using arma::uword;
 using arma::vec;
-using arma::join_cols;
 using Rcpp::List;
 using std::vector;
 
@@ -33,16 +32,10 @@ public:
     return(penalty_.dual_norm(data_.XTy_, lambda_factor_));
   }
   
-  const sp_mat unbounded_var() { 
-    vector<uword> rowA, colA ;
-    uword current_col = 0;
-    for (const auto& a : bounded_) {
-      rowA.insert(rowA.end(), a.begin(), a.end()) ;
-      colA.insert(colA.end(), a.n_elem, current_col) ;
-      current_col++;
-    }
-    return sp_mat(join_cols(urowvec(rowA), urowvec(colA)),
-                  vec(rowA.size(), arma::fill::ones), data_.p_, bounded_.size(), true, false) ;
+  const sp_mat unbounded_var() {
+    umat locs = build_sp_locations(bounded_) ;
+    return sp_mat(locs, arma::ones<vec>(locs.n_cols),
+                  data_.p_, bounded_.size(), true, false) ;
   }
   
   List solution_path(const List&);

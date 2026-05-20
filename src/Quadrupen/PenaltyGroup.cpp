@@ -4,6 +4,7 @@
  */
 
 #include "PenaltyGroup.h"
+#include "PenaltyUtils.h"
 
 using namespace Rcpp;
 using namespace arma;
@@ -29,7 +30,7 @@ vec GroupPenalty<GroupSparseNorm::L1L2>::proximal(const vec& x, double lambda, c
   double l2_grp_const = lambda * (1.0 - alpha_);
   
   if (l1_threshold > 0) {
-    res = sign(x) % max(abs(x) - l1_threshold, zeros<vec>(x.n_elem));
+    res = soft_threshold(x, l1_threshold);
   }
   
   uword ind = 0;
@@ -74,7 +75,7 @@ vec GroupPenalty<GroupSparseNorm::L1LINF>::proximal(const vec& x, double lambda,
   double l2_grp_const = lambda * (1.0 - alpha_);
   
   if (l1_threshold > 0) {
-    res = sign(x) % max(abs(x) - l1_threshold, zeros<vec>(x.n_elem));
+    res = soft_threshold(x, l1_threshold);
   }
 
   uword ind = 0;
@@ -148,7 +149,7 @@ vec GroupPenalty<GroupSparseNorm::COOP>::proximal(const vec& x, double lambda, c
   double l2_grp_const = lambda * (1.0 - alpha_);
   
   if (l1_threshold > 0) {
-    res = sign(x) % max(abs(x) - l1_threshold, zeros<vec>(x.n_elem));
+    res = soft_threshold(x, l1_threshold);
   }
   
   uword ind = 0;

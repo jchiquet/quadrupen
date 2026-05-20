@@ -11,9 +11,8 @@ using arma::vec;
 using arma::uvec;
 using arma::uword;
 using arma::sp_mat;
-using arma::urowvec;
+using arma::umat;
 using arma::wall_clock;
-using arma::join_cols;
 using Rcpp::List;
 using Rcpp::Named;
 using Rcpp::as;
@@ -60,39 +59,19 @@ class SparseRegularizer :
     double get_df() ;
 
     const sp_mat coefficients() const {
-      vector<uword> rowA, colA ;
-      uword current_col = 0;
-      for (const auto& a : active_) {
-        rowA.insert(rowA.end(), a.begin(), a.end()) ;
-        colA.insert(colA.end(), a.n_elem, current_col) ;
-        current_col++;
-      }
-      return sp_mat(join_cols(urowvec(rowA), urowvec(colA)),
+      return sp_mat(build_sp_locations(active_),
                     vec(nzeros_), data_.p_, active_.size(), true, false) ;
     }
 
     const sp_mat debiased_coefficients() const {
-      vector<uword> rowA, colA ;
-      uword current_col = 0;
-      for (const auto& a : active_) {
-        rowA.insert(rowA.end(), a.begin(), a.end()) ;
-        colA.insert(colA.end(), a.n_elem, current_col) ;
-        current_col++;
-      }
-      return sp_mat(join_cols(urowvec(rowA), urowvec(colA)),
+      return sp_mat(build_sp_locations(active_),
                     vec(debiased_), data_.p_, active_.size(), true, false) ;
     }
-    
-    const sp_mat active_var() const { 
-      vector<uword> rowA, colA ;
-      uword current_col = 0;
-      for (const auto& a : active_) {
-        rowA.insert(rowA.end(), a.begin(), a.end()) ;
-        colA.insert(colA.end(), a.n_elem, current_col) ;
-        current_col++;
-      }
-      return sp_mat(join_cols(urowvec(rowA), urowvec(colA)),
-                    vec(rowA.size(), arma::fill::ones), data_.p_, active_.size(), true, false) ;
+
+    const sp_mat active_var() const {
+      umat locs = build_sp_locations(active_) ;
+      return sp_mat(locs, arma::ones<vec>(locs.n_cols),
+                    data_.p_, active_.size(), true, false) ;
     }
     
     const vector<double>& intercept_debiased() const { return intercept_debiased_ ; }
@@ -130,11 +109,11 @@ SparseRegularizer<matrix,norm>::SparseRegularizer(
 
 template <typename matrix, SparseNorm norm>
 double SparseRegularizer<matrix,norm>::get_df() {
-  
+
   double df = set_.size() + data_.centered_ ;
   if (gamma_ > 0) {
     // loop due to sparse encoding. should iterate over the n_zeros only...
-    mat SAA(set_.size(),set_.size()) ;
+    mat SAA(set_.size(), set_.size()) ;
     for (uword i=0;i<set_.size();i++){
       for (uword j=i;j<set_.size();j++){
         SAA(i,j) = data_.S_.at(set_.A_(i),set_.A_(j));
@@ -142,9 +121,9 @@ double SparseRegularizer<matrix,norm>::get_df() {
       }
     }
     // note that XATXAinv_ is in fact (XATXA + lambda S)^-1
-    df -= trace(SAA * set_.XATXAinv_); 
+    df -= trace(SAA * set_.XATXAinv_);
   }
-  
+
   return(df);
 }
 

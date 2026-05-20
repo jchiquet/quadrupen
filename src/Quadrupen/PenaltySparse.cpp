@@ -4,6 +4,7 @@
 */
   
 #include "PenaltySparse.h"
+#include "PenaltyUtils.h"
 
 using namespace Rcpp;
 using namespace arma;
@@ -36,7 +37,7 @@ vec SparsePenalty<SparseNorm::L1>::elt_norm(const vec& x, const vec& w, double l
 
 template<>
 vec SparsePenalty<SparseNorm::L1>::proximal(const vec& x, double lambda, const vec& w) {
-  return(sign(x) % max(abs(x) - lambda * w, zeros<vec>(x.n_elem))) ;
+  return soft_threshold(x, lambda * w) ;
 }
 
 template<>

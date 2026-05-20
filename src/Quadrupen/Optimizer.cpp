@@ -25,39 +25,45 @@ double Optimizer::estimate_lipschitz(
   const mat& XTX,
   uword max_it,
   double tol) {
-  
+
   uword pk = XTX.n_rows;
   if (pk == 0) return 1.0;
   if (pk == 1) return as_scalar(XTX(0,0));
-  
-  vec q = randu<vec>(pk);
-  q /= norm(q, 2);
-  
+
+  // Warm-start from previous eigenvector when size matches; random init otherwise
+  vec q;
+  if (q_lipschitz_.n_elem == pk) {
+    q = q_lipschitz_;
+  } else {
+    q = randu<vec>(pk);
+    q /= norm(q, 2);
+  }
+
   double lambda = 0.0;
   double lambda_old = 0.0;
-  
-  // 2. Power Iteration Loop
+
   for (uword i = 0; i < max_it; ++i) {
     vec z = XTX * q;
-    
-    // Largest Eigen Value (simplified Rayleigh quotien since ||q||=1)
+
+    // Largest eigenvalue (simplified Rayleigh quotient since ||q||=1)
     lambda = dot(q, z);
     if (i > 0 && std::abs(lambda - lambda_old) < tol * lambda) {
       break;
     }
     lambda_old = lambda;
-    
-    // Normalising for next iterate
+
     double n = norm(z, 2);
     if (n > 1e-15) {
       q = z / n;
     } else {
-      break; 
+      break;
     }
   }
-  
+
+  q_lipschitz_ = q; // save for next call
+
   // Safety margin for 1/L
-  return lambda * 1.01; 
+  return lambda * 1.01;
 }
 
 uword Optimizer::pgd(

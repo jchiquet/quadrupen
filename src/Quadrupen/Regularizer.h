@@ -8,6 +8,8 @@
 #include "RegressionData.h"
 
 using arma::vec;
+using arma::uvec;
+using arma::umat;
 using arma::uword;
 using arma::conv_to;
 using arma::logspace;
@@ -33,13 +35,28 @@ public:
   vector<double> df_           ; // degrees of freedom along the path
 
   void get_lambda_seq(double, const List&);
-  
+
   // Getter functions to access private members
   const RegressionData<matrix>& data()    const { return data_      ; }
   const matrix& coefficients()            const { return coef_      ; }
   const vector<double>& intercept()       const { return intercept_ ; }
   const vector<double>& path_tuning()     const { return lambdas_   ; }
   const vector<double>& degrees_freedom() const { return df_        ; }
+
+protected:
+  // Build (row, col) location matrix for sp_mat construction from a sequence
+  // of active index sets. Row 0 = variable indices, Row 1 = lambda-step index.
+  static umat build_sp_locations(const vector<uvec>& groups) {
+    uword total_nnz = 0;
+    for (const auto& g : groups) total_nnz += g.n_elem;
+    umat locs(2, total_nnz);
+    uword col = 0, pos = 0;
+    for (const auto& g : groups) {
+      for (uword r : g) { locs(0, pos) = r; locs(1, pos) = col; ++pos; }
+      ++col;
+    }
+    return locs;
+  }
 };
 
 template <typename matrix>

@@ -33,11 +33,11 @@ BoundedRegression::BoundedRegression(
 double BoundedRegression::get_df() {
 
   double df = data_.centered_ + unbounded_.size();
-  
-  mat SUU(unbounded_.size(), unbounded_.size()) ;
+
   if (gamma_ > 0) {
     mat C = inv_sympd(data_.XTX_(unbounded_,unbounded_));
     // loop due to sparse encoding. should iterate over the n_zeros only...
+    mat SUU(unbounded_.size(), unbounded_.size()) ;
     for (uword i=0;i<unbounded_.size();i++){
       for (uword j=i;j<unbounded_.size();j++){
         SUU(i,j) = data_.S_.at(unbounded_(i),unbounded_(j));
@@ -46,7 +46,7 @@ double BoundedRegression::get_df() {
     }
     df -= trace(SUU * C);
   }
-  
+
   return(df);
 }
 
