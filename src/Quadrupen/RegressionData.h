@@ -16,8 +16,14 @@
 
 #include <RcppArmadillo.h>
 
-using namespace Rcpp;
-using namespace arma;
+using arma::uword;
+using arma::sp_mat;
+using arma::vec;
+using arma::mat;
+using arma::zeros;
+using arma::ones;
+using Rcpp::Environment;
+using Rcpp::as;
 
 // Use template to handle dense or sparse encoding (mat/sp_mat in armadillo)
 template <typename matrix>

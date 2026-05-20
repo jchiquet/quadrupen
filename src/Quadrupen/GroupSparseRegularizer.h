@@ -11,9 +11,17 @@
 #include "Regularizer.h"
 #include "OptimizerGroup.h"
 
-using namespace Rcpp;
-using namespace arma;
-using namespace std;
+using arma::vec;
+using arma::uvec;
+using arma::uword;
+using arma::sp_mat;
+using arma::urowvec;
+using arma::wall_clock;
+using arma::join_cols;
+using Rcpp::List;
+using Rcpp::Named;
+using Rcpp::as;
+using std::vector;
 
 template <typename matrix, GroupSparseNorm norm>
 class GroupSparseRegularizer : 
@@ -88,7 +96,7 @@ class GroupSparseRegularizer :
         current_col++;
       }
       return sp_mat(join_cols(urowvec(rowA), urowvec(colA)),
-                    vec(rowA.size(), fill::ones), data_.p_, active_.size(), true, false) ;
+                    vec(rowA.size(), arma::fill::ones), data_.p_, active_.size(), true, false) ;
     }
     
     const vector<double>& intercept_debiased() const { return intercept_debiased_ ; }

@@ -3,9 +3,12 @@
  */
 #pragma once
 
-using namespace Rcpp;
-using namespace arma;
-using namespace std;
+using arma::vec;
+using arma::mat;
+using arma::uvec;
+using arma::uword;
+using arma::regspace;
+using std::vector;
 
 #include "RegressionData.h"
 #include "ActiveSet.h"

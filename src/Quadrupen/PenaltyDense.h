@@ -11,9 +11,7 @@
 
 enum class DenseNorm {L2, LINF};
 
-using namespace Rcpp;
-using namespace arma;
-using namespace std;
+using arma::vec;
 
 template <DenseNorm norm> class DensePenalty {
 public: 

@@ -7,9 +7,14 @@
 
 #include "SparseRegularizer.h"
 
-using namespace Rcpp;
-using namespace arma;
-using namespace std;
+using arma::vec;
+using arma::mat;
+using arma::sp_mat;
+using arma::uvec;
+using arma::uword;
+using arma::ones;
+using Rcpp::List;
+using std::vector;
 
 template <typename matrix, SparseNorm norm>
 class Lava : public SparseRegularizer<matrix,norm> {

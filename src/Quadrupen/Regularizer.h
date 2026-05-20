@@ -7,9 +7,13 @@
 
 #include "RegressionData.h"
 
-using namespace Rcpp;
-using namespace arma;
-using namespace std;
+using arma::vec;
+using arma::uword;
+using arma::conv_to;
+using arma::logspace;
+using Rcpp::List;
+using Rcpp::as;
+using std::vector;
 
 template <typename matrix>
 class Regularizer {

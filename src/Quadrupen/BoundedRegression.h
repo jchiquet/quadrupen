@@ -8,9 +8,15 @@
 #include "PenaltyDense.h"
 #include "OptimizerLINF.h"
 
-using namespace Rcpp;
-using namespace arma;
-using namespace std;
+using arma::mat;
+using arma::sp_mat;
+using arma::uvec;
+using arma::urowvec;
+using arma::uword;
+using arma::vec;
+using arma::join_cols;
+using Rcpp::List;
+using std::vector;
 
 class BoundedRegression : public Regularizer<mat> {
 public:
@@ -36,7 +42,7 @@ public:
       current_col++;
     }
     return sp_mat(join_cols(urowvec(rowA), urowvec(colA)),
-                  vec(rowA.size(), fill::ones), data_.p_, bounded_.size(), true, false) ;
+                  vec(rowA.size(), arma::fill::ones), data_.p_, bounded_.size(), true, false) ;
   }
   
   List solution_path(const List&);

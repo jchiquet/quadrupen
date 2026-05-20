@@ -8,9 +8,8 @@
 #include "Regularizer.h"
 #include "PenaltyDense.h"
 
-using namespace Rcpp;
-using namespace arma;
-using namespace std;
+using arma::mat;
+using Rcpp::List;
 
 class RidgeRegression : public Regularizer<mat>{
 public:
