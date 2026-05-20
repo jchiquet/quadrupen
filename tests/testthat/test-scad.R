@@ -1,4 +1,4 @@
-context("Consistency of the Lasso solution paths (package 'lars' and 'glmnet')")
+context("Consistency of SCAD solution path (package 'ncvreg')")
 
 testDataEnet <- readRDS("dataTest-Enet.rds")
 
@@ -8,7 +8,7 @@ get_scad <- function(x, y, method = "quadra", plot = FALSE) {
   
   require(ncvreg)
   
-  scad_ncvreg <- ncvreg(x, y, family = "gaussian", penalty = "SCAD")
+  scad_ncvreg <- ncvreg(x, y, family = "gaussian", penalty = "SCAD", eps = 1e-5, max.iter = 1e6)
   coef   <- scad_ncvreg$beta[-1,]
   
   lambda <- scad_ncvreg$lambda ; n <- nrow(x)

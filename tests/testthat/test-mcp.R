@@ -1,4 +1,4 @@
-context("Consistency of the Lasso solution paths (package 'lars' and 'glmnet')")
+context("Consistency of MCP solution path (package 'ncvreg')")
 
 testDataEnet <- readRDS("dataTest-Enet.rds")
 
@@ -8,7 +8,7 @@ get_mcp <- function(x, y, method = "quadra", plot = FALSE) {
   
   require(ncvreg)
   
-  mcp_ncvreg <- ncvreg(x, y, family="gaussian", penalty = "MCP")
+  mcp_ncvreg <- ncvreg(x, y, family="gaussian", penalty = "MCP", eps = 1e-5, max.iter = 1e6)
   coef   <- mcp_ncvreg$beta[-1,]
   lambda <- mcp_ncvreg$lambda
   n <- nrow(x)
@@ -38,8 +38,8 @@ test_that("MCP with Newton solver", {
                check.attributes = FALSE, tolerance = tol)
   
   # ## RANDOM DATA
-  # x <- testDataEnet$x_sim
-  # y <- testDataEnet$y_sim
+  x <- testDataEnet$x_sim
+  y <- testDataEnet$y_sim
   # 
   # ## Run the tests...
   # out <- get_mcp(x,y)
