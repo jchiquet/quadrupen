@@ -54,9 +54,11 @@ Lava<matrix,norm>::Lava(
 
 template <typename matrix, SparseNorm norm>
 double Lava<matrix,norm>::get_df() {
-  
+
   double df = set_.size() + data_.centered_ ;
-  mat K = diagmat(ones(data_.n_)) - 
+  // Materialise XATXAinv_ here: store_path_step() now uses solve_gram() and skips this
+  set_.inverse_Gram() ;
+  mat K = diagmat(ones(data_.n_)) -
     data_.X_.cols(set_.A_) * set_.XATXAinv_ * data_.X_.cols(set_.A_).t() ;
   
   df -= trace(K * Proj_);

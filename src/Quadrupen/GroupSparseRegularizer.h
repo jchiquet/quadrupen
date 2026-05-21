@@ -65,8 +65,8 @@ class GroupSparseRegularizer :
       nzeros_.insert(nzeros_.end(), nz.begin(), nz.end()) ;
       intercept_.push_back(data_.y_bar_ - dot(beta_, data_.X_bar_(set_.A_))) ; // X_bar is scaled
       // XTy_(A) = X_A'(y - y_bar) already incorporates centering
-      set_.inverse_Gram() ;
-      beta_debiased_ = set_.XATXAinv_ * data_.XTy_(set_.A_) ;
+      // solve_gram() uses existing Cholesky factors: O(k²) vs O(k³) for inverse_Gram()
+      beta_debiased_ = set_.solve_gram(data_.XTy_(set_.A_)) ;
       vec db = beta_debiased_ / data_.norm_X_(set_.A_) ;
       debiased_.insert(debiased_.end(), db.begin(), db.end()) ;
       intercept_debiased_.push_back(data_.y_bar_ - dot(beta_debiased_, data_.X_bar_(set_.A_))) ;

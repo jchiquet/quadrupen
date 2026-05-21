@@ -47,8 +47,11 @@ public:
   // Downdate Cholesky factorisation by removing the specified variables
   void downdate_Cholesky(uword j) ;
 
-  // Inverse the currently active Gram matrix
+  // Inverse the currently active Gram matrix (materialises XATXAinv_)
   void inverse_Gram() ;
+
+  // Solve (XATXA)^{-1} * b without materialising the full inverse — O(k²) vs O(k³)
+  vec solve_gram(const vec& b) const ;
 
 };
 
@@ -245,5 +248,16 @@ void ActiveSet<matrix>::inverse_Gram() {
     XATXAinv_ = solve(trimatu(R_), solve(trimatl(R_.t()), eye<mat>(R_.n_cols, R_.n_cols)));
   } else {
     XATXAinv_ = inv_sympd(XATXA_, arma::inv_opts::allow_approx);
+  }
+}
+
+template <typename matrix>
+vec ActiveSet<matrix>::solve_gram(const vec& b) const {
+  if (use_chol_) {
+    return solve(trimatu(R_),
+                 solve(trimatl(R_.t()), b, arma::solve_opts::fast),
+                 arma::solve_opts::fast) ;
+  } else {
+    return solve(XATXA_, b) ;
   }
 }

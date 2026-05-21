@@ -55,9 +55,11 @@ GroupLava<matrix,norm>::GroupLava(
 
 template <typename matrix, GroupSparseNorm norm>
 double GroupLava<matrix,norm>::get_df() {
-  
+
   double df = GroupSparseRegularizer<matrix,norm>::get_df() ;
-  mat K = diagmat(ones(data_.n_)) - 
+  // Materialise XATXAinv_ here: store_path_step() now uses solve_gram() and skips this
+  set_.inverse_Gram() ;
+  mat K = diagmat(ones(data_.n_)) -
     data_.X_.cols(set_.A_) * set_.XATXAinv_ * data_.X_.cols(set_.A_).t() ;
   
   df -= trace(K * Proj_);

@@ -60,8 +60,8 @@ class SparseRegularizer :
       nzeros_.insert(nzeros_.end(), nz.begin(), nz.end()) ;
       intercept_.push_back(data_.y_bar_ - dot(beta_, data_.X_bar_(set_.A_))) ;
       // XTy_(A) = X_A'(y - y_bar) already incorporates centering
-      set_.inverse_Gram() ;
-      beta_debiased_ = set_.XATXAinv_ * data_.XTy_(set_.A_) ;
+      // solve_gram() uses existing Cholesky factors: O(k²) vs O(k³) for inverse_Gram()
+      beta_debiased_ = set_.solve_gram(data_.XTy_(set_.A_)) ;
       vec db = beta_debiased_ / data_.norm_X_(set_.A_) ;
       debiased_.insert(debiased_.end(), db.begin(), db.end()) ;
       intercept_debiased_.push_back(data_.y_bar_ - dot(beta_debiased_, data_.X_bar_(set_.A_))) ;
@@ -107,6 +107,8 @@ double SparseRegularizer<matrix,norm>::get_df() {
 
   double df = set_.size() + data_.centered_ ;
   if (gamma_ > 0) {
+    // Materialise XATXAinv_ now (not in store_path_step): only paid when gamma_ > 0
+    set_.inverse_Gram() ;
     // loop due to sparse encoding. should iterate over the n_zeros only...
     mat SAA(set_.size(), set_.size()) ;
     for (uword i=0;i<set_.size();i++){
@@ -116,7 +118,8 @@ double SparseRegularizer<matrix,norm>::get_df() {
       }
     }
     // note that XATXAinv_ is in fact (XATXA + lambda S)^-1
-    df -= trace(SAA * set_.XATXAinv_);
+    // trace(A*B) = sum(A .* B') avoids materialising the k×k product: O(k²) vs O(k³)
+    df -= accu(SAA % set_.XATXAinv_.t());
   }
 
   return df ;
