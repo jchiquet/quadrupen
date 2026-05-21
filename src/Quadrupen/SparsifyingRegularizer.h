@@ -14,6 +14,7 @@
 #pragma once
 
 #include "Regularizer.h"
+#include "ActiveSet.h"
 
 using arma::vec;
 using arma::uvec;
@@ -42,12 +43,12 @@ public:
   using Regularizer<matrix>::get_lambda_seq ;
   using Regularizer<matrix>::build_sp_locations ;
 
-  // ── Common state ────────────────────────────────────────────────────────────
-  std::vector<double> nzeros_             ; // scaled nonzero coefficients (all lambdas)
-  std::vector<double> debiased_           ; // scaled debiased coefficients (all lambdas)
-  vector<uvec>        active_             ; // active index sets (all lambdas)
-  vector<double>      intercept_debiased_ ; // debiased intercepts (all lambdas)
-  vec                 beta_debiased_      ; // current debiased beta (current lambda)
+  // ── Common state (all lambdas) ──────────────────────────────────────────────
+  std::vector<double> nzeros_             ; // scaled nonzero coefficients
+  std::vector<double> debiased_           ; // scaled debiased coefficients
+  vector<uvec>        active_             ; // active index sets
+  vector<double>      intercept_debiased_ ; // debiased intercepts
+  vec                 beta_debiased_      ; // current debiased beta
 
   // ── Accessors ───────────────────────────────────────────────────────────────
   const vector<double>& intercept_debiased() const { return intercept_debiased_ ; }
@@ -68,18 +69,17 @@ public:
                   data_.p_, active_.size(), true, false) ;
   }
 
+  // ── Pure-virtual hooks implemented by each subclass ────────────────
+
   // ── Degrees of freedom ──────────────────────────────────────────────────────
   virtual double get_df() = 0 ;
 
-  // ── Pure-virtual hooks implemented by each concrete subclass ────────────────
+  // ── Active set accessor (implemented by each concrete subclass) ─────────────
+  virtual ActiveSet<matrix>& current_set() = 0 ;
 
   // Call working_set for the given lambda; return (status, gap, outer_iter).
   struct StepResult { uword status ; double gap ; uword iter ; } ;
   virtual StepResult run_solver(double lambda) = 0 ;
-
-  // Store nzeros, intercept, debiased coefs and active set for the current beta.
-  // Called only when status < 2.
-  virtual void store_path_step() = 0 ;
 
   // Return the solver's inner diagnostic vectors for the output List.
   struct Diagnostics { const vector<uword>& inner_iter ; const vector<double>& J_vec ; const vector<double>& D_vec ; } ;
@@ -102,8 +102,16 @@ public:
       if (status.back() >= 2) {
         break ;
       } else {
-        store_path_step() ;
-        df_.push_back(get_df()) ;
+        auto& set = current_set() ;
+        vec nz = beta_ / data_.norm_X_(set.A_) ;
+        nzeros_.insert(nzeros_.end(), nz.begin(), nz.end()) ;
+        intercept_.push_back(data_.y_bar_ - dot(beta_, data_.X_bar_(set.A_))) ;
+        beta_debiased_ = set.solve_Gram(data_.XTy_(set.A_)) ;
+        vec db = beta_debiased_ / data_.norm_X_(set.A_) ;
+        debiased_.insert(debiased_.end(), db.begin(), db.end()) ;
+        intercept_debiased_.push_back(data_.y_bar_ - dot(beta_debiased_, data_.X_bar_(set.A_))) ;
+        active_.push_back(set.A_) ;
+       df_.push_back(get_df()) ;
       }
 
       timing.push_back(timer.toc()) ;

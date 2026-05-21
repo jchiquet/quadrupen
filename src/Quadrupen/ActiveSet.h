@@ -31,30 +31,26 @@ public:
   ActiveSet(const RegressionData<matrix> &data, const bool use_chol=true) ;
   ActiveSet(const RegressionData<matrix> &data, const uvec&, const bool use_chol) ;
 
-  // ACTIVE SET HANDLING
-  void add_var(uword, const RegressionData<matrix> &) ; // add a variable in the active set
-  void add_vars(uvec, const RegressionData<matrix> &) ; // add a list of variables in the active set
+  // ── Active set handling ──────────────────────────────────────────────────────────
+  void add_var(uword, const RegressionData<matrix> &) ; // add a single variable
+  void add_vars(uvec, const RegressionData<matrix> &) ; // add a list of variables
   void del_var(uword, vec&) ; // remove the variable activated in position ind_var_out
   void del_vars(uvec, vec&) ; // remove a set of non contiguous variables
   void reset() ; // empty the active set
   const uword size() const { return A_.n_elem ; }
 
-  // Update Cholesky factorisation by inserting the last activated variables
-  void update_Cholesky() ;
-  // Update Cholesky factorisation by inserting the last n_new activated variables
-  void update_Cholesky_block(uword n_new) ;
+  // ── Update/Downdate the Cholesky factorisation ────────────────────────────────────
+  void update_Cholesky() ; // Insert the last activated variable
+  void update_Cholesky_block(uword n_new) ; // Insert the last n_new activated variables
+  void downdate_Cholesky(uword j) ; // Remove the specified variables
 
-  // Downdate Cholesky factorisation by removing the specified variables
-  void downdate_Cholesky(uword j) ;
-
-  // Inverse the currently active Gram matrix (materialises XATXAinv_)
-  void inverse_Gram() ;
-
-  // Solve (XATXA)^{-1} * b without materialising the full inverse — O(k²) vs O(k³)
-  vec solve_gram(const vec& b) const ;
+  // ── Inverse the currently active Gram matrix (XATXAinv_) ──────────────────────────
+  void inverse_Gram() ; // When whole inverse is needed (df computation when gamma > 0)
+  vec solve_Gram(const vec& b) const ; // Without the full inverse — O(k²) vs O(k³)
 
 };
 
+// ── Constructors ────────────────────────────────────────────────────────────────────
 template <typename matrix>
 ActiveSet<matrix>::ActiveSet(const RegressionData<matrix>& data, const bool use_chol) :
   use_chol_(use_chol) {
@@ -94,6 +90,8 @@ void ActiveSet<matrix>::add_var(uword var_in, const RegressionData<matrix>& data
   XTXA_ = std::move(new_XTXA_) ;
 
   // Single allocation for XATXA_: fill four blocks directly
+  // [ XATXA_old | cross        ]
+  // [ cross.t() | new_cols.rows(vars) ]
   mat new_XATXA_(k + 1, k + 1, arma::fill::none) ;
   if (k > 0) {
     vec cross = new_col.elem(A_.head(k)) ; // cross-products with previously active variables
@@ -127,9 +125,7 @@ void ActiveSet<matrix>::add_vars(uvec vars, const RegressionData<matrix>& data) 
   new_XTXA_.cols(p_old, p_total - 1) = new_cols ;
   XTXA_ = std::move(new_XTXA_) ;
 
-  // Single allocation for XATXA_: fill four blocks directly
-  // [ XATXA_old | cross        ]
-  // [ cross.t() | new_cols.rows(vars) ]
+  // Single allocation for XATXA_
   mat new_XATXA_(p_total, p_total, arma::fill::none) ;
   if (p_old > 0) {
     mat cross = new_cols.rows(A_.head(p_old)) ; // p_old x n_new cross-products
@@ -145,7 +141,7 @@ void ActiveSet<matrix>::add_vars(uvec vars, const RegressionData<matrix>& data) 
 
 template <typename matrix>
 void ActiveSet<matrix>::del_var(uword ivar_out, vec& beta) {
-  is_in_[A_[ivar_out]] = 0  ; // update the active set
+  is_in_[A_[ivar_out]] = 0  ;
   A_.shed_row(ivar_out)     ;
   XTXA_.shed_col(ivar_out)  ;
   XATXA_.shed_col(ivar_out) ;
@@ -153,7 +149,6 @@ void ActiveSet<matrix>::del_var(uword ivar_out, vec& beta) {
   beta.shed_row(ivar_out)   ;
 
   if (use_chol_) downdate_Cholesky(ivar_out) ;
-
 }
 
 template <typename matrix>
@@ -178,7 +173,9 @@ void ActiveSet<matrix>::update_Cholesky() {
                          arma::solve_opts::fast) ;
     rp(p-1) = std::sqrt(XATXA_(p-1, p-1) - dot(rp.head(p-1), rp.head(p-1))) ;
 
-    // Single allocation: extend R_ from (p-1)x(p-1) to pxp
+    // Extend R_ from (p-1)x(p-1) to pxp
+    // [ R_old | R_new_cols     ]
+    // [ 0     | R_bottom_right ]
     mat new_R_(p, p, arma::fill::zeros) ; // lower-triangular part stays zero
     new_R_.submat(0, 0, p-2, p-2) = R_ ;
     new_R_.col(p-1) = rp ;
@@ -203,7 +200,7 @@ void ActiveSet<matrix>::update_Cholesky_block(uword n_new) {
     mat R_bottom_right = chol(XATXA_.submat(p_old, p_old, p_total-1, p_total-1) -
                               R_new_cols.t() * R_new_cols) ;
 
-    // Single allocation: extend R_ from p_old×p_old to p_total×p_total
+    // Extend R_ from p_old×p_old to p_total×p_total
     // [ R_old | R_new_cols     ]
     // [ 0     | R_bottom_right ]
     mat new_R_(p_total, p_total, arma::fill::zeros) ; // lower-triangular part stays zero
@@ -252,12 +249,12 @@ void ActiveSet<matrix>::inverse_Gram() {
 }
 
 template <typename matrix>
-vec ActiveSet<matrix>::solve_gram(const vec& b) const {
+vec ActiveSet<matrix>::solve_Gram(const vec& b) const {
   if (use_chol_) {
     return solve(trimatu(R_),
                  solve(trimatl(R_.t()), b, arma::solve_opts::fast),
                  arma::solve_opts::fast) ;
   } else {
-    return solve(XATXA_, b) ;
+    return solve(XATXA_, b, arma::solve_opts::fast) ;
   }
 }

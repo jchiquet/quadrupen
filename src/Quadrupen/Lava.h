@@ -29,7 +29,7 @@ public:
   using SparseRegularizer<matrix,norm>::debiased_ ;
   using SparseRegularizer<matrix,norm>::intercept_debiased_ ;
   using SparseRegularizer<matrix,norm>::lambda_factor_ ;
-  
+
   Lava(const RegressionData<matrix>&, const mat&, const List&, const List&);
 
   void post_treatment(const RegressionData<matrix>& data, const mat& b) ;
@@ -40,7 +40,7 @@ public:
 
   // Compute degrees of freedom for the current estimate
   double get_df() override ;
-  
+
 };
 
 template <typename matrix, SparseNorm norm>
@@ -49,33 +49,33 @@ Lava<matrix,norm>::Lava(
   const mat& Proj,
   const List& regParam,
   const List& control) :
-  SparseRegularizer<matrix,norm>::SparseRegularizer(data, regParam, control), 
+  SparseRegularizer<matrix,norm>::SparseRegularizer(data, regParam, control),
   Proj_(Proj) {}
 
 template <typename matrix, SparseNorm norm>
 double Lava<matrix,norm>::get_df() {
 
   double df = set_.size() + data_.centered_ ;
-  // Materialise XATXAinv_ here: store_path_step() now uses solve_gram() and skips this
+  // Materialise XATXAinv_ here: store_path_step() now uses solve_Gram() and skips this
   set_.inverse_Gram() ;
   mat K = diagmat(ones(data_.n_)) -
     data_.X_.cols(set_.A_) * set_.XATXAinv_ * data_.X_.cols(set_.A_).t() ;
-  
+
   df -= trace(K * Proj_);
-  
+
   return(df);
 }
 
 template <typename matrix, SparseNorm norm>
 void Lava<matrix,norm>::post_treatment(const RegressionData<matrix>& data, const mat& b) {
-  
+
   sp_mat beta = this->coefficients() ;
 
   mat Xs = data.X_ ; Xs.each_row() -= data.X_bar_.t() ;
-  
+
   // Scale coefficients (theta = beta + b) to original
-  coef_ = diagmat(1/data.norm_X_) * (b + beta.as_dense()) ; 
-  
+  coef_ = diagmat(1/data.norm_X_) * (b + beta.as_dense()) ;
+
   intercept_.clear() ;
   intercept_debiased_.clear() ;
 
@@ -101,4 +101,3 @@ void Lava<matrix,norm>::post_treatment(const RegressionData<matrix>& data, const
   sparse_coef_ = beta ;
 
 }
-

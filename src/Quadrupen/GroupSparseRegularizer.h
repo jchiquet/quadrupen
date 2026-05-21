@@ -55,22 +55,11 @@ class GroupSparseRegularizer :
 
     // ── SparsifyingRegularizer hooks ─────────────────────────────────────────
 
+    ActiveSet<matrix>& current_set() override { return set_ ; }
+
     StepResult run_solver(double lambda) override {
       uword status = solver_.working_set(beta_, grad_, lambda, lambda_factor_, gamma_, data_, set_) ;
       return { status, solver_.gap_, solver_.iter_ } ;
-    }
-
-    void store_path_step() override {
-      vec nz = beta_ / data_.norm_X_(set_.A_) ;
-      nzeros_.insert(nzeros_.end(), nz.begin(), nz.end()) ;
-      intercept_.push_back(data_.y_bar_ - dot(beta_, data_.X_bar_(set_.A_))) ; // X_bar is scaled
-      // XTy_(A) = X_A'(y - y_bar) already incorporates centering
-      // solve_gram() uses existing Cholesky factors: O(k²) vs O(k³) for inverse_Gram()
-      beta_debiased_ = set_.solve_gram(data_.XTy_(set_.A_)) ;
-      vec db = beta_debiased_ / data_.norm_X_(set_.A_) ;
-      debiased_.insert(debiased_.end(), db.begin(), db.end()) ;
-      intercept_debiased_.push_back(data_.y_bar_ - dot(beta_debiased_, data_.X_bar_(set_.A_))) ;
-      active_.push_back(set_.A_) ;
     }
 
     Diagnostics solver_diagnostics() const override {
