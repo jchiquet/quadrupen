@@ -68,37 +68,7 @@ double GroupLava<matrix,norm>::get_df() {
 }
 
 template <typename matrix, GroupSparseNorm norm>
-void GroupLava<matrix,norm>::post_treatment(const RegressionData<matrix>& data, const mat& b) {
-
-  sp_mat beta = this->coefficients() ;
-
-  mat Xs = data.X_ ; Xs.each_row() -= data.X_bar_.t() ;
-
-  // Scale coefficients (theta = beta + b) to original
-  coef_ = diagmat(1/data.norm_X_) * (b + beta.as_dense()) ;
-
-  intercept_.clear() ;
-  intercept_debiased_.clear() ;
-
-  debiased_.clear() ;
-  for (uword i=0; i< this->lambdas_.size() ;i++){
-
-    intercept_.push_back(data.y_bar_ - dot(beta.col(i) + b.col(i), data.X_bar_));
-
-    // Refit the sparse coefficient to remove bias due to sparse shrinkage
-    uvec A = active_[i] ;
-    vec w = (data.y_ - data_.y_bar_) - Xs * b.col(i) ;
-    vec beta_debiased = solve(Xs.cols(A).t() * Xs.cols(A), Xs.cols(A).t() * w) ;
-    vec db = beta_debiased / data_.norm_X_(A) ;
-    debiased_.insert(debiased_.end(), db.begin(), db.end()) ;
-    intercept_debiased_.push_back(
-      data_.y_bar_ -
-        dot(beta_debiased, data_.X_bar_(A)) - dot(b.col(i), data_.X_bar_)) ;
-
-    // Scale the sparse coefficients to original
-    beta.col(i) /= data.norm_X_ ;
-  }
-
-  sparse_coef_ = beta ;
-
+void GroupLava<matrix,norm>::post_treatment(const RegressionData<matrix>& orig_data, const mat& b) {
+  this->post_treatment_impl(orig_data, b, sparse_coef_,
+    [this](const uvec& A) { return data_.norm_X_(A) ; }) ;
 }

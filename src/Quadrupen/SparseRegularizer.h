@@ -96,19 +96,18 @@ double SparseRegularizer<matrix,norm>::get_df() {
 
   double df = set_.size() + data_.centered_ ;
   if (gamma_ > 0) {
-    // Inversion of XATXAinv_ (only paid when gamma_ > 0)
     set_.inverse_Gram() ;
-    // loop due to sparse encoding. should iterate over the n_zeros only...
-    mat SAA(set_.size(), set_.size()) ;
-    for (uword i=0;i<set_.size();i++){
-      for (uword j=i;j<set_.size();j++){
-        SAA(i,j) = data_.S_.at(set_.A_(i),set_.A_(j));
-        SAA(j,i) = SAA(i,j);
-      }
+    uword k = set_.size() ;
+    // Build local position lookup: pos(i) = index of variable i in set_.A_
+    uvec pos(data_.p_) ;
+    for (uword i = 0; i < k; i++) pos(set_.A_(i)) = i ;
+    // Iterate over non-zeros of S_ only — O(p + nnz(S)) vs O(k² log nnz)
+    mat SAA(k, k, arma::fill::zeros) ;
+    for (auto it = data_.S_.begin(); it != data_.S_.end(); ++it) {
+      uword r = it.row(), c = it.col() ;
+      if (set_.is_in_(r) && set_.is_in_(c)) SAA(pos(r), pos(c)) = *it ;
     }
-    // note that XATXAinv_ is in fact (XATXA + lambda S)^-1
-    // trace(A*B) = sum(A .* B') avoids materialising the k×k product: O(k²) vs O(k³)
-    df -= accu(SAA % set_.XATXAinv_);
+    df -= accu(SAA % set_.XATXAinv_) ;
   }
 
   return df ;

@@ -16,7 +16,10 @@
 #include "Regularizer.h"
 #include "ActiveSet.h"
 
+#include <functional>
+
 using arma::vec;
+using arma::mat;
 using arma::uvec;
 using arma::umat;
 using arma::uword;
@@ -32,6 +35,7 @@ class SparsifyingRegularizer : public Regularizer<matrix> {
 public:
 
   using Regularizer<matrix>::Regularizer ;       // inherit constructors
+  using Regularizer<matrix>::coef_         ;
   using Regularizer<matrix>::intercept_     ;
   using Regularizer<matrix>::lambdas_       ;
   using Regularizer<matrix>::gamma_         ;
@@ -85,11 +89,45 @@ public:
   struct Diagnostics { const vector<uword>& inner_iter ; const vector<double>& J_vec ; const vector<double>& D_vec ; } ;
   virtual Diagnostics solver_diagnostics() const = 0 ;
 
+  // ── Shared post_treatment for Lava variants ─────────────────────────────────
+  // scale(A) returns the per-variable denominator for the debiased coefficients:
+  //   Lava:      data_.norm_X_(A) % lambda_factor_(A)
+  //   GroupLava: data_.norm_X_(A)
+  // orig_data: original (unscaled) RegressionData; data_ holds the transformed data used by the solver.
+  void post_treatment_impl(const RegressionData<matrix>& orig_data, const mat& b,
+                           sp_mat& sparse_out,
+                           std::function<vec(const uvec&)> scale) {
+    sp_mat beta = this->coefficients() ;
+    mat Xs = orig_data.X_ ; Xs.each_row() -= orig_data.X_bar_.t() ;
+    coef_ = diagmat(1 / orig_data.norm_X_) * (b + beta.as_dense()) ;
+    intercept_.clear() ;
+    intercept_debiased_.clear() ;
+    debiased_.clear() ;
+    for (uword i = 0; i < lambdas_.size(); i++) {
+      intercept_.push_back(orig_data.y_bar_ - dot(beta.col(i) + b.col(i), orig_data.X_bar_)) ;
+      uvec A = active_[i] ;
+      mat XsA = Xs.cols(A) ; mat XsAT = XsA.t() ;
+      vec w = (orig_data.y_ - data_.y_bar_) - Xs * b.col(i) ;
+      vec beta_debiased = solve(XsAT * XsA, XsAT * w) ;
+      vec db = beta_debiased / scale(A) ;
+      debiased_.insert(debiased_.end(), db.begin(), db.end()) ;
+      intercept_debiased_.push_back(
+        data_.y_bar_ - dot(beta_debiased, data_.X_bar_(A)) - dot(b.col(i), data_.X_bar_)) ;
+      beta.col(i) /= orig_data.norm_X_ ;
+    }
+    sparse_out = beta ;
+  }
+
   // ── Shared solution_path ────────────────────────────────────────────────────
   List solution_path(const List& /*control*/) {
 
+    uword n_lambda = lambdas_.size() ;
     vector<double> gap, timing ;
     vector<uword>  status, iter ;
+    gap.reserve(n_lambda) ; timing.reserve(n_lambda) ;
+    status.reserve(n_lambda) ; iter.reserve(n_lambda) ;
+    intercept_.reserve(n_lambda) ; intercept_debiased_.reserve(n_lambda) ;
+    active_.reserve(n_lambda) ; df_.reserve(n_lambda) ;
     wall_clock timer ; timer.tic() ;
 
     for (auto lambda_ : lambdas_) {
