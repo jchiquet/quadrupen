@@ -23,13 +23,13 @@ FusedLasso::FusedLasso(const SparseMatrix &X, const vector<double> &y, const vec
 
   this->fusedGroupSize.resize(p, 1);
   this->fusions.resize(p);
-  for(int i = 0; i < p; ++i) this->fusions[i] = i;
+  std::iota(this->fusions.begin(), this->fusions.end(), 0);
 
   switch(regType) {
-  case GAUSSIAN:
+  case regEnum::GAUSSIAN:
     quadratic = make_shared<QuadraticDerivativeDiagonal>(this->X, this->y, this->wObs, this->beta);
     break;
-  case BINOMIAL:
+  case regEnum::BINOMIAL:
     quadratic = make_shared<QuadraticDerivativeLogistic>(this->X, this->y, this->wObs, this->beta);
   }
 
@@ -77,7 +77,10 @@ bool FusedLasso::areFusionsEqual(vector<int>& fusion1, vector<int>& fusion2) {
   return true;
 }
 
-void FusedLasso::getSplitFusionsActive(vector<int>& newFusions, vector<int>& newFusedGroupSize) {
+// Shared implementation for getSplitFusionsActive and getSplitFusionsInactive.
+// splitZeroNodes=true: zero-beta nodes become individual singletons (active variant).
+// splitZeroNodes=false: zero-beta nodes are split via max-flow (inactive variant).
+void FusedLasso::buildFusionGroups_(vector<int>& newFusions, vector<int>& newFusedGroupSize, bool splitZeroNodes) {
   newFusions.clear(); newFusedGroupSize.clear();
   newFusions.resize(p, -1);
 
@@ -90,18 +93,29 @@ void FusedLasso::getSplitFusionsActive(vector<int>& newFusions, vector<int>& new
     if(newFusions[i] == -1) {
       vector<int> nodes = pg.connectedWithSameValue(i, beta, accuracy);
       if(beta[i] == 0) {
-        for(int node : nodes) {
-          beta[node] = 0;
-          newFusedGroupSize.push_back(1);
-          newFusions[node] = newNumFused++;
+        if(splitZeroNodes) {
+          for(int node : nodes) {
+            beta[node] = 0;
+            newFusedGroupSize.push_back(1);
+            newFusions[node] = newNumFused++;
+          }
+          continue;
+        } else {
+          groups = pg.splitGroup(nodes, nodePull, -lambda1, lambda2, false);
+          vector<vector<int>> positiveGroups = pg.splitGroup(nodes, nodePull, lambda1, lambda2, true);
+          groups.insert(groups.end(), positiveGroups.begin(), positiveGroups.end());
         }
-        continue;
+      } else if(splitZeroNodes) {
+        // Active variant: split non-zero groups via max-flow
+        if(beta[i] > 0) groups = pg.splitGroup(nodes, nodePull,  lambda1, lambda2, false);
+        else             groups = pg.splitGroup(nodes, nodePull, -lambda1, lambda2, false);
+      } else {
+        // Inactive variant: keep non-zero groups intact
+        groups.assign(1, nodes);
       }
-      else if(beta[i] > 0) groups = pg.splitGroup(nodes, nodePull, lambda1, lambda2, false);
-      else                  groups = pg.splitGroup(nodes, nodePull, -lambda1, lambda2, false);
 
       try { addComplementaryGroups(groups, nodes); }
-      catch(std::exception &ex) { forward_exception_to_r(ex); }
+      catch(std::exception& ex) { forward_exception_to_r(ex); }
 
       for(size_t j = 0; j < groups.size(); ++j) {
         newFusedGroupSize.push_back(groups[j].size());
@@ -112,39 +126,12 @@ void FusedLasso::getSplitFusionsActive(vector<int>& newFusions, vector<int>& new
   }
 }
 
+void FusedLasso::getSplitFusionsActive(vector<int>& newFusions, vector<int>& newFusedGroupSize) {
+  buildFusionGroups_(newFusions, newFusedGroupSize, /*splitZeroNodes=*/true);
+}
+
 void FusedLasso::getSplitFusionsInactive(vector<int>& newFusions, vector<int>& newFusedGroupSize) {
-  newFusions.clear(); newFusedGroupSize.clear();
-  newFusions.resize(p, -1);
-
-  vector<double> nodePull = getPulls();
-  makePullAdjustment(beta, nodePull, lambda2);
-  vector<vector<int>> groups;
-  int newNumFused = 0;
-
-  for(int i = 0; i < p; ++i) {
-    if(newFusions[i] == -1) {
-      vector<int> nodes = pg.connectedWithSameValue(i, beta, accuracy);
-      if(beta[i] == 0) {
-        vector<vector<int>> foo;
-        groups = pg.splitGroup(nodes, nodePull, -lambda1, lambda2, false);
-        foo    = pg.splitGroup(nodes, nodePull,  lambda1, lambda2, true);
-        groups.insert(groups.end(), foo.begin(), foo.end());
-      }
-      else {
-        groups.resize(1);
-        groups[0] = nodes;
-      }
-
-      try { addComplementaryGroups(groups, nodes); }
-      catch(std::exception &ex) { forward_exception_to_r(ex); }
-
-      for(size_t j = 0; j < groups.size(); ++j) {
-        newFusedGroupSize.push_back(groups[j].size());
-        for(int node : groups[j]) newFusions[node] = newNumFused;
-        newNumFused++;
-      }
-    }
-  }
+  buildFusionGroups_(newFusions, newFusedGroupSize, /*splitZeroNodes=*/false);
 }
 
 
@@ -168,8 +155,8 @@ void FusedLasso::addComplementaryGroups(vector<vector<int>>& groups, vector<int>
 
   vector<int> complNodes = pg.getComplement(groupsMerged, nodes);
 
-  vector<vector<int>> foo = pg.identifyConnectedGroups(complNodes);
-  groups.insert(groups.end(), foo.begin(), foo.end());
+  vector<vector<int>> complementGroups = pg.identifyConnectedGroups(complNodes);
+  groups.insert(groups.end(), complementGroups.begin(), complementGroups.end());
   sortAllGroups(groups);
   sort(groups.begin(), groups.end(), groupComp);
 }
@@ -184,19 +171,20 @@ bool FusedLasso::identifyNewFusionsHuber() {
   vector<int> newFusions;
   vector<int> newFusedGroupSize;
 
-  double huberParam = 1000;
+  // huberParam chosen large enough to approximate L1 closely during the pre-smoothing step
+  const double huberParam = 1000;
 
   vector<int> singleFusions(p);
-  for(int i = 0; i < p; ++i) singleFusions[i] = i;
+  std::iota(singleFusions.begin(), singleFusions.end(), 0);
 
   vector<vector<int>> connectionsSingle;
   vector<vector<double>> wLambda2Single;
   pg.getFusedConnectionsWeights(singleFusions, p, connectionsSingle, wLambda2Single);
 
-  FusedLassoCoordinate flcHuber(quadratic, wLambda1, connectionsSingle, wLambda2Single, 100, accuracy, 100000, lambda1, lambda2, Huber, huberParam);
+  FusedLassoCoordinate flcHuber(quadratic, wLambda1, connectionsSingle, wLambda2Single, 100, accuracy, 100000, lambda1, lambda2, penEnum::Huber, huberParam);
   flcHuber.runAlgorithm();
 
-  FusedLassoCoordinate flc(quadratic, wLambda1, connectionsSingle, wLambda2Single, maxIterInner, accuracy, maxActivateVars, lambda1, lambda2, L1);
+  FusedLassoCoordinate flc(quadratic, wLambda1, connectionsSingle, wLambda2Single, maxIterInner, accuracy, maxActivateVars, lambda1, lambda2, penEnum::L1);
   flc.runAlgorithm();
   beta = flc.getBetaOriginal(singleFusions);
 
@@ -313,9 +301,9 @@ bool FusedLasso::runAlgorithmL2() {
   outerIterNum = 0;
   innerIterNum = 0;
   fusedGroupSize.resize(p, 1);
-  for(int i = 0; i < p; ++i) fusions[i] = i;
+  std::iota(fusions.begin(), fusions.end(), 0);
 
-  bool lastRunOK = (regType != GAUSSIAN) ? runFusedGeneral(L2) : runFused(L2);
+  bool lastRunOK = (regType != regEnum::GAUSSIAN) ? runFusedGeneral(penEnum::L2) : runFused(penEnum::L2);
   return lastRunOK;
 }
 
@@ -326,7 +314,7 @@ bool FusedLasso::runAlgorithmHuber() {
   bool lastRunOK;
   vector<double> oldBeta;
 
-  lastRunOK = (regType != GAUSSIAN) ? runFusedGeneral(L1) : runFused(L1);
+  lastRunOK = (regType != regEnum::GAUSSIAN) ? runFusedGeneral(penEnum::L1) : runFused(penEnum::L1);
   if(quadratic->isExtreme()) return false;
 
   oldBeta = beta;
@@ -340,7 +328,7 @@ bool FusedLasso::runAlgorithmHuber() {
     oldBeta = beta;
     fusions = newFusions;
     fusedGroupSize = newFusedGroupSize;
-    lastRunOK = (regType != GAUSSIAN) ? runFusedGeneral(L1) : runFused(L1);
+    lastRunOK = (regType != regEnum::GAUSSIAN) ? runFusedGeneral(penEnum::L1) : runFused(penEnum::L1);
     if(quadratic->isExtreme()) return false;
     getEqualFusions(newFusions, newFusedGroupSize);
     fusions = newFusions;
@@ -361,7 +349,7 @@ bool FusedLasso::runAlgorithm(FusionStrategy maxFusion) {
 
   while(outerIterNum < maxIterOuter && lastRunOK) {
     oldBeta = beta;
-    lastRunOK = (regType != GAUSSIAN) ? runFusedGeneral(L1) : runFused(L1);
+    lastRunOK = (regType != regEnum::GAUSSIAN) ? runFusedGeneral(penEnum::L1) : runFused(penEnum::L1);
     if(quadratic->isExtreme()) { lastRunOK = false; break; }
 
     double lastIterChange = maxDiffDoubleVec(oldBeta, beta);
@@ -391,9 +379,9 @@ SparseMatrix FusedLasso::runAlgorithm(
   for(size_t i = 0; i < lambda1Vec.size(); ++i) {
     setNewLambdas(lambda1Vec[i], lambda2Vec[i]);
     switch(penType) {
-    case L1:   success[i] = runAlgorithm(maxFusion); break;
-    case L2:   success[i] = runAlgorithmL2(); break;
-    case Huber: success[i] = runAlgorithmHuber(); break;
+    case penEnum::L1:    success[i] = runAlgorithm(maxFusion); break;
+    case penEnum::L2:    success[i] = runAlgorithmL2(); break;
+    case penEnum::Huber: success[i] = runAlgorithmHuber(); break;
     }
     outerIterNumVec[i] = getOuterIterNum();
     innerIterNumVec[i] = getInnerIterNum();
@@ -416,19 +404,19 @@ double FusedLasso::findMaxLambda1(const vector<int>& exemptVars) {
   vector<double> wLambda1Extreme(p, 1e6);
   for(int v : exemptVars) wLambda1Extreme[v] = 1e-4;
 
-  FusedLassoCoordinate flc(quadratic, wLambda1Extreme, connectionsEmpty, wLambda2Empty, maxIterInner, accuracy, maxActivateVars, 1, 1, L1);
+  FusedLassoCoordinate flc(quadratic, wLambda1Extreme, connectionsEmpty, wLambda2Empty, maxIterInner, accuracy, maxActivateVars, 1, 1, penEnum::L1);
   flc.runAlgorithm();
   this->beta = flc.getBeta();
 
-  if(regType != GAUSSIAN) {
+  if(regType != regEnum::GAUSSIAN) {
     quadratic = make_shared<QuadraticDerivativeLogistic>(this->X, this->y, this->wObs, this->beta);
   }
 
   double highLambda1 = 0;
   for(int i = 0; i < p; ++i) {
     if(quadratic->getBeta(i) == 0) {
-      double foo = fabs(quadratic->getDerivative(i) / wLambda1[i]);
-      if(highLambda1 < foo) highLambda1 = foo;
+      double normDeriv = fabs(quadratic->getDerivative(i) / wLambda1[i]);
+      if(normDeriv > highLambda1) highLambda1 = normDeriv;
     }
   }
   return highLambda1;

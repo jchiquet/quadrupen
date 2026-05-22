@@ -63,6 +63,9 @@ public:
   void getEqualFusions(vector<int>& newFusions, vector<int>& newFusedGroupSize, bool zeroSingle=true, double accFactor=1);
   void getSplitFusionsActive(vector<int>& newFusions, vector<int>& newFusedGroupSize);
   void getSplitFusionsInactive(vector<int>& newFusions, vector<int>& newFusedGroupSize);
+
+  // shared implementation for getSplitFusionsActive / getSplitFusionsInactive
+  void buildFusionGroups_(vector<int>& newFusions, vector<int>& newFusedGroupSize, bool splitZeroNodes);
   
   // check if two fusions are equal 
   bool areFusionsEqual(vector<int> &fusion1, vector<int> &fusion2);
@@ -81,7 +84,7 @@ public:
   // Here regType can be GAUSSIAN or LOGISTIC
 
   // construct with sparse matrix as input
-  FusedLasso(const SparseMatrix &X, const vector<double> &y, const vector<double> &wObs, const vector<double> &beta, const vector<double>& wLambda1, const Graph& graph, int maxIterInner, int maxIterOuter, double accuracy, int maxActivateVars, double lambda1, double lambda2, regEnum regType=GAUSSIAN);
+  FusedLasso(const SparseMatrix &X, const vector<double> &y, const vector<double> &wObs, const vector<double> &beta, const vector<double>& wLambda1, const Graph& graph, int maxIterInner, int maxIterOuter, double accuracy, int maxActivateVars, double lambda1, double lambda2, regEnum regType=regEnum::GAUSSIAN);
   
   ~FusedLasso();
   

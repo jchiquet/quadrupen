@@ -75,9 +75,9 @@ void FusedLassoCoordinate::singleStep(int pos) {
     double slope = quadratic->getHessian(pos); 
 
     switch(penType) {
-        case L1: Steps::findRootL1(beta, deriv, slope, pos, wLambda1Mult[pos], connections[pos], wLambda2Mult[pos], rootScratch_); break;
-        case Huber: Steps::findRootHuber(beta, deriv, slope, pos, wLambda1Mult[pos], connections[pos], wLambda2Mult[pos], huberParam, rootScratch_); break;
-        case L2: Steps::findRootL2(beta, deriv, slope, pos, wLambda1Mult[pos], connections[pos], wLambda2Mult[pos]); break;
+        case penEnum::L1: Steps::findRootL1(beta, deriv, slope, pos, wLambda1Mult[pos], connections[pos], wLambda2Mult[pos], rootScratch_); break;
+        case penEnum::Huber: Steps::findRootHuber(beta, deriv, slope, pos, wLambda1Mult[pos], connections[pos], wLambda2Mult[pos], huberParam, rootScratch_); break;
+        case penEnum::L2: Steps::findRootL2(beta, deriv, slope, pos, wLambda1Mult[pos], connections[pos], wLambda2Mult[pos]); break;
     }
     quadratic->updateBeta(pos, beta[pos]);
 }
@@ -147,7 +147,7 @@ void FusedLassoCoordinate::derivAdjustment(double& adjDeriv, double& zeroPenalty
     // Adjust derivative based on penalty type and connected variables
     
     switch(penType) {
-        case L1:
+        case penEnum::L1:
             // L1 penalty adjustment
             for(size_t i = 0; i < connections[pos].size(); ++i) {
                 double connBeta = beta[connections[pos][i]];
@@ -163,7 +163,7 @@ void FusedLassoCoordinate::derivAdjustment(double& adjDeriv, double& zeroPenalty
             }
             break;
             
-        case Huber:
+        case penEnum::Huber:
             // Huber penalty adjustment
             for(size_t i = 0; i < connections[pos].size(); ++i) {
                 double connBeta = beta[connections[pos][i]];
@@ -181,7 +181,7 @@ void FusedLassoCoordinate::derivAdjustment(double& adjDeriv, double& zeroPenalty
             }
             break;
             
-        case L2:
+        case penEnum::L2:
             // L2 penalty adjustment
             for(size_t i = 0; i < connections[pos].size(); ++i) {
                 adjDeriv -= beta[connections[pos][i]] * 2 * wLambda2Mult[pos][i];
@@ -254,7 +254,7 @@ vector<double> FusedLassoCoordinate::getBetaOriginal(vector<int>& fusions) {
 
     for(unsigned int i = 0; i < fusions.size(); ++i) {
         if((size_t)fusions[i] >= beta.size()) {
-            Rcpp::stop("The node has a group that is too large. Node: %i", i, "\n") ;
+            Rcpp::stop("The node has a group that is too large. Node: %d\n", i);
         }
         betaOrig[i] = beta[fusions[i]];
     }

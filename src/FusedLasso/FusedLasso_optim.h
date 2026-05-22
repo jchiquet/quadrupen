@@ -73,7 +73,7 @@ public:
     bool deactivateBeta(int pos);
 
     // Constructor
-    FusedLassoCoordinate(shared_ptr<QuadraticDerivative> quadDer, const vector<double>& wLambda1, const vector<vector<int> > &connections, const vector<vector<double> > &wLambda2, int maxIterInner, double accuracy, int maxActivateVars, double lambda1, double lambda2, penEnum penType=L1, double huberParam=100);
+    FusedLassoCoordinate(shared_ptr<QuadraticDerivative> quadDer, const vector<double>& wLambda1, const vector<vector<int> > &connections, const vector<vector<double> > &wLambda2, int maxIterInner, double accuracy, int maxActivateVars, double lambda1, double lambda2, penEnum penType=penEnum::L1, double huberParam=100);
 
     // After initialization, run the whole algorithm
     bool runAlgorithm();

@@ -52,12 +52,12 @@ List FusedLasso_cpp(
   const bool normalize                = controlFit["normalize"]       ;
   
   // Regression type (default to Gaussian)
-  regEnum regType = GAUSSIAN;
+  regEnum regType = regEnum::GAUSSIAN;
 
   // Penalty type (default to L1)
-  penEnum penType = L1;
-  if (penalty == "Huber") {penType = Huber;}
-  if (penalty == "L2")    {penType = L2;}
+  penEnum penType = penEnum::L1;
+  if (penalty == "Huber") {penType = penEnum::Huber;}
+  if (penalty == "L2")    {penType = penEnum::L2;}
 
   // Create the sparse data matrix for X
   arma::sp_mat sp_x(as<sp_mat>(R_XMat)) ;

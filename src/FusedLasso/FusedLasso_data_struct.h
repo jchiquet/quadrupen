@@ -189,7 +189,7 @@ public:
   
   SparseMatrix X; // copy of vector X
   vector<double> y; // copy of vector y
-  vector<double> w; // copy of vector beta
+  vector<double> w; // observation weights
   vector<double> beta; // copy of R object that stores the current value of beta
   SparseMatrix WX; // stores a sparse matrix of WX
   vector<double> WXbeta; // stores the current value of Xbeta
@@ -244,7 +244,7 @@ public:
   SparseMatrix X; // copy of vector X
   vector<double> y; // copy of vector y
   vector<double> z; // adjusted response
-  vector<double> w; // copy of vector beta
+  vector<double> w; // observation weights
   vector<double> beta; // copy of R object that stores the current value of beta
   SparseMatrix WX; // stores a sparse matrix of WX
   vector<double> Xbeta; // stores the current value of Xbeta

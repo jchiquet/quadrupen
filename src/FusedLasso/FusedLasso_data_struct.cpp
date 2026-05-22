@@ -78,12 +78,11 @@ SparseMatrix::SparseMatrix(const vector<double>& x, int n, int p) {
 }
 
 SparseMatrix::SparseMatrix(const vector<double>& x, const vector<int>& indexCol, const vector<int>& rowPos, int n, int p) {
-  nnz = (int)x.size();
-  this-> p = p;
-  this-> n = n;
-  this->nnz = 0;
+  this->n = n;
+  this->p = p;
+  this->nnz = (int)x.size();
   this->nzVec = x;
-  this->indexCol = indexCol;    
+  this->indexCol = indexCol;
   this->rowPos = rowPos;
 }
 
@@ -317,7 +316,7 @@ void SparseMatrix::addMultOfColumn(vector<double>& y, int i, double mult) const 
     Rcpp::stop("y does not have the right size\n");
   }
   if(i < 0 || i >= p) {
-    Rcpp::stop("not a valid column %o out of %o\n", i, p);
+    Rcpp::stop("not a valid column %d out of %d\n", i, p);
   }
   
   if(mult == 0) {
