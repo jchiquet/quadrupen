@@ -36,13 +36,6 @@ public:
 
   void get_lambda_seq(double, const List&);
 
-  // Getter functions to access private members
-  const RegressionData<matrix>& data()    const { return data_      ; }
-  const matrix& coefficients()            const { return coef_      ; }
-  const vector<double>& intercept()       const { return intercept_ ; }
-  const vector<double>& path_tuning()     const { return lambdas_   ; }
-  const vector<double>& degrees_freedom() const { return df_        ; }
-
   // Build (row, col) location matrix for sp_mat construction from a sequence
   // of active index sets. Row 0 = variable indices, Row 1 = lambda-step index.
   static umat build_sp_locations(const vector<uvec>& groups) {

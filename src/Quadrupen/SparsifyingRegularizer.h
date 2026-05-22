@@ -52,8 +52,6 @@ public:
   vec                 beta_debiased_      ; // current debiased beta
 
   // ── Accessors ───────────────────────────────────────────────────────────────
-  const vector<double>& intercept_debiased() const { return intercept_debiased_ ; }
-
   const sp_mat coefficients() const {
     return sp_mat(build_sp_locations(active_),
                   vec(nzeros_), data_.p_, active_.size(), true, false) ;
@@ -68,6 +66,24 @@ public:
     umat locs = build_sp_locations(active_) ;
     return sp_mat(locs, arma::ones<vec>(locs.n_cols),
                   data_.p_, active_.size(), true, false) ;
+  }
+
+  // ── R export ────────────────────────────────────────────────────────────────
+  virtual List to_list(const List& monitoring) {
+    return List::create(
+      Named("tuning_param") = List::create(
+        Named("l1") = lambdas_,
+        Named("l2") = gamma_
+      ),
+      Named("coef")               = coefficients(),
+      Named("coef_debiased")      = debiased_coefficients(),
+      Named("active")             = active_var(),
+      Named("intercept")          = intercept_,
+      Named("intercept_debiased") = intercept_debiased_,
+      Named("normx")              = data_.norm_X_,
+      Named("df")                 = df_,
+      Named("monitoring")         = monitoring
+    ) ;
   }
 
   // ── Pure-virtual hooks implemented by each subclass ────────────────

@@ -30,6 +30,21 @@ BoundedRegression::BoundedRegression(
     grad_ = -data_.XTy_          ; // vector of current gradient (smooth part)
   }
 
+List BoundedRegression::to_list(const List& monitoring) {
+  return List::create(
+    Named("tuning_param") = List::create(
+      Named("linf") = lambdas_,
+      Named("l2")   = gamma_
+    ),
+    Named("coef")       = coef_,
+    Named("active")     = unbounded_var(),
+    Named("intercept")  = intercept_,
+    Named("normx")      = data_.norm_X_,
+    Named("df")         = df_,
+    Named("monitoring") = monitoring
+  ) ;
+}
+
 double BoundedRegression::get_df() {
 
   double df = data_.centered_ + unbounded_.size();

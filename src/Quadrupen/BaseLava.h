@@ -22,6 +22,7 @@ using arma::uvec;
 using arma::uword;
 using arma::ones;
 using Rcpp::List;
+using Rcpp::Named;
 
 template <typename matrix, typename ConcreteBase>
 class BaseLava : public ConcreteBase {
@@ -82,6 +83,26 @@ public:
       this->data_.X_.cols(this->set_.A_) * this->set_.XATXAinv_ * this->data_.X_.cols(this->set_.A_).t() ;
     df -= trace(K * Proj_) ;
     return df ;
+  }
+
+  // ── R export ────────────────────────────────────────────────────────────────
+  List to_list(const List& monitoring) override {
+    return List::create(
+      Named("tuning_param") = List::create(
+        Named("l1") = this->lambdas_,
+        Named("l2") = this->gamma_
+      ),
+      Named("coef")                 = this->coef_,
+      Named("coef_debiased")        = diagmat(1/orig_data_.norm_X_) * b_ + this->debiased_coefficients(),
+      Named("sparse_coef")          = sparse_coef_,
+      Named("sparse_coef_debiased") = this->debiased_coefficients(),
+      Named("active")               = this->active_var(),
+      Named("intercept")            = this->intercept_,
+      Named("intercept_debiased")   = this->intercept_debiased_,
+      Named("normx")                = this->data_.norm_X_,
+      Named("df")                   = this->df_,
+      Named("monitoring")           = monitoring
+    ) ;
   }
 
   // ── post_treatment: compute dense component b, then refit sparse ──────────────

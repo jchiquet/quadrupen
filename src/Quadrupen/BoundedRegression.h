@@ -39,6 +39,7 @@ public:
   }
   
   List solution_path(const List&);
+  List to_list(const List& monitoring) ;
   
   // Compute degrees of freedom for the current estimate
   double get_df() ; 
