@@ -78,7 +78,7 @@ SparseMatrix::SparseMatrix(const vector<double>& x, int n, int p) {
 }
 
 SparseMatrix::SparseMatrix(const vector<double>& x, const vector<int>& indexCol, const vector<int>& rowPos, int n, int p) {
-  nnz = x.size();
+  nnz = (int)x.size();
   this-> p = p;
   this-> n = n;
   this->nnz = 0;
@@ -96,9 +96,9 @@ SparseMatrix::SparseMatrix(const arma::sp_mat& sm) {
   rowPos = std::vector<int>(sm.row_indices, sm.row_indices + sm.n_nonzero);
   nzVec  = std::vector<double>(sm.values, sm.values + sm.n_nonzero ) ;
   
-  n = sm.n_rows;
-  p = sm.n_cols;
-  nnz = nzVec.size();
+  n = (int)sm.n_rows;
+  p = (int)sm.n_cols;
+  nnz = (int)nzVec.size();
 }
 
 // assumes that it is the right class; does not check
@@ -111,7 +111,7 @@ SparseMatrix::SparseMatrix(Rcpp::S4 x) {
   
   n = dimslot[0];
   p = dimslot[1];
-  nnz = nzVec.size();
+  nnz = (int)nzVec.size();
 }
 
 
@@ -123,7 +123,7 @@ SparseMatrix SparseMatrix::createFusedX(const vector<vector<int> > fusedGroups) 
   // approximation
   SparseMatrix fusedX;
   fusedX.n = n;
-  fusedX.p = fusedGroups.size();
+  fusedX.p = (int)fusedGroups.size();
   
   fusedX.nzVec.reserve(nzVec.size());
   fusedX.nzVec.clear();
@@ -144,7 +144,7 @@ SparseMatrix SparseMatrix::createFusedX(const vector<vector<int> > fusedGroups) 
   vector<int> pos, endPos;
   pos.reserve(maxGroupSize);
   endPos.reserve(maxGroupSize);
-  unsigned int curRow;
+  int curRow;
   double curVal;
   
   for(unsigned int group = 0; group < fusedGroups.size(); ++group) {
@@ -162,7 +162,7 @@ SparseMatrix SparseMatrix::createFusedX(const vector<vector<int> > fusedGroups) 
     }
     
     // save the starting position of this column
-    fusedX.indexCol[group] = fusedX.nzVec.size();
+    fusedX.indexCol[group] = (int)fusedX.nzVec.size();
     
     while(curRow < n) {
       curRow = n;
@@ -188,8 +188,8 @@ SparseMatrix SparseMatrix::createFusedX(const vector<vector<int> > fusedGroups) 
       fusedX.nzVec.push_back(curVal);
     }
   }
-  fusedX.indexCol[fusedGroups.size()] = fusedX.nzVec.size();
-  fusedX.nnz = fusedX.nzVec.size();
+  fusedX.indexCol[fusedGroups.size()] = (int)fusedX.nzVec.size();
+  fusedX.nnz = (int)fusedX.nzVec.size();
   
   return fusedX;
 }
@@ -198,7 +198,7 @@ SparseMatrix SparseMatrix::createFusedX(const vector<vector<int> > fusedGroups) 
 void SparseMatrix::addColumn(const vector<double>& newnzVec, const vector<int>& newrowPos) {
   nzVec.insert(nzVec.end(), newnzVec.begin(), newnzVec.end());
   rowPos.insert(rowPos.end(), newrowPos.begin(), newrowPos.end());
-  nnz += newnzVec.size();
+  nnz += (int)newnzVec.size();
   indexCol.push_back(nnz);
   p += 1;
 }
@@ -269,7 +269,7 @@ double SparseMatrix::innerProd(int i, int j, const vector<double>& w) const {
     Rcpp::stop("not a valid column %d out of %d\n", j, p);
   }
   
-  if(w.size() != n) {
+  if((int)w.size() != n) {
     Rcpp::stop("w not the right size\n");
   }
   
@@ -299,7 +299,7 @@ double SparseMatrix::innerProd(const vector<double>& y, int i, const vector<doub
 
 void SparseMatrix::multByDiag(const vector<double>& w) {
   // check that w has the right size
-  if(w.size() != n) { // not the right size
+  if((int)w.size() != n) { // not the right size
     Rcpp::stop("w does not have the right size\n");
   }
   
@@ -313,7 +313,7 @@ void SparseMatrix::multByDiag(const vector<double>& w) {
 // speed penalty
 void SparseMatrix::addMultOfColumn(vector<double>& y, int i, double mult) const {
   // check that y has the right size
-  if(y.size() != n) { // does not have the right size
+  if((int)y.size() != n) { // does not have the right size
     Rcpp::stop("y does not have the right size\n");
   }
   if(i < 0 || i >= p) {
@@ -335,7 +335,7 @@ void SparseMatrix::addMultOfColumn(vector<double>& y, int i, double mult) const 
 inline void SparseMatrix::addMultOfColumnUnsafe(vector<double>& y, int i, double mult) const {
   // DEBUG mode: still do checks (can be disabled with -DNDEBUG)
   #ifndef NDEBUG
-    if(y.size() != n || i < 0 || i >= p) {
+    if((int)y.size() != n || i < 0 || i >= p) {
       Rcpp::stop("addMultOfColumnUnsafe: precondition violated (y.size=%d, n=%d, i=%d, p=%d)",
                  (int)y.size(), n, i, p);
     }

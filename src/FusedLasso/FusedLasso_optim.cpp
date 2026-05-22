@@ -258,7 +258,7 @@ vector<double> FusedLassoCoordinate::getBetaOriginal(vector<int>& fusions) {
     vector<double> betaOrig(fusions.size());
 
     for(unsigned int i = 0; i < fusions.size(); ++i) {
-        if(fusions[i] > beta.size() - 1) {
+        if((size_t)fusions[i] >= beta.size()) {
             Rcpp::stop("The node has a group that is too large. Node: %i", i, "\n") ;
         }
         betaOrig[i] = beta[fusions[i]];
