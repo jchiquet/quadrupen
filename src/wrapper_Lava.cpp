@@ -10,63 +10,33 @@ using namespace arma;
 
 // [[Rcpp::export]]
 List lava_dense_cpp(
-    const Environment &dataModel   , // data structure
-    const bool        &intercept   , // Boolean for intercept
-    const List        &regParam    , // regularization parameters
-    const List        &control    // config of the optimization 
+    const Environment &dataModel,
+    const bool        &intercept,
+    const List        &regParam,
+    const List        &control
 ) {
-  
-  // Data declaration and standardization
+
   RegressionData<mat> data(dataModel, intercept, as<bool>(control["normalize"])) ;
-  // Scale the structuring matrix according to main penalty factor and the amount of l2 penalty 
-  vec lambda_factor = as<vec>(regParam["lambda_factor"]) ;
-  double gamma = as<double>(regParam["gamma"]) ;
-  data.scale_struct(gamma) ;
 
-  // Create the scaled/transformed data
-  mat C_inv = solve(trimatu(chol(data.S_.as_dense())), eye(data.p_, data.p_)) ;
-  mat U, V ; vec D ; // U D V = X C^-1
-  svd_econ(U, D, V, (data.X_.each_row() - data.X_bar_.t())*C_inv) ;
-  mat Proj = U * diagmat(square(D)/(square(D) + 1)) * U.t() ;
-  mat K12 = U * diagmat(1/sqrt(square(D) + 1)) * U.t() ;
-  mat X_tilde = K12 * (data.X_.each_row() - data.X_bar_.t()) ;
-  vec y_tilde = K12 * (data.y_ - data.y_bar_) ;
-  
-  // Create the corresponding scaled/transformed data 
-  RegressionData<mat> scaled_data(
-      X_tilde,
-      y_tilde,
-      sp_mat(data.p_, data.p_),
-      ones(data.p_), false, false) ;
+  Lava<mat,SparseNorm::L1> lava(data, regParam, control) ;
+  List results = lava.solution_path(control) ;
+  lava.post_treatment() ;
 
-  Lava<mat,SparseNorm::L1> lava(scaled_data, Proj, regParam, control);
-
-  List results = lava.solution_path(control);
-
-  // Un-normalized vector of dense coefficients
-  mat b = (C_inv * V * diagmat(D/(square(D) + 1)) * U.t()) * ( 
-    (data.y_ - data.y_bar_) * ones(1, lava.lambdas_.size()) - 
-      (data.X_.each_row() - data.X_bar_.t()) * lava.coefficients()
-  ) ;
-  lava.post_treatment(data, b) ;
-  
   return List::create(
     Named("tuning_param") = List::create(
       Named("l1") = lava.lambdas_,
-      Named("l2") = gamma
+      Named("l2") = as<double>(regParam["gamma"])
     ),
-    
-    Named("coef")          = lava.coef_,
-    Named("coef_debiased") = diagmat(1/data.norm_X_) * b + lava.debiased_coefficients(),
-    Named("sparse_coef")   = lava.sparse_coef_,
+    Named("coef")                 = lava.coef_,
+    Named("coef_debiased")        = diagmat(1/data.norm_X_) * lava.b_ + lava.debiased_coefficients(),
+    Named("sparse_coef")          = lava.sparse_coef_,
     Named("sparse_coef_debiased") = lava.debiased_coefficients(),
-    Named("active")        = lava.active_var(),
-    Named("intercept")     = lava.intercept_,
-    Named("intercept_debiased") = lava.intercept_debiased_,
-    Named("normx")         = lava.data_.norm_X_,
-    Named("df")            = lava.df_,
-    Named("monitoring")    = results
+    Named("active")               = lava.active_var(),
+    Named("intercept")            = lava.intercept_,
+    Named("intercept_debiased")   = lava.intercept_debiased_,
+    Named("normx")                = lava.data_.norm_X_,
+    Named("df")                   = lava.df_,
+    Named("monitoring")           = results
+  ) ;
 
-  );
-  
 }
