@@ -8,9 +8,14 @@
 #include "PenaltyDense.h"
 #include "OptimizerLINF.h"
 
-using namespace Rcpp;
-using namespace arma;
-using namespace std;
+using arma::mat;
+using arma::sp_mat;
+using arma::uvec;
+using arma::umat;
+using arma::uword;
+using arma::vec;
+using Rcpp::List;
+using std::vector;
 
 class BoundedRegression : public Regularizer<mat> {
 public:
@@ -27,19 +32,14 @@ public:
     return(penalty_.dual_norm(data_.XTy_, lambda_factor_));
   }
   
-  const sp_mat unbounded_var() { 
-    vector<uword> rowA, colA ;
-    uword current_col = 0;
-    for (const auto& a : bounded_) {
-      rowA.insert(rowA.end(), a.begin(), a.end()) ;
-      colA.insert(colA.end(), a.n_elem, current_col) ;
-      current_col++;
-    }
-    return sp_mat(join_cols(urowvec(rowA), urowvec(colA)),
-                  vec(rowA.size(), fill::ones), data_.p_, bounded_.size(), true, false) ;
+  const sp_mat unbounded_var() {
+    umat locs = build_sp_locations(bounded_) ;
+    return sp_mat(locs, arma::ones<vec>(locs.n_cols),
+                  data_.p_, bounded_.size(), true, false) ;
   }
   
   List solution_path(const List&);
+  List to_list(const List& monitoring) ;
   
   // Compute degrees of freedom for the current estimate
   double get_df() ; 

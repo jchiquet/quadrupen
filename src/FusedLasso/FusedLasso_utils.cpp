@@ -4,21 +4,17 @@ using namespace std;
 
 double RelDif(double a, double b)
 {
-  double c = Abs(a);
-  double d = Abs(b);
-  
-  d = Max(c, d);
-  
-  return d == 0.0 ? 0.0 : Abs(a - b) / d;
+  double c = std::abs(a);
+  double d = std::abs(b);
+  d = std::max(c, d);
+  return d == 0.0 ? 0.0 : std::abs(a - b) / d;
 }
 
 double RelDifNoAbs(double a, double b)
 {
-  double c = Abs(a);
-  double d = Abs(b);
-  
-  d = Max(c, d);
-  
+  double c = std::abs(a);
+  double d = std::abs(b);
+  d = std::max(c, d);
   return d == 0.0 ? 0.0 : (a - b) / d;
 }
 
@@ -27,10 +23,9 @@ double maxDiffDoubleVec(const vector<double>& x, const vector<double>& y) {
   if(x.size() != y.size()) {
     return infinite;
   }
-  for(int i = 0; i < x.size(); ++i) {
-    if(fabs(x[i] - y[i]) > maxDiff) {
-      maxDiff = fabs(x[i] - y[i]);
-    }
+  for(size_t i = 0; i < x.size(); ++i) {
+    double diff = std::abs(x[i] - y[i]) ;
+    if(diff > maxDiff) maxDiff = diff ;
   }
   return maxDiff;
 }
@@ -89,26 +84,18 @@ bool checkIfSubset(const set<int>& x, const vector<int>& fusions) {
 
 int numNonZero(const vector<double>& x) {
   int nonZero = 0;
-  for(int i = 0; i < x.size(); ++i) {
-    if(x[i]!=0) {
-      nonZero++;
-    }
-  }
+  for(const auto& xi : x) if(xi != 0) nonZero++ ;
   return nonZero;
 }
 
 
 void printVector(const vector<double>& x, ostream& outStream) {
-  for(int i = 0; i < x.size(); ++i) {
-    outStream << i <<":" <<x[i] << ", ";
-  }
+  for(size_t i = 0; i < x.size(); ++i) outStream << i << ":" << x[i] << ", ";
   outStream << endl;
 }
 
 void printVector(const vector<int>& x, ostream& outStream) {
-  for(int i = 0; i < x.size(); ++i) {
-    outStream << i <<":" << x[i] << ", ";
-  }
+  for(size_t i = 0; i < x.size(); ++i) outStream << i << ":" << x[i] << ", ";
   outStream << endl;
 }
 
@@ -145,8 +132,7 @@ void Steps::findRootL2(vector<double>& beta, double deriv, const double hessian,
   
   double curDeriv = deriv - beta[pos] * hessian;
   double curHessian = hessian;
-  int counter = 0;
-  for(int i = 0; i < l2Idx.size(); ++i) {
+  for(size_t i = 0; i < l2Idx.size(); ++i) {
     curDeriv += l2Mult[i] * 2 * (0 - beta[l2Idx[i]]);
     curHessian += l2Mult[i] * 2;
   }
@@ -173,7 +159,7 @@ void Steps::findRootHuber(vector<double>& beta, double deriv, const double hessi
   vector<pair<double, double> > huberPosVec(2*huberIdx.size()+1);
   double derivSum = zeroStepSize;
   int counter = 0;
-  for(int i = 0; i < huberIdx.size(); ++i) {
+  for(size_t i = 0; i < huberIdx.size(); ++i) {
     huberPosVec[counter] = pair<double, double>(beta[huberIdx[i]] - 1/huberParam, huberMult[i] * huberParam);
     counter++;
     huberPosVec[counter] = pair<double, double>(beta[huberIdx[i]] + 1/huberParam, - huberMult[i] * huberParam);
@@ -199,7 +185,7 @@ void Steps::findRootHuber(vector<double>& beta, double deriv, const double hessi
     return;
   }
   
-  for(int i = 0; i < huberPosVec.size(); ++i) {
+  for(size_t i = 0; i < huberPosVec.size(); ++i) {
     //        cout << "pos: " << huberPosVec[i].first << " val: " << huberPosVec[i].second << endl;
     curDeriv += curHessian * (huberPosVec[i].first - curBeta);
     curBeta = huberPosVec[i].first;
@@ -235,10 +221,8 @@ void Steps::findRootL1(vector<double>& beta, double deriv, const double hessian,
   // first gives the position of the hessianchange, second the amoung of hessianChange
   vector<pair<double, double> > stepPosVec(stepIdx.size()+1);
   double derivSum = zeroStepSize;
-  int counter = 0;
-  for(int i = 0; i < stepIdx.size(); ++i) {
+  for(size_t i = 0; i < stepIdx.size(); ++i) {
     stepPosVec[i] = pair<double, double>(beta[stepIdx[i]], 2 * stepMult[i]);
-    counter++;
     derivSum += stepMult[i];
   }
   stepPosVec[stepIdx.size()] = pair<double, double>(0, 2 * zeroStepSize);
@@ -260,7 +244,7 @@ void Steps::findRootL1(vector<double>& beta, double deriv, const double hessian,
     return;
   }
   
-  for(int i = 0; i < stepPosVec.size(); ++i) {
+  for(size_t i = 0; i < stepPosVec.size(); ++i) {
     curDeriv += hessian * (stepPosVec[i].first - curBeta);
     curBeta = stepPosVec[i].first;
     
@@ -316,7 +300,7 @@ void Steps::findRootL1(vector<double>& beta, double deriv, const double hessian,
     
     
     // calculate current derivative, also the next position that is smaller or larger
-    for(int i = 0; i < stepIdx.size(); ++i) {
+    for(size_t i = 0; i < stepIdx.size(); ++i) {
       if(beta[stepIdx[i]] > curBeta) {
         curDeriv -= stepSize[i];
         if(beta[stepIdx[i]] < nextLargerPos) {
@@ -389,7 +373,6 @@ void Steps::findRootL1(vector<double>& beta, double deriv, const double hessian,
   
   void Steps::findRoot(vector<double> &beta, double derivQuad, const double slope, const int pos, const double zeroStepSize, const vector<int>& stepIdx, const vector<double>& stepSize) {
     
-    bool finished = false;
     // catch if the slope is 0; this should only occur if the derivative is also 0;
     // then set the beta to 0
     if(fabs(slope) < 1e-10) {

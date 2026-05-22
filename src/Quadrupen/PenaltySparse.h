@@ -1,6 +1,5 @@
 #pragma once
 
-#define ARMA_NO_DEBUG
 #define ARMA_USE_LAPACK
 #define ARMA_USE_BLAS
 
@@ -12,9 +11,8 @@
 
 enum class SparseNorm {L1, MCP, SCAD};
 
-using namespace Rcpp;
-using namespace arma;
-using namespace std;
+using arma::vec;
+using arma::uvec;
 
 template <SparseNorm norm> class SparsePenalty {
   public: 

@@ -7,14 +7,20 @@
 
 #include "RegressionData.h"
 
-using namespace Rcpp;
-using namespace arma;
-using namespace std;
+using arma::vec;
+using arma::uvec;
+using arma::umat;
+using arma::uword;
+using arma::conv_to;
+using arma::logspace;
+using Rcpp::List;
+using Rcpp::as;
+using std::vector;
 
 template <typename matrix>
 class Regularizer {
 public:
-  
+
   Regularizer() {} ;
   Regularizer(const RegressionData<matrix>&, const List&);
 
@@ -29,18 +35,25 @@ public:
   vector<double> df_           ; // degrees of freedom along the path
 
   void get_lambda_seq(double, const List&);
-  
-  // Getter functions to access private members
-  const RegressionData<matrix>& data()    const { return data_      ; }
-  const matrix& coefficients()            const { return coef_      ; }
-  const vector<double>& intercept()       const { return intercept_ ; }
-  const vector<double>& path_tuning()     const { return lambdas_   ; }
-  const vector<double>& degrees_freedom() const { return df_        ; }
+
+  // Build (row, col) location matrix for sp_mat construction from a sequence
+  // of active index sets. Row 0 = variable indices, Row 1 = lambda-step index.
+  static umat build_sp_locations(const vector<uvec>& groups) {
+    uword total_nnz = 0;
+    for (const auto& g : groups) total_nnz += g.n_elem;
+    umat locs(2, total_nnz);
+    uword col = 0, pos = 0;
+    for (const auto& g : groups) {
+      for (uword r : g) { locs(0, pos) = r; locs(1, pos) = col; ++pos; }
+      ++col;
+    }
+    return locs;
+  }
 };
 
 template <typename matrix>
 Regularizer<matrix>::Regularizer(
-  const RegressionData<matrix>& data, const List& regParam) : 
+  const RegressionData<matrix>& data, const List& regParam) :
   data_ (data),
   gamma_(as<double>(regParam["gamma"])),
   lambda_factor_(as<vec>(regParam["lambda_factor"]))
@@ -48,7 +61,7 @@ Regularizer<matrix>::Regularizer(
 
 template <typename matrix>
 void Regularizer<matrix>::get_lambda_seq(double lambda_max, const List& regParam) {
-  if (regParam[0] != R_NilValue) {
+  if (regParam["lambda"] != R_NilValue) {
     lambdas_  = as<vector<double>>(regParam["lambda"]) ;
   } else {
     lambdas_ = conv_to<vector<double>>::from(
@@ -60,4 +73,3 @@ void Regularizer<matrix>::get_lambda_seq(double lambda_max, const List& regParam
     );
   }
 }
-

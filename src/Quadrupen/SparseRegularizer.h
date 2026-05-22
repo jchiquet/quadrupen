@@ -4,99 +4,71 @@
  */
 #pragma once
 
-#include "Regularizer.h"
+#include "SparsifyingRegularizer.h"
 #include "OptimizerSparse.h"
 
-using namespace Rcpp;
-using namespace arma;
-using namespace std;
+using arma::vec;
+using arma::uvec;
+using arma::uword;
+using arma::sp_mat;
+using arma::umat;
+using Rcpp::List;
+using Rcpp::as;
+using std::vector;
 
 template <typename matrix, SparseNorm norm>
-class SparseRegularizer : 
-  public Regularizer<matrix>{
+class SparseRegularizer :
+  public SparsifyingRegularizer<matrix> {
   public:
-    
-    using Regularizer<matrix>::intercept_ ;
-    using Regularizer<matrix>::lambdas_   ;
-    using Regularizer<matrix>::gamma_   ;
-    using Regularizer<matrix>::data_ ;
-    using Regularizer<matrix>::df_   ;
-    using Regularizer<matrix>::beta_   ;
-    using Regularizer<matrix>::grad_   ;
-    using Regularizer<matrix>::lambda_factor_ ;
-    using Regularizer<matrix>::get_lambda_seq ;
-    
-    vec   nzeros_ ; // contains non-zero values of all betas (for all lambda values)
-    vec debiased_ ; // contains debiased non-zero values of all betas (for all lambda values)
-    vector<uvec> active_ ; // successively activated variable (for all lambda values)
-    vector<double >intercept_debiased_ ; // debiased vector of intercept values (for all lambda values)
-    vec beta_debiased_ ; // vector of current active beta debiased (for the current lambda)
-    SparsePenalty<norm> penalty_ ; // main penalty object 
-    ActiveSet<matrix> set_       ; // Active set of variable and data
-    
-    double get_lambda_max() 
-    {
-      return(penalty_.lambda_max(data_.XTy_, lambda_factor_));
-    }
-    
-    SparseRegularizer(const RegressionData<matrix>&, const List&, const List&);
-    
-    List solution_path(const List&);
-    
-    // Specific to Elastic-Net regularization
-    SparseOptimizer<matrix, norm> solver_ ; // Solvers for L1 penalty
-    
-    void optimality_violation(double lambda_, uword type) ;
-    
-    // Compute degrees of freedom for the current estimate
-    double get_df() ;
 
-    const sp_mat coefficients() const {
-      vector<uword> rowA, colA ;
-      uword current_col = 0;
-      for (const auto& a : active_) {
-        rowA.insert(rowA.end(), a.begin(), a.end()) ;
-        colA.insert(colA.end(), a.n_elem, current_col) ;
-        current_col++;
-      }
-      return sp_mat(join_cols(urowvec(rowA), urowvec(colA)),
-                    nzeros_, data_.p_, active_.size(), true, false) ;
-    }
-    
-    const sp_mat debiased_coefficients() const { 
-      vector<uword> rowA, colA ;
-      uword current_col = 0;
-      for (const auto& a : active_) {
-        rowA.insert(rowA.end(), a.begin(), a.end()) ;
-        colA.insert(colA.end(), a.n_elem, current_col) ;
-        current_col++;
-      }
-      return sp_mat(join_cols(urowvec(rowA), urowvec(colA)),
-                    debiased_, data_.p_, active_.size(), true, false) ;
-    }
-    
-    const sp_mat active_var() const { 
-      vector<uword> rowA, colA ;
-      uword current_col = 0;
-      for (const auto& a : active_) {
-        rowA.insert(rowA.end(), a.begin(), a.end()) ;
-        colA.insert(colA.end(), a.n_elem, current_col) ;
-        current_col++;
-      }
-      return sp_mat(join_cols(urowvec(rowA), urowvec(colA)),
-                    vec(rowA.size(), fill::ones), data_.p_, active_.size(), true, false) ;
-    }
-    
-    const vector<double>& intercept_debiased() const { return intercept_debiased_ ; }
+    using SparsifyingRegularizer<matrix>::intercept_ ;
+    using SparsifyingRegularizer<matrix>::gamma_     ;
+    using SparsifyingRegularizer<matrix>::data_      ;
+    using SparsifyingRegularizer<matrix>::beta_      ;
+    using SparsifyingRegularizer<matrix>::grad_      ;
+    using SparsifyingRegularizer<matrix>::lambda_factor_ ;
+    using SparsifyingRegularizer<matrix>::get_lambda_seq ;
+    using SparsifyingRegularizer<matrix>::nzeros_    ;
+    using SparsifyingRegularizer<matrix>::debiased_  ;
+    using SparsifyingRegularizer<matrix>::active_    ;
+    using SparsifyingRegularizer<matrix>::intercept_debiased_ ;
+    using SparsifyingRegularizer<matrix>::beta_debiased_ ;
+    using typename SparsifyingRegularizer<matrix>::StepResult ;
+    using typename SparsifyingRegularizer<matrix>::Diagnostics ;
 
-};
+    SparsePenalty<norm>          penalty_ ;
+    ActiveSet<matrix>            set_     ;
+    SparseOptimizer<matrix,norm> solver_  ;
+
+    double get_lambda_max() {
+      return penalty_.lambda_max(data_.XTy_, lambda_factor_) ;
+    }
+
+    SparseRegularizer(const RegressionData<matrix>&, const List&, const List&) ;
+
+    double get_df() override ;
+
+    // ── SparsifyingRegularizer hooks ─────────────────────────────────────────
+
+    ActiveSet<matrix>& current_set() override { return set_ ; }
+
+    StepResult run_solver(double lambda) override {
+      uword status = solver_.working_set(beta_, grad_, lambda, lambda_factor_, gamma_, data_, set_) ;
+      return { status, solver_.gap_, solver_.iter_ } ;
+    }
+
+    Diagnostics solver_diagnostics() const override {
+      return { solver_.inner_iter_, solver_.J_vec_, solver_.D_vec_ } ;
+    }
+
+} ;
 
 template <typename matrix, SparseNorm norm>
 SparseRegularizer<matrix,norm>::SparseRegularizer(
   const RegressionData<matrix>& data, const List& regParam, const List& control) :
-  Regularizer<matrix>::Regularizer(data, regParam) {
+  SparsifyingRegularizer<matrix>::SparsifyingRegularizer(data, regParam) {
 
-    // Scale the structuring matrix according to the amount of l2 penalty 
+    // Scale the structuring matrix according to the amount of l2 penalty
     data_.scale_struct(gamma_) ;
 
     // Initialize the active set, beta_ and the gradient
@@ -108,87 +80,35 @@ SparseRegularizer<matrix,norm>::SparseRegularizer(
     } else {
       set_  = ActiveSet(data_, A0, as<bool>(control["factmat"])) ;
       beta_ = beta0(A0) ;
-      grad_ += set_.XTXA_ * beta_  ;
+      grad_ += set_.XTXA_ * beta_ ;
     }
-    
-    // Set the penalty to l1
+
+    // Set the penalty
     penalty_ = SparsePenalty<norm>(as<double>(regParam["eta"])) ;
     get_lambda_seq(penalty_.lambda_max(data_.XTy_, lambda_factor_), regParam) ;
-    
+
     // Set up the optimizer
     solver_ = SparseOptimizer<matrix,norm>(penalty_, control) ;
-
   }
 
 template <typename matrix, SparseNorm norm>
 double SparseRegularizer<matrix,norm>::get_df() {
-  
+
   double df = set_.size() + data_.centered_ ;
   if (gamma_ > 0) {
-    // loop due to sparse encoding. should iterate over the n_zeros only...
-    mat SAA(set_.size(),set_.size()) ;
-    for (uword i=0;i<set_.size();i++){
-      for (uword j=i;j<set_.size();j++){
-        SAA(i,j) = data_.S_.at(set_.A_(i),set_.A_(j));
-        SAA(j,i) = SAA(i,j);
-      }
+    set_.inverse_Gram() ;
+    uword k = set_.size() ;
+    // Build local position lookup: pos(i) = index of variable i in set_.A_
+    uvec pos(data_.p_) ;
+    for (uword i = 0; i < k; i++) pos(set_.A_(i)) = i ;
+    // Iterate over non-zeros of S_ only — O(p + nnz(S)) vs O(k² log nnz)
+    mat SAA(k, k, arma::fill::zeros) ;
+    for (auto it = data_.S_.begin(); it != data_.S_.end(); ++it) {
+      uword r = it.row(), c = it.col() ;
+      if (set_.is_in_(r) && set_.is_in_(c)) SAA(pos(r), pos(c)) = *it ;
     }
-    // note that XATXAinv_ is in fact (XATXA + lambda S)^-1
-    df -= trace(SAA * set_.XATXAinv_); 
+    df -= accu(SAA % set_.XATXAinv_) ;
   }
-  
-  return(df);
-}
 
-template <typename matrix, SparseNorm norm>
-List SparseRegularizer<matrix,norm>::solution_path(const List& control) {
-  
-  vector<double> gap, timing ; // timings and optimality measures
-  vector<uword> status, iter ; // convergence and # of inner/outer iterates
-  
-  // LAMBDA LOOP
-  wall_clock timer ; timer.tic(); // clock
-  for(auto lambda_ : lambdas_) {
-    
-    // OPTIMIZER LOOP (FIX-LAMBDA VALUE): IDENTIFY THE ACTIVE SET AND SOLVE
-    status.push_back(
-      solver_.working_set(beta_, grad_, lambda_, lambda_factor_, gamma_, data_, set_)
-    ) ;
-    gap.push_back(solver_.gap_) ;
-    iter.push_back(solver_.iter_) ;
-    
-    // Preparing next value of the penalty
-    if (status.back() >= 2) {
-      break;
-    } else {
-      // store current coefficients
-      nzeros_ = join_cols(nzeros_, beta_/(data_.norm_X_(set_.A_)));
-      intercept_.push_back(data_.y_bar_ - dot(beta_, data_.X_bar_(set_.A_))); // X_bar is scaled
-      // compute and store debiased coefficients
-      set_.inverse_Gram() ;
-      beta_debiased_ = set_.XATXAinv_ * (data_.XTy_(set_.A_) - data_.X_bar_(set_.A_) * accu(data_.y_)) ;
-      debiased_ = join_cols(debiased_, beta_debiased_/(data_.norm_X_(set_.A_)));
-      intercept_debiased_.push_back(data_.y_bar_ - dot(beta_debiased_, data_.X_bar_(set_.A_))) ;
-      // store degrees fo freedom and current active set
-      df_.push_back(get_df()) ;
-      active_.push_back(set_.A_) ;
-    }
-    
-    timing.push_back(timer.toc()) ;
-  } // END OF THE LOOP OVER LAMBDA
-  
-  lambdas_.resize(df_.size()) ;
-  
-  return(
-    List::create(
-      Named("it_active")      = iter,
-      Named("it_optim")       = solver_.inner_iter_ ,
-      Named("max_grd")        = gap,
-      Named("gap_hat")        = solver_.J_vec_,
-      Named("delta_hat")      = solver_.D_vec_,
-      Named("convergence")    = status ,
-      Named("pensteps_timer") = timing
-    )
-  );
+  return df ;
 }
-

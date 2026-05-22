@@ -25,90 +25,6 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
-// elastic_net_dense_cpp
-List elastic_net_dense_cpp(const Environment& dataModel, const bool& intercept, const List& regParam, const List& control);
-RcppExport SEXP _quadrupen_elastic_net_dense_cpp(SEXP dataModelSEXP, SEXP interceptSEXP, SEXP regParamSEXP, SEXP controlSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< const Environment& >::type dataModel(dataModelSEXP);
-    Rcpp::traits::input_parameter< const bool& >::type intercept(interceptSEXP);
-    Rcpp::traits::input_parameter< const List& >::type regParam(regParamSEXP);
-    Rcpp::traits::input_parameter< const List& >::type control(controlSEXP);
-    rcpp_result_gen = Rcpp::wrap(elastic_net_dense_cpp(dataModel, intercept, regParam, control));
-    return rcpp_result_gen;
-END_RCPP
-}
-// elastic_net_sparse_cpp
-List elastic_net_sparse_cpp(const Environment& dataModel, const bool& intercept, const List& regParam, const List& control);
-RcppExport SEXP _quadrupen_elastic_net_sparse_cpp(SEXP dataModelSEXP, SEXP interceptSEXP, SEXP regParamSEXP, SEXP controlSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< const Environment& >::type dataModel(dataModelSEXP);
-    Rcpp::traits::input_parameter< const bool& >::type intercept(interceptSEXP);
-    Rcpp::traits::input_parameter< const List& >::type regParam(regParamSEXP);
-    Rcpp::traits::input_parameter< const List& >::type control(controlSEXP);
-    rcpp_result_gen = Rcpp::wrap(elastic_net_sparse_cpp(dataModel, intercept, regParam, control));
-    return rcpp_result_gen;
-END_RCPP
-}
-// mcp_dense_cpp
-List mcp_dense_cpp(const Environment& dataModel, const bool& intercept, const List& regParam, const List& control);
-RcppExport SEXP _quadrupen_mcp_dense_cpp(SEXP dataModelSEXP, SEXP interceptSEXP, SEXP regParamSEXP, SEXP controlSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< const Environment& >::type dataModel(dataModelSEXP);
-    Rcpp::traits::input_parameter< const bool& >::type intercept(interceptSEXP);
-    Rcpp::traits::input_parameter< const List& >::type regParam(regParamSEXP);
-    Rcpp::traits::input_parameter< const List& >::type control(controlSEXP);
-    rcpp_result_gen = Rcpp::wrap(mcp_dense_cpp(dataModel, intercept, regParam, control));
-    return rcpp_result_gen;
-END_RCPP
-}
-// mcp_sparse_cpp
-List mcp_sparse_cpp(const Environment& dataModel, const bool& intercept, const List& regParam, const List& control);
-RcppExport SEXP _quadrupen_mcp_sparse_cpp(SEXP dataModelSEXP, SEXP interceptSEXP, SEXP regParamSEXP, SEXP controlSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< const Environment& >::type dataModel(dataModelSEXP);
-    Rcpp::traits::input_parameter< const bool& >::type intercept(interceptSEXP);
-    Rcpp::traits::input_parameter< const List& >::type regParam(regParamSEXP);
-    Rcpp::traits::input_parameter< const List& >::type control(controlSEXP);
-    rcpp_result_gen = Rcpp::wrap(mcp_sparse_cpp(dataModel, intercept, regParam, control));
-    return rcpp_result_gen;
-END_RCPP
-}
-// scad_dense_cpp
-List scad_dense_cpp(const Environment& dataModel, const bool& intercept, const List& regParam, const List& control);
-RcppExport SEXP _quadrupen_scad_dense_cpp(SEXP dataModelSEXP, SEXP interceptSEXP, SEXP regParamSEXP, SEXP controlSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< const Environment& >::type dataModel(dataModelSEXP);
-    Rcpp::traits::input_parameter< const bool& >::type intercept(interceptSEXP);
-    Rcpp::traits::input_parameter< const List& >::type regParam(regParamSEXP);
-    Rcpp::traits::input_parameter< const List& >::type control(controlSEXP);
-    rcpp_result_gen = Rcpp::wrap(scad_dense_cpp(dataModel, intercept, regParam, control));
-    return rcpp_result_gen;
-END_RCPP
-}
-// scad_sparse_cpp
-List scad_sparse_cpp(const Environment& dataModel, const bool& intercept, const List& regParam, const List& control);
-RcppExport SEXP _quadrupen_scad_sparse_cpp(SEXP dataModelSEXP, SEXP interceptSEXP, SEXP regParamSEXP, SEXP controlSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< const Environment& >::type dataModel(dataModelSEXP);
-    Rcpp::traits::input_parameter< const bool& >::type intercept(interceptSEXP);
-    Rcpp::traits::input_parameter< const List& >::type regParam(regParamSEXP);
-    Rcpp::traits::input_parameter< const List& >::type control(controlSEXP);
-    rcpp_result_gen = Rcpp::wrap(scad_sparse_cpp(dataModel, intercept, regParam, control));
-    return rcpp_result_gen;
-END_RCPP
-}
 // FusedLasso_cpp
 List FusedLasso_cpp(const Environment& dataModel, const bool& intercept, const List& regParam, const List& controlFit);
 RcppExport SEXP _quadrupen_FusedLasso_cpp(SEXP dataModelSEXP, SEXP interceptSEXP, SEXP regParamSEXP, SEXP controlFitSEXP) {
@@ -120,6 +36,51 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< const List& >::type regParam(regParamSEXP);
     Rcpp::traits::input_parameter< const List& >::type controlFit(controlFitSEXP);
     rcpp_result_gen = Rcpp::wrap(FusedLasso_cpp(dataModel, intercept, regParam, controlFit));
+    return rcpp_result_gen;
+END_RCPP
+}
+// group_lava_l1l2_dense_cpp
+List group_lava_l1l2_dense_cpp(const Environment& dataModel, const bool& intercept, const arma::uvec& group, const List& regParam, const List& control);
+RcppExport SEXP _quadrupen_group_lava_l1l2_dense_cpp(SEXP dataModelSEXP, SEXP interceptSEXP, SEXP groupSEXP, SEXP regParamSEXP, SEXP controlSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const Environment& >::type dataModel(dataModelSEXP);
+    Rcpp::traits::input_parameter< const bool& >::type intercept(interceptSEXP);
+    Rcpp::traits::input_parameter< const arma::uvec& >::type group(groupSEXP);
+    Rcpp::traits::input_parameter< const List& >::type regParam(regParamSEXP);
+    Rcpp::traits::input_parameter< const List& >::type control(controlSEXP);
+    rcpp_result_gen = Rcpp::wrap(group_lava_l1l2_dense_cpp(dataModel, intercept, group, regParam, control));
+    return rcpp_result_gen;
+END_RCPP
+}
+// group_lava_l1linf_dense_cpp
+List group_lava_l1linf_dense_cpp(const Environment& dataModel, const bool& intercept, const arma::uvec& group, const List& regParam, const List& control);
+RcppExport SEXP _quadrupen_group_lava_l1linf_dense_cpp(SEXP dataModelSEXP, SEXP interceptSEXP, SEXP groupSEXP, SEXP regParamSEXP, SEXP controlSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const Environment& >::type dataModel(dataModelSEXP);
+    Rcpp::traits::input_parameter< const bool& >::type intercept(interceptSEXP);
+    Rcpp::traits::input_parameter< const arma::uvec& >::type group(groupSEXP);
+    Rcpp::traits::input_parameter< const List& >::type regParam(regParamSEXP);
+    Rcpp::traits::input_parameter< const List& >::type control(controlSEXP);
+    rcpp_result_gen = Rcpp::wrap(group_lava_l1linf_dense_cpp(dataModel, intercept, group, regParam, control));
+    return rcpp_result_gen;
+END_RCPP
+}
+// group_lava_coop_dense_cpp
+List group_lava_coop_dense_cpp(const Environment& dataModel, const bool& intercept, const arma::uvec& group, const List& regParam, const List& control);
+RcppExport SEXP _quadrupen_group_lava_coop_dense_cpp(SEXP dataModelSEXP, SEXP interceptSEXP, SEXP groupSEXP, SEXP regParamSEXP, SEXP controlSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const Environment& >::type dataModel(dataModelSEXP);
+    Rcpp::traits::input_parameter< const bool& >::type intercept(interceptSEXP);
+    Rcpp::traits::input_parameter< const arma::uvec& >::type group(groupSEXP);
+    Rcpp::traits::input_parameter< const List& >::type regParam(regParamSEXP);
+    Rcpp::traits::input_parameter< const List& >::type control(controlSEXP);
+    rcpp_result_gen = Rcpp::wrap(group_lava_coop_dense_cpp(dataModel, intercept, group, regParam, control));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -213,51 +174,6 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
-// group_lava_l1l2_dense_cpp
-List group_lava_l1l2_dense_cpp(const Environment& dataModel, const bool& intercept, const arma::uvec& group, const List& regParam, const List& control);
-RcppExport SEXP _quadrupen_group_lava_l1l2_dense_cpp(SEXP dataModelSEXP, SEXP interceptSEXP, SEXP groupSEXP, SEXP regParamSEXP, SEXP controlSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< const Environment& >::type dataModel(dataModelSEXP);
-    Rcpp::traits::input_parameter< const bool& >::type intercept(interceptSEXP);
-    Rcpp::traits::input_parameter< const arma::uvec& >::type group(groupSEXP);
-    Rcpp::traits::input_parameter< const List& >::type regParam(regParamSEXP);
-    Rcpp::traits::input_parameter< const List& >::type control(controlSEXP);
-    rcpp_result_gen = Rcpp::wrap(group_lava_l1l2_dense_cpp(dataModel, intercept, group, regParam, control));
-    return rcpp_result_gen;
-END_RCPP
-}
-// group_lava_l1linf_dense_cpp
-List group_lava_l1linf_dense_cpp(const Environment& dataModel, const bool& intercept, const arma::uvec& group, const List& regParam, const List& control);
-RcppExport SEXP _quadrupen_group_lava_l1linf_dense_cpp(SEXP dataModelSEXP, SEXP interceptSEXP, SEXP groupSEXP, SEXP regParamSEXP, SEXP controlSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< const Environment& >::type dataModel(dataModelSEXP);
-    Rcpp::traits::input_parameter< const bool& >::type intercept(interceptSEXP);
-    Rcpp::traits::input_parameter< const arma::uvec& >::type group(groupSEXP);
-    Rcpp::traits::input_parameter< const List& >::type regParam(regParamSEXP);
-    Rcpp::traits::input_parameter< const List& >::type control(controlSEXP);
-    rcpp_result_gen = Rcpp::wrap(group_lava_l1linf_dense_cpp(dataModel, intercept, group, regParam, control));
-    return rcpp_result_gen;
-END_RCPP
-}
-// group_lava_coop_dense_cpp
-List group_lava_coop_dense_cpp(const Environment& dataModel, const bool& intercept, const arma::uvec& group, const List& regParam, const List& control);
-RcppExport SEXP _quadrupen_group_lava_coop_dense_cpp(SEXP dataModelSEXP, SEXP interceptSEXP, SEXP groupSEXP, SEXP regParamSEXP, SEXP controlSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< const Environment& >::type dataModel(dataModelSEXP);
-    Rcpp::traits::input_parameter< const bool& >::type intercept(interceptSEXP);
-    Rcpp::traits::input_parameter< const arma::uvec& >::type group(groupSEXP);
-    Rcpp::traits::input_parameter< const List& >::type regParam(regParamSEXP);
-    Rcpp::traits::input_parameter< const List& >::type control(controlSEXP);
-    rcpp_result_gen = Rcpp::wrap(group_lava_coop_dense_cpp(dataModel, intercept, group, regParam, control));
-    return rcpp_result_gen;
-END_RCPP
-}
 // lava_dense_cpp
 List lava_dense_cpp(const Environment& dataModel, const bool& intercept, const List& regParam, const List& control);
 RcppExport SEXP _quadrupen_lava_dense_cpp(SEXP dataModelSEXP, SEXP interceptSEXP, SEXP regParamSEXP, SEXP controlSEXP) {
@@ -286,27 +202,111 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// elastic_net_dense_cpp
+List elastic_net_dense_cpp(const Environment& dataModel, const bool& intercept, const List& regParam, const List& control);
+RcppExport SEXP _quadrupen_elastic_net_dense_cpp(SEXP dataModelSEXP, SEXP interceptSEXP, SEXP regParamSEXP, SEXP controlSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const Environment& >::type dataModel(dataModelSEXP);
+    Rcpp::traits::input_parameter< const bool& >::type intercept(interceptSEXP);
+    Rcpp::traits::input_parameter< const List& >::type regParam(regParamSEXP);
+    Rcpp::traits::input_parameter< const List& >::type control(controlSEXP);
+    rcpp_result_gen = Rcpp::wrap(elastic_net_dense_cpp(dataModel, intercept, regParam, control));
+    return rcpp_result_gen;
+END_RCPP
+}
+// elastic_net_sparse_cpp
+List elastic_net_sparse_cpp(const Environment& dataModel, const bool& intercept, const List& regParam, const List& control);
+RcppExport SEXP _quadrupen_elastic_net_sparse_cpp(SEXP dataModelSEXP, SEXP interceptSEXP, SEXP regParamSEXP, SEXP controlSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const Environment& >::type dataModel(dataModelSEXP);
+    Rcpp::traits::input_parameter< const bool& >::type intercept(interceptSEXP);
+    Rcpp::traits::input_parameter< const List& >::type regParam(regParamSEXP);
+    Rcpp::traits::input_parameter< const List& >::type control(controlSEXP);
+    rcpp_result_gen = Rcpp::wrap(elastic_net_sparse_cpp(dataModel, intercept, regParam, control));
+    return rcpp_result_gen;
+END_RCPP
+}
+// mcp_dense_cpp
+List mcp_dense_cpp(const Environment& dataModel, const bool& intercept, const List& regParam, const List& control);
+RcppExport SEXP _quadrupen_mcp_dense_cpp(SEXP dataModelSEXP, SEXP interceptSEXP, SEXP regParamSEXP, SEXP controlSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const Environment& >::type dataModel(dataModelSEXP);
+    Rcpp::traits::input_parameter< const bool& >::type intercept(interceptSEXP);
+    Rcpp::traits::input_parameter< const List& >::type regParam(regParamSEXP);
+    Rcpp::traits::input_parameter< const List& >::type control(controlSEXP);
+    rcpp_result_gen = Rcpp::wrap(mcp_dense_cpp(dataModel, intercept, regParam, control));
+    return rcpp_result_gen;
+END_RCPP
+}
+// mcp_sparse_cpp
+List mcp_sparse_cpp(const Environment& dataModel, const bool& intercept, const List& regParam, const List& control);
+RcppExport SEXP _quadrupen_mcp_sparse_cpp(SEXP dataModelSEXP, SEXP interceptSEXP, SEXP regParamSEXP, SEXP controlSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const Environment& >::type dataModel(dataModelSEXP);
+    Rcpp::traits::input_parameter< const bool& >::type intercept(interceptSEXP);
+    Rcpp::traits::input_parameter< const List& >::type regParam(regParamSEXP);
+    Rcpp::traits::input_parameter< const List& >::type control(controlSEXP);
+    rcpp_result_gen = Rcpp::wrap(mcp_sparse_cpp(dataModel, intercept, regParam, control));
+    return rcpp_result_gen;
+END_RCPP
+}
+// scad_dense_cpp
+List scad_dense_cpp(const Environment& dataModel, const bool& intercept, const List& regParam, const List& control);
+RcppExport SEXP _quadrupen_scad_dense_cpp(SEXP dataModelSEXP, SEXP interceptSEXP, SEXP regParamSEXP, SEXP controlSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const Environment& >::type dataModel(dataModelSEXP);
+    Rcpp::traits::input_parameter< const bool& >::type intercept(interceptSEXP);
+    Rcpp::traits::input_parameter< const List& >::type regParam(regParamSEXP);
+    Rcpp::traits::input_parameter< const List& >::type control(controlSEXP);
+    rcpp_result_gen = Rcpp::wrap(scad_dense_cpp(dataModel, intercept, regParam, control));
+    return rcpp_result_gen;
+END_RCPP
+}
+// scad_sparse_cpp
+List scad_sparse_cpp(const Environment& dataModel, const bool& intercept, const List& regParam, const List& control);
+RcppExport SEXP _quadrupen_scad_sparse_cpp(SEXP dataModelSEXP, SEXP interceptSEXP, SEXP regParamSEXP, SEXP controlSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const Environment& >::type dataModel(dataModelSEXP);
+    Rcpp::traits::input_parameter< const bool& >::type intercept(interceptSEXP);
+    Rcpp::traits::input_parameter< const List& >::type regParam(regParamSEXP);
+    Rcpp::traits::input_parameter< const List& >::type control(controlSEXP);
+    rcpp_result_gen = Rcpp::wrap(scad_sparse_cpp(dataModel, intercept, regParam, control));
+    return rcpp_result_gen;
+END_RCPP
+}
 
 static const R_CallMethodDef CallEntries[] = {
     {"_quadrupen_bounded_regression_cpp", (DL_FUNC) &_quadrupen_bounded_regression_cpp, 4},
-    {"_quadrupen_elastic_net_dense_cpp", (DL_FUNC) &_quadrupen_elastic_net_dense_cpp, 4},
-    {"_quadrupen_elastic_net_sparse_cpp", (DL_FUNC) &_quadrupen_elastic_net_sparse_cpp, 4},
-    {"_quadrupen_mcp_dense_cpp", (DL_FUNC) &_quadrupen_mcp_dense_cpp, 4},
-    {"_quadrupen_mcp_sparse_cpp", (DL_FUNC) &_quadrupen_mcp_sparse_cpp, 4},
-    {"_quadrupen_scad_dense_cpp", (DL_FUNC) &_quadrupen_scad_dense_cpp, 4},
-    {"_quadrupen_scad_sparse_cpp", (DL_FUNC) &_quadrupen_scad_sparse_cpp, 4},
     {"_quadrupen_FusedLasso_cpp", (DL_FUNC) &_quadrupen_FusedLasso_cpp, 4},
+    {"_quadrupen_group_lava_l1l2_dense_cpp", (DL_FUNC) &_quadrupen_group_lava_l1l2_dense_cpp, 5},
+    {"_quadrupen_group_lava_l1linf_dense_cpp", (DL_FUNC) &_quadrupen_group_lava_l1linf_dense_cpp, 5},
+    {"_quadrupen_group_lava_coop_dense_cpp", (DL_FUNC) &_quadrupen_group_lava_coop_dense_cpp, 5},
     {"_quadrupen_group_enet_l1l2_dense_cpp", (DL_FUNC) &_quadrupen_group_enet_l1l2_dense_cpp, 5},
     {"_quadrupen_group_enet_l1l2_sparse_cpp", (DL_FUNC) &_quadrupen_group_enet_l1l2_sparse_cpp, 5},
     {"_quadrupen_group_enet_l1linf_dense_cpp", (DL_FUNC) &_quadrupen_group_enet_l1linf_dense_cpp, 5},
     {"_quadrupen_group_enet_l1linf_sparse_cpp", (DL_FUNC) &_quadrupen_group_enet_l1linf_sparse_cpp, 5},
     {"_quadrupen_group_enet_coop_dense_cpp", (DL_FUNC) &_quadrupen_group_enet_coop_dense_cpp, 5},
     {"_quadrupen_group_enet_coop_sparse_cpp", (DL_FUNC) &_quadrupen_group_enet_coop_sparse_cpp, 5},
-    {"_quadrupen_group_lava_l1l2_dense_cpp", (DL_FUNC) &_quadrupen_group_lava_l1l2_dense_cpp, 5},
-    {"_quadrupen_group_lava_l1linf_dense_cpp", (DL_FUNC) &_quadrupen_group_lava_l1linf_dense_cpp, 5},
-    {"_quadrupen_group_lava_coop_dense_cpp", (DL_FUNC) &_quadrupen_group_lava_coop_dense_cpp, 5},
     {"_quadrupen_lava_dense_cpp", (DL_FUNC) &_quadrupen_lava_dense_cpp, 4},
     {"_quadrupen_ridge_cpp", (DL_FUNC) &_quadrupen_ridge_cpp, 4},
+    {"_quadrupen_elastic_net_dense_cpp", (DL_FUNC) &_quadrupen_elastic_net_dense_cpp, 4},
+    {"_quadrupen_elastic_net_sparse_cpp", (DL_FUNC) &_quadrupen_elastic_net_sparse_cpp, 4},
+    {"_quadrupen_mcp_dense_cpp", (DL_FUNC) &_quadrupen_mcp_dense_cpp, 4},
+    {"_quadrupen_mcp_sparse_cpp", (DL_FUNC) &_quadrupen_mcp_sparse_cpp, 4},
+    {"_quadrupen_scad_dense_cpp", (DL_FUNC) &_quadrupen_scad_dense_cpp, 4},
+    {"_quadrupen_scad_sparse_cpp", (DL_FUNC) &_quadrupen_scad_sparse_cpp, 4},
     {NULL, NULL, 0}
 };
 

@@ -25,39 +25,45 @@ double Optimizer::estimate_lipschitz(
   const mat& XTX,
   uword max_it,
   double tol) {
-  
+
   uword pk = XTX.n_rows;
   if (pk == 0) return 1.0;
   if (pk == 1) return as_scalar(XTX(0,0));
-  
-  vec q = randu<vec>(pk);
-  q /= norm(q, 2);
-  
+
+  // Warm-start from previous eigenvector when size matches; random init otherwise
+  vec q;
+  if (q_lipschitz_.n_elem == pk) {
+    q = q_lipschitz_;
+  } else {
+    q = randu<vec>(pk);
+    q /= norm(q, 2);
+  }
+
   double lambda = 0.0;
   double lambda_old = 0.0;
-  
-  // 2. Power Iteration Loop
+
   for (uword i = 0; i < max_it; ++i) {
     vec z = XTX * q;
-    
-    // Largest Eigen Value (simplified Rayleigh quotien since ||q||=1)
+
+    // Largest eigenvalue (simplified Rayleigh quotient since ||q||=1)
     lambda = dot(q, z);
     if (i > 0 && std::abs(lambda - lambda_old) < tol * lambda) {
       break;
     }
     lambda_old = lambda;
-    
-    // Normalising for next iterate
+
     double n = norm(z, 2);
     if (n > 1e-15) {
       q = z / n;
     } else {
-      break; 
+      break;
     }
   }
-  
+
+  q_lipschitz_ = q; // save for next call
+
   // Safety margin for 1/L
-  return lambda * 1.01; 
+  return lambda * 1.01;
 }
 
 uword Optimizer::pgd(
@@ -65,16 +71,17 @@ uword Optimizer::pgd(
     const double& lambda,
     const vec& XTy,
     const mat& XTX,
-    std::function<vec(const vec&, double)> proximal_operator, 
+    std::function<vec(const vec&, double)> proximal_operator,
     const double& accuracy,
     const uword& max_iter,
-    const uword m) {
-  
+    const uword m,
+    double L_cache) {
+
   uword p = beta.n_elem;
-  mat mat_F(p, m, fill::zeros); 
-  mat mat_X(p, m, fill::zeros); 
-  
-  double invL = 1.0 / estimate_lipschitz(XTX); 
+  mat mat_F(p, m, fill::zeros);
+  mat mat_X(p, m, fill::zeros);
+
+  double invL = 1.0 / ((L_cache > 0) ? L_cache : estimate_lipschitz(XTX)); 
   uword iter = 0;
   double delta = 2.0 * accuracy;
   
@@ -94,21 +101,12 @@ uword Optimizer::pgd(
       mat_F.col(col_idx) = f_k;       // son résidu f_k
       
       uword current_m = std::min(iter, m);
-      
-      // On résout le système sur l'historique disponible
+
       if (current_m > 1) {
-        mat F_delta(p, current_m - 1);
-        mat X_delta(p, current_m - 1);
-        
-        // On calcule les différences par rapport au résidu actuel
-        for (uword j = 0; j < current_m; ++j) {
-          // Optionnel : tu peux ici reconstruire proprement les différences 
-          // f_{j+1} - f_j pour une version plus standard d'Anderson
-        }
-        
-        // Raccourci efficace : 
+        // Anderson mixing (type II): dF(:,j) = f_j - f_k (differences from current residual)
+        // mat_X.col(j) + mat_F.col(j) = beta_j + (beta_{j+1} - beta_j) = beta_{j+1}
         mat dF = mat_F.cols(0, current_m - 1);
-        dF.each_col() -= f_k; 
+        dF.each_col() -= f_k;
         
         vec gamma;
         if (solve(gamma, dF, -f_k, solve_opts::fast)) {
@@ -135,17 +133,17 @@ uword Optimizer::fista(
   const double& lambda,
   const vec& XTy,
   const mat& XTX,
-  std::function<vec(const vec&, double)> proximal_operator, 
+  std::function<vec(const vec&, double)> proximal_operator,
   const double& accuracy,
-  const uword& max_iter) {
-  
-  // Computing Lipschitz constant (largest eigen value in XA^T XA)
-  double L = estimate_lipschitz(XTX); 
-  
-  vec betak; 
+  const uword& max_iter,
+  double L_cache) {
+
+  double L = (L_cache > 0) ? L_cache : estimate_lipschitz(XTX);
+
+  vec betak;
   vec betal = beta;
   double delta = 2.0 * accuracy;
-  
+
   double t0 = 1.0, tk;
   uword iter = 0;
   double invL = 1.0 / L;

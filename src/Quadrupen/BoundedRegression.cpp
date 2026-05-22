@@ -30,14 +30,29 @@ BoundedRegression::BoundedRegression(
     grad_ = -data_.XTy_          ; // vector of current gradient (smooth part)
   }
 
+List BoundedRegression::to_list(const List& monitoring) {
+  return List::create(
+    Named("tuning_param") = List::create(
+      Named("linf") = lambdas_,
+      Named("l2")   = gamma_
+    ),
+    Named("coef")       = coef_,
+    Named("active")     = unbounded_var(),
+    Named("intercept")  = intercept_,
+    Named("normx")      = data_.norm_X_,
+    Named("df")         = df_,
+    Named("monitoring") = monitoring
+  ) ;
+}
+
 double BoundedRegression::get_df() {
 
   double df = data_.centered_ + unbounded_.size();
-  
-  mat SUU(unbounded_.size(), unbounded_.size()) ;
+
   if (gamma_ > 0) {
     mat C = inv_sympd(data_.XTX_(unbounded_,unbounded_));
     // loop due to sparse encoding. should iterate over the n_zeros only...
+    mat SUU(unbounded_.size(), unbounded_.size()) ;
     for (uword i=0;i<unbounded_.size();i++){
       for (uword j=i;j<unbounded_.size();j++){
         SUU(i,j) = data_.S_.at(unbounded_(i),unbounded_(j));
@@ -46,7 +61,7 @@ double BoundedRegression::get_df() {
     }
     df -= trace(SUU * C);
   }
-  
+
   return(df);
 }
 
@@ -124,7 +139,8 @@ List BoundedRegression::solution_path(const List& control) {
     } else {
       coef_ = join_rows(coef_, beta_/data_.norm_X_) ;
       intercept_.push_back(data_.y_bar_ - dot(beta_, data_.X_bar_));
-      bounded_.push_back(find(abs(beta_) == max(abs(beta_)))) ;
+      double max_abs = max(abs(beta_));
+      bounded_.push_back(find(abs(beta_) >= max_abs * (1.0 - 1e-10))) ;
       df_.push_back(get_df()) ;
     }
 

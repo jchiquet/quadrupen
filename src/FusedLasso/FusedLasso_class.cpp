@@ -115,7 +115,7 @@ void FusedLasso::getSplitFusionsActive(vector<int>& newFusions, vector<int>& new
   list<int>::iterator listIt;
   int newNumFused = 0;
   
-  for(unsigned int i = 0; i < p; ++i) {
+  for(int i = 0; i < p; ++i) {
     if(newFusions[i] == -1) { // not yet grouped
       nodes = pg.connectedWithSameValue(i, beta, accuracy);
       if(beta[i] == 0) { // all variables are singles
@@ -171,7 +171,7 @@ void FusedLasso::getSplitFusionsInactive(vector<int>& newFusions, vector<int>& n
   list<int>::iterator listIt;
   int newNumFused = 0;
   
-  for(unsigned int i = 0; i < p; ++i) {
+  for(int i = 0; i < p; ++i) {
     if(newFusions[i] == -1) { // not yet grouped
       nodes = pg.connectedWithSameValue(i, beta, accuracy);
       if(beta[i] == 0) {
@@ -193,8 +193,8 @@ void FusedLasso::getSplitFusionsInactive(vector<int>& newFusions, vector<int>& n
       }
       
       // now mark all the sets in here
-      for(int j = 0; j < groups.size(); ++j) {
-        // setting this here is not completely correct 
+      for(size_t j = 0; j < groups.size(); ++j) {
+        // setting this here is not completely correct
         newFusedGroupSize.push_back(groups[j].size());
         for(listIt = groups[j].begin(); listIt != groups[j].end(); ++listIt) {
           newFusions[*listIt] = newNumFused;
@@ -265,7 +265,7 @@ bool FusedLasso::identifyNewFusionsHuber() {
   
   // create the object to run the coordinate descent algorithm
   vector<int> singleFusions(p);
-  for(unsigned int i = 0; i < p; ++i) {
+  for(int i = 0; i < p; ++i) {
     singleFusions[i] = i;
   }
   
@@ -405,7 +405,7 @@ bool FusedLasso::runFusedGeneral(penEnum penType) {
   vector<double> wLambda1Fused(fusedGroupSize.size());
   for(unsigned int i = 0; i < fusedGroups.size(); ++i) {
     wLambda1Fused[i] = 0;
-    for(int j = 0; j < fusedGroups[i].size(); ++j) {
+    for(size_t j = 0; j < fusedGroups[i].size(); ++j) {
       wLambda1Fused[i] += wLambda1[fusedGroups[i][j]];
     }
   }
@@ -455,7 +455,7 @@ bool FusedLasso::runAlgorithmL2() {
   bool lastRunOK = true;
   // set single fusions
   fusedGroupSize.resize(p, 1);
-  for(unsigned int i = 0; i < p; ++i) {
+  for(int i = 0; i < p; ++i) {
     fusions[i] = i;
   }
   
@@ -639,7 +639,7 @@ double FusedLasso::findMaxLambda1(const list<int>& exemptVars) {
   double highLambda1 = 0;
   double foo;
   // now search through the 0 variables which will start next
-  for(unsigned int i = 0; i < p; ++i) {
+  for(int i = 0; i < p; ++i) {
     if(quadratic->getBeta(i) == 0) {
       foo = fabs(quadratic->getDerivative(i) / wLambda1[i]);
       if(highLambda1 < foo) {
@@ -660,7 +660,7 @@ double FusedLasso::findMaxLambda2(double lambda1_here) {
   
   outerIterNum=0; // reset as this is run several times
   // first, set beta equal to 0.1
-  for(unsigned int i = 0; i < p; i++) {
+  for(int i = 0; i < p; i++) {
     beta[i] = 0.1;
     quadratic->updateBeta(i, 0.1);
   }
@@ -675,7 +675,7 @@ double FusedLasso::findMaxLambda2(double lambda1_here) {
   runAlgorithmHuber();
   
   vector<double> oldBeta(p,0);
-  for(unsigned int i=0; i < p; ++i) {
+  for(int i=0; i < p; ++i) {
     oldBeta[i] = beta[i];
   }
   bool hasChanged;
@@ -685,7 +685,7 @@ double FusedLasso::findMaxLambda2(double lambda1_here) {
   for(unsigned int i = 0; i < 30; ++i) {
     setNewLambdas(lambda1, lambda2);
     runAlgorithmHuber();
-    for(unsigned int i = 0; i < p; ++i) {
+    for(int i = 0; i < p; ++i) {
       if(fabs(oldBeta[i] - beta[i]) > accuracy * 10) {
         hasChanged = true;
       }
@@ -709,7 +709,7 @@ void FusedLasso::printBetaAndGroup(ostream& outStream) {
   outStream << "========== Fusions =================" << endl;
   
   int curGroup = -1;
-  for(unsigned int i = 0; i < p; ++i) {
+  for(int i = 0; i < p; ++i) {
     if(fusions[i] > curGroup) { // a new group has started
       curGroup++;
       outStream << " Group: " << i << " Beta: " << beta[i] ;

@@ -9,7 +9,6 @@
 
 #include "FusedLasso_utils.h"
 
-using namespace std;
 
 struct GraphEdge {
   GraphEdge* backwards;

@@ -9,9 +9,11 @@
 #include "PenaltyDense.h"
 #include "ActiveSet.h"
 
-using namespace Rcpp;
-using namespace arma;
-using namespace std;
+using arma::vec;
+using arma::mat;
+using arma::uvec;
+using arma::uword;
+using Rcpp::List;
 
 class OptimizerLINF : public Optimizer {
 

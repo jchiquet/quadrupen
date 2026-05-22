@@ -16,6 +16,20 @@ RidgeRegression::RidgeRegression(
   get_lambda_seq(get_lambda_max(), regParam) ;
 }
 
+List RidgeRegression::to_list(const List& monitoring) {
+  return List::create(
+    Named("tuning_param") = List::create(
+      Named("l2") = lambdas_,
+      Named("l1") = 0
+    ),
+    Named("coef")       = coef_,
+    Named("intercept")  = intercept_,
+    Named("normx")      = data_.norm_X_,
+    Named("df")         = df_,
+    Named("monitoring") = monitoring
+  ) ;
+}
+
 List RidgeRegression::solution_path(const mat& C_inv) {
 
   // SVD DECOMPOSITION OF ( X * C^-1)

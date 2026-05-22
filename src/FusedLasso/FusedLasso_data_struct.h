@@ -3,7 +3,6 @@
 #include "FusedLasso_utils.h"
 #include "FusedLasso_enums.h"
 
-using namespace std;
 
 // Very simple implementation of a sparse matrix
 // The matrix sparseness structure can not be changed after construction
@@ -11,9 +10,9 @@ using namespace std;
 
 class SparseMatrix {
 public:
-  unsigned int nnz;
-  unsigned int n;
-  unsigned int p;
+  int nnz;
+  int n;
+  int p;
   vector<double> nzVec; // vector of non-zero elements
   vector<int> indexCol; // index of the first element of x of column; length p+1
   vector<int> rowPos; // row position of the ith element of x; length size(x)
@@ -79,7 +78,7 @@ public:
       }
     } else {
       // Weighted: res += X[r,col]^2 * w[r]
-      if(weights->size() != n) {
+      if((int)weights->size() != n) {
         Rcpp::stop("weights not the right size\n");
       }
       for(int pos = indexCol[col]; pos < indexCol[col+1]; ++pos) {
@@ -93,7 +92,7 @@ public:
   // Pattern used by: innerProd(y, i) when w==nullptr, innerProd(y, i, w) when w!=nullptr
   inline double dotProductColumnVector(const vector<double>& y, int col, 
                                        const vector<double>* weights = nullptr) const {
-    if(y.size() != n) {
+    if((int)y.size() != n) {
       Rcpp::stop("y does not have the right size\n");
     }
     if(col < 0 || col >= p) {
@@ -107,7 +106,7 @@ public:
       }
     } else {
       // Weighted: res += y[r] * X[r,col] * w[r]
-      if(weights->size() != n) {
+      if((int)weights->size() != n) {
         Rcpp::stop("weights not the right size\n");
       }
       for(int posI = indexCol[col]; posI < indexCol[col + 1]; ++posI) {
@@ -148,12 +147,6 @@ public:
 
 // the class that keeps the data for calculating the derivative
 class QuadraticDerivative {
-
-protected:
-    // Common initialization helper for derived classes
-    // Centralizes the data member initialization to avoid duplication
-    void initializeCommonData(const SparseMatrix& X_in, const vector<double>& y_in, 
-                              const vector<double>& w_in, const vector<double>& beta_in);
 
 public:
     /*

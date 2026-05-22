@@ -1,6 +1,5 @@
 #pragma once
 
-#define ARMA_NO_DEBUG
 #define ARMA_USE_LAPACK
 #define ARMA_USE_BLAS
 
@@ -12,9 +11,7 @@
 
 enum class DenseNorm {L2, LINF};
 
-using namespace Rcpp;
-using namespace arma;
-using namespace std;
+using arma::vec;
 
 template <DenseNorm norm> class DensePenalty {
 public: 

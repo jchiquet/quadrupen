@@ -1,6 +1,5 @@
 #pragma once
 
-#define ARMA_NO_DEBUG
 #define ARMA_USE_LAPACK
 #define ARMA_USE_BLAS
 
@@ -12,9 +11,10 @@
 
 enum class GroupSparseNorm {L1L2, L1LINF, COOP};
 
-using namespace Rcpp;
-using namespace arma;
-using namespace std;
+using arma::vec;
+using arma::uvec;
+using arma::uword;
+using arma::zeros;
 
 template <GroupSparseNorm norm> class GroupPenalty {
 public: 

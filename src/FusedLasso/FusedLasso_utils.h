@@ -12,13 +12,16 @@
 #include <set>
 #include <map>
 #include <queue>
-#include <math.h>
+#include <cmath>
 
-using namespace std;
-
-#define Abs(x)    ((x) < 0 ? -(x) : (x))
-#define Max(a, b) ((a) > (b) ? (a) : (b))
-#define Min(a, b) ((a) < (b) ? (a) : (b))
+using std::vector;
+using std::string;
+using std::list;
+using std::set;
+using std::map;
+using std::queue;
+using std::ostream;
+using std::pair;
 
 const double tolerance =1.0e-8;
 const double infinite = std::numeric_limits<double>::max();

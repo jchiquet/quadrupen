@@ -4,6 +4,7 @@
 */
   
 #include "PenaltySparse.h"
+#include "PenaltyUtils.h"
 
 using namespace Rcpp;
 using namespace arma;
@@ -36,7 +37,7 @@ vec SparsePenalty<SparseNorm::L1>::elt_norm(const vec& x, const vec& w, double l
 
 template<>
 vec SparsePenalty<SparseNorm::L1>::proximal(const vec& x, double lambda, const vec& w) {
-  return(sign(x) % max(abs(x) - lambda * w, zeros<vec>(x.n_elem))) ;
+  return soft_threshold(x, lambda * w) ;
 }
 
 template<>
@@ -92,7 +93,8 @@ vec SparsePenalty<SparseNorm::MCP>::proximal(const vec& x, double lambda, const 
     if (abs_xi <= l) {
       res[i] = 0.0;
     } else if (abs_xi <= eta_ * l) {
-      res[i] = std::copysign(abs_xi - l, x[i]) / (1.0 - 1.0/eta_);
+      // equivalent to / (1 - 1/eta_), but avoids singularity at eta_=1
+      res[i] = std::copysign((abs_xi - l) * eta_ / (eta_ - 1.0), x[i]);
     } else {
       res[i] = x[i];
     }

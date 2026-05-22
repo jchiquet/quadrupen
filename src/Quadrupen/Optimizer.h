@@ -10,9 +10,12 @@
 
 enum SolverType {FISTA, QUADRA, PGD};
 
-using namespace Rcpp;
-using namespace arma;
-using namespace std;
+using arma::vec;
+using arma::mat;
+using arma::uvec;
+using arma::uword;
+using Rcpp::List;
+using std::vector;
 
 class Optimizer {
 public:
@@ -21,11 +24,12 @@ public:
   Optimizer(const List& control) ;
 
   SolverType algorithm_ ;
-  double accuracy_, gap_, J_, D_ ; 
+  double accuracy_, gap_, J_, D_ ;
   bool verbosity_       ;
   uword iter_, maxiter_, maxfeat_, monitoring_ ;
-  vector<uword> inner_iter_   ; 
-  vector<double> J_vec_, D_vec_ ;   
+  vector<uword> inner_iter_   ;
+  vector<double> J_vec_, D_vec_ ;
+  vec q_lipschitz_ ; // warm-start eigenvector for power iteration in estimate_lipschitz
   
   uword conjugate_gradient(
       vec& x0,
@@ -42,12 +46,13 @@ public:
   
   uword fista(
       vec& beta,
-      const double& lambda, 
+      const double& lambda,
       const vec& XTy,
       const mat& XTX,
-      std::function<vec(const vec&, double)> proximal_operator, 
-      const double& accuracy, 
-      const uword& max_iter
+      std::function<vec(const vec&, double)> proximal_operator,
+      const double& accuracy,
+      const uword& max_iter,
+      double L_cache = -1.0  // pre-computed Lipschitz constant; negative means auto-compute
   ) ;
 
   uword pgd(
@@ -55,10 +60,11 @@ public:
       const double& lambda,
       const vec& XTy,
       const mat& XTX,
-      std::function<vec(const vec&, double)> proximal_operator, 
+      std::function<vec(const vec&, double)> proximal_operator,
       const double& accuracy,
       const uword& max_iter,
-      const uword m = 3
+      const uword m = 3,
+      double L_cache = -1.0  // pre-computed Lipschitz constant; negative means auto-compute
   ) ;
 
   void optimality_violation(

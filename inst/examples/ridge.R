@@ -35,7 +35,7 @@ plot(ridge.block)
 beta_ridge <- as.numeric(ridge(x,y,lambda=1)$coefficients)
 beta_ridge_neighbor <- as.numeric(ridge(x,y,lambda=10,struct=L1)$coefficients)
 beta_ridge_block <- as.numeric(ridge(x,y,lambda=10,struct=L2)$coefficients)
-beta_enet_block  <- as.numeric(elastic_net(x,y,lambda2=5,lambda1=20,struct=L2)$coefficients)
+beta_enet_block  <- as.numeric(elastic_net(x,y,lambda2=5,lambda1=20,struct=L2,refit=TRUE)$coefficients)
 
 par(mfrow=c(2,2))
 plot(beta_ridge, type="b", ylim=c(-1,1))

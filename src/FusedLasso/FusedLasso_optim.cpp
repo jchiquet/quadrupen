@@ -18,7 +18,7 @@ FusedLassoCoordinate::FusedLassoCoordinate(counted_ptr<QuadraticDerivative> quad
     
     // Pre-multiply wLambda1 by lambda1
     this->wLambda1Mult.resize(wLambda1.size());
-    for(int i = 0; i < wLambda1.size(); ++i) {
+    for(size_t i = 0; i < wLambda1.size(); ++i) {
         wLambda1Mult[i] = wLambda1[i] * lambda1;
     }
     
@@ -35,8 +35,8 @@ FusedLassoCoordinate::FusedLassoCoordinate(counted_ptr<QuadraticDerivative> quad
     // Store connections and pre-multiply wLambda2 by lambda2
     this->connections = connections;
     this->wLambda2Mult = wLambda2;
-    for(int i = 0; i < wLambda2Mult.size(); ++i) {
-        for(int j = 0; j < wLambda2Mult[i].size(); ++j) {
+    for(size_t i = 0; i < wLambda2Mult.size(); ++i) {
+        for(size_t j = 0; j < wLambda2Mult[i].size(); ++j) {
             wLambda2Mult[i][j] *= lambda2;
         }
     }
@@ -154,7 +154,7 @@ void FusedLassoCoordinate::derivAdjustment(double& adjDeriv, double& zeroPenalty
     switch(penType) {
         case L1:
             // L1 penalty adjustment
-            for(int i = 0; i < connections[pos].size(); ++i) {
+            for(size_t i = 0; i < connections[pos].size(); ++i) {
                 double connBeta = beta[connections[pos][i]];
                 if(connBeta > 0) {
                     adjDeriv -= wLambda2Mult[pos][i];
@@ -170,7 +170,7 @@ void FusedLassoCoordinate::derivAdjustment(double& adjDeriv, double& zeroPenalty
             
         case Huber:
             // Huber penalty adjustment
-            for(int i = 0; i < connections[pos].size(); ++i) {
+            for(size_t i = 0; i < connections[pos].size(); ++i) {
                 double connBeta = beta[connections[pos][i]];
                 double threshold = 1.0 / huberParam;
                 if(connBeta > threshold) {
@@ -188,7 +188,7 @@ void FusedLassoCoordinate::derivAdjustment(double& adjDeriv, double& zeroPenalty
             
         case L2:
             // L2 penalty adjustment
-            for(int i = 0; i < connections[pos].size(); ++i) {
+            for(size_t i = 0; i < connections[pos].size(); ++i) {
                 adjDeriv -= beta[connections[pos][i]] * 2 * wLambda2Mult[pos][i];
             }
             break;
@@ -258,7 +258,7 @@ vector<double> FusedLassoCoordinate::getBetaOriginal(vector<int>& fusions) {
     vector<double> betaOrig(fusions.size());
 
     for(unsigned int i = 0; i < fusions.size(); ++i) {
-        if(fusions[i] > beta.size() - 1) {
+        if((size_t)fusions[i] >= beta.size()) {
             Rcpp::stop("The node has a group that is too large. Node: %i", i, "\n") ;
         }
         betaOrig[i] = beta[fusions[i]];

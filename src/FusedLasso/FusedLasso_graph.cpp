@@ -1,11 +1,13 @@
 #include "FusedLasso_graph.h"
 
+using namespace std;
+
 void  Graph::distance(const bool fromSource) 
 {
   list<int>::iterator listIt;
   // set the distances to maximum
   for(listIt = maxFlowNodeList.begin(); listIt != maxFlowNodeList.end(); ++listIt) {
-    dist[*listIt] = maxFlowNodeList.size() + 2;
+    dist[*listIt] = (int)(maxFlowNodeList.size() + 2);
   }
   queue<int> next;
   int u; // number of node that is currently being looked at
@@ -100,10 +102,10 @@ int Graph::findDist(int nodeNum)
   // check if nodeNum is connected to the source
   int newDist;
   if(sourceFlow[nodeNum] > tolerance) {
-    newDist = maxFlowNodeList.size() + 2;
+    newDist = (int)(maxFlowNodeList.size() + 2);
   }
   else {
-    newDist = 2 * maxFlowNodeList.size() + 2;
+    newDist = (int)(2 * maxFlowNodeList.size() + 2);
   }
   
   for(edgeIt = nodes[nodeNum].begin(); edgeIt != nodes[nodeNum].end(); ++edgeIt)
@@ -161,7 +163,7 @@ bool Graph::pushRelabel(const int i)
   }
   
   // check if we can push back to the source
-  if(dist[i] > maxFlowNodeList.size() + 1 && sourceFlow[i] > 0) {
+  if(dist[i] > (int)(maxFlowNodeList.size() + 1) && sourceFlow[i] > 0) {
     if(!pushToSource(i)) {
       return(false);
     }
@@ -315,7 +317,7 @@ list<int> Graph::connectedTo(const list<int>& nodeList)
   // step through all nodes in the set
   for(listIt = nodeList.begin(); listIt != nodeList.end(); ++listIt)
   {
-    if(*listIt < nodes.size()) {
+    if((size_t)*listIt < nodes.size()) {
       for(edgeIt = nodes[*listIt].begin(); edgeIt != nodes[*listIt].end(); ++edgeIt) {
         if(!subNodesCT[(*edgeIt)->to]) {
           conn.push_back((*edgeIt)->to);
@@ -361,7 +363,7 @@ void Graph::breadthFirstSearch(const int startNode, vector<int>&parentTable, vec
     }
     
     nodesToSearch.pop_back();
-    for(int edgeIndex = 0; edgeIndex <  nodes[u].size(); ++edgeIndex) {
+    for(size_t edgeIndex = 0; edgeIndex < nodes[u].size(); ++edgeIndex) {
       e = nodes[u][edgeIndex];
       if(!subNodes[e->to]) {
         continue; // not part of the maxFlowGraph
@@ -516,13 +518,12 @@ Graph::Graph(Rcpp::List connList, Rcpp::List connWeights)
   Rcpp::NumericVector weightOneNode;    
   int numberOfNodes = connList.length();
   int numOfConn;
-  int node1,node2;
-  
+
   vector<list<int> > conn(numberOfNodes);
   vector<list<double> > weights(numberOfNodes);
   list<int> foo;
   list<double> bar;
-  
+
   // go through all the nodes
   for(int i=0; i < numberOfNodes; ++i)
   {
@@ -531,7 +532,6 @@ Graph::Graph(Rcpp::List connList, Rcpp::List connWeights)
     numOfConn = connOneNode.length(); // how many are there
     foo.clear();
     bar.clear();
-    node1 = i; // number of node currently working on
     for(int j = 0; j < numOfConn; ++j) // go through all connections of this node
     {
       foo.push_back(connOneNode[j] - 1);
@@ -605,9 +605,9 @@ void Graph::makeCopy(const Graph& pg) {
   nodes.clear(); nodes.resize(pg.nodes.size(), vector<GraphEdge*>());
   
   // go through all the edges 
-  for(int node = 0; node < pg.nodes.size(); ++node) {
+  for(size_t node = 0; node < pg.nodes.size(); ++node) {
     for(edgeIt = pg.nodes[node].begin(); edgeIt != pg.nodes[node].end(); ++edgeIt) {
-      if((*edgeIt)->to > node) {
+      if((size_t)(*edgeIt)->to > node) {
         edgePtr = *edgeIt;
         edgePtrBack = edgePtr->backwards;
         addEdge(node, edgePtr->to, edgePtr->capacity, edgePtrBack->capacity, edgePtr->flow, edgePtrBack->flow); 
@@ -746,7 +746,7 @@ list<int> Graph::reachableFromSource()
   // reachable nodes are all nodes in parent except source and sink
   list<int>::iterator listIt;
   for(listIt = maxFlowNodeList.begin(); listIt != maxFlowNodeList.end(); ++listIt) {
-    if((int) dist[*listIt] <= maxFlowNodeList.size())
+    if(dist[*listIt] <= (int)maxFlowNodeList.size())
     {
       // node is reachable; insert node in external notation
       reachable.push_back(*listIt); 
@@ -841,9 +841,7 @@ list<int> Graph::allNodes()
 {
   list<int> all;
   
-  for(int i = 0; i < nodes.size(); ++i) {
-    all.push_back(i);
-  }
+  for(size_t i = 0; i < nodes.size(); ++i) all.push_back(static_cast<int>(i)) ;
   
   return(all);
 }
@@ -860,8 +858,8 @@ void Graph::getFusedConnectionsWeights(const vector<int>& fusions, int numFusion
   
   // create a mapping of fused groups to original groups
   vector<list<int> > mapFusedToOriginal(numFusions);
-  for(int i = 0; i < fusions.size(); ++i) {
-    mapFusedToOriginal[fusions[i]].push_back(i);
+  for(size_t i = 0; i < fusions.size(); ++i) {
+    mapFusedToOriginal[fusions[i]].push_back((int)i);
   }
   
   list<int> usedFusedGroups;
@@ -898,7 +896,7 @@ void Graph::getFusedConnectionsWeights(const vector<int>& fusions, int numFusion
 
 void Graph::makePullAdjustment(const vector<double>& beta, vector<double>& nodePull, double lambda2, double accuracy) {
   Node::iterator nodeIt;
-  for(int pos = 0; pos < nodePull.size(); ++pos) {
+  for(int pos = 0; pos < (int)nodePull.size(); ++pos) {
     for(nodeIt = nodes[pos].begin(); nodeIt != nodes[pos].end(); ++nodeIt) {
       if(beta[pos] - beta[(*nodeIt)->to] > accuracy) {
         nodePull[pos] += lambda2 * (*nodeIt)->capacity;

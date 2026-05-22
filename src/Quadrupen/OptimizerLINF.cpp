@@ -29,7 +29,8 @@ uword OptimizerLINF::quadratic_breg(
   
   uword iter = 0, iter_in= 0 ; // count the number of systems solved
   bool success = false ;
-  while ((!success) && (iter < 3)) {
+  const uword max_boundary_iter = beta.n_elem + 1; // at most p variables can cross
+  while ((!success) && (iter < max_boundary_iter)) {
     
     iter++;
     
@@ -67,6 +68,9 @@ uword OptimizerLINF::quadratic_breg(
     }
   }
   
+  if (!success)
+    throw std::runtime_error("Failed to resolve boundary transitions (too many simultaneous crossings).");
+
   // Guys leaving the boundary after optimization
   grad = -data.XTy_ + data.XTX_ * beta ;
   uvec ind_toA  = find(theta == sign(grad(B)));
