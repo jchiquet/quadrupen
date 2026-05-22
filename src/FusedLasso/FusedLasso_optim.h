@@ -20,8 +20,10 @@ public:
     
     vector<int> active; // which fused groups are active
 
+    vector<pair<double,double>> rootScratch_; // reused buffer for findRootL1/findRootHuber
+
     // object for calculating the quadratic derivatives under the current fusions
-    counted_ptr<QuadraticDerivative> quadratic; 
+    shared_ptr<QuadraticDerivative> quadratic; 
 
     int n;
     int p;
@@ -71,7 +73,7 @@ public:
     bool deactivateBeta(int pos);
 
     // Constructor
-    FusedLassoCoordinate(counted_ptr<QuadraticDerivative> quadDer, const vector<double>& wLambda1, const vector<vector<int> > &connections, const vector<vector<double> > &wLambda2, int maxIterInner, double accuracy, int maxActivateVars, double lambda1, double lambda2, penEnum penType=L1, double huberParam=100);
+    FusedLassoCoordinate(shared_ptr<QuadraticDerivative> quadDer, const vector<double>& wLambda1, const vector<vector<int> > &connections, const vector<vector<double> > &wLambda2, int maxIterInner, double accuracy, int maxActivateVars, double lambda1, double lambda2, penEnum penType=L1, double huberParam=100);
 
     // After initialization, run the whole algorithm
     bool runAlgorithm();
@@ -83,16 +85,10 @@ public:
     vector<double> getBetaOriginal(vector<int>& fusions);
 
     void printBeta(ostream& outStream);
-
-    void printBetaActive(ostream& outStream); 
-
+    void printBetaActive(ostream& outStream);
     void printDerivActive(ostream& outStream);
-
     void printDerivs(ostream& outStream);
-
     void printConnectionsWeights(ostream& outStream);
-
     void printPosSingleStepInfo(int pos, ostream& outStream);
-
 };
 

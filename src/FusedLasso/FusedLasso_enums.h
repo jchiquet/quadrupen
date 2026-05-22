@@ -24,3 +24,14 @@ enum penEnum {
     L2         ///< Pénalité L2 (norme L2)
 };
 
+/**
+ * @enum FusionStrategy
+ * @brief Niveau maximal de fusion autorisé durant l'algorithme
+ */
+enum class FusionStrategy {
+    None              = -1,  ///< Aucune fusion (beta figé dans les groupes courants)
+    EqualOnly         =  0,  ///< Fusionne uniquement les groupes égaux
+    EqualSplitInactive=  1,  ///< Ajoute le split des inactifs
+    Full              =  2   ///< Stratégie complète : égaux + split inactifs + split actifs
+};
+

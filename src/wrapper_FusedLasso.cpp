@@ -47,7 +47,7 @@ List FusedLasso_cpp(
   const double accuracy               = controlFit["accuracy"]      ;
   const unsigned int maxActivateVars  = controlFit["maxactivation"] ;
   const unsigned int maxNonZero       = controlFit["maxfeat"]       ;
-  const int maxFusionLevel            = controlFit["fusioncheck"]   ;
+  const FusionStrategy maxFusion = static_cast<FusionStrategy>(static_cast<int>(controlFit["fusioncheck"]));
   const bool verbose                  = controlFit["verbose"]       ;
   const bool normalize                = controlFit["normalize"]       ;
   
@@ -90,11 +90,9 @@ List FusedLasso_cpp(
                 maxActivateVars, 0, 0, regType);
 
   // Vectors of penalties
-  list<int> exemptVars;
-  for(unsigned int i = 0; i < wlambda1.size(); ++i) {
-    if(wlambda1[i] < 1e-4) {
-      exemptVars.push_back(i);   
-    }
+  vector<int> exemptVars;
+  for(size_t i = 0; i < wlambda1.size(); ++i) {
+    if(wlambda1[i] < 1e-4) exemptVars.push_back(i);
   }
   double maxLambda1 = fl.findMaxLambda1(exemptVars);
   vec lambda_l1 = get_lambda1(R_LAMBDA1, n_lambda, min_ratio, maxLambda1) ;
@@ -108,7 +106,7 @@ List FusedLasso_cpp(
   vector<int> innerIterNum;
   SparseMatrix res = 
     fl.runAlgorithm(
-      penType, maxFusionLevel, 
+      penType, maxFusion,
       lambda1Vec, lambda2Vec, maxNonZero, 
       success, outerIterNum, innerIterNum, verbose
   );
