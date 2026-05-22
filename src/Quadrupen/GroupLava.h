@@ -18,7 +18,7 @@ public:
 
   using Base = BaseLava<matrix, GroupSparseRegularizer<matrix,norm>> ;
 
-  GroupLava(const RegressionData<matrix>& orig_data, const uvec& group_ind,
+  GroupLava(RegressionData<matrix> orig_data, const uvec& group_ind,
             const List& regParam, const List& control)
     : Base(orig_data,
            Base::lava_preprocess(orig_data, Rcpp::as<double>(regParam["gamma"])),

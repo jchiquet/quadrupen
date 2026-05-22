@@ -9,8 +9,8 @@ using namespace Rcpp;
 using namespace arma;
 
 BoundedRegression::BoundedRegression(
-  RegressionData<mat>& data, const List& regParam, const List& control) :
-  Regularizer<mat>::Regularizer(data, regParam) {
+  RegressionData<mat> data, const List& regParam, const List& control) :
+  Regularizer<mat>::Regularizer(std::move(data), regParam) {
     
     // Set the penalty to L-infinity
     penalty_ = DensePenalty<DenseNorm::LINF>() ;

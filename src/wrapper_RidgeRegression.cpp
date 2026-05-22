@@ -16,6 +16,6 @@ List ridge_cpp(
     const List        &controlFit
     ) {
   RegressionData<mat> data(dataModel, intercept, as<bool>(controlFit["normalize"])) ;
-  RidgeRegression ridge(data, regParam) ;
+  RidgeRegression ridge(std::move(data), regParam) ;
   return ridge.to_list(ridge.solution_path(trimatu(as<mat>(dataModel["C_inv"])))) ;
 }

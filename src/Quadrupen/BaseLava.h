@@ -69,9 +69,9 @@ public:
   // Lava:      Base(orig, t, regParam, control)
   // GroupLava: Base(orig, t, group_ind, regParam, control)
   template <typename... BaseArgs>
-  BaseLava(const RegressionData<matrix>& orig_data, LavaData t, BaseArgs&&... base_args)
-    : ConcreteBase(t.scaled, std::forward<BaseArgs>(base_args)...),
-      orig_data_(orig_data),
+  BaseLava(RegressionData<matrix> orig_data, LavaData t, BaseArgs&&... base_args)
+    : ConcreteBase(std::move(t.scaled), std::forward<BaseArgs>(base_args)...),
+      orig_data_(std::move(orig_data)),
       Proj_(std::move(t.Proj)),
       B_proj_(std::move(t.B_proj)) {}
 
