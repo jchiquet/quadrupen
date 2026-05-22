@@ -117,7 +117,7 @@ void RegressionData<matrix>::standardize() {
   if (scaled_) {
     norm_X_ = sqrt(trans(sum(square(X_))) - n_ * square(X_bar_));
     norm_X_.replace(0.0, 1.0);  // constant columns: leave unchanged (avoid div by zero)
-    X_.each_col() /= norm_X_ ;
+    X_.each_row() /= norm_X_.t() ;
     X_bar_ /= norm_X_ ;
   } else {
     norm_X_ = ones(p_);
