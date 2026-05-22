@@ -49,7 +49,7 @@ class GroupSparseRegularizer :
       return penalty_.lambda_max(data_.XTy_, set_.grp_sizes_, lambda_factor_) ;
     }
 
-    GroupSparseRegularizer(const RegressionData<matrix>&, const uvec&, const List&, const List&) ;
+    GroupSparseRegularizer(RegressionData<matrix>, const uvec&, const List&, const List&) ;
 
     double get_df() override ;
 
@@ -70,8 +70,8 @@ class GroupSparseRegularizer :
 
 template <typename matrix, GroupSparseNorm norm>
 GroupSparseRegularizer<matrix,norm>::GroupSparseRegularizer(
-  const RegressionData<matrix>& data, const uvec& group_ind, const List& regParam, const List& control) :
-  SparsifyingRegularizer<matrix>::SparsifyingRegularizer(data, regParam) {
+  RegressionData<matrix> data, const uvec& group_ind, const List& regParam, const List& control) :
+  SparsifyingRegularizer<matrix>::SparsifyingRegularizer(std::move(data), regParam) {
 
     // Scale the structuring matrix according to the amount of l2 penalty
     data_.scale_struct(gamma_) ;

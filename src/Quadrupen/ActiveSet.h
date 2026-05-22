@@ -213,9 +213,8 @@ void ActiveSet<matrix>::update_Cholesky_block(uword n_new) {
 template <typename matrix>
 void ActiveSet<matrix>::downdate_Cholesky(uword j) {
 
-  vec x = zeros<vec>(2,1);
+  vec x = zeros<vec>(2);
   mat G = zeros<mat>(2,2);
-  mat H = zeros<mat>(2,2);
 
   R_.shed_col(j);
   int p = R_.n_cols;

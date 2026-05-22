@@ -31,57 +31,6 @@ double maxDiffDoubleVec(const vector<double>& x, const vector<double>& y) {
 }
 
 
-void readDoubleMatrix(vector<double>& X, int& n, int& p, string filename) {
-  n = 0;
-  p = 0;
-  double foo;
-  ifstream infile;
-  
-  X.clear();
-  
-  infile.open(filename.c_str());
-  
-  while(!infile.eof()) {
-    if(infile.peek() == '\n') {
-      n++;
-    }    
-    infile >> foo;
-    X.push_back(foo);
-    p++;
-  }
-  // check if there is one too many, then delete it
-  while(p % n != 0) {
-    X.pop_back();
-    p--;
-  }
-  p /= n;
-  X = transpose(X, p, n);
-}
-
-// does not do any error checking
-vector<double> transpose(vector<double>& X, int n, int p) {
-  vector<double> res(X.size());
-  
-  for(int i = 0; i < n; ++i) {
-    for(int j = 0; j < p; ++j) {
-      res[i * p + j] = X[j * n + i];            
-    }
-  }
-  
-  return res;
-}
-
-bool checkIfSubset(const set<int>& x, const vector<int>& fusions) {
-  set<int>::const_iterator setIt;
-  int group = fusions[*(x.begin())];
-  for(setIt = x.begin(); setIt != x.end(); ++setIt) {
-    if(fusions[*setIt] != group) {
-      return false;
-    }
-  }
-  return true; 
-}
-
 int numNonZero(const vector<double>& x) {
   int nonZero = 0;
   for(const auto& xi : x) if(xi != 0) nonZero++ ;
@@ -126,7 +75,9 @@ void printMatrix(vector<double>& X, int n, int p, ostream& outStream) {
   }
 }
 
-void Steps::findRootL2(vector<double>& beta, double deriv, const double hessian, const int pos, const double zeroStepSize, const vector<int>& l2Idx, const vector<double>& l2Mult) {
+namespace Steps {
+
+void findRootL2(vector<double>& beta, double deriv, const double hessian, const int pos, const double zeroStepSize, const vector<int>& l2Idx, const vector<double>& l2Mult) {
   
   // first gives the position of the hessianchange, second the amoung of hessianChange
   
@@ -153,10 +104,10 @@ void Steps::findRootL2(vector<double>& beta, double deriv, const double hessian,
 
 // finding the optimum using the huber penalty; huberParam is the scaling factor for the
 // Huber penalty (the larger the more similar to L1 penalty)
-void Steps::findRootHuber(vector<double>& beta, double deriv, const double hessian, const int pos, const double zeroStepSize, const vector<int>& huberIdx, const vector<double>& huberMult, double huberParam) {
+void findRootHuber(vector<double>& beta, double deriv, const double hessian, const int pos, const double zeroStepSize, const vector<int>& huberIdx, const vector<double>& huberMult, double huberParam, vector<pair<double,double>>& scratch) {
   double doubleMax = numeric_limits<double>::max();
-  // first gives the position of the hessianchange, second the amoung of hessianChange
-  vector<pair<double, double> > huberPosVec(2*huberIdx.size()+1);
+  scratch.resize(2*huberIdx.size()+1);
+  vector<pair<double, double>>& huberPosVec = scratch;
   double derivSum = zeroStepSize;
   int counter = 0;
   for(size_t i = 0; i < huberIdx.size(); ++i) {
@@ -217,9 +168,9 @@ void Steps::findRootHuber(vector<double>& beta, double deriv, const double hessi
   return;
 }
 
-void Steps::findRootL1(vector<double>& beta, double deriv, const double hessian, const int pos, const double zeroStepSize, const vector<int>& stepIdx, const vector<double>& stepMult) {
-  // first gives the position of the hessianchange, second the amoung of hessianChange
-  vector<pair<double, double> > stepPosVec(stepIdx.size()+1);
+void findRootL1(vector<double>& beta, double deriv, const double hessian, const int pos, const double zeroStepSize, const vector<int>& stepIdx, const vector<double>& stepMult, vector<pair<double,double>>& scratch) {
+  scratch.resize(stepIdx.size()+1);
+  vector<pair<double, double>>& stepPosVec = scratch;
   double derivSum = zeroStepSize;
   for(size_t i = 0; i < stepIdx.size(); ++i) {
     stepPosVec[i] = pair<double, double>(beta[stepIdx[i]], 2 * stepMult[i]);
@@ -272,10 +223,10 @@ void Steps::findRootL1(vector<double>& beta, double deriv, const double hessian,
 }
 
 
-/* 
+/*
   * Update beta, return true when finished (moves at most over one step)
 */
-  bool Steps::updateBeta(vector<double>& beta, const int pos, double& deriv, const double& slope, const double& zeroStepSize, const vector<int>& stepIdx, const vector<double>& stepSize) {
+  static bool updateBeta(vector<double>& beta, const int pos, double& deriv, const double& slope, const double& zeroStepSize, const vector<int>& stepIdx, const vector<double>& stepSize) {
     double curDeriv = deriv;
     double curDerivDelta = 0;
     double nextSmallerPos = -numeric_limits<double>::max();
@@ -371,7 +322,7 @@ void Steps::findRootL1(vector<double>& beta, double deriv, const double hessian,
   * Includes the step given into the calculation and updates steps on the left or right if necessary
 */
   
-  void Steps::findRoot(vector<double> &beta, double derivQuad, const double slope, const int pos, const double zeroStepSize, const vector<int>& stepIdx, const vector<double>& stepSize) {
+  void findRoot(vector<double> &beta, double derivQuad, const double slope, const int pos, const double zeroStepSize, const vector<int>& stepIdx, const vector<double>& stepSize) {
     
     // catch if the slope is 0; this should only occur if the derivative is also 0;
     // then set the beta to 0
@@ -389,7 +340,5 @@ void Steps::findRootL1(vector<double>& beta, double deriv, const double hessian,
     while(!updateBeta(beta, pos, derivQuad, slope, zeroStepSize, stepIdx, stepSize)) {};
   }
 
-
-
-
+} // namespace Steps
 

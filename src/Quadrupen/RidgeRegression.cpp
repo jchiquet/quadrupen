@@ -9,8 +9,8 @@ using namespace Rcpp;
 using namespace arma;
 
 RidgeRegression::RidgeRegression(
-  RegressionData<mat>& data, const List& regParam) :
-  Regularizer::Regularizer(data, regParam) 
+  RegressionData<mat> data, const List& regParam) :
+  Regularizer::Regularizer(std::move(data), regParam)
 {
   penalty_ = DensePenalty<DenseNorm::L2>() ;
   get_lambda_seq(get_lambda_max(), regParam) ;

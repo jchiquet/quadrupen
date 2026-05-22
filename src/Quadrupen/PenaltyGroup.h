@@ -8,6 +8,7 @@
 #endif
 
 #include <RcppArmadillo.h>
+#include "PenaltyUtils.h"
 
 enum class GroupSparseNorm {L1L2, L1LINF, COOP};
 
@@ -57,8 +58,8 @@ template<GroupSparseNorm norm>
 vec GroupPenalty<norm>::optimality(const vec& x, double lambda, const uvec& pk, const vec& wk)  {
   
   vec x_st = x;
-  if (alpha_ > 0.0) 
-    x_st = sign(x_st) % max(abs(x_st) - lambda * alpha_, zeros<vec>(x_st.n_elem)) ;
+  if (alpha_ > 0.0)
+    x_st = soft_threshold(x_st, lambda * alpha_) ;
   
   vec res = zeros<vec>(pk.n_elem);
   uword ind = 0;

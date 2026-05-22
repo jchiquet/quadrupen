@@ -26,7 +26,7 @@ public:
   uvec unbounded_   ; // Active variables (away from the boundary)
   vector<uvec> bounded_ ; // variables reaching the boundary (for all lambda values)
   
-  BoundedRegression(RegressionData<mat>&, const List&, const List&);
+  BoundedRegression(RegressionData<mat>, const List&, const List&);
   
   double get_lambda_max() {
     return(penalty_.dual_norm(data_.XTy_, lambda_factor_));

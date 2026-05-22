@@ -88,7 +88,7 @@ uword GroupOptimizer<matrix, norm>::quadratic(
     iter++;
     vec beta_old = beta;
     uword offset = 0; // go through active variables
-    uvec groups_to_remove;
+    std::vector<uword> groups_to_remove_vec;
 
     for (uword k = 0; k < nb_active_groups; ++k) {
       uword sz   = set.grp_sizes_(set.G_(k)); // group size
@@ -137,8 +137,7 @@ uword GroupOptimizer<matrix, norm>::quadratic(
       // Group deletion if applicable
       if (arma::norm(beta_g, 2) < 1e-10) {
         beta_g.zeros();
-        groups_to_remove.insert_rows(groups_to_remove.n_elem, 1);
-        groups_to_remove.tail(1) = k;
+        groups_to_remove_vec.push_back(k);
       }
 
       beta.subvec(offset, offset + sz - 1) = beta_g;
@@ -146,7 +145,8 @@ uword GroupOptimizer<matrix, norm>::quadratic(
       offset += sz; // go to next group
     }
 
-    if (!groups_to_remove.is_empty()) {
+    if (!groups_to_remove_vec.empty()) {
+      uvec groups_to_remove = arma::conv_to<uvec>::from(groups_to_remove_vec);
       if (verbosity_) set.G_(groups_to_remove).print("\tremoving group") ;
       set.del_groups(groups_to_remove, beta);
       // Let the working set algorithm handle new active set (beta size now has changed...)
@@ -190,7 +190,7 @@ uword GroupOptimizer<matrix,norm>::working_set(
     if (set.is_grp_in_[grp_in] == 0 && optimality(grp_in) > 0) { // Is var_in already in the active set?
       set.add_group(grp_in, data) ;
       beta.insert_rows(beta.n_elem, set.grp_sizes_(grp_in)); // update the vector of active parameters
-      if (algorithm_ ==  QUADRA) {
+      if (algorithm_ ==  SolverType::QUADRA) {
         beta.tail(set.grp_sizes_(grp_in)).fill(- 1e-3 * arma::sign(grad(grp_in)));
       } else {
         beta.tail(set.grp_sizes_(grp_in)).fill(0.0);
@@ -202,7 +202,7 @@ uword GroupOptimizer<matrix,norm>::working_set(
     }
 
     // OPTIMIZATION OVER THE CURRENTLY ACTIVATED VARIABLES
-    if (algorithm_ == QUADRA) {
+    if (algorithm_ == SolverType::QUADRA) {
       inner_iter_.push_back(
         quadratic(beta, lambda, weights(set.G_), data.XTy_(set.A_), set, 1e-4)
       );
@@ -213,11 +213,11 @@ uword GroupOptimizer<matrix,norm>::working_set(
         return(penalty_.proximal(x, l, set.grp_sizes_(set.G_), weights(set.G_)));
       } ;
       vec beta_old = beta ;
-      if (algorithm_ == FISTA) {
+      if (algorithm_ == SolverType::FISTA) {
         inner_iter_.push_back(
           fista(beta, lambda, data.XTy_(set.A_), set.XATXA_, prox, current_tol, 3000, cached_L)
         );
-      } else if (algorithm_ == PGD) {
+      } else if (algorithm_ == SolverType::PGD) {
         inner_iter_.push_back(
           pgd(beta, lambda, data.XTy_(set.A_), set.XATXA_, prox, current_tol, 3000, 3, cached_L)
         );

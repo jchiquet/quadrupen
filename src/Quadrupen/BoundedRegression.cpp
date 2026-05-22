@@ -9,8 +9,8 @@ using namespace Rcpp;
 using namespace arma;
 
 BoundedRegression::BoundedRegression(
-  RegressionData<mat>& data, const List& regParam, const List& control) :
-  Regularizer<mat>::Regularizer(data, regParam) {
+  RegressionData<mat> data, const List& regParam, const List& control) :
+  Regularizer<mat>::Regularizer(std::move(data), regParam) {
     
     // Set the penalty to L-infinity
     penalty_ = DensePenalty<DenseNorm::LINF>() ;
@@ -51,14 +51,11 @@ double BoundedRegression::get_df() {
 
   if (gamma_ > 0) {
     mat C = inv_sympd(data_.XTX_(unbounded_,unbounded_));
-    // loop due to sparse encoding. should iterate over the n_zeros only...
-    mat SUU(unbounded_.size(), unbounded_.size()) ;
-    for (uword i=0;i<unbounded_.size();i++){
-      for (uword j=i;j<unbounded_.size();j++){
-        SUU(i,j) = data_.S_.at(unbounded_(i),unbounded_(j));
-        SUU(j,i) = SUU(i,j);
-      }
-    }
+    uword ku = unbounded_.size();
+    mat SUU(ku, ku);
+    for (uword i = 0; i < ku; i++)
+      for (uword j = i; j < ku; j++)
+        SUU(j, i) = SUU(i, j) = data_.S_.at(unbounded_(i), unbounded_(j));
     df -= trace(SUU * C);
   }
 
@@ -73,14 +70,16 @@ List BoundedRegression::solution_path(const List& control) {
   const uword maxiter(control["maxiter"])     ; // max # of passes in the active set
   const uword maxfeat(control["maxfeat"])     ; // max # of variables activated
 
-  SolverType algorithm = QUADRA; // Optimizer (default to QUADRA)
+  SolverType algorithm = SolverType::QUADRA; // Optimizer (default to QUADRA)
   if (as<std::string>(control["method"]) == "FISTA") {
-    algorithm = FISTA;
+    algorithm = SolverType::FISTA;
   }
 
   // Variables monitoring the algorithm
   vector<double> gap, timing ; // timings and optimality measures
   vector<uword> status, iactive, ioptim ; // convergence and # of inner/outer iterates
+  gap.reserve(lambdas_.size()); timing.reserve(lambdas_.size());
+  status.reserve(lambdas_.size()); iactive.reserve(lambdas_.size()); ioptim.reserve(lambdas_.size());
 
   auto prox = [this](vec x, double l) {
     return(penalty_.proximal(x, l, this->lambda_factor_));
@@ -97,7 +96,7 @@ List BoundedRegression::solution_path(const List& control) {
     do {
       R_CheckUserInterrupt();
       current_it++;
-      if (algorithm == FISTA) {
+      if (algorithm == SolverType::FISTA) {
         ioptim.push_back(
           solver_.fista(beta_, lambda_, data_.XTy_, data_.XTX_, prox, 1e-5, 10000)
         );
@@ -116,7 +115,7 @@ List BoundedRegression::solution_path(const List& control) {
             Rprintf("\nNumerical instability: switching to proximal algorithm (slower but safer).");
           }
           current_it = 0; // start this lambda all the way back, with FISTA algorithm
-          algorithm = FISTA ;
+          algorithm = SolverType::FISTA ;
         }
       }
 
@@ -131,7 +130,7 @@ List BoundedRegression::solution_path(const List& control) {
     status.push_back(0) ;
     if (current_it >= maxiter) { status.back() = 1 ; }
     if ((unbounded_.n_elem > maxfeat) & 
-        (algorithm == QUADRA)) { status.back() = 2 ; }
+        (algorithm == SolverType::QUADRA)) { status.back() = 2 ; }
 
     // Preparing next value of the penalty
     if (status.back() >= 2) {

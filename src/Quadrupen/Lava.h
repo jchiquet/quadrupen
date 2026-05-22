@@ -17,7 +17,7 @@ public:
 
   using Base = BaseLava<matrix, SparseRegularizer<matrix,norm>> ;
 
-  Lava(const RegressionData<matrix>& orig_data, const List& regParam, const List& control)
+  Lava(RegressionData<matrix> orig_data, const List& regParam, const List& control)
     : Base(orig_data,
            Base::lava_preprocess(orig_data, Rcpp::as<double>(regParam["gamma"])),
            regParam, control) {}

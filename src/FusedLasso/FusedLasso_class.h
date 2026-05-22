@@ -22,9 +22,18 @@ public:
   
   vector<int> lastDetailedFusions; //stores the result of the last fusion
   vector<double> wLambda1;
+
+  // Cache for the fused matrix and graph connections — invalidated when fusions change
+  SparseMatrix cachedFusedX_;
+  vector<vector<int>>  cachedConnectionsFused_;
+  vector<vector<double>> cachedWLambda2Fused_;
+  vector<double> cachedWLambda1Coordinate_;
+  bool fusedCacheValid_ = false;
+
+  void rebuildFusedCache_();
   
   // quadratic derivatives under the current fusions
-  counted_ptr<QuadraticDerivative> quadratic;
+  shared_ptr<QuadraticDerivative> quadratic;
   
   Graph pg;
   
@@ -54,6 +63,9 @@ public:
   void getEqualFusions(vector<int>& newFusions, vector<int>& newFusedGroupSize, bool zeroSingle=true, double accFactor=1);
   void getSplitFusionsActive(vector<int>& newFusions, vector<int>& newFusedGroupSize);
   void getSplitFusionsInactive(vector<int>& newFusions, vector<int>& newFusedGroupSize);
+
+  // shared implementation for getSplitFusionsActive / getSplitFusionsInactive
+  void buildFusionGroups_(vector<int>& newFusions, vector<int>& newFusedGroupSize, bool splitZeroNodes);
   
   // check if two fusions are equal 
   bool areFusionsEqual(vector<int> &fusion1, vector<int> &fusion2);
@@ -62,17 +74,17 @@ public:
   void makePullAdjustment(const vector<double>& beta, vector<double>& nodePull, double lambda2);
   
   // given nodes and groups, adds the complementary groups as defined by the given graph
-  void addComplementaryGroups(vector<list<int> >& groups, list<int>& nodes);
+  void addComplementaryGroups(vector<vector<int>>& groups, vector<int>& nodes);
   // compute the mean of the current group
-  double calcGroupAverage(int pos, vector<double>& nodePull, vector<double>& beta); 
-  
-  void sortAllLists(vector<list<int> >& x); 
-  
+  double calcGroupAverage(int pos, vector<double>& nodePull, vector<double>& beta);
+
+  void sortAllGroups(vector<vector<int>>& x);
+
   // Constructor
   // Here regType can be GAUSSIAN or LOGISTIC
-  
+
   // construct with sparse matrix as input
-  FusedLasso(const SparseMatrix &X, const vector<double> &y, const vector<double> &wObs, const vector<double> &beta, const vector<double>& wLambda1, const Graph& graph, int maxIterInner, int maxIterOuter, double accuracy, int maxActivateVars, double lambda1, double lambda2, regEnum regType=GAUSSIAN);
+  FusedLasso(const SparseMatrix &X, const vector<double> &y, const vector<double> &wObs, const vector<double> &beta, const vector<double>& wLambda1, const Graph& graph, int maxIterInner, int maxIterOuter, double accuracy, int maxActivateVars, double lambda1, double lambda2, regEnum regType=regEnum::GAUSSIAN);
   
   ~FusedLasso();
   
@@ -82,7 +94,7 @@ public:
   // find the new fusions and set them
   // returns false if they are the same as the old ones
   // i.e. the algorithm has converged
-  bool identifyNewFusions(double lastIterChange, int maxFusionLevel);
+  bool identifyNewFusions(double lastIterChange, FusionStrategy maxFusion);
   bool identifyNewFusionsHuber();
   
   // initialize the FusedLassoCoordinate object
@@ -94,11 +106,11 @@ public:
   bool runFusedGeneral(penEnum penType);
   
   // After initialization, run the whole algorithm
-  bool runAlgorithm(int maxFusionLevel);
+  bool runAlgorithm(FusionStrategy maxFusion);
   bool runAlgorithmHuber();
   bool runAlgorithmL2();
-  
-  SparseMatrix runAlgorithm(penEnum penType, const int maxFusionLevel, const vector<double>& lambda1Vec, const vector<double>& lambda2Vec, const int maxNonZero, vector<bool>& success, vector<int>& outerIterNumVec, vector<int>& innerIterNumVec, bool verbose=false);
+
+  SparseMatrix runAlgorithm(penEnum penType, FusionStrategy maxFusion, const vector<double>& lambda1Vec, const vector<double>& lambda2Vec, const int maxNonZero, vector<bool>& success, vector<int>& outerIterNumVec, vector<int>& innerIterNumVec, bool verbose=false);
   
   // set new values for lambda1 and lambda2
   void setNewLambdas(double lambda1, double lambda2);
@@ -107,7 +119,7 @@ public:
   inline int getInnerIterNum() {return innerIterNum ;};
   
   // finds the maximum lambda1 at which the first non-exempt variable enters the model
-  double findMaxLambda1(const list<int>& exemptVars);
+  double findMaxLambda1(const vector<int>& exemptVars);
   
   // finds the value of lambda2 at which the first group of variables breaks apart
   double findMaxLambda2(double lambda1);
@@ -118,13 +130,7 @@ public:
   void getBeta(SparseMatrix& betaMat);
   
   void printBetaAndGroup(ostream& outStream);
-  
-  void printDerivs(ostream& outStream);
-  
-  void printAdjustedDerivs(ostream& outStream);
-  
-  void printGroups(vector<list<int> > x, ostream& outStream);
-  
+  void printGroups(vector<vector<int>> x, ostream& outStream);
   void checkSolution(ostream& outStream);
 };
 

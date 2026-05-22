@@ -103,34 +103,8 @@ void RegressionData<matrix>::precompute_XTX() {
   XTX_ = X_.t() * X_ - n_ * X_bar_ * X_bar_.t() + S_;
 };
 
-// template <>
-// inline void RegressionData<sp_mat>::scale_regressors(vec weights) {
-//   
-//   if (any(weights != 1)) {
-//     for (uword i=0; i<n_; i++) {
-//       X_.row(i) /= trans(weights) ;
-//     }
-//     X_bar_ /= weights ;
-//   }
-//   XTy_ = X_.t() * (y_-y_bar_) - sum(y_-y_bar_) * X_bar_ ;
-// 
-// };
-// 
-// template <>
-// inline void RegressionData<mat>::scale_regressors(vec weights) {
-//   
-//   if (any(weights != 1)) {
-//     X_.each_row() /= trans(weights) ;
-//     X_bar_ /= weights ;
-//   }
-//   XTy_ = X_.t() * (y_-y_bar_) - sum(y_-y_bar_) * X_bar_ ;
-// 
-// };
-
 template <typename matrix>
 void RegressionData<matrix>::standardize() {
-
-  // TODO: OBSERVATION WEIGHTS
 
   if (centered_) {
     X_bar_ = mean(X_, 0).t();
@@ -143,7 +117,7 @@ void RegressionData<matrix>::standardize() {
   if (scaled_) {
     norm_X_ = sqrt(trans(sum(square(X_))) - n_ * square(X_bar_));
     norm_X_.replace(0.0, 1.0);  // constant columns: leave unchanged (avoid div by zero)
-    X_ = X_ * diagmat(1/norm_X_) ;
+    X_.each_row() /= norm_X_.t() ;
     X_bar_ /= norm_X_ ;
   } else {
     norm_X_ = ones(p_);
@@ -154,8 +128,8 @@ void RegressionData<matrix>::standardize() {
 }
 
 // Specialization for sp_mat: column scaling via non-zero iterator — O(nnz) instead
-// of O(n×p). The generic path does X_ = X_ * diagmat(v) which goes through a dense
-// intermediate (sp_mat * dense_expr → mat → sp_mat), destroying the sparsity benefit.
+// of the dense each_col() path which would densify the matrix.
+// The generic path uses X_.each_col() /= norm_X_ which is O(n*p) for dense mat.
 template <>
 inline void RegressionData<sp_mat>::standardize() {
 

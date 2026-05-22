@@ -16,6 +16,6 @@ List bounded_regression_cpp(
     const List        &control
     ) {
   RegressionData<mat> data(dataModel, intercept, as<bool>(control["normalize"])) ;
-  BoundedRegression bounded(data, regParam, control) ;
+  BoundedRegression bounded(std::move(data), regParam, control) ;
   return bounded.to_list(bounded.solution_path(control)) ;
 }

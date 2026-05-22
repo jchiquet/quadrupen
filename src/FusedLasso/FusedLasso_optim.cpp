@@ -2,7 +2,7 @@
 
 using namespace std;
 
-FusedLassoCoordinate::FusedLassoCoordinate(counted_ptr<QuadraticDerivative> quadDer, const vector<double>& wLambda1, const vector<vector<int> > &connections, const vector<vector<double> > &wLambda2, int maxIterInner, double accuracy, int maxActivateVars, double lambda1, double lambda2, penEnum penType, double huberParam) : quadratic(quadDer) {
+FusedLassoCoordinate::FusedLassoCoordinate(shared_ptr<QuadraticDerivative> quadDer, const vector<double>& wLambda1, const vector<vector<int> > &connections, const vector<vector<double> > &wLambda2, int maxIterInner, double accuracy, int maxActivateVars, double lambda1, double lambda2, penEnum penType, double huberParam) : quadratic(quadDer) {
  
     // Set parameters
     this->p = quadDer->getp();
@@ -75,9 +75,9 @@ void FusedLassoCoordinate::singleStep(int pos) {
     double slope = quadratic->getHessian(pos); 
 
     switch(penType) {
-        case L1: Steps::findRootL1(beta, deriv, slope, pos, wLambda1Mult[pos], connections[pos], wLambda2Mult[pos]); break;
-        case Huber: Steps::findRootHuber(beta, deriv, slope, pos, wLambda1Mult[pos], connections[pos], wLambda2Mult[pos], huberParam); break;
-        case L2: Steps::findRootL2(beta, deriv, slope, pos, wLambda1Mult[pos], connections[pos], wLambda2Mult[pos]); break;
+        case penEnum::L1: Steps::findRootL1(beta, deriv, slope, pos, wLambda1Mult[pos], connections[pos], wLambda2Mult[pos], rootScratch_); break;
+        case penEnum::Huber: Steps::findRootHuber(beta, deriv, slope, pos, wLambda1Mult[pos], connections[pos], wLambda2Mult[pos], huberParam, rootScratch_); break;
+        case penEnum::L2: Steps::findRootL2(beta, deriv, slope, pos, wLambda1Mult[pos], connections[pos], wLambda2Mult[pos]); break;
     }
     quadratic->updateBeta(pos, beta[pos]);
 }
@@ -108,43 +108,38 @@ double FusedLassoCoordinate::singleIteration(const int iterNum) {
 
 
 int FusedLassoCoordinate::activateVariables() {
-    // go through all variables that are equal to 0
-    // calculate their penalty adjusted derivative and sort them
-    // by absolute value of derivative
-    // then active the top variables, but at most maxVars
-    multimap<double, int> activationCandidates;
-    vector<double> derivVec = quadratic->getDerivativeVec(); 
+    vector<double> derivVec = quadratic->getDerivativeVec();
     vector<bool> isActive(beta.size(), false);
-    for(unsigned int i = 0; i < active.size(); ++i) {
+    for(int i = 0; i < (int)active.size(); ++i) {
         isActive[active[i]] = true;
     }
 
-    double adjDeriv;
-    for(unsigned int pos = 0; pos < beta.size(); ++pos) {
+    // Collect candidates: (|adjDeriv|, pos) for inactive variables that violate KKT
+    vector<pair<double, int>> candidates;
+    for(int pos = 0; pos < (int)beta.size(); ++pos) {
         if(!isActive[pos]) {
             double zeroPenalty = wLambda1Mult[pos];
-
-            adjDeriv = derivVec[pos];
+            double adjDeriv = derivVec[pos];
             derivAdjustment(adjDeriv, zeroPenalty, pos);
-            // now if in absolute value > lambda1, add to list of
-            // possible activations
             if(fabs(adjDeriv) > zeroPenalty) {
-                activationCandidates.insert(make_pair(fabs(adjDeriv), pos));
+                candidates.emplace_back(fabs(adjDeriv), pos);
             }
         }
     }
 
-    // now go through the activation candidates
-    multimap<double, int>::reverse_iterator mapIt;
-    int activateCount;
-    for(mapIt = activationCandidates.rbegin(), activateCount = 0; mapIt !=activationCandidates.rend() && activateCount < maxActivateVars; ++mapIt, ++ activateCount) {
-        active.push_back(mapIt->second);       
-        quadratic->activate(mapIt->second); 
+    // Partial sort: bring the top-maxActivateVars to the front in O(n) average
+    int activateCount = (int)std::min((int)candidates.size(), maxActivateVars);
+    if(activateCount > 0 && activateCount < (int)candidates.size()) {
+        std::nth_element(candidates.begin(), candidates.begin() + activateCount, candidates.end(),
+            [](const pair<double,int>& a, const pair<double,int>& b){ return a.first > b.first; });
     }
 
-    // and sort the vector of active variables
-    sort(active.begin(), active.end());
+    for(int i = 0; i < activateCount; ++i) {
+        active.push_back(candidates[i].second);
+        quadratic->activate(candidates[i].second);
+    }
 
+    sort(active.begin(), active.end());
     return activateCount;
 }
 
@@ -152,7 +147,7 @@ void FusedLassoCoordinate::derivAdjustment(double& adjDeriv, double& zeroPenalty
     // Adjust derivative based on penalty type and connected variables
     
     switch(penType) {
-        case L1:
+        case penEnum::L1:
             // L1 penalty adjustment
             for(size_t i = 0; i < connections[pos].size(); ++i) {
                 double connBeta = beta[connections[pos][i]];
@@ -168,7 +163,7 @@ void FusedLassoCoordinate::derivAdjustment(double& adjDeriv, double& zeroPenalty
             }
             break;
             
-        case Huber:
+        case penEnum::Huber:
             // Huber penalty adjustment
             for(size_t i = 0; i < connections[pos].size(); ++i) {
                 double connBeta = beta[connections[pos][i]];
@@ -186,7 +181,7 @@ void FusedLassoCoordinate::derivAdjustment(double& adjDeriv, double& zeroPenalty
             }
             break;
             
-        case L2:
+        case penEnum::L2:
             // L2 penalty adjustment
             for(size_t i = 0; i < connections[pos].size(); ++i) {
                 adjDeriv -= beta[connections[pos][i]] * 2 * wLambda2Mult[pos][i];
@@ -259,70 +254,11 @@ vector<double> FusedLassoCoordinate::getBetaOriginal(vector<int>& fusions) {
 
     for(unsigned int i = 0; i < fusions.size(); ++i) {
         if((size_t)fusions[i] >= beta.size()) {
-            Rcpp::stop("The node has a group that is too large. Node: %i", i, "\n") ;
+            Rcpp::stop("The node has a group that is too large. Node: %d\n", i);
         }
         betaOrig[i] = beta[fusions[i]];
     }
     return betaOrig;
 }
 
-void FusedLassoCoordinate::printBetaActive(ostream& outStream) {
-    outStream << "===================== Beta Active =====================" << endl;
-    for(unsigned int i = 0; i < beta.size(); ++i) {
-        if(beta[i] != 0) {
-            outStream << i << ":" << beta[i] << " | ";
-        }
-    }
-    outStream << endl << "======================== End Beta Active ================" << endl;
-}
-
-void FusedLassoCoordinate::printDerivActive(ostream& outStream) {
-    outStream << "===================== Deriv Active =====================" << endl;
-    for(unsigned int i = 0; i < beta.size(); ++i) {
-        if(beta[i] != 0) {
-            outStream << i << ":" << quadratic->getDerivative(i) << " | ";
-        }
-    }
-    outStream << endl << "======================== End Deriv Active ================" << endl;
-}
-
-void FusedLassoCoordinate::printBeta(ostream& outStream) {
-    outStream << "======================= Beta ===============" << endl;
-    for(unsigned int i = 0; i < beta.size(); ++i) {
-        outStream << beta[i] << ", ";
-    }
-    outStream << endl << "================ End Beta ================" << endl;
-}
-
-void FusedLassoCoordinate::printDerivs(ostream& outStream) {
-    outStream << "============= Derivs =============" << endl;
-    for(unsigned int i = 0; i < beta.size(); ++i) {
-        outStream << quadratic->getDerivative(i) << " " ;
-    }
-    outStream << endl << "============= End Derivs =========" << endl;
-}
-
-void FusedLassoCoordinate::printConnectionsWeights(ostream& outStream) {
-    outStream << "============ Conn Weights ============" << endl;
-    for(unsigned int i = 0; i < connections.size(); ++i) {
-        outStream << "Node:" << i << endl; 
-        for(unsigned int j = 0; j < connections[i].size(); ++j) {
-            outStream << connections[i][j] << " " << wLambda2Mult[i][j] << ";";
-        }
-        outStream << endl;
-    }
-
-}
-
-void FusedLassoCoordinate::printPosSingleStepInfo(int pos, ostream& outStream) {
-    outStream << "Info at Step: " << pos << endl;
-    outStream << "Deriv: " << quadratic->getDerivative(pos) << endl;    
-    outStream << "Hessian: " << quadratic->getHessian(pos) << endl;
-    outStream << "OldBeta: " << beta[pos] << endl;
-    outStream << "wLambda1: " << wLambda1Mult[pos] << endl;
-    outStream << "Connections: " << endl;
-    printVector(connections[pos], outStream);
-    outStream << "wLambda2Mult: " << endl;
-    printVector(wLambda2Mult[pos], outStream);
-}
 

@@ -44,7 +44,7 @@ class SparseRegularizer :
       return penalty_.lambda_max(data_.XTy_, lambda_factor_) ;
     }
 
-    SparseRegularizer(const RegressionData<matrix>&, const List&, const List&) ;
+    SparseRegularizer(RegressionData<matrix>, const List&, const List&) ;
 
     double get_df() override ;
 
@@ -65,8 +65,8 @@ class SparseRegularizer :
 
 template <typename matrix, SparseNorm norm>
 SparseRegularizer<matrix,norm>::SparseRegularizer(
-  const RegressionData<matrix>& data, const List& regParam, const List& control) :
-  SparsifyingRegularizer<matrix>::SparsifyingRegularizer(data, regParam) {
+  RegressionData<matrix> data, const List& regParam, const List& control) :
+  SparsifyingRegularizer<matrix>::SparsifyingRegularizer(std::move(data), regParam) {
 
     // Scale the structuring matrix according to the amount of l2 penalty
     data_.scale_struct(gamma_) ;

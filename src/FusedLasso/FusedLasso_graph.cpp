@@ -2,81 +2,66 @@
 
 using namespace std;
 
-void  Graph::distance(const bool fromSource) 
+void Graph::distance(const bool fromSource)
 {
-  list<int>::iterator listIt;
   // set the distances to maximum
-  for(listIt = maxFlowNodeList.begin(); listIt != maxFlowNodeList.end(); ++listIt) {
-    dist[*listIt] = (int)(maxFlowNodeList.size() + 2);
+  for(int node : maxFlowNodeList) {
+    dist[node] = (int)(maxFlowNodeList.size() + 2);
   }
   queue<int> next;
-  int u; // number of node that is currently being looked at
+  int u;
   GraphEdge* e;
   Node::iterator edgeIt;
-  
-  // initialize the nodes that are connected to the source
-  for(listIt = maxFlowNodeList.begin(); listIt != maxFlowNodeList.end(); ++listIt) {
+
+  for(int node : maxFlowNodeList) {
     if(fromSource) {
-      if(sourceCapacity[*listIt] - tolerance > sourceFlow[*listIt]) {
-        dist[*listIt] = 1;
-        next.push(*listIt);
+      if(sourceCapacity[node] - tolerance > sourceFlow[node]) {
+        dist[node] = 1;
+        next.push(node);
       }
     }
     else {
-      if(sinkCapacity[*listIt] - tolerance > sinkFlow[*listIt]) {
-        dist[*listIt] = 1;
-        next.push(*listIt);
+      if(sinkCapacity[node] - tolerance > sinkFlow[node]) {
+        dist[node] = 1;
+        next.push(node);
       }
     }
-  }   
-  
+  }
+
   while(!next.empty())
   {
-    u=next.front();
+    u = next.front();
     next.pop();
-    // checking node u
-    // go through all edges in node u;
-    for(edgeIt= nodes[u].begin(); edgeIt != nodes[u].end(); ++edgeIt)
+    for(edgeIt = nodes[u].begin(); edgeIt != nodes[u].end(); ++edgeIt)
     {
-      if(!subNodes[(*edgeIt)->to]) {
-        continue; // nothing to do
-      }
-      if(fromSource) { // if fromSource, then do it forward, otherwise backwards
-        e=*edgeIt;
-      }
-      else {
-        e = (*edgeIt)->backwards;
-      }
-      if(e->flow < e->capacity-tolerance) // is reachable
+      if(!subNodes[(*edgeIt)->to]) continue;
+      if(fromSource) e = *edgeIt;
+      else e = (*edgeIt)->backwards;
+      if(e->flow < e->capacity - tolerance)
       {
-        if(dist[(*edgeIt) -> to]>dist[u]+1) // distance can be updated
+        if(dist[(*edgeIt)->to] > dist[u] + 1)
         {
-          dist[(*edgeIt)->to] = dist[u]+1;
+          dist[(*edgeIt)->to] = dist[u] + 1;
           next.push((*edgeIt)->to);
         }
       }
     }
   }
-};
+}
 
 bool Graph::push(const int from, GraphEdge *e)
 {
   bool isToActive;
-  // push as much flow as possible (also check the backwards flow first)
   double addFlowBack = min(exFlow[from], e->backwards->flow);
   double addFlow = min(exFlow[from]-addFlowBack, e->capacity - e->flow);
-  e->flow +=addFlow;
+  e->flow += addFlow;
   e->backwards->flow -= addFlowBack;
-  
+
   exFlow[from] -= addFlow + addFlowBack;
-  // save if to is not already an active node
   isToActive = (exFlow[e->to] > tolerance);
   exFlow[e->to] += addFlow + addFlowBack;
-  if(!isToActive) // add it to the active nodes if not active already and not source or sink
-  {
-    insertActiveNode(e->to);
-  }
-  return(exFlow[from] > tolerance); // return true if the node is still active
+  if(!isToActive) insertActiveNode(e->to);
+  return(exFlow[from] > tolerance);
 }
 
 
@@ -98,8 +83,7 @@ bool Graph::pushToSink(const int from) {
 int Graph::findDist(int nodeNum)
 {
   Node::iterator edgeIt;
-  
-  // check if nodeNum is connected to the source
+
   int newDist;
   if(sourceFlow[nodeNum] > tolerance) {
     newDist = (int)(maxFlowNodeList.size() + 2);
@@ -107,13 +91,10 @@ int Graph::findDist(int nodeNum)
   else {
     newDist = (int)(2 * maxFlowNodeList.size() + 2);
   }
-  
+
   for(edgeIt = nodes[nodeNum].begin(); edgeIt != nodes[nodeNum].end(); ++edgeIt)
   {
-    if(!subNodes[(*edgeIt)->to]) {
-      continue;
-    }
-    // check that there is residual capacity left
+    if(!subNodes[(*edgeIt)->to]) continue;
     if((*edgeIt)->backwards->flow + (*edgeIt)->capacity - (*edgeIt)->flow > tolerance)
     {
       newDist = min(newDist, dist[(*edgeIt)->to]+1);
@@ -125,109 +106,66 @@ int Graph::findDist(int nodeNum)
 
 void Graph::preprocess()
 {
-  // clean the active nodes;
-  activeByDist.assign(2* maxFlowNodeList.size() + 3, list<int>(0));
-  level=-1;
-  
-  // compute the distance label from the sink using the current flow
+  activeByDist.assign(2 * maxFlowNodeList.size() + 3, vector<int>());
+  level = -1;
+
   distance();
-  
-  list<int>::iterator listIt;
-  // go through all nodes connected to the source and push the maximum flow
-  for(listIt = maxFlowNodeList.begin(); listIt != maxFlowNodeList.end(); ++listIt)
+
+  for(int node : maxFlowNodeList)
   {
-    // what is the excess in the connected node
-    exFlow[*listIt] = sourceCapacity[*listIt] - sourceFlow[*listIt];
-    // set flow to maximum
-    sourceFlow[*listIt] = sourceCapacity[*listIt];
-    // if positive excess flow, insert it as an active node
-    if(exFlow[*listIt] > tolerance)
-    {
-      insertActiveNode(*listIt);
-    }
+    exFlow[node] = sourceCapacity[node] - sourceFlow[node];
+    sourceFlow[node] = sourceCapacity[node];
+    if(exFlow[node] > tolerance) insertActiveNode(node);
   }
 }
 
 bool Graph::pushRelabel(const int i)
 {
-  // go through all edges from node i and look for admissible ones
-  // that is d(i) > d(j)+1 and flow(i,j) < cap(i,j)
-  bool didPush = false; // saves if a successfull push has occured
+  bool didPush = false;
   Node::iterator edgeIt;
-  // check if we can push to the sink
+
   if(sinkCapacity[i] - sinkFlow[i] > tolerance) {
-    if(!pushToSink(i)) {
-      return(false);               
-    }
+    if(!pushToSink(i)) return(false);
     didPush = true;
   }
-  
-  // check if we can push back to the source
+
   if(dist[i] > (int)(maxFlowNodeList.size() + 1) && sourceFlow[i] > 0) {
-    if(!pushToSource(i)) {
-      return(false);
-    }
+    if(!pushToSource(i)) return(false);
     didPush = true;
   }
-  
+
   for(edgeIt = nodes[i].begin(); edgeIt != nodes[i].end(); ++edgeIt)
   {
-    if(!subNodes[(*edgeIt)->to]) {
-      continue; // nothing to do
-    }
-    
-    // check if the edge is admissible
+    if(!subNodes[(*edgeIt)->to]) continue;
     if((dist[i] > dist[(*edgeIt)->to]) && ((*edgeIt)->capacity > (*edgeIt)->flow + tolerance))
     {
-      didPush=true;
-      if(!push(i, *edgeIt)) // node became inactive
-      {
-        return(false);
-      }
+      didPush = true;
+      if(!push(i, *edgeIt)) return(false);
     }
   }
-  if(!didPush) // no successfull push was possible; relabel
-  {
-    dist[i] = findDist(i);
-  }
-  
-  return(true); // node still active as there is still an excess
+  if(!didPush) dist[i] = findDist(i);
+
+  return(true);
 }
 
 
 bool Graph::getLargestActiveNode(int& nodeNum)
 {
-  // check that there is an active node with distance level
-  if(level<0) // nothing in here
+  if(level < 0) return(false);
+  if(activeByDist[level].empty())
   {
-    return(false);
+    do { --level; }
+    while((level >= 0) && (activeByDist[level].empty()));
+    if(level < 0) return(false);
   }
-  if(activeByDist[level].empty()) // no there isn't, step down until there is
-  {
-    do
-    {
-      --level;
-    }
-    while((level>=0) && (activeByDist[level].empty()) ); // check first if level still >=0, then if list is empty
-    if(level<0) // no active nodes left
-    {
-      return(false);
-    }
-  }
-  // save the largest element and delete it;
-  nodeNum = activeByDist[level].front();
-  activeByDist[level].pop_front();
-  return(true); // saved active node
+  nodeNum = activeByDist[level].back();
+  activeByDist[level].pop_back();
+  return(true);
 }
 
 void Graph::insertActiveNode(const int nodeNum)
 {
-  // check if new node is the largest
-  if(dist[nodeNum]>level)
-  {
-    level = dist[nodeNum];
-  }
-  // insert the node
+  if(dist[nodeNum] > level) level = dist[nodeNum];
   activeByDist[dist[nodeNum]].push_back(nodeNum);
 }
 
@@ -238,16 +176,10 @@ bool Graph::findMaxFlowPrelabelPush()
   preprocess();
   while(getLargestActiveNode(activeNodeNum))
   {
-    //        cout << level << " ";
-    if(pushRelabel(activeNodeNum)) // node remains active; if inactive, does not need to be replaced
-    {
-      insertActiveNode(activeNodeNum);
-    }
+    if(pushRelabel(activeNodeNum)) insertActiveNode(activeNodeNum);
   }
-  
   return(true);
 }
-
 
 
 bool Graph::findMaxFlowEdmondsKarp() {
@@ -256,121 +188,79 @@ bool Graph::findMaxFlowEdmondsKarp() {
   vector<int> nodeWithParent;
   vector<double> maxFlow(nodes.size(), 0);
   int endNode;
-  
-  list<int>::iterator listIt;
   double lastFlow;
-  
-  for(listIt = maxFlowNodeList.begin(); listIt != maxFlowNodeList.end(); ++listIt) {
+
+  for(int node : maxFlowNodeList) {
     lastFlow = 1;
     while(lastFlow > 0) {
-      breadthFirstSearch(*listIt, parentTable, parentEdgeIndex, nodeWithParent, endNode, maxFlow);
-      lastFlow = addFlow(*listIt, endNode, parentTable, parentEdgeIndex, maxFlow); 
-      //printGraph(cout);
+      breadthFirstSearch(node, parentTable, parentEdgeIndex, nodeWithParent, endNode, maxFlow);
+      lastFlow = addFlow(node, endNode, parentTable, parentEdgeIndex, maxFlow);
     }
   }
   return(true);
 }
 
 
-
-
-
-
 void Graph::addEdge(const int from, const int to, const double capacityFromTo, const double capacityToFrom, const double flowFromTo, const double flowToFrom)
 {
   GraphEdge* e1 = new(GraphEdge);
   GraphEdge* e2 = new(GraphEdge);
-  
-  // set where they are going to
-  e1->to = to;
-  e2->to = from;
-  
-  // set the backward edge
-  e1->backwards = e2;
-  e2->backwards = e1;
-  
-  // set the flow (also works as derivative)
-  e1->flow = flowFromTo;
-  e2->flow = flowToFrom;
-  
-  // set the capacity
-  e1->capacity = capacityFromTo;
-  e2->capacity = capacityToFrom;
-  
+
+  e1->to = to;   e2->to = from;
+  e1->backwards = e2; e2->backwards = e1;
+  e1->flow = flowFromTo; e2->flow = flowToFrom;
+  e1->capacity = capacityFromTo; e2->capacity = capacityToFrom;
+
   nodes[from].push_back(e1);
   nodes[to].push_back(e2);
-};
+}
 
 
-
-list<int> Graph::connectedTo(const list<int>& nodeList)
+vector<int> Graph::connectedTo(const vector<int>& nodeList)
 {
-  list<int> conn; // nodes it is connected to;
-  list<int>::const_iterator listIt;
+  vector<int> conn;
   Node::iterator edgeIt;
-  
-  // first, set all nodes that are currently of interest
-  for(listIt = nodeList.begin(); listIt != nodeList.end(); ++listIt) {
-    subNodesCT[*listIt] = true;
-  }
-  
-  // step through all nodes in the set
-  for(listIt = nodeList.begin(); listIt != nodeList.end(); ++listIt)
+
+  for(int node : nodeList) subNodesCT[node] = true;
+
+  for(int node : nodeList)
   {
-    if((size_t)*listIt < nodes.size()) {
-      for(edgeIt = nodes[*listIt].begin(); edgeIt != nodes[*listIt].end(); ++edgeIt) {
-        if(!subNodesCT[(*edgeIt)->to]) {
-          conn.push_back((*edgeIt)->to);
-        }
+    if((size_t)node < nodes.size()) {
+      for(edgeIt = nodes[node].begin(); edgeIt != nodes[node].end(); ++edgeIt) {
+        if(!subNodesCT[(*edgeIt)->to]) conn.push_back((*edgeIt)->to);
       }
     }
   }
-  
-  // clean up all nodes that are currently of interest
+
   clearSubNodesCT(nodeList);
-  
-  conn.sort();
-  conn.unique();
+
+  sort(conn.begin(), conn.end());
+  conn.erase(unique(conn.begin(), conn.end()), conn.end());
   return(conn);
 }
 
 
-void Graph::breadthFirstSearch(const int startNode, vector<int>&parentTable, vector<int>& parentEdgeIndex, vector<int>& nodeWithParent, int& endNode, vector<double>& maxFlow) {
+void Graph::breadthFirstSearch(const int startNode, vector<int>& parentTable, vector<int>& parentEdgeIndex, vector<int>& nodeWithParent, int& endNode, vector<double>& maxFlow) {
   vector<int> nodesToSearch;
-  
-  // clear the parent table
-  for(unsigned int i = 0; i < nodeWithParent.size(); ++i) {
-    parentTable[nodeWithParent[i]] = -1;
-  }
+
+  for(int n : nodeWithParent) parentTable[n] = -1;
   nodeWithParent.clear();
-  
-  list<int> nodeToSearch;
+
   nodesToSearch.push_back(startNode);
-  maxFlow[startNode] = sourceCapacity[startNode] - sourceFlow[startNode]; 
-  
-  if(maxFlow[startNode] == 0) {
-    endNode = startNode;
-    return;
-  }
-  
+  maxFlow[startNode] = sourceCapacity[startNode] - sourceFlow[startNode];
+
+  if(maxFlow[startNode] == 0) { endNode = startNode; return; }
+
   int u;
   GraphEdge* e;
   while(nodesToSearch.size() > 0) {
     u = nodesToSearch.back();
-    if(sinkCapacity[u] - sinkFlow[u] > 0) {
-      endNode = u;
-      return;
-    }
-    
+    if(sinkCapacity[u] - sinkFlow[u] > 0) { endNode = u; return; }
+
     nodesToSearch.pop_back();
     for(size_t edgeIndex = 0; edgeIndex < nodes[u].size(); ++edgeIndex) {
       e = nodes[u][edgeIndex];
-      if(!subNodes[e->to]) {
-        continue; // not part of the maxFlowGraph
-      }
-      
-      // check if u is connected to sink with spare capacity
-      // go through the edges for things to search
+      if(!subNodes[e->to]) continue;
       double addFlow = e->capacity - e->flow + e->backwards->flow;
       if(addFlow > 0 && parentTable[e->to] == -1) {
         parentTable[e->to] = u;
@@ -380,35 +270,28 @@ void Graph::breadthFirstSearch(const int startNode, vector<int>&parentTable, vec
         nodesToSearch.push_back(e->to);
       }
     }
-    
   }
-  
-  // did not find anything
+
   endNode = startNode;
   maxFlow[startNode] = 0;
-  return;
 }
 
 
 double Graph::addFlow(const int startNode, const int endNode, const vector<int>& parentTable, const vector<int>& parentEdgeIndex, const vector<double>& maxFlow) {
-  
   double totalFlow = min(maxFlow[endNode], sinkCapacity[endNode] - sinkFlow[endNode]);
-  
-  // add the flow
+
   sourceFlow[startNode] += totalFlow;
   sinkFlow[endNode] += totalFlow;
-  if(startNode == endNode) {
-    return totalFlow; // nothing to do anymore
-  }
+  if(startNode == endNode) return totalFlow;
+
   int curNode = endNode;
-  int parentEdge;
-  int parentNode;
+  int parentEdge, parentNode;
   GraphEdge* e;
   while(curNode != startNode) {
     parentNode = parentTable[curNode];
     parentEdge = parentEdgeIndex[curNode];
     e = nodes[parentNode][parentEdge];
-    
+
     double restFlow = totalFlow;
     if(e->backwards->flow > 0) {
       if(e->backwards->flow < totalFlow) {
@@ -416,97 +299,66 @@ double Graph::addFlow(const int startNode, const int endNode, const vector<int>&
         e->backwards->flow = 0;
         e->flow += restFlow;
       }
-      else {
-        e->backwards->flow -= totalFlow;
-      }
+      else { e->backwards->flow -= totalFlow; }
     }
-    else {
-      e->flow += totalFlow;
-    }
-    
+    else { e->flow += totalFlow; }
+
     curNode = parentNode;
   }
-  
+
   return totalFlow;
 }
 
 
-
 void Graph::printGraph(ostream& outStream) const
 {
-  Node::const_iterator edgeIt; // iterator over the edges
-  list<int>::const_iterator listIt;
-  
-  // print the numbers for the source and sink
-  for(listIt = maxFlowNodeList.begin(); listIt!= maxFlowNodeList.end(); ++listIt) {
-    if(sourceCapacity[*listIt] > 0) {
-      outStream << *listIt << ": Source Cap: " << sourceCapacity[*listIt] << " Flow: " <<
-        sourceFlow[*listIt] << endl;
-    }    
-    if(sinkCapacity[*listIt] > 0) {
-      outStream << *listIt << ": Sink Cap: " << sinkCapacity[*listIt] << " Flow: " <<
-        sinkFlow[*listIt] << endl;
-    }    }
-  
-  for(unsigned int node = 0; node < nodes.size(); ++node)
+  Node::const_iterator edgeIt;
+
+  for(int node : maxFlowNodeList) {
+    if(sourceCapacity[node] > 0)
+      outStream << node << ": Source Cap: " << sourceCapacity[node] << " Flow: " << sourceFlow[node] << endl;
+    if(sinkCapacity[node] > 0)
+      outStream << node << ": Sink Cap: " << sinkCapacity[node] << " Flow: " << sinkFlow[node] << endl;
+  }
+
+  for(size_t node = 0; node < nodes.size(); ++node)
   {
     outStream << "Node Number: " << node << endl;
     outStream << "Dist: " << dist[node] << endl;
     outStream << "ExFlow: " << exFlow[node] << endl;
     outStream << "Edges:" << endl;
     for(edgeIt = nodes[node].begin(); edgeIt != nodes[node].end(); ++edgeIt)
-    {
-      outStream << "To: " << (*edgeIt)->to << " Cap: " << (*edgeIt)->capacity <<
-        " Flow: " << (*edgeIt)->flow  << endl;
-    }
+      outStream << "To: " << (*edgeIt)->to << " Cap: " << (*edgeIt)->capacity << " Flow: " << (*edgeIt)->flow << endl;
     outStream << endl;
   }
   outStream << endl;
 }
 
 
-void Graph::constructorWorker(const vector<list<int> >& conn, const vector<list<double> >& weights) {
-  unsigned int numberOfNodes = conn.size();
-  list<int> connOneNode;
-  list<double> weightsOneNode;
-  unsigned int numOfConn;
-  unsigned int node1, node2;
-  double weight;
-  
+void Graph::constructorWorker(const vector<vector<int>>& conn, const vector<vector<double>>& weights) {
+  size_t numberOfNodes = conn.size();
+
   nodes.clear(); nodes.resize(numberOfNodes);
-  sourceCapacity.clear(); sourceCapacity.resize(numberOfNodes, 0);
-  sourceFlow.clear(); sourceFlow.resize(numberOfNodes, 0);
-  sinkCapacity.clear(); sinkCapacity.resize(numberOfNodes, 0);
-  sinkFlow.clear(); sinkFlow.resize(numberOfNodes, 0);
-  subNodesICG.clear(); subNodesICG.resize(numberOfNodes, false);
-  subNodesCWSM.clear(); subNodesCWSM.resize(numberOfNodes, false);
-  subNodesCT.clear(); subNodesCT.resize(numberOfNodes, false);
-  subNodes.clear(); subNodes.resize(numberOfNodes, false);
-  exFlow.clear(); exFlow.resize(numberOfNodes, 0);
-  dist.clear(); dist.resize(numberOfNodes, 0);
+  sourceCapacity.assign(numberOfNodes, 0);
+  sourceFlow.assign(numberOfNodes, 0);
+  sinkCapacity.assign(numberOfNodes, 0);
+  sinkFlow.assign(numberOfNodes, 0);
+  subNodesICG.assign(numberOfNodes, false);
+  subNodesCWSM.assign(numberOfNodes, false);
+  subNodesCT.assign(numberOfNodes, false);
+  subNodes.assign(numberOfNodes, false);
+  exFlow.assign(numberOfNodes, 0);
+  dist.assign(numberOfNodes, 0);
   activeByDist.clear();
   level = 0;
   maxFlowNodeList.clear();
-  
-  // go through all the nodes
-  for(unsigned int i=0; i<numberOfNodes; ++i)
+
+  for(size_t i = 0; i < numberOfNodes; ++i)
   {
-    connOneNode = conn[i]; // get the connection of the current node
-    weightsOneNode = weights[i]; // and with the weights
-    numOfConn = connOneNode.size(); // how many are there
-    node1 = i; // number of node currently working on
-    for(unsigned int j=0; j<numOfConn; ++j) // go through all connections of this node
+    for(size_t j = 0; j < conn[i].size(); ++j)
     {
-      node2 = connOneNode.front();
-      connOneNode.pop_front();
-      weight = weightsOneNode.front();
-      weightsOneNode.pop_front();
-      
-      // only check nodes that have a larger number (to avoid doubles and nodes to itself)
-      if(node2>node1)
-      {
-        addEdge(node1, node2, weight, weight);
-      }
+      int node2 = conn[i][j];
+      if(node2 > (int)i) addEdge(i, node2, weights[i][j], weights[i][j]);
     }
   }
 }
@@ -514,48 +366,32 @@ void Graph::constructorWorker(const vector<list<int> >& conn, const vector<list<
 
 Graph::Graph(Rcpp::List connList, Rcpp::List connWeights)
 {
-  Rcpp::IntegerVector connOneNode;
-  Rcpp::NumericVector weightOneNode;    
   int numberOfNodes = connList.length();
-  int numOfConn;
 
-  vector<list<int> > conn(numberOfNodes);
-  vector<list<double> > weights(numberOfNodes);
-  list<int> foo;
-  list<double> bar;
+  vector<vector<int>> conn(numberOfNodes);
+  vector<vector<double>> weights(numberOfNodes);
 
-  // go through all the nodes
-  for(int i=0; i < numberOfNodes; ++i)
+  for(int i = 0; i < numberOfNodes; ++i)
   {
-    connOneNode = connList[i]; // get the connection of the current node
-    weightOneNode = connWeights[i]; // and for the weights
-    numOfConn = connOneNode.length(); // how many are there
-    foo.clear();
-    bar.clear();
-    for(int j = 0; j < numOfConn; ++j) // go through all connections of this node
-    {
-      foo.push_back(connOneNode[j] - 1);
-      bar.push_back(weightOneNode[j]);
-      
+    Rcpp::IntegerVector connOneNode = connList[i];
+    Rcpp::NumericVector weightOneNode = connWeights[i];
+    int numOfConn = connOneNode.length();
+    conn[i].resize(numOfConn);
+    weights[i].resize(numOfConn);
+    for(int j = 0; j < numOfConn; ++j) {
+      conn[i][j] = connOneNode[j] - 1;
+      weights[i][j] = weightOneNode[j];
     }
-    conn[i] = foo;
-    weights[i] = bar;
   }
-  
+
   constructorWorker(conn, weights);
 }
 
-// Graph::Graph(const vector<list<int> >& conn, const vector<list<double> >& weights)
-// {
-//   constructorWorker(conn, weights);
-// }
 
 Graph::~Graph()
 {
-  // go through all nodes and delete all the edges 
   Nodes::iterator nodeIt;
   Node::iterator edgeIt;
-  
   for(nodeIt = nodes.begin(); nodeIt != nodes.end(); ++nodeIt) {
     for(edgeIt = nodeIt->begin(); edgeIt != nodeIt->end(); ++edgeIt) {
       delete(*edgeIt);
@@ -579,14 +415,11 @@ void Graph::addNode() {
 }
 
 
-
 void Graph::makeCopy(const Graph& pg) {
-  // make a deep copy of the penaltygraph
   Node::const_iterator edgeIt;
   GraphEdge* edgePtr;
   GraphEdge* edgePtrBack;
-  
-  // copy all the elements that can just be copied
+
   subNodesICG = pg.subNodesICG;
   subNodesCWSM = pg.subNodesCWSM;
   subNodes = pg.subNodes;
@@ -600,295 +433,216 @@ void Graph::makeCopy(const Graph& pg) {
   dist = pg.dist;
   activeByDist = pg.activeByDist;
   level = pg.level;
-  
-  // prepare nodes vector for copy
+
   nodes.clear(); nodes.resize(pg.nodes.size(), vector<GraphEdge*>());
-  
-  // go through all the edges 
+
   for(size_t node = 0; node < pg.nodes.size(); ++node) {
     for(edgeIt = pg.nodes[node].begin(); edgeIt != pg.nodes[node].end(); ++edgeIt) {
       if((size_t)(*edgeIt)->to > node) {
         edgePtr = *edgeIt;
         edgePtrBack = edgePtr->backwards;
-        addEdge(node, edgePtr->to, edgePtr->capacity, edgePtrBack->capacity, edgePtr->flow, edgePtrBack->flow); 
+        addEdge(node, edgePtr->to, edgePtr->capacity, edgePtrBack->capacity, edgePtr->flow, edgePtrBack->flow);
       }
     }
   }
 }
 
 
-Graph::Graph(const Graph& pg) {
-  makeCopy(pg);
-}
+Graph::Graph(const Graph& pg) { makeCopy(pg); }
+
+Graph& Graph::operator= (const Graph& pg) { makeCopy(pg); return(*this); }
 
 
-Graph& Graph::operator= (const Graph& pg) {
-  makeCopy(pg);
-  return(*this);
-}
+vector<vector<int>> Graph::identifyConnectedGroups(const vector<int>& x) {
+  vector<int> currentGroup;
+  vector<int> stack;
+  vector<vector<int>> allGroups;
 
-vector<list<int> > Graph::identifyConnectedGroups(const list<int>& x) {
-  list<int> currentGroup;
-  list<int> neighbours;
-  vector<list<int> > allGroups(0);
-  list<int> stack;
-  list<int>::const_iterator listIt;
-  list<int>::const_iterator neighIt;
-  
-  // set the subNodes that appear in the list
-  for(listIt = x.begin(); listIt != x.end(); ++listIt) {
-    subNodesICG[*listIt] = true;
-  }
-  
-  for(listIt = x.begin(); listIt != x.end(); ++listIt) {
-    if(subNodesICG[*listIt]) {
-      subNodesICG[*listIt] = false;
-      // first add an element of x to the new set
+  for(int node : x) subNodesICG[node] = true;
+
+  for(int startNode : x) {
+    if(subNodesICG[startNode]) {
+      subNodesICG[startNode] = false;
       currentGroup.clear();
-      currentGroup.push_back(*listIt);
-      stack.push_back(*listIt);
-      // now for all new elements
-      // add their neighbours that are also in x 
-      // then remove them from x
-      while(stack.size() > 0) {
-        neighbours = connectedTo(stack);
+      currentGroup.push_back(startNode);
+      stack.push_back(startNode);
+      while(!stack.empty()) {
+        vector<int> neighbours = connectedTo(stack);
         stack.clear();
-        for(neighIt = neighbours.begin(); neighIt != neighbours.end(); ++neighIt) {
-          if(subNodesICG[*neighIt]) {
-            subNodesICG[*neighIt] = false;
-            currentGroup.push_back(*neighIt); // in currentGroup, everything can only be inserted once
-            stack.push_back(*neighIt);
+        for(int nb : neighbours) {
+          if(subNodesICG[nb]) {
+            subNodesICG[nb] = false;
+            currentGroup.push_back(nb);
+            stack.push_back(nb);
           }
         }
       }
       allGroups.push_back(currentGroup);
     }
   }
-  // Clean up: ensure all nodes in x have subNodesICG set to false
   clearSubNodesICG(x);
   return(allGroups);
 }
 
 
-
-
-
-
-list<int> Graph::connectedWithSameValue(int node, const vector<double>& values, double accuracy) {
-  list<int> stack;
-  list<int> stackConnect;
-  list<int>::iterator listIt;
-  list<int> connected;
-  list<int> neighbours;
+vector<int> Graph::connectedWithSameValue(int node, const vector<double>& values, double accuracy) {
+  vector<int> stack;
+  vector<int> connected;
   double curVal = values[node];
-  
+
   stack.push_back(node);
   connected.push_back(node);
   subNodesCWSM[node] = true;
-  
-  while(stack.size() > 0) {
-    stackConnect = connectedTo(stack);
+
+  while(!stack.empty()) {
+    vector<int> stackConnect = connectedTo(stack);
     stack.clear();
-    for(listIt = stackConnect.begin(); listIt != stackConnect.end(); ++listIt) {
-      // Check if values are equal (special handling for zero)
-      bool valuesEqual = (curVal == 0 && values[*listIt] == 0) || 
-                         (curVal != 0 && fabs(values[*listIt] - curVal) < accuracy/10);
-      
-      if(valuesEqual && !subNodesCWSM[*listIt]) {
-        connected.push_back(*listIt);
-        subNodesCWSM[*listIt] = true;
-        stack.push_back(*listIt);
+    for(int nb : stackConnect) {
+      bool valuesEqual = (curVal == 0 && values[nb] == 0) ||
+                         (curVal != 0 && fabs(values[nb] - curVal) < accuracy/10);
+      if(valuesEqual && !subNodesCWSM[nb]) {
+        connected.push_back(nb);
+        subNodesCWSM[nb] = true;
+        stack.push_back(nb);
       }
     }
   }
-  
-  // Clean up the subnodes
+
   clearSubNodesCWSM(connected);
   return connected;
 }
 
 
-vector<list<int> > Graph::splitGroup(const list<int>& groupNodes, vector<double>& nodePull, double adjustment, double lambda2, bool invert) {
-  vector<list<int> > foo(0);
-  list<double> saveNodePulls;
-  list<int> mfgNodes;
-  list<int>::const_iterator listIt;
-  list<double>::iterator saveIt;
-  
-  // adjust everything
-  for(listIt = groupNodes.begin(); listIt != groupNodes.end(); ++listIt) {
-    saveNodePulls.push_back(nodePull[*listIt]);
-    nodePull[*listIt] += adjustment;
-    if(invert) {
-      nodePull[*listIt] *= -1;
-    }      
-    nodePull[*listIt] /= lambda2; 
+vector<vector<int>> Graph::splitGroup(const vector<int>& groupNodes, vector<double>& nodePull, double adjustment, double lambda2, bool invert) {
+  // Save nodePull values, then transform in-place for max-flow
+  vector<double> savedPull(groupNodes.size());
+  for(size_t i = 0; i < groupNodes.size(); ++i) {
+    savedPull[i] = nodePull[groupNodes[i]];
+    nodePull[groupNodes[i]] += adjustment;
+    if(invert) nodePull[groupNodes[i]] *= -1;
+    nodePull[groupNodes[i]] /= lambda2;
   }
-  
-  initializeMaxFlow(groupNodes, nodePull); 
+
+  initializeMaxFlow(groupNodes, nodePull);
   findMaxFlowEdmondsKarp();
-  mfgNodes = reachableFromSource();
-  foo = identifyConnectedGroups(mfgNodes);
-  
-  // now reset the nodePulls to their old values
-  for(listIt = groupNodes.begin(), saveIt = saveNodePulls.begin(); listIt != groupNodes.end(); ++listIt, ++saveIt) {
-    nodePull[*listIt] = *saveIt;
+  vector<int> mfgNodes = reachableFromSource();
+  vector<vector<int>> foo = identifyConnectedGroups(mfgNodes);
+
+  for(size_t i = 0; i < groupNodes.size(); ++i) {
+    nodePull[groupNodes[i]] = savedPull[i];
   }
-  // now the nodes need to be sorted
   return foo;
 }
 
-list<int> Graph::reachableFromSource()
+vector<int> Graph::reachableFromSource()
 {
-  list<int> reachable;
-  distance(true); // get the distance from the source; nodes.size() means that it can't be
-  // reached
-  // reachable nodes are all nodes in parent except source and sink
-  list<int>::iterator listIt;
-  for(listIt = maxFlowNodeList.begin(); listIt != maxFlowNodeList.end(); ++listIt) {
-    if(dist[*listIt] <= (int)maxFlowNodeList.size())
-    {
-      // node is reachable; insert node in external notation
-      reachable.push_back(*listIt); 
-    }
+  vector<int> reachable;
+  distance(true);
+  for(int node : maxFlowNodeList) {
+    if(dist[node] <= (int)maxFlowNodeList.size()) reachable.push_back(node);
   }
   return(reachable);
 }
 
 
-list<int> Graph::getComplement(list<int> &x, list<int>& y)
+vector<int> Graph::getComplement(vector<int>& x, vector<int>& y)
 {
-  list<int> complement;
-  x.sort();
-  y.sort();
-  list<int>::const_iterator xIt;
-  list<int>::const_iterator yIt;
-  
-  xIt = x.begin();
-  for(yIt = y.begin(); yIt != y.end(); ++yIt) {
-    while(xIt != x.end() && *xIt < *yIt) {
-      ++xIt;
-    }
-    if(xIt == x.end() || *yIt != *xIt) {
-      complement.push_back(*yIt);
-    }
+  vector<int> complement;
+  sort(x.begin(), x.end());
+  sort(y.begin(), y.end());
+
+  auto xIt = x.begin();
+  for(int yVal : y) {
+    while(xIt != x.end() && *xIt < yVal) ++xIt;
+    if(xIt == x.end() || yVal != *xIt) complement.push_back(yVal);
   }
-  
   return(complement);
 }
 
 
-void Graph::initializeMaxFlow(const list<int>& groupNodes, const vector<double>& nodePull) {
-  list<int>::const_iterator listIt;
+void Graph::initializeMaxFlow(const vector<int>& groupNodes, const vector<double>& nodePull) {
   Node::iterator edgeIt;
-  
-  for(listIt = maxFlowNodeList.begin(); listIt != maxFlowNodeList.end(); ++listIt) {
-    subNodes[*listIt] = false;
-  }
-  
+
+  for(int node : maxFlowNodeList) subNodes[node] = false;
+
   maxFlowNodeList = groupNodes;
-  // set the appropriate subNodes to true
-  
-  
-  for(listIt = groupNodes.begin(); listIt != groupNodes.end(); ++listIt) {
-    for(edgeIt = nodes[*listIt].begin(); edgeIt != nodes[*listIt].end(); ++edgeIt) {
+
+  for(int node : groupNodes) {
+    for(edgeIt = nodes[node].begin(); edgeIt != nodes[node].end(); ++edgeIt)
       (*edgeIt)->flow = 0;
-    }
-    // now clean up everything w.r.t. source and sink
-    sourceFlow[*listIt] = 0;
-    sinkFlow[*listIt] = 0;
-    exFlow[*listIt] = 0;
-    dist[*listIt] = 0;
-    subNodes[*listIt] = true;
-    if(nodePull[*listIt] > 0) {
-      sourceCapacity[*listIt] = nodePull[*listIt];
-      sinkCapacity[*listIt] = 0;
+    sourceFlow[node] = 0;
+    sinkFlow[node] = 0;
+    exFlow[node] = 0;
+    dist[node] = 0;
+    subNodes[node] = true;
+    if(nodePull[node] > 0) {
+      sourceCapacity[node] = nodePull[node];
+      sinkCapacity[node] = 0;
     }
     else {
-      sourceCapacity[*listIt] = 0;
-      sinkCapacity[*listIt] = -nodePull[*listIt];
+      sourceCapacity[node] = 0;
+      sinkCapacity[node] = -nodePull[node];
     }
-    
   }
-  
+
   activeByDist.clear();
-  
   level = -1;
 }
 
 
 double Graph::getFlowFromSource() {
   double res = 0;
-  list<int>::const_iterator listIt;
-  for(listIt = maxFlowNodeList.begin(); listIt != maxFlowNodeList.end(); ++listIt) {
-    res += sourceFlow[*listIt];
-  }
+  for(int node : maxFlowNodeList) res += sourceFlow[node];
   return res;
 }
 
 double Graph::getFlowIntoSink() {
   double res = 0;
-  list<int>::const_iterator listIt;
-  for(listIt = maxFlowNodeList.begin(); listIt != maxFlowNodeList.end(); ++listIt) {
-    res += sinkFlow[*listIt];
-  }
+  for(int node : maxFlowNodeList) res += sinkFlow[node];
   return res;
 }
 
 
-
-list<int> Graph::allNodes()
+vector<int> Graph::allNodes()
 {
-  list<int> all;
-  
-  for(size_t i = 0; i < nodes.size(); ++i) all.push_back(static_cast<int>(i)) ;
-  
+  vector<int> all;
+  all.reserve(nodes.size());
+  for(size_t i = 0; i < nodes.size(); ++i) all.push_back((int)i);
   return(all);
 }
 
 
-void Graph::getFusedConnectionsWeights(const vector<int>& fusions, int numFusions, vector<vector<int> > &connections, vector<vector<double> > &weights) {
-  list<int>::iterator listIt;
-  list<int>::iterator mapListIt;
+void Graph::getFusedConnectionsWeights(const vector<int>& fusions, int numFusions, vector<vector<int>>& connections, vector<vector<double>>& weights) {
   Node::iterator nodeIt;
-  
-  // prepare the parameters
+
   connections.clear(); connections.resize(numFusions);
   weights.clear(); weights.resize(numFusions);
-  
-  // create a mapping of fused groups to original groups
-  vector<list<int> > mapFusedToOriginal(numFusions);
+
+  vector<vector<int>> mapFusedToOriginal(numFusions);
   for(size_t i = 0; i < fusions.size(); ++i) {
     mapFusedToOriginal[fusions[i]].push_back((int)i);
   }
-  
-  list<int> usedFusedGroups;
+
+  vector<int> usedFusedGroups;
   vector<int> fusedGroupPosMap(numFusions, -1);
   int toGroup;
-  // now build up the weights and connections of the fused groups
+
   for(int curGrp = 0; curGrp < numFusions; ++curGrp) {
-    for(mapListIt = mapFusedToOriginal[curGrp].begin(); mapListIt != mapFusedToOriginal[curGrp].end(); ++mapListIt) {
-      for(nodeIt = nodes[*mapListIt].begin(); nodeIt != nodes[*mapListIt].end(); ++nodeIt) {
+    for(int origNode : mapFusedToOriginal[curGrp]) {
+      for(nodeIt = nodes[origNode].begin(); nodeIt != nodes[origNode].end(); ++nodeIt) {
         toGroup = fusions[(*nodeIt)->to];
-        // check if it is to a different group
         if(toGroup != curGrp) {
-          // check if it was found before
-          if(fusedGroupPosMap[toGroup] == -1) { // add it
+          if(fusedGroupPosMap[toGroup] == -1) {
             fusedGroupPosMap[toGroup] = usedFusedGroups.size();
             usedFusedGroups.push_back(toGroup);
             connections[curGrp].push_back(toGroup);
             weights[curGrp].push_back(0);
           }
-          // now add the weight in
-          weights[curGrp][fusedGroupPosMap[toGroup]] += (*nodeIt)->capacity; 
+          weights[curGrp][fusedGroupPosMap[toGroup]] += (*nodeIt)->capacity;
         }
       }
     }
-    
-    // clean up
-    for(listIt = usedFusedGroups.begin(); listIt != usedFusedGroups.end(); ++listIt) {
-      fusedGroupPosMap[*listIt] = -1;
-    }
+    for(int g : usedFusedGroups) fusedGroupPosMap[g] = -1;
     usedFusedGroups.clear();
   }
 }
@@ -898,31 +652,24 @@ void Graph::makePullAdjustment(const vector<double>& beta, vector<double>& nodeP
   Node::iterator nodeIt;
   for(int pos = 0; pos < (int)nodePull.size(); ++pos) {
     for(nodeIt = nodes[pos].begin(); nodeIt != nodes[pos].end(); ++nodeIt) {
-      if(beta[pos] - beta[(*nodeIt)->to] > accuracy) {
+      if(beta[pos] - beta[(*nodeIt)->to] > accuracy)
         nodePull[pos] += lambda2 * (*nodeIt)->capacity;
-      }
-      else if(beta[pos] - beta[(*nodeIt)->to] < -accuracy) {
+      else if(beta[pos] - beta[(*nodeIt)->to] < -accuracy)
         nodePull[pos] -= lambda2 * (*nodeIt)->capacity;
-      }
     }
   }
-  
 }
 
 
-
-
-void Graph::printIntList(ostream& outStream, const list<int> x) {
-  list<int>::const_iterator listIt;
-  for(listIt = x.begin(); listIt != x.end(); ++listIt) {
-    outStream << *listIt << ", ";
-  }
+void Graph::printIntList(ostream& outStream, const vector<int>& x) {
+  for(int val : x) outStream << val << ", ";
   outStream << endl;
 }
 
+
 // ============================================================================
 // HELPER FUNCTIONS FOR SUBNODE MANAGEMENT
-// 
+//
 
 void Graph::initializeSubNodes() {
   int size = nodes.size();
@@ -932,25 +679,14 @@ void Graph::initializeSubNodes() {
   subNodes.assign(size, false);
 }
 
-void Graph::clearSubNodesICG(const list<int>& nodeList) {
-  list<int>::const_iterator listIt;
-  for(listIt = nodeList.begin(); listIt != nodeList.end(); ++listIt) {
-    subNodesICG[*listIt] = false;
-  }
+void Graph::clearSubNodesICG(const vector<int>& nodeList) {
+  for(int node : nodeList) subNodesICG[node] = false;
 }
 
-void Graph::clearSubNodesCWSM(const list<int>& nodeList) {
-  list<int>::const_iterator listIt;
-  for(listIt = nodeList.begin(); listIt != nodeList.end(); ++listIt) {
-    subNodesCWSM[*listIt] = false;
-  }
+void Graph::clearSubNodesCWSM(const vector<int>& nodeList) {
+  for(int node : nodeList) subNodesCWSM[node] = false;
 }
 
-void Graph::clearSubNodesCT(const list<int>& nodeList) {
-  list<int>::const_iterator listIt;
-  for(listIt = nodeList.begin(); listIt != nodeList.end(); ++listIt) {
-    subNodesCT[*listIt] = false;
-  }
+void Graph::clearSubNodesCT(const vector<int>& nodeList) {
+  for(int node : nodeList) subNodesCT[node] = false;
 }
-
-
