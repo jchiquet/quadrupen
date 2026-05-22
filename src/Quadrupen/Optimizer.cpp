@@ -219,8 +219,8 @@ uword Optimizer::conjugate_gradient(
 }
 
 void Optimizer::optimality_violation(
-  vec& beta,
-  vec& grad,
+  const vec& beta,
+  const vec& grad,
   const double& lambda,
   const double& gamma,
   const vec& XTy,

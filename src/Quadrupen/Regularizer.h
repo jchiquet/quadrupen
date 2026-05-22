@@ -25,7 +25,7 @@ public:
   Regularizer(const RegressionData<matrix>&, const List&);
 
   RegressionData<matrix> data_ ; // data structure
-  double gamma_                ; // overall amount of minor penalty (not leading the path)
+  double gamma_ = 0.0          ; // overall amount of minor penalty (not leading the path)
   vector<double> lambdas_      ; // vector of parameters tuning the main penalty
   vec lambda_factor_           ; // weights for the main penalty
   vector<double> intercept_    ; // vector of intercept term
