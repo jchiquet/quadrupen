@@ -107,16 +107,16 @@ uword SparseOptimizer<matrix, norm>::quadratic(
     }
 
     // Check for swapping variables / sign stability
-    uvec swap = find(arma::sign(beta_new) != theta && abs(beta) > accuracy);
-    if (swap.is_empty()) { // No swap: check for convergence
+    uvec swap_idx = find(arma::sign(beta_new) != theta && abs(beta) > accuracy);
+    if (swap_idx.is_empty()) { // No swap: check for convergence
       double diff = arma::norm(beta_new - beta, 2); // for MCP and SCAD
       beta = beta_new;
       if (diff < accuracy) convergence = true;
     } else {
       // Find the first variable hitting zero and its interpolating ratio
-      vec ratios = -beta(swap) / (beta_new(swap) - beta(swap));
+      vec ratios = -beta(swap_idx) / (beta_new(swap_idx) - beta(swap_idx));
       uword i_min = ratios.index_min();
-      uword idx_to_remove = swap[i_min];
+      uword idx_to_remove = swap_idx[i_min];
 
       // Interpolate by moving all variables to this point
       beta = beta + ratios(i_min) * (beta_new - beta);
@@ -162,7 +162,7 @@ uword SparseOptimizer<matrix,norm>::working_set(
     if (set.is_in_[var_in] == 0) { // Is var_in already in the active set?
       set.add_var(var_in, data) ;
       beta.insert_rows(beta.n_elem, 1); // update the vector of active parameters
-      if (algorithm_ ==  QUADRA) {
+      if (algorithm_ ==  SolverType::QUADRA) {
         beta.tail(1).fill(- 1e-3 * arma::sign(grad(var_in)));
       } else {
         beta.tail(1).fill(0.0);
@@ -174,7 +174,7 @@ uword SparseOptimizer<matrix,norm>::working_set(
     }
 
     // OPTIMIZATION OVER THE CURRENTLY ACTIVATED VARIABLES
-    if (algorithm_ ==  QUADRA) { // Newton-based solver
+    if (algorithm_ ==  SolverType::QUADRA) { // Newton-based solver
       inner_iter_.push_back(
         quadratic(beta, lambda, weights, data.XTy_, set, 1e-9, 1000)
       );
@@ -186,11 +186,11 @@ uword SparseOptimizer<matrix,norm>::working_set(
         return(penalty_.proximal(x, l, weights.elem(set.A_)));
       };
       vec beta_old = beta ;
-      if (algorithm_ == FISTA) {
+      if (algorithm_ == SolverType::FISTA) {
         inner_iter_.push_back(
           fista(beta, lambda, data.XTy_.elem(set.A_), set.XATXA_, prox, 1e-7, 3000, cached_L)
         );
-      } else if (algorithm_ == PGD) {
+      } else if (algorithm_ == SolverType::PGD) {
         inner_iter_.push_back(
           pgd(beta, lambda, data.XTy_.elem(set.A_), set.XATXA_, prox, 1e-7, 3000, 5, cached_L)
         );

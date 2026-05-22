@@ -15,9 +15,9 @@ maxiter_(control["maxiter"]),
 maxfeat_(control["maxfeat"]),
 monitoring_(control["monitor"]) {
   
-  if (as<std::string>(control["method"]) == "FISTA") algorithm_ = FISTA;
-  if (as<std::string>(control["method"]) == "QUADRA") algorithm_ = QUADRA;
-  if (as<std::string>(control["method"]) == "PGD") algorithm_ = PGD;
+  if (as<std::string>(control["method"]) == "FISTA") algorithm_ = SolverType::FISTA;
+  if (as<std::string>(control["method"]) == "QUADRA") algorithm_ = SolverType::QUADRA;
+  if (as<std::string>(control["method"]) == "PGD") algorithm_ = SolverType::PGD;
   
 }
 
@@ -230,31 +230,30 @@ void Optimizer::optimality_violation(
   uword type) {
   
   // nu equals the max |gradient|
-    double nu = arma::norm(grad, "inf");
-    double loss = .5 * pow(norm_y,2) + dot(beta, .5 * XTX * beta - XTy) ;
-    double old_J = J_, old_D = D_ ;
-    J_ = loss - dot(beta, grad(A)) ;
-    uvec Ac ;
-    uword p = grad.n_elem ;
-    
-    switch (type) {
-      case 1: // Grandvalet's bound
-    Ac = find(grad > nu); // set of adversarial variables outside the boundary
-    D_ = J_ * (1 - lambda/nu) - 
-      (pow(lambda,2)/(2*gamma))*((lambda*(p-Ac.n_elem))/nu + 
-      pow(arma::norm(grad(Ac),2)/nu,2)-p);
-    break;
-  case 2: // Fenchel's bound
-      if (nu < lambda) nu = lambda;
-      D_ = loss * (1+pow(lambda/nu,2)) + sum(abs(lambda*beta)) + 
-        (lambda/nu)*(dot(beta,XTy)-pow(norm_y,2));
+  double nu   = arma::norm(grad, "inf");
+  double loss  = .5 * pow(norm_y, 2) + dot(beta, .5 * XTX * beta - XTy);
+  double old_J = J_, old_D = D_;
+  J_ = loss - dot(beta, grad(A));
+  uvec Ac;
+  uword p = grad.n_elem;
+
+  switch (type) {
+    case 1: // Grandvalet's bound
+      Ac = find(grad > nu);
+      D_ = J_ * (1 - lambda/nu) -
+        (pow(lambda, 2) / (2*gamma)) * ((lambda*(p - Ac.n_elem))/nu +
+        pow(arma::norm(grad(Ac), 2)/nu, 2) - p);
       break;
-      default: 
-        D_ = datum::inf ;
-        break;
-    }
-    
-    // keep the smallest bound reached so far for a given lambda value
-    if ((old_J < J_) && (old_D - D_) < (old_J - J_)) {D_ = old_D ; }
-    
+    case 2: // Fenchel's bound
+      if (nu < lambda) nu = lambda;
+      D_ = loss * (1 + pow(lambda/nu, 2)) + sum(abs(lambda*beta)) +
+        (lambda/nu) * (dot(beta, XTy) - pow(norm_y, 2));
+      break;
+    default:
+      D_ = datum::inf;
+      break;
+  }
+
+  // keep the smallest bound reached so far for a given lambda value
+  if ((old_J < J_) && (old_D - D_) < (old_J - J_)) { D_ = old_D; }
 }

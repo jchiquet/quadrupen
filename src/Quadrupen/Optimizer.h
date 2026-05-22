@@ -8,7 +8,7 @@
 #include "RegressionData.h"
 #include <functional>
 
-enum SolverType {FISTA, QUADRA, PGD};
+enum class SolverType {FISTA, QUADRA, PGD};
 
 using arma::vec;
 using arma::mat;
@@ -23,10 +23,10 @@ public:
   Optimizer() {} ;
   Optimizer(const List& control) ;
 
-  SolverType algorithm_ ;
-  double accuracy_, gap_, J_, D_ ;
-  bool verbosity_       ;
-  uword iter_, maxiter_, maxfeat_, monitoring_ ;
+  SolverType algorithm_ = SolverType::QUADRA ;
+  double accuracy_ = 1e-4, gap_ = 0.0, J_ = 0.0, D_ = 0.0 ;
+  bool verbosity_  = false ;
+  uword iter_ = 0, maxiter_ = 1000, maxfeat_ = 0, monitoring_ = 0 ;
   vector<uword> inner_iter_   ;
   vector<double> J_vec_, D_vec_ ;
   vec q_lipschitz_ ; // warm-start eigenvector for power iteration in estimate_lipschitz
