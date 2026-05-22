@@ -3,8 +3,6 @@
 #include "FusedLasso_utils.h"
 #include <vector>
 
-using namespace std;
-
 /**
  * @file FusedLasso_vectorops.h
  * @brief Utilitaires pour opérations vectorielles communes
@@ -21,9 +19,7 @@ namespace VectorOps {
      * @param scalar Valeur scalaire à multiplier
      */
     inline void scalarMultiply(vector<double>& vec, double scalar) {
-        for (int i = 0; i < vec.size(); ++i) {
-            vec[i] *= scalar;
-        }
+        for (auto& v : vec) v *= scalar ;
     }
 
     /**
@@ -35,9 +31,7 @@ namespace VectorOps {
         if (vec.size() != weights.size()) {
             Rcpp::stop("VectorOps::weightedMultiply: Tailles incompatibles\n");
         }
-        for (int i = 0; i < vec.size(); ++i) {
-            vec[i] *= weights[i];
-        }
+        for (size_t i = 0; i < vec.size(); ++i) vec[i] *= weights[i] ;
     }
 
     /**
@@ -50,9 +44,7 @@ namespace VectorOps {
         if (result.size() != other.size()) {
             Rcpp::stop("VectorOps::addScaledVector: Tailles incompatibles\n");
         }
-        for (int i = 0; i < result.size(); ++i) {
-            result[i] += scalar * other[i];
-        }
+        for (size_t i = 0; i < result.size(); ++i) result[i] += scalar * other[i] ;
     }
 
     /**
@@ -66,9 +58,7 @@ namespace VectorOps {
             Rcpp::stop("VectorOps::dotProduct: Tailles incompatibles\n");
         }
         double result = 0.0;
-        for (int i = 0; i < vec1.size(); ++i) {
-            result += vec1[i] * vec2[i];
-        }
+        for (size_t i = 0; i < vec1.size(); ++i) result += vec1[i] * vec2[i] ;
         return result;
     }
 
@@ -84,9 +74,7 @@ namespace VectorOps {
             Rcpp::stop("VectorOps::weightedDotProduct: Tailles incompatibles\n");
         }
         double result = 0.0;
-        for (int i = 0; i < vec1.size(); ++i) {
-            result += vec1[i] * vec2[i] * weights[i];
-        }
+        for (size_t i = 0; i < vec1.size(); ++i) result += vec1[i] * vec2[i] * weights[i] ;
         return result;
     }
 
@@ -96,9 +84,7 @@ namespace VectorOps {
      * @param value Valeur à affecter à chaque élément
      */
     inline void fill(vector<double>& vec, double value) {
-        for (int i = 0; i < vec.size(); ++i) {
-            vec[i] = value;
-        }
+        for (auto& v : vec) v = value ;
     }
 
     /**
@@ -109,9 +95,7 @@ namespace VectorOps {
      */
     template<typename F>
     inline void apply(vector<double>& vec, F f) {
-        for (int i = 0; i < vec.size(); ++i) {
-            vec[i] = f(vec[i]);
-        }
+        for (auto& v : vec) v = f(v) ;
     }
 
     /**
@@ -121,11 +105,7 @@ namespace VectorOps {
      */
     inline int countZeros(const vector<double>& vec) {
         int count = 0;
-        for (int i = 0; i < vec.size(); ++i) {
-            if (vec[i] == 0.0) {
-                count++;
-            }
-        }
+        for (const auto& v : vec) if (v == 0.0) count++ ;
         return count;
     }
 
@@ -145,10 +125,7 @@ namespace VectorOps {
      * @param maxVal Valeur maximum
      */
     inline void clamp(vector<double>& vec, double minVal, double maxVal) {
-        for (int i = 0; i < vec.size(); ++i) {
-            if (vec[i] < minVal) vec[i] = minVal;
-            else if (vec[i] > maxVal) vec[i] = maxVal;
-        }
+        for (auto& v : vec) { if (v < minVal) v = minVal; else if (v > maxVal) v = maxVal; }
     }
 
 }

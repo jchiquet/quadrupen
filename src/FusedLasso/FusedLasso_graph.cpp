@@ -1,5 +1,7 @@
 #include "FusedLasso_graph.h"
 
+using namespace std;
+
 void  Graph::distance(const bool fromSource) 
 {
   list<int>::iterator listIt;
@@ -361,7 +363,7 @@ void Graph::breadthFirstSearch(const int startNode, vector<int>&parentTable, vec
     }
     
     nodesToSearch.pop_back();
-    for(int edgeIndex = 0; edgeIndex <  nodes[u].size(); ++edgeIndex) {
+    for(size_t edgeIndex = 0; edgeIndex < nodes[u].size(); ++edgeIndex) {
       e = nodes[u][edgeIndex];
       if(!subNodes[e->to]) {
         continue; // not part of the maxFlowGraph
@@ -605,7 +607,7 @@ void Graph::makeCopy(const Graph& pg) {
   nodes.clear(); nodes.resize(pg.nodes.size(), vector<GraphEdge*>());
   
   // go through all the edges 
-  for(int node = 0; node < pg.nodes.size(); ++node) {
+  for(size_t node = 0; node < pg.nodes.size(); ++node) {
     for(edgeIt = pg.nodes[node].begin(); edgeIt != pg.nodes[node].end(); ++edgeIt) {
       if((*edgeIt)->to > node) {
         edgePtr = *edgeIt;
@@ -841,9 +843,7 @@ list<int> Graph::allNodes()
 {
   list<int> all;
   
-  for(int i = 0; i < nodes.size(); ++i) {
-    all.push_back(i);
-  }
+  for(size_t i = 0; i < nodes.size(); ++i) all.push_back(static_cast<int>(i)) ;
   
   return(all);
 }

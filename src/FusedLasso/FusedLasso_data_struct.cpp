@@ -1,5 +1,7 @@
 #include "FusedLasso_data_struct.h"
 
+using namespace std;
+
 // ============================================================================
 // SPARSE MATRIX
 // 
@@ -416,15 +418,6 @@ void SparseMatrix::printColumn(int i, ostream& outStream) const {
 // ============================================================================
 // LINEAR REGRESSION (GAUSSIAN OUTCOME)
 // 
-
-// Common initialization helper for QuadraticDerivative subclasses
-// Centralizes data member initialization to eliminate duplication
-void QuadraticDerivative::initializeCommonData(const SparseMatrix& X_in, const vector<double>& y_in, 
-                                               const vector<double>& w_in, const vector<double>& beta_in) {
-  // This should only be called from derived classes which have the appropriate data members
-  // Note: This is implemented in the .cpp but the actual member assignments
-  // are done in the derived class constructors since they have different data layouts
-}
 
 QuadraticDerivativeDiagonal::QuadraticDerivativeDiagonal(const SparseMatrix& X, const vector<double>& y, const vector<double>&  w, const vector<double>& beta) {
   // set number of rows and cols and store X, y and w and beta

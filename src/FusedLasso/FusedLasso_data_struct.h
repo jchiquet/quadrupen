@@ -3,7 +3,6 @@
 #include "FusedLasso_utils.h"
 #include "FusedLasso_enums.h"
 
-using namespace std;
 
 // Very simple implementation of a sparse matrix
 // The matrix sparseness structure can not be changed after construction
@@ -148,12 +147,6 @@ public:
 
 // the class that keeps the data for calculating the derivative
 class QuadraticDerivative {
-
-protected:
-    // Common initialization helper for derived classes
-    // Centralizes the data member initialization to avoid duplication
-    void initializeCommonData(const SparseMatrix& X_in, const vector<double>& y_in, 
-                              const vector<double>& w_in, const vector<double>& beta_in);
 
 public:
     /*

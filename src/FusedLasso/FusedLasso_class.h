@@ -5,7 +5,6 @@
 #include "FusedLasso_optim.h"
 #include "FusedLasso_data_struct.h"
 
-using namespace std;
 
 // main class of the program; stores important data and administrate other important classes
 class FusedLasso {

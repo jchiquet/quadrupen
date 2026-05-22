@@ -5,7 +5,6 @@
 #include "FusedLasso_enums.h"
 #include "FusedLasso_graph.h"
 
-using namespace std;
 
 // main class for optimization and coordinate descent algorithm with maximum flow
 class FusedLassoCoordinate {
