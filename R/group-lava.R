@@ -82,6 +82,7 @@ group_lava <- function(x,
                        type        = c("l2", "coop", "linf"),
                        lambda1   = NULL,
                        lambda2   = 1,
+                       weights   = rep(1, nrow(x)),
                        penscale  = sqrt(tabulate(group)),
                        struct    = Matrix::Diagonal(ncol(x), 1),
                        intercept = TRUE,
@@ -111,7 +112,8 @@ group_lava <- function(x,
   myData <- DataModel$new(
     covariates  = x,
     outcome     = y,
-    cov_struct  = struct
+    cov_struct  = struct,
+    obs_weights = weights
   )
   
   ## ============================================
@@ -122,10 +124,11 @@ group_lava <- function(x,
     intercept = intercept,
     group     = group,
     type      = match.arg(type),
-    regParam  = list(lambda = lambda1, 
+    regParam  = list(lambda = lambda1,
                      gamma  = lambda2,
+                     alpha  = 0,
                      eta = 1,
-                     lambda_factor = penscale, 
+                     lambda_factor = penscale,
                      min_ratio = minratio, n_lambda = nlambda1)
   )
 

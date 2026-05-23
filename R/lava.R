@@ -54,6 +54,7 @@ lava <- function(x,
                  y,
                  lambda1   = NULL,
                  lambda2   = 1,
+                 weights   = rep(1, nrow(x)),
                  penscale  = rep(1,ncol(x)),
                  struct    = Matrix::Diagonal(ncol(x), 1),
                  intercept = TRUE,
@@ -82,7 +83,8 @@ lava <- function(x,
   myData <- DataModel$new(
     covariates  = x,
     outcome     = y,
-    cov_struct  = struct
+    cov_struct  = struct,
+    obs_weights = weights
   )
   
   ## ============================================

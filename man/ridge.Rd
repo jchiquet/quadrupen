@@ -8,6 +8,7 @@ ridge(
   x,
   y,
   lambda = NULL,
+  weights = rep(1, nrow(x)),
   struct = Matrix::Diagonal(ncol(x), 1),
   penscale = rep(1, ncol(x)),
   intercept = TRUE,
@@ -31,6 +32,10 @@ levels. If \code{NULL} (the default), a vector is generated with
 \code{nlambda} entries, starting from a guessed level
 \code{lambda_max} where only the intercept is included, then
 shrunken to \code{minratio*lambda_max}.}
+
+\item{weights}{vector with real positive values that weight the
+observations (like in weighted least square).
+Default sets all weights to 1.}
 
 \item{struct}{matrix structuring the coefficients, possibly
 sparsely encoded. Must be at least positive semidefinite (this is
