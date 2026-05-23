@@ -16,6 +16,7 @@ sparse_lm(
   lambda1 = NULL,
   lambda2 = 0.01,
   eta = 3.7,
+  weights = rep(1, nrow(x)),
   penscale = rep(1, ncol(x)),
   struct = Matrix::Diagonal(ncol(x), 1),
   intercept = TRUE,
@@ -33,6 +34,7 @@ elastic.net(
   y,
   lambda1 = NULL,
   lambda2 = 0.5,
+  weights = rep(1, nrow(x)),
   penscale = rep(1, ncol(x)),
   struct = Matrix::Diagonal(ncol(x), 1),
   intercept = TRUE,
@@ -50,6 +52,7 @@ elastic_net(
   y,
   lambda1 = NULL,
   lambda2 = 0.5,
+  weights = rep(1, nrow(x)),
   penscale = rep(1, ncol(x)),
   struct = Matrix::Diagonal(ncol(x), 1),
   intercept = TRUE,
@@ -66,6 +69,7 @@ lasso(
   x,
   y,
   lambda1 = NULL,
+  weights = rep(1, nrow(x)),
   penscale = rep(1, ncol(x)),
   intercept = TRUE,
   normalize = TRUE,
@@ -83,6 +87,7 @@ mcp(
   lambda1 = NULL,
   lambda2 = 0,
   eta = 3,
+  weights = rep(1, nrow(x)),
   penscale = rep(1, ncol(x)),
   struct = Matrix::Diagonal(ncol(x), 1),
   intercept = TRUE,
@@ -101,6 +106,7 @@ scad(
   lambda1 = NULL,
   lambda2 = 0,
   eta = 3.7,
+  weights = rep(1, nrow(x)),
   penscale = rep(1, ncol(x)),
   struct = Matrix::Diagonal(ncol(x), 1),
   intercept = TRUE,
@@ -149,10 +155,15 @@ scad(
   real positive scalar for tuning SCAD or MCP penalties. Default is 3.7.
   Ignored when type == "l1".
 
+- weights:
+
+  vector with real positive values that weight the observations (like in
+  weighted least square). Default sets all weights to 1.
+
 - penscale:
 
-  vector with real positive values that weight the \\\ell_1\\-penalty of
-  each feature. Default sets all weights to 1.
+  vector with real positive values that weight the penalty of each
+  feature. Default sets all weights to 1.
 
 - struct:
 

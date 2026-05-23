@@ -13,23 +13,28 @@ algorithms. Also provides a few methods for model selection purpose
 **Quadrupen** covers the following regularizers
 
 - LASSO[^1] (Least Absolute Shrinkage and Selection Operator)
-- Group-LASSO[^2] (\\\ell_1/\ell_2\\ or \\\ell_1/\ell\_\infty\\)
-- Cooperative-LASSO[^3]
-- Sparse Group-LASSO[^4] and Sparse Cooperative-LASSO
+- SCAD[^2] (Smoothly Clip Absolute Deviation) - *preliminary version*
+- MCP[^3] (Minimax Concave Penalty) - *preliminary version*
+- Group-LASSO[^4] (\\\ell_1/\ell_2\\ or \\\ell_1/\ell\_\infty\\)
+- Cooperative-LASSO[^5]
+- Sparse Group-LASSO[^6] and Sparse Cooperative-LASSO
 - Bounded Regression (\\\ell\_\infty\\-norm).
+- LAVA[^7] and the group-LAVA variants for the all the group-sparse
+  methods
+- Ridge Regression[^8]
 
 For all these regularizers, **Quadrupen** offers the possibility to add
 an \\\ell_2\\/ridge-like “structured” penalty to embed some external
 knowledge about the statistical dependence between the features. This is
-sometimes referred to as the “Structured Elastic-Net”[^5].
+sometimes referred to as the “Structured Elastic-Net”[^9].
 
 We also provide in the package the implementation of the Generalized
-Fused-LASSO[^6] originally proposed by Holger Höfling now archived from
+Fused-LASSO[^10] originally proposed by Holger Höfling now archived from
 CRAN ([original repo here](https://github.com/cran/FusedLasso)).
 
 The original version of **Quadrupen** only includes Lasso, Elastic-Net
 and Bounded regression. It was used as an illustration for our paper
-*“Sparsity by worst-case penalties”*[^7]. I eventually used it to
+*“Sparsity by worst-case penalties”*[^11]. I eventually used it to
 include my personal implementation of sparse methods for linear
 regression.
 
@@ -62,11 +67,7 @@ library(quadrupen)
 ```
 
 ``` R
-----------------------------------------------
-  'quadrupen' package version 0.3-9xxx        
-
- Still under development... feedback welcome  
-----------------------------------------------
+'quadrupen' package version 1.0-0
 ```
 
 ### A toy data set advocating for structured regularization
@@ -96,7 +97,7 @@ x <- rPred.block(n, p, sizes = group, rho=c(0.25, 0.75, 0.25, 0.75, 0.25))
 Indeed, the correlation structure between the regressors exhibits a
 strong pattern:
 
-![](reference/figures/unnamed-chunk-3-1.png)
+![](reference/figures/img-cor-struct-1.png)
 
 We draw the response variable by fixing the variance of the noise ratio
 to get an \\R^2\\ equal to \\0.8\\.
@@ -120,7 +121,7 @@ fit the regularization path to this data set
 plot(ridge(x,y, intercept=FALSE), labels=labels)
 ```
 
-![](reference/figures/ridge_nostruct-1.png)
+![](reference/figures/ridge-nostruct-1.png)
 
 #### Lasso (\\\ell_1\\ penalty)
 
@@ -129,7 +130,44 @@ plot(ridge(x,y, intercept=FALSE), labels=labels)
 plot(lasso(x,y, intercept=FALSE), labels=labels)
 ```
 
-![](reference/figures/lasso_nostruct-1.png)
+![](reference/figures/lasso-nostruct-1.png)
+
+#### MCP (Minimax Concave Penalty)
+
+``` r
+
+plot(mcp(x,y, intercept=FALSE), labels=labels)
+```
+
+``` R
+Warning in sparse_lm(x, y, type = "mcp", lambda1 = lambda1, lambda2 = lambda2,
+: SCAD and MCP are still highly experimental and in development
+```
+
+![](reference/figures/mcp-nostruct-1.png)
+
+#### SCAD (Smoothly Clipped Absolute Deviation)
+
+``` r
+
+plot(scad(x,y, intercept=FALSE), labels=labels)
+```
+
+``` R
+Warning in sparse_lm(x, y, type = "scad", lambda1 = lambda1, lambda2 = lambda2,
+: SCAD and MCP are still highly experimental and in development
+```
+
+![](reference/figures/scad-nostruct-1.png)
+
+#### SCAD (Smoothly Clipped Absolute Deviation)
+
+``` r
+
+plot(fused_lasso(x,y, lambda2 = 5, intercept=FALSE), labels=labels)
+```
+
+![](reference/figures/fused-lasso-1.png)
 
 #### Elastic-net (\\\ell_1+\ell_2\\ penalty)
 
@@ -138,7 +176,7 @@ plot(lasso(x,y, intercept=FALSE), labels=labels)
 plot(elastic_net(x,y, lambda2=1, intercept=FALSE), labels=labels)
 ```
 
-![](reference/figures/enet_nostruct-1.png)
+![](reference/figures/enet-nostruct-1.png)
 
 #### Bounded regression (\\\ell\_\infty\\ penalty)
 
@@ -147,7 +185,7 @@ plot(elastic_net(x,y, lambda2=1, intercept=FALSE), labels=labels)
 plot(bounded_reg(x,y, lambda2=0, intercept=FALSE), labels=labels)
 ```
 
-![](reference/figures/breg_nostruct-1.png)
+![](reference/figures/breg-nostruct-1.png)
 
 #### Bounded regression + Ridge (\\\ell\_\infty+\ell_2\\ penalty)
 
@@ -156,7 +194,7 @@ plot(bounded_reg(x,y, lambda2=0, intercept=FALSE), labels=labels)
 plot(bounded_reg(x,y, lambda2=5, intercept=FALSE), labels=labels)
 ```
 
-![](reference/figures/bregridge_nostruct-1.png)
+![](reference/figures/bregridge-nostruct-1.png)
 
 #### Lava (sparse + dense signal decomposition)
 
@@ -166,14 +204,14 @@ out_lava <- lava(x,y, lambda2=1, intercept=FALSE)
 out_lava$plot_path(component = "sparse", labels=labels)
 ```
 
-![](reference/figures/lava_nostruct-1.png)
+![](reference/figures/lava-nostruct-1.png)
 
 ``` r
 
 out_lava$plot_path(component = "dense", labels=labels)
 ```
 
-![](reference/figures/lava_nostruct-2.png)
+![](reference/figures/lava-nostruct-2.png)
 
 ### Regularization with smooth prior knowledge
 
@@ -327,26 +365,6 @@ plot(group_sparse_lm(x, y, group, type = "l2", alpha = 0.5, lambda2 = 2, struct 
 
 ![](reference/figures/sparse-grpenet-l1l2-1.png)
 
-#### Sparse Group-Lasso LInf + Structured ElasticNet (group sparse L1/LInf + structured L2)
-
-``` r
-
-plot(group_sparse_lm(x, y, group, type = "linf", alpha = 0.5, lambda2 = 2, struct = L, intercept=FALSE), labels=labels)
-```
-
-![](reference/figures/sparse-grpenet-l1linf-1.png)
-
-#### Sparse Cooperative-Lasso + Structured ElasticNet (sign-coherent group lasso + structured L2)
-
-``` r
-
-plot(group_sparse_lm(x, y, group, type = "coop", alpha = 0.5, lambda2 = 2, struct = L, intercept=FALSE), labels=labels)
-```
-
-![](reference/figures/sparse-coopenet-1.png)
-
-## References
-
 ## Appendix: functions for data generation
 
 ``` r
@@ -386,7 +404,7 @@ rPred.block <- function(n, p, sizes=rmultinom(1,p,rep(p/K,K)), rho=rep(0.75,4)) 
   K <- length(rho)
   stopifnot(sum(sizes) == p | length(rho) != length(sizes))
   Cs <- lapply(1:K, function(k) chol.uniform(sizes[k],rho[k]))
-  
+
   rmv <- function() {
       return(
       unlist(lapply(1:K, function(k) {
@@ -399,16 +417,46 @@ rPred.block <- function(n, p, sizes=rmultinom(1,p,rep(p/K,K)), rho=rep(0.75,4)) 
 }
 ```
 
-[^1]: 1
+## References
 
-[^2]: 4
+[^1]: Tibshirani, Robert. “Regression shrinkage and selection via the
+    lasso.” Journal of the Royal Statistical Society Series B:
+    Statistical Methodology 58.1 (1996): 267-288.
 
-[^3]: 5
+[^2]: Fan, Jianqing, and Runze Li. “Variable selection via nonconcave
+    penalized likelihood and its oracle properties.” Journal of the
+    American statistical Association 96.456 (2001): 1348-1360.
 
-[^4]: 6
+[^3]: Zhang, C. H. Nearly unbiased variable selection under minimax
+    concave penalty. The Annals of Statistics, 38(2), (2010): 894-942.
 
-[^5]: 7
+[^4]: Yuan, Ming, and Yi Lin. “Model selection and estimation in
+    regression with grouped variables.” Journal of the Royal Statistical
+    Society Series B: Statistical Methodology 68.1 (2006): 49-67.
 
-[^6]: 8
+[^5]: Chiquet, Julien, Yves Grandvalet, and Camille Charbonnier.
+    “Sparsity with sign-coherent groups of variables via the
+    cooperative-lasso.” (2012): 795-830.
 
-[^7]: 9
+[^6]: Simon, Noah, et al. “A sparse-group lasso.” Journal of
+    computational and graphical statistics 22.2 (2013): 231-245.
+
+[^7]: Chernozhukov, Victor, Christian Hansen, and Yuan Liao. “A lava
+    attack on the recovery of sums of dense and sparse signals.” The
+    Annals of Statistics (2017): 39-76.
+
+[^8]: Hoerl, Arthur E., and Robert W. Kennard. “Ridge regression: Biased
+    estimation for nonorthogonal problems.” Technometrics 12.1 (1970):
+    55-67.
+
+[^9]: Slawski, Martin. “The structured elastic net for quantile
+    regression and support vector classification.” Statistics and
+    Computing 22.1 (2012): 153-168.
+
+[^10]: Hoefling, Holger. “A path algorithm for the fused lasso signal
+    approximator.” Journal of Computational and Graphical Statistics
+    19.4 (2010): 984-1006.
+
+[^11]: Grandvalet, Yves, Julien Chiquet, and Christophe Ambroise.
+    “Sparsity by worst-case penalties.” arXiv preprint arXiv:1210.2077
+    (2012).

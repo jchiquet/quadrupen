@@ -58,6 +58,7 @@ for the criterion optimized.</p>
 <span>  <span class="va">x</span>,</span>
 <span>  <span class="va">y</span>,</span>
 <span>  lambda <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  weights <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">x</span><span class="op">)</span><span class="op">)</span>,</span>
 <span>  struct <span class="op">=</span> <span class="fu">Matrix</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/Matrix/man/Diagonal.html" class="external-link">Diagonal</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">ncol</a></span><span class="op">(</span><span class="va">x</span><span class="op">)</span>, <span class="fl">1</span><span class="op">)</span>,</span>
 <span>  penscale <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">ncol</a></span><span class="op">(</span><span class="va">x</span><span class="op">)</span><span class="op">)</span>,</span>
 <span>  intercept <span class="op">=</span> <span class="cn">TRUE</span>,</span>
@@ -92,6 +93,12 @@ levels. If <code>NULL</code> (the default), a vector is generated with
 shrunken to <code>minratio*lambda_max</code>.</p></dd>
 
 
+<dt id="arg-weights">weights<a class="anchor" aria-label="anchor" href="#arg-weights"></a></dt>
+<dd><p>vector with real positive values that weight the
+observations (like in weighted least square).
+Default sets all weights to 1.</p></dd>
+
+
 <dt id="arg-struct">struct<a class="anchor" aria-label="anchor" href="#arg-struct"></a></dt>
 <dd><p>matrix structuring the coefficients, possibly
 sparsely encoded. Must be at least positive semidefinite (this is
@@ -101,8 +108,7 @@ used. See details below.</p></dd>
 
 <dt id="arg-penscale">penscale<a class="anchor" aria-label="anchor" href="#arg-penscale"></a></dt>
 <dd><p>vector with real positive values that weight the
-\(\ell_1\)-penalty of each feature. Default sets all weights
-to 1.</p></dd>
+penalty of each feature. Default sets all weights to 1.</p></dd>
 
 
 <dt id="arg-intercept">intercept<a class="anchor" aria-label="anchor" href="#arg-intercept"></a></dt>

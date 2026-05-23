@@ -20,6 +20,7 @@ group_sparse_lm(
   lambda1 = NULL,
   lambda2 = 0.01,
   alpha = 0,
+  weights = rep(1, nrow(x)),
   penscale = sqrt(tabulate(group)),
   struct = Matrix::Diagonal(ncol(x), 1),
   intercept = TRUE,
@@ -38,6 +39,7 @@ group_lasso(
   group,
   lambda1 = NULL,
   lambda2 = 0,
+  weights = rep(1, nrow(x)),
   penscale = sqrt(tabulate(group)),
   intercept = TRUE,
   normalize = TRUE,
@@ -54,6 +56,7 @@ group_l1linf(
   group,
   lambda1 = NULL,
   lambda2 = 0,
+  weights = rep(1, nrow(x)),
   penscale = sqrt(tabulate(group)),
   intercept = TRUE,
   normalize = TRUE,
@@ -70,6 +73,7 @@ coop_lasso(
   group,
   lambda1 = NULL,
   lambda2 = 0,
+  weights = rep(1, nrow(x)),
   penscale = sqrt(tabulate(group)),
   intercept = TRUE,
   normalize = TRUE,
@@ -87,6 +91,7 @@ sparse_group_lasso(
   lambda1 = NULL,
   lambda2 = 0,
   alpha = 0.5,
+  weights = rep(1, nrow(x)),
   penscale = sqrt(tabulate(group)),
   intercept = TRUE,
   normalize = TRUE,
@@ -104,6 +109,7 @@ sparse_group_l1linf(
   lambda1 = NULL,
   lambda2 = 0,
   alpha = 0,
+  weights = rep(1, nrow(x)),
   penscale = sqrt(tabulate(group)),
   intercept = TRUE,
   normalize = TRUE,
@@ -121,6 +127,7 @@ sparse_coop_lasso(
   lambda1 = NULL,
   lambda2 = 0,
   alpha = 0,
+  weights = rep(1, nrow(x)),
   penscale = sqrt(tabulate(group)),
   intercept = TRUE,
   normalize = TRUE,
@@ -171,10 +178,15 @@ sparse_coop_lasso(
   real scalar in (0,1); tunes mixture between \\\ell_1\\ group
   penalties. Default is 0.0 (standard group-lasso).
 
+- weights:
+
+  vector with real positive values that weight the observations (like in
+  weighted least square). Default sets all weights to 1.
+
 - penscale:
 
-  vector with real positive values that weight the \\\ell_1\\-penalty of
-  each feature. Default sets all weights to 1.
+  vector with real positive values that weight the penalty of each
+  feature. Default sets all weights to 1.
 
 - struct:
 
@@ -281,7 +293,7 @@ See also
 ## Simulating multivariate Gaussian with blockwise correlation
 ## and piecewise constant vector of parameters
 beta <- rep(c(0,1,0,-1,0), c(25,10,25,10,25))
-grp  <- rep(1:5, c(25,10,25,10,25)) 
+grp  <- rep(1:5, c(25,10,25,10,25))
 cor <- 0.75
 Soo <- toeplitz(cor^(0:(25-1))) ## Toeplitz correlation for irrelevant variables
 Sww  <- matrix(cor,10,10) ## bloc correlation between active variables
@@ -310,7 +322,7 @@ plot(group_sparse_lm(x, y, grp, type = "l2", alpha = .75, lambda2=.5),
  label=labels)
 plot(group_sparse_lm(x, y, grp, type = "l2", alpha = .75, lambda2=10),
  label=labels)
-plot(group_sparse_lm(x, y, grp, type = "l2", alpha = .75, lambda2=10, 
+plot(group_sparse_lm(x, y, grp, type = "l2", alpha = .75, lambda2=10,
  struct=solve(Sigma)), label=labels)
 } # }
 
@@ -328,7 +340,7 @@ plot(group_sparse_lm(x, y, grp, type = "linf", alpha = .75, lambda2=.5),
   label=labels)
 plot(group_sparse_lm(x, y, grp, type = "linf", alpha = .75, lambda2=10),
   label=labels)
-plot(group_sparse_lm(x, y, grp, type = "linf", alpha = .75, lambda2=10, 
+plot(group_sparse_lm(x, y, grp, type = "linf", alpha = .75, lambda2=10,
   struct=solve(Sigma)), label=labels)
 } # }
 
@@ -346,7 +358,7 @@ plot(group_sparse_lm(x, y, grp, type = "coop", alpha = .75, lambda2=.5),
  label=labels)
 plot(group_sparse_lm(x, y, grp, type = "coop", alpha = .75, lambda2=10),
  label=labels)
-plot(group_sparse_lm(x, y, grp, type = "coop", alpha = .75, lambda2=10, 
+plot(group_sparse_lm(x, y, grp, type = "coop", alpha = .75, lambda2=10,
  struct=solve(Sigma)), label=labels)
 } # }
 ```

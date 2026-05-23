@@ -11,6 +11,7 @@ ridge(
   x,
   y,
   lambda = NULL,
+  weights = rep(1, nrow(x)),
   struct = Matrix::Diagonal(ncol(x), 1),
   penscale = rep(1, ncol(x)),
   intercept = TRUE,
@@ -41,6 +42,11 @@ ridge(
   a guessed level `lambda_max` where only the intercept is included,
   then shrunken to `minratio*lambda_max`.
 
+- weights:
+
+  vector with real positive values that weight the observations (like in
+  weighted least square). Default sets all weights to 1.
+
 - struct:
 
   matrix structuring the coefficients, possibly sparsely encoded. Must
@@ -49,8 +55,8 @@ ridge(
 
 - penscale:
 
-  vector with real positive values that weight the \\\ell_1\\-penalty of
-  each feature. Default sets all weights to 1.
+  vector with real positive values that weight the penalty of each
+  feature. Default sets all weights to 1.
 
 - intercept:
 

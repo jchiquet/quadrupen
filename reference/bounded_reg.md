@@ -66,8 +66,8 @@ bounded.reg(
 
 - penscale:
 
-  vector with real positive values that weight the \\\ell_1\\-penalty of
-  each feature. Default sets all weights to 1.
+  vector with real positive values that weight the penalty of each
+  feature. Default sets all weights to 1.
 
 - struct:
 

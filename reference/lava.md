@@ -13,6 +13,7 @@ lava(
   y,
   lambda1 = NULL,
   lambda2 = 1,
+  weights = rep(1, nrow(x)),
   penscale = rep(1, ncol(x)),
   struct = Matrix::Diagonal(ncol(x), 1),
   intercept = TRUE,
@@ -50,10 +51,15 @@ lava(
   real scalar; tunes the \\\ell_2\\ penalty in the Elastic-net. Default
   is 0.01. Set to 0 to recover the Lasso.
 
+- weights:
+
+  vector with real positive values that weight the observations (like in
+  weighted least square). Default sets all weights to 1.
+
 - penscale:
 
-  vector with real positive values that weight the \\\ell_1\\-penalty of
-  each feature. Default sets all weights to 1.
+  vector with real positive values that weight the penalty of each
+  feature. Default sets all weights to 1.
 
 - struct:
 
