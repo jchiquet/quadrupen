@@ -38,8 +38,7 @@ checked internally). If \code{NULL} (the default), the identity matrix is
 used. See details below.}
 
 \item{penscale}{vector with real positive values that weight the
-\eqn{\ell_1}{l1}-penalty of each feature. Default sets all weights
-to 1.}
+penalty of each feature. Default sets all weights to 1.}
 
 \item{intercept}{logical; indicates if an intercept should be
 included in the model. Default is \code{TRUE}.}

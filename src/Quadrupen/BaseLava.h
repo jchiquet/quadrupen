@@ -48,7 +48,7 @@ protected:
     mat B_proj = C_inv * V * diagmat(D / (D2 + 1)) * U.t() ;
     return {
       RegressionData<matrix>(K12 * Xc, K12 * (orig.y_ - orig.y_bar_),
-                             sp_mat(orig.p_, orig.p_), ones(orig.p_), false, false),
+                             sp_mat(orig.p_, orig.p_), ones(orig.n_), false, false),
       std::move(Proj),
       std::move(B_proj)
     } ;

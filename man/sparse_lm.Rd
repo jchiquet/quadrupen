@@ -16,6 +16,7 @@ sparse_lm(
   lambda1 = NULL,
   lambda2 = 0.01,
   eta = 3.7,
+  weights = rep(1, nrow(x)),
   penscale = rep(1, ncol(x)),
   struct = Matrix::Diagonal(ncol(x), 1),
   intercept = TRUE,
@@ -33,6 +34,7 @@ elastic.net(
   y,
   lambda1 = NULL,
   lambda2 = 0.5,
+  weights = rep(1, nrow(x)),
   penscale = rep(1, ncol(x)),
   struct = Matrix::Diagonal(ncol(x), 1),
   intercept = TRUE,
@@ -50,6 +52,7 @@ elastic_net(
   y,
   lambda1 = NULL,
   lambda2 = 0.5,
+  weights = rep(1, nrow(x)),
   penscale = rep(1, ncol(x)),
   struct = Matrix::Diagonal(ncol(x), 1),
   intercept = TRUE,
@@ -66,6 +69,7 @@ lasso(
   x,
   y,
   lambda1 = NULL,
+  weights = rep(1, nrow(x)),
   penscale = rep(1, ncol(x)),
   intercept = TRUE,
   normalize = TRUE,
@@ -83,6 +87,7 @@ mcp(
   lambda1 = NULL,
   lambda2 = 0,
   eta = 3,
+  weights = rep(1, nrow(x)),
   penscale = rep(1, ncol(x)),
   struct = Matrix::Diagonal(ncol(x), 1),
   intercept = TRUE,
@@ -101,6 +106,7 @@ scad(
   lambda1 = NULL,
   lambda2 = 0,
   eta = 3.7,
+  weights = rep(1, nrow(x)),
   penscale = rep(1, ncol(x)),
   struct = Matrix::Diagonal(ncol(x), 1),
   intercept = TRUE,
@@ -137,9 +143,12 @@ the Elastic-net. Default is 0.01. Set to 0 to recover the Lasso.}
 \item{eta}{real positive scalar for tuning SCAD or MCP penalties.
 Default is 3.7. Ignored when type == "l1".}
 
+\item{weights}{vector with real positive values that weight the
+observations (like in weighted least square).
+Default sets all weights to 1.}
+
 \item{penscale}{vector with real positive values that weight the
-\eqn{\ell_1}{l1}-penalty of each feature. Default sets all weights
-to 1.}
+penalty of each feature. Default sets all weights to 1.}
 
 \item{struct}{matrix structuring the coefficients, possibly
 sparsely encoded. Must be at least positive semidefinite (this is

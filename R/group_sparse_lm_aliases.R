@@ -1,11 +1,12 @@
 #' @rdname group_sparse_lm
 #' @export
-group_lasso <- 
+group_lasso <-
   function(x,
            y,
            group,
            lambda1   = NULL,
            lambda2   = 0.0,
+           weights   = rep(1,nrow(x)),
            penscale  = sqrt(tabulate(group)),
            intercept = TRUE,
            normalize = TRUE,
@@ -14,7 +15,7 @@ group_lasso <-
            maxfeat   = ncol(x),
            beta0     = numeric(ncol(x)),
            control   = list(method = "quadra")) {
-    
+
     out <- group_sparse_lm(
       x,
       y,
@@ -23,6 +24,7 @@ group_lasso <-
       lambda1   = lambda1,
       lambda2   = lambda2,
       alpha     = 0.0,
+      weights   = weights,
       penscale  = penscale,
       struct    = Matrix::Diagonal(ncol(x), 1),
       intercept = intercept,
@@ -33,18 +35,19 @@ group_lasso <-
       maxfeat   = maxfeat,
       beta0     = beta0,
       control   = control)
-    
-    out    
+
+    out
   }
 
 #' @rdname group_sparse_lm
 #' @export
-group_l1linf <- 
+group_l1linf <-
   function(x,
            y,
            group,
            lambda1   = NULL,
            lambda2   = 0.0,
+           weights   = rep(1,nrow(x)),
            penscale  = sqrt(tabulate(group)),
            intercept = TRUE,
            normalize = TRUE,
@@ -53,7 +56,7 @@ group_l1linf <-
            maxfeat   = ncol(x),
            beta0     = numeric(ncol(x)),
            control   = list()) {
-    
+
     out <- group_sparse_lm(
       x,
       y,
@@ -62,6 +65,7 @@ group_l1linf <-
       lambda1   = lambda1,
       lambda2   = lambda2,
       alpha     = 0.0,
+      weights   = weights,
       penscale  = penscale,
       struct    = Matrix::Diagonal(ncol(x), 1),
       intercept = intercept,
@@ -72,18 +76,19 @@ group_l1linf <-
       maxfeat   = maxfeat,
       beta0     = beta0,
       control   = control)
-    
-    out    
+
+    out
   }
 
 #' @rdname group_sparse_lm
 #' @export
-coop_lasso <- 
+coop_lasso <-
   function(x,
            y,
            group,
            lambda1   = NULL,
            lambda2   = 0.0,
+           weights   = rep(1,nrow(x)),
            penscale  = sqrt(tabulate(group)),
            intercept = TRUE,
            normalize = TRUE,
@@ -92,7 +97,7 @@ coop_lasso <-
            maxfeat   = ncol(x),
            beta0     = numeric(ncol(x)),
            control   = list()) {
-    
+
     out <- group_sparse_lm(
       x,
       y,
@@ -101,6 +106,7 @@ coop_lasso <-
       lambda1   = lambda1,
       lambda2   = lambda2,
       alpha     = 0.0,
+      weights   = weights,
       penscale  = penscale,
       struct    = Matrix::Diagonal(ncol(x), 1),
       intercept = intercept,
@@ -111,19 +117,20 @@ coop_lasso <-
       maxfeat   = maxfeat,
       beta0     = beta0,
       control   = control)
-    
-    out    
+
+    out
   }
 
 #' @rdname group_sparse_lm
 #' @export
-sparse_group_lasso <- 
+sparse_group_lasso <-
   function(x,
            y,
            group,
            lambda1   = NULL,
            lambda2   = 0.0,
            alpha     = 0.5,
+           weights   = rep(1,nrow(x)),
            penscale  = sqrt(tabulate(group)),
            intercept = TRUE,
            normalize = TRUE,
@@ -132,7 +139,7 @@ sparse_group_lasso <-
            maxfeat   = ncol(x),
            beta0     = numeric(ncol(x)),
            control   = list()) {
-    
+
     out <- group_sparse_lm(
       x,
       y,
@@ -141,6 +148,7 @@ sparse_group_lasso <-
       lambda1   = lambda1,
       lambda2   = lambda2,
       alpha     = alpha,
+      weights   = weights,
       penscale  = penscale,
       struct    = Matrix::Diagonal(ncol(x), 1),
       intercept = intercept,
@@ -151,19 +159,20 @@ sparse_group_lasso <-
       maxfeat   = maxfeat,
       beta0     = beta0,
       control   = control)
-    
-    out    
+
+    out
   }
 
 #' @rdname group_sparse_lm
 #' @export
-sparse_group_l1linf <- 
+sparse_group_l1linf <-
   function(x,
            y,
            group,
            lambda1   = NULL,
            lambda2   = 0.0,
            alpha     = 0.0,
+           weights   = rep(1,nrow(x)),
            penscale  = sqrt(tabulate(group)),
            intercept = TRUE,
            normalize = TRUE,
@@ -172,7 +181,7 @@ sparse_group_l1linf <-
            maxfeat   = ncol(x),
            beta0     = numeric(ncol(x)),
            control   = list()) {
-    
+
     out <- group_sparse_lm(
       x,
       y,
@@ -181,6 +190,7 @@ sparse_group_l1linf <-
       lambda1   = lambda1,
       lambda2   = lambda2,
       alpha     = alpha,
+      weights   = weights,
       penscale  = penscale,
       struct    = Matrix::Diagonal(ncol(x), 1),
       intercept = intercept,
@@ -191,19 +201,20 @@ sparse_group_l1linf <-
       maxfeat   = maxfeat,
       beta0     = beta0,
       control   = control)
-    
-    out    
+
+    out
   }
 
 #' @rdname group_sparse_lm
 #' @export
-sparse_coop_lasso <- 
+sparse_coop_lasso <-
   function(x,
            y,
            group,
            lambda1   = NULL,
            lambda2   = 0.0,
            alpha     = 0.0,
+           weights   = rep(1,nrow(x)),
            penscale  = sqrt(tabulate(group)),
            intercept = TRUE,
            normalize = TRUE,
@@ -212,7 +223,7 @@ sparse_coop_lasso <-
            maxfeat   = ncol(x),
            beta0     = numeric(ncol(x)),
            control   = list()) {
-    
+
     out <- group_sparse_lm(
       x,
       y,
@@ -221,6 +232,7 @@ sparse_coop_lasso <-
       lambda1   = lambda1,
       lambda2   = lambda2,
       alpha     = alpha,
+      weights   = weights,
       penscale  = penscale,
       struct    = Matrix::Diagonal(ncol(x), 1),
       intercept = intercept,
@@ -231,6 +243,6 @@ sparse_coop_lasso <-
       maxfeat   = maxfeat,
       beta0     = beta0,
       control   = control)
-    
-    out    
+
+    out
   }
