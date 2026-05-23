@@ -32,14 +32,17 @@ List RidgeRegression::to_list(const List& monitoring) {
 
 List RidgeRegression::solution_path(const mat& C_inv) {
 
-  // SVD DECOMPOSITION OF ( X * C^-1)
-  vec eta ; // eigen value of X cinv
-  mat U   ; // left singular vectors of X
-  mat V   ; // right singular vectors of X
-  svd_econ(U, eta, V, (data_.X_.each_row() - data_.X_bar_.t())*C_inv) ;
-  
+  // Weighted SVD: diag(sqrtW) * Xc * C_inv
+  vec sqrtW = sqrt(data_.weights_) ;
+  mat Xwc   = data_.X_ ;
+  Xwc.each_row() -= data_.X_bar_.t() ;
+  Xwc.each_col() %= sqrtW ;
+
+  vec eta ; mat U, V ;
+  svd_econ(U, eta, V, Xwc * C_inv) ;
+
   mat C_invV = C_inv * V ;
-  mat Uty = trans(U) * (data_.y_ - data_.y_bar_) ;
+  vec Uty    = U.t() * (sqrtW % (data_.y_ - data_.y_bar_)) ;
 
   vector<double> timing ; // successive timing for solving for each lambda value
   wall_clock timer ; timer.tic(); // clock

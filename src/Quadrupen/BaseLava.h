@@ -38,17 +38,31 @@ protected:
 
   static LavaData lava_preprocess(RegressionData<matrix> orig, double gamma) {
     orig.scale_struct(gamma) ;
-    mat Xc = orig.X_ ; Xc.each_row() -= orig.X_bar_.t() ;
+    mat Xc  = orig.X_ ; Xc.each_row() -= orig.X_bar_.t() ;
+    // Weighted: diag(sqrtW) * Xc for SVD; sqrtW is baked into B_proj and transformed data
+    vec sqrtW = sqrt(orig.weights_) ;
+    mat Xwc   = Xc ; Xwc.each_col() %= sqrtW ;
+
     mat C_inv = solve(trimatu(chol(orig.S_.as_dense())), eye(orig.p_, orig.p_)) ;
     mat U, V ; vec D ;
-    svd_econ(U, D, V, Xc * C_inv) ;
+    svd_econ(U, D, V, Xwc * C_inv) ;
     vec D2     = square(D) ;
-    mat Proj   = U * diagmat(D2 / (D2 + 1))       * U.t() ;
-    mat K12    = U * diagmat(1 / sqrt(D2 + 1))     * U.t() ;
-    mat B_proj = C_inv * V * diagmat(D / (D2 + 1)) * U.t() ;
+    vec kcoeff = 1 / sqrt(D2 + 1) - 1 ;  // K12_w applied as: Xwc + U * (kcoeff .* U^T Xwc)
+
+    mat Proj   = U * diagmat(D2 / (D2 + 1)) * U.t() ;
+    // B_proj_w = C_inv * V * diag(D/(D2+1)) * (diag(sqrtW) * U)^T
+    mat WU = U ; WU.each_col() %= sqrtW ;
+    mat B_proj = C_inv * V * diagmat(D / (D2 + 1)) * WU.t() ;
+
+    // X_new = K12_w * Xwc  (efficient: Xwc + U * diag(kcoeff) * U^T Xwc)
+    mat UtXwc = U.t() * Xwc ; UtXwc.each_col() %= kcoeff ;
+    mat X_new = Xwc + U * UtXwc ;
+    // y_new = K12_w * (sqrtW % y_c)
+    vec y_wc  = sqrtW % (orig.y_ - orig.y_bar_) ;
+    vec y_new = y_wc + U * (kcoeff % (U.t() * y_wc)) ;
+
     return {
-      RegressionData<matrix>(K12 * Xc, K12 * (orig.y_ - orig.y_bar_),
-                             sp_mat(orig.p_, orig.p_), ones(orig.p_), false, false),
+      RegressionData<matrix>(X_new, y_new, sp_mat(orig.p_, orig.p_), ones(orig.n_), false, false),
       std::move(Proj),
       std::move(B_proj)
     } ;
@@ -121,11 +135,12 @@ public:
       this->intercept_.push_back(orig_data_.y_bar_ - dot(beta.col(i) + b_.col(i), orig_data_.X_bar_)) ;
       uvec A = this->active_[i] ;
       mat XsA = Xs.cols(A) ; mat XsAT = XsA.t() ;
-      vec w = (orig_data_.y_ - this->data_.y_bar_) - Xs * b_.col(i) ;
-      vec beta_debiased = solve(XsAT * XsA, XsAT * w) ;
+      vec w = (orig_data_.y_ - orig_data_.y_bar_) - Xs * b_.col(i) ;
+      mat WXsA = XsA ; WXsA.each_col() %= orig_data_.weights_ ;
+      vec beta_debiased = solve(XsAT * WXsA, XsAT * (orig_data_.weights_ % w)) ;
       this->debiased_.insert(this->debiased_.end(), beta_debiased.begin(), beta_debiased.end()) ;
       this->intercept_debiased_.push_back(
-        this->data_.y_bar_ - dot(beta_debiased, this->data_.X_bar_(A)) - dot(b_.col(i), this->data_.X_bar_)) ;
+        orig_data_.y_bar_ - dot(beta_debiased, orig_data_.X_bar_(A)) - dot(b_.col(i), orig_data_.X_bar_)) ;
       beta.col(i) /= orig_data_.norm_X_ ;
     }
     sparse_coef_ = beta ;

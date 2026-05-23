@@ -53,8 +53,7 @@ shrunken to \code{minratio*lambda1.max}.}
 the Elastic-net. Default is 0.01. Set to 0 to recover the Lasso.}
 
 \item{penscale}{vector with real positive values that weight the
-\eqn{\ell_1}{l1}-penalty of each feature. Default sets all weights
-to 1.}
+penalty of each feature. Default sets all weights to 1.}
 
 \item{struct}{matrix structuring the coefficients, possibly
 sparsely encoded. Must be at least positive semidefinite (this is

@@ -5,6 +5,7 @@ elastic.net <- function(x,
                         y,
                         lambda1   = NULL,
                         lambda2   = 0.5,
+                        weights   = rep(1,nrow(x)),
                         penscale  = rep(1,ncol(x)),
                         struct    = Matrix::Diagonal(ncol(x), 1),
                         intercept = TRUE,
@@ -15,15 +16,16 @@ elastic.net <- function(x,
                         maxfeat   = ifelse(lambda2 < 1e-2, min(nrow(x),ncol(x)), min(4*nrow(x),ncol(x))),
                         beta0     = numeric(ncol(x)),
                         control   = list(method = "quadra")) {
-  
+
   lifecycle::deprecate_warn("1.1.0", "elastic.net()", "elastic_net()")
-  
+
   out <- sparse_lm(x,
                    y,
                    type      = "l1",
                    lambda1   = lambda1,
                    lambda2   = lambda2,
                    eta       = 0,
+                   weights   = weights,
                    penscale  = penscale,
                    struct    = struct,
                    intercept = intercept,
@@ -34,7 +36,7 @@ elastic.net <- function(x,
                    maxfeat   = maxfeat,
                    beta0     = beta0,
                    control   = control)
-  out  
+  out
 }
 
 #' @rdname sparse_lm
@@ -43,6 +45,7 @@ elastic_net <- function(x,
                         y,
                         lambda1   = NULL,
                         lambda2   = 0.5,
+                        weights   = rep(1,nrow(x)),
                         penscale  = rep(1,ncol(x)),
                         struct    = Matrix::Diagonal(ncol(x), 1),
                         intercept = TRUE,
@@ -53,13 +56,14 @@ elastic_net <- function(x,
                         maxfeat   = ifelse(lambda2 < 1e-2, min(nrow(x),ncol(x)), min(4*nrow(x),ncol(x))),
                         beta0     = numeric(ncol(x)),
                         control   = list(method = "quadra")) {
-  
+
   out <- sparse_lm(x,
                    y,
                    type      = "l1",
                    lambda1   = lambda1,
                    lambda2   = lambda2,
                    eta       = 0,
+                   weights   = weights,
                    penscale  = penscale,
                    struct    = struct,
                    intercept = intercept,
@@ -70,7 +74,7 @@ elastic_net <- function(x,
                    maxfeat   = maxfeat,
                    beta0     = beta0,
                    control   = control)
-  out  
+  out
 }
 
 #' @rdname sparse_lm
@@ -78,6 +82,7 @@ elastic_net <- function(x,
 lasso <- function(x,
                   y,
                   lambda1   = NULL,
+                  weights   = rep(1,nrow(x)),
                   penscale  = rep(1,ncol(x)),
                   intercept = TRUE,
                   normalize = TRUE,
@@ -87,13 +92,14 @@ lasso <- function(x,
                   maxfeat   = min(nrow(x),ncol(x)),
                   beta0     = numeric(ncol(x)),
                   control   = list(method = "quadra")) {
-  
+
   out <- sparse_lm(x,
                    y,
                    type = "l1",
                    lambda1   = lambda1,
                    lambda2   = 0,
                    eta       = 0,
+                   weights   = weights,
                    penscale  = penscale,
                    intercept = intercept,
                    normalize = normalize,
@@ -113,6 +119,7 @@ mcp <- function(x,
                         lambda1   = NULL,
                         lambda2   = 0.0,
                         eta       = 3,
+                        weights   = rep(1,nrow(x)),
                         penscale  = rep(1,ncol(x)),
                         struct    = Matrix::Diagonal(ncol(x), 1),
                         intercept = TRUE,
@@ -123,13 +130,14 @@ mcp <- function(x,
                         maxfeat   = ifelse(lambda2 < 1e-2, min(nrow(x),ncol(x)), min(4*nrow(x),ncol(x))),
                         beta0     = numeric(ncol(x)),
                         control   = list(method = "quadra")) {
-  
+
   out <- sparse_lm(x,
                    y,
                    type      = "mcp",
                    lambda1   = lambda1,
                    lambda2   = lambda2,
                    eta       = eta,
+                   weights   = weights,
                    penscale  = penscale,
                    struct    = struct,
                    intercept = intercept,
@@ -140,7 +148,7 @@ mcp <- function(x,
                    maxfeat   = maxfeat,
                    beta0     = beta0,
                    control   = control)
-  out  
+  out
 }
 
 #' @rdname sparse_lm
@@ -150,6 +158,7 @@ scad <- function(x,
                  lambda1   = NULL,
                  lambda2   = 0.0,
                  eta       = 3.7,
+                 weights   = rep(1,nrow(x)),
                  penscale  = rep(1,ncol(x)),
                  struct    = Matrix::Diagonal(ncol(x), 1),
                  intercept = TRUE,
@@ -160,13 +169,14 @@ scad <- function(x,
                  maxfeat   = ifelse(lambda2 < 1e-2, min(nrow(x),ncol(x)), min(4*nrow(x),ncol(x))),
                  beta0     = numeric(ncol(x)),
                  control   = list(method = "quadra")) {
-  
+
   out <- sparse_lm(x,
                    y,
                    type      = "scad",
                    lambda1   = lambda1,
                    lambda2   = lambda2,
                    eta       = eta,
+                   weights   = weights,
                    penscale  = penscale,
                    struct    = struct,
                    intercept = intercept,
@@ -177,5 +187,5 @@ scad <- function(x,
                    maxfeat   = maxfeat,
                    beta0     = beta0,
                    control   = control)
-  out  
+  out
 }

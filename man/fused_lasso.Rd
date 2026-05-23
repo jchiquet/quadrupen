@@ -41,8 +41,7 @@ the Elastic-net. Default is 0.01. Set to 0 to recover the Lasso.}
 \item{pen_fused}{penalty used for fusing the variables (either L1, L2 or Huber). Default is L1}
 
 \item{penscale}{vector with real positive values that weight the
-\eqn{\ell_1}{l1}-penalty of each feature. Default sets all weights
-to 1.}
+penalty of each feature. Default sets all weights to 1.}
 
 \item{struct}{Description of the graph that corresponds to the \code{lambda2} penalty structure.
 If \code{NULL} (the default) a chain graph is assumed, like in the standard fused-lasso.

@@ -58,6 +58,7 @@
 ridge <- function(x,
                   y,
                   lambda     = NULL,
+                  weights    = rep(1, nrow(x)),
                   struct     = Matrix::Diagonal(ncol(x),1),
                   penscale   = rep(1,ncol(x)),
                   intercept  = TRUE,
@@ -81,7 +82,8 @@ ridge <- function(x,
   myData <- DataModel$new(
     covariates  = as.matrix(x),
     outcome     = y,
-    cov_struct  = struct
+    cov_struct  = struct,
+    obs_weights = weights
   )
   myData$CholStruct()
 

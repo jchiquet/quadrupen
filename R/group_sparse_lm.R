@@ -1,36 +1,36 @@
 #' Fit a linear model with (sparse) group regularisation
 #'
 #' Adjust a linear model with (sparse) group regularization, that is, a
-#' mixture of an element-wise \eqn{\ell_1}{l1} norm and a group-wise mixed-norm 
-#' (either \eqn{\ell_1/\ell_2}{l1/l2}, \eqn{\ell_1/\ell_\infty}{l1/linf} or 
-#' cooperative). We also add a (possibly structured) \eqn{\ell_2}{l2}-norm (ridge-like). 
-#' The solution path is computed on an automatically tuned  grid of values for 
+#' mixture of an element-wise \eqn{\ell_1}{l1} norm and a group-wise mixed-norm
+#' (either \eqn{\ell_1/\ell_2}{l1/l2}, \eqn{\ell_1/\ell_\infty}{l1/linf} or
+#' cooperative). We also add a (possibly structured) \eqn{\ell_2}{l2}-norm (ridge-like).
+#' The solution path is computed on an automatically tuned  grid of values for
 #' the sparse group penalty. The mixture coefficient and the amount of ridge-like
 #' regularization are fixed by the user.  See details for the criterion optimized.
-#' 
+#'
 #' @inheritParams sparse_lm
-#' 
-#' @param alpha real scalar in (0,1); tunes mixture between \eqn{\ell_1}{l1} 
+#'
+#' @param alpha real scalar in (0,1); tunes mixture between \eqn{\ell_1}{l1}
 #' group penalties. Default is 0.0 (standard group-lasso).
 #'
 #' @param group vector of integers indicating group belonging. Must
 #' match the number of column in \code{x}. Must be SORTED integers
 #' starting from 1.
 #'
-#' @param type string indicating the sparse-group variant to be fitted. 
+#' @param type string indicating the sparse-group variant to be fitted.
 #' Could be "l2", "coop", or "linf". Default is "l2" (regular Group-Lasso)
 #'
 #' @return an object with class [SparseGroupFit], inheriting from [QuadrupenFit].
 #'
 #' @seealso See also [QuadrupenFit]
-#' 
+#'
 #' @keywords models, regression
 #'
 #' @examples
 #' ## Simulating multivariate Gaussian with blockwise correlation
 #' ## and piecewise constant vector of parameters
 #' beta <- rep(c(0,1,0,-1,0), c(25,10,25,10,25))
-#' grp  <- rep(1:5, c(25,10,25,10,25)) 
+#' grp  <- rep(1:5, c(25,10,25,10,25))
 #' cor <- 0.75
 #' Soo <- toeplitz(cor^(0:(25-1))) ## Toeplitz correlation for irrelevant variables
 #' Sww  <- matrix(cor,10,10) ## bloc correlation between active variables
@@ -44,56 +44,56 @@
 #' ## and with structuring prior
 #' labels <- rep("irrelevant", length(beta))
 #' labels[beta != 0] <- "relevant"
-#' 
+#'
 #' ## Group-Lasso
 #' plot(group_lasso(x, y, grp), label=labels)
-#' 
+#'
 #' ## Sparse Group-Lasso
 #' plot(sparse_group_lasso(x, y, grp, alpha = 0.75), label=labels)
-#' 
+#'
 #' \dontrun{
 #' ## Sparse Group-Lasso + L2 regularization
 #' plot(group_sparse_lm(x, y, grp, type = "l2", alpha = .75, lambda2=.5),
 #'  label=labels)
 #' plot(group_sparse_lm(x, y, grp, type = "l2", alpha = .75, lambda2=10),
 #'  label=labels)
-#' plot(group_sparse_lm(x, y, grp, type = "l2", alpha = .75, lambda2=10, 
+#' plot(group_sparse_lm(x, y, grp, type = "l2", alpha = .75, lambda2=10,
 #'  struct=solve(Sigma)), label=labels)
 #' }
-#' 
+#'
 #' ## Group-Lasso L1/LINF
 #' plot(group_l1linf(x, y, grp), label=labels)
-#' 
+#'
 #' ## Sparse Group-Lasso L1/LINF
 #' plot(sparse_group_l1linf(x, y, grp, alpha = 0.75), label=labels)
-#' 
+#'
 #' \dontrun{
 #' ## Sparse L1/LINF Group-Lasso + L2 regularization
 #' plot(group_sparse_lm(x, y, grp, type = "linf", alpha = .75, lambda2=.5),
 #'   label=labels)
 #' plot(group_sparse_lm(x, y, grp, type = "linf", alpha = .75, lambda2=10),
 #'   label=labels)
-#' plot(group_sparse_lm(x, y, grp, type = "linf", alpha = .75, lambda2=10, 
+#' plot(group_sparse_lm(x, y, grp, type = "linf", alpha = .75, lambda2=10,
 #'   struct=solve(Sigma)), label=labels)
 #' }
-#' 
+#'
 #' ## Cooperative-Lasso
 #' plot(coop_lasso(x, y, grp), label=labels)
-#' 
+#'
 #' ## Sparse Cooperative-Lasso
 #' plot(sparse_coop_lasso(x, y, grp, alpha = 0.75), label=labels)
-#' 
+#'
 #' \dontrun{
 #' ## Sparse Cooperative-Lasso + L2 regularization
 #' plot(group_sparse_lm(x, y, grp, type = "coop", alpha = .75, lambda2=.5),
 #'  label=labels)
 #' plot(group_sparse_lm(x, y, grp, type = "coop", alpha = .75, lambda2=10),
 #'  label=labels)
-#' plot(group_sparse_lm(x, y, grp, type = "coop", alpha = .75, lambda2=10, 
+#' plot(group_sparse_lm(x, y, grp, type = "coop", alpha = .75, lambda2=10,
 #'  struct=solve(Sigma)), label=labels)
 #' }
 #' @export
-group_sparse_lm <- 
+group_sparse_lm <-
   function(x,
            y,
            group,
@@ -101,6 +101,7 @@ group_sparse_lm <-
            lambda1   = NULL,
            lambda2   = 0.01,
            alpha     = 0.0,
+           weights   = rep(1,nrow(x)),
            penscale  = sqrt(tabulate(group)),
            struct    = Matrix::Diagonal(ncol(x), 1),
            intercept = TRUE,
@@ -111,11 +112,11 @@ group_sparse_lm <-
            maxfeat   = ifelse(lambda2 < 1e-2, min(2*nrow(x),ncol(x)), min(4*nrow(x),ncol(x))),
            beta0     = numeric(ncol(x)),
            control   = list()) {
-    
+
     stopifnot(alpha < 1 && alpha >= 0)
     stopifnot(!is.unsorted(group))
     type <- match.arg(type)
-    
+
     ## ============================================
     ## RECOVER LOW LEVEL CONFIGURATION
     ##
@@ -127,16 +128,17 @@ group_sparse_lm <-
     ctrl$normalize <- normalize
     ctrl$beta0 <- beta0
     ctrl$maxfeat <- maxfeat
-    
+
     ## ============================================
     ## INSTANTIATE THE DATA MODEL
     ##
     myData <- DataModel$new(
       covariates  = x,
       outcome     = y,
-      cov_struct  = struct
+      cov_struct  = struct,
+      obs_weights = weights
     )
-    
+
     ## ============================================
     ## INSTANTIATE THE PENALIZED MODEL
     ##
@@ -145,10 +147,10 @@ group_sparse_lm <-
       intercept = intercept,
       group     = group,
       type      = type,
-      regParam  = list(lambda = lambda1, 
+      regParam  = list(lambda = lambda1,
                        gamma  = lambda2,
                        alpha  = alpha,
-                       lambda_factor = penscale, 
+                       lambda_factor = penscale,
                        min_ratio = minratio, n_lambda = nlambda1)
     )
 
@@ -157,7 +159,7 @@ group_sparse_lm <-
     ##
     if (ctrl$verbose > 0) cat("\nModel fitting and optimization")
     myModel$fit(ctrl)
-    
+
     ## ============================================
     ## POSTREATMENT + SEND BACK THE RESULTING MODEL
     ##

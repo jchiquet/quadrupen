@@ -80,8 +80,9 @@ void ActiveSet<matrix>::add_var(uword var_in, const RegressionData<matrix>& data
   A_(k) = var_in   ;
   is_in_[var_in] = 1 ;
 
-  vec new_col = data.X_.t() * data.X_.col(var_in) -
-    data.n_ * data.X_bar_ * arma::as_scalar(data.X_bar_[var_in]) + data.S_.col(var_in) ;
+  vec wcol = data.weights_ % vec(data.X_.col(var_in)) ;
+  vec new_col = data.X_.t() * wcol -
+    data.n_w_ * data.X_bar_ * arma::as_scalar(data.X_bar_[var_in]) + data.S_.col(var_in) ;
 
   // Single allocation for XTXA_: copy old columns then set new one
   mat new_XTXA_(data.p_, k + 1, arma::fill::none) ;
@@ -115,8 +116,10 @@ void ActiveSet<matrix>::add_vars(uvec vars, const RegressionData<matrix>& data) 
   A_.resize(p_total) ;
   A_.tail(n_new) = vars ;
 
-  mat new_cols = data.X_.t() * data.X_.cols(vars) -
-    data.n_ * data.X_bar_ * data.X_bar_.rows(vars).t() +
+  mat WXvars(data.X_.cols(vars)) ;
+  WXvars.each_col() %= data.weights_ ;
+  mat new_cols = data.X_.t() * WXvars -
+    data.n_w_ * data.X_bar_ * data.X_bar_.rows(vars).t() +
     data.S_.cols(vars) ;
 
   // Single allocation for XTXA_
