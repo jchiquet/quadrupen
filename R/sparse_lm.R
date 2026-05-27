@@ -182,7 +182,6 @@ sparse_lm <- function(x,
   type <- match.arg(type)
   if (type == "mcp") stopifnot(eta > 1)
   if (type == "scad") stopifnot(eta > 2)
-  if (type != "l1") warning("SCAD and MCP are still highly experimental and in development")
 
   ## ============================================
   ## RECOVER LOW LEVEL CONFIGURATION
