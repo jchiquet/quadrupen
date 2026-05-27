@@ -299,12 +299,10 @@ plot(lasso(x, y), label=labels)
 
 ## SCAD
 plot(scad(x, y), label=labels)
-#> Warning: SCAD and MCP are still highly experimental and in development
 
 
 ## MCP
 plot(mcp(x, y), label=labels)
-#> Warning: SCAD and MCP are still highly experimental and in development
 
 
 ## Elastic-net
@@ -317,11 +315,9 @@ plot(elastic_net(x,y,lambda2=3,struct=solve(Sigma)), label=labels)
 
 ## SCAD + L2
 plot(scad(x,y, eta = 3.7, lambda2=1), label=labels)
-#> Warning: SCAD and MCP are still highly experimental and in development
 
 
 ## MCP + L2
 plot(mcp(x, y, eta = 3, lambda2=1), label=labels)
-#> Warning: SCAD and MCP are still highly experimental and in development
 
 ```
