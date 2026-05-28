@@ -19,16 +19,20 @@
 #' \eqn{\ell_1/\ell_\infty}{l1/linf} group-Lasso must be fitted. Could be "linf" or 
 #' "l2", default is "l2"
 #'
-#' @note The optimized criterion is the following: \if{latex}{\deqn{%
+#' @details The optimized criterion is the following: \if{latex}{\deqn{%
 #' \hat{\theta}_{\lambda_1,\lambda_2} = \arg \min_{\theta = \beta + \delta} \frac{1}{2 n} (y - X
-#' (\beta + \delta))^T (y - X (\beta + \delta)) + \lambda_1 \| \beta \|_{1} + \frac{\lambda_2}{2} \delta^T S \delta, }}
-#' \if{html}{\out{ <center> &beta;<sup>hat</sup>
-#' <sub>&lambda;<sub>1</sub></sub> =
-#' argmin<sub>&theta = &beta+&delta;</sub> 1/2n RSS(&beta + &delta) + &lambda;<sub>1</sub>
-#' &#124; &beta; &#124;<sub>1</sub> + &lambda;/2 <sub>2</sub> &delta;<sup>T</sup> S
+#' (\beta + \delta))^T (y - X (\beta + \delta)) + \lambda_1 \Omega_g(\beta) + \frac{\lambda_2}{2} \delta^T S \delta, }}
+#' \if{html}{\out{ <center> &theta;<sup>hat</sup>
+#' <sub>&lambda;<sub>1</sub>,&lambda;<sub>2</sub></sub> =
+#' argmin<sub>&theta; = &beta;+&delta;</sub> 1/2n RSS(&beta; + &delta;) + &lambda;<sub>1</sub>
+#' &Omega;<sub>g</sub>(&beta;) + &lambda;<sub>2</sub>/2 &delta;<sup>T</sup> S
 #' &delta;, </center> }}
 #' \if{text}{\deqn{theta.hat(lambda1,lambda2) = argmin_{theta = beta + delta} 1/2n
-#' RSS(beta + delta) + lambda1 |beta|1 + + lambda2 delta' S delta}}.
+#' RSS(beta + delta) + lambda1 Omega_g(beta) + lambda2/2 delta' S delta,}}
+#' where \eqn{\Omega_g}{Omega_g} is the group-wise mixed norm:
+#' \eqn{\ell_1/\ell_2}{l1/l2} (Group-LAVA) or
+#' \eqn{\ell_1/\ell_\infty}{l1/linf}, controlled by the \code{type} argument.
+#' The \eqn{\ell_2}{l2} structuring matrix \eqn{S}{S} is provided via \code{struct}.
 #'
 #' @return an object with class [GroupLavaFit], inheriting from [QuadrupenFit].
 #' 

@@ -19,8 +19,8 @@ algorithms. Also provides a few methods for model selection purpose
 **Quadrupen** covers the following regularizers
 
 - LASSO[^1] (Least Absolute Shrinkage and Selection Operator)
-- SCAD[^2] (Smoothly Clip Absolute Deviation) - *preliminary version*
-- MCP[^3] (Minimax Concave Penalty) - *preliminary version*
+- SCAD[^2] (Smoothly Clip Absolute Deviation)
+- MCP[^3] (Minimax Concave Penalty)
 - Group-LASSO[^4] ($\ell_1/\ell_2$ or $\ell_1/\ell_\infty$)
 - Cooperative-LASSO[^5]
 - Sparse Group-LASSO[^6] and Sparse Cooperative-LASSO

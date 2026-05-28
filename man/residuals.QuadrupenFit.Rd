@@ -4,14 +4,14 @@
 \alias{residuals.QuadrupenFit}
 \title{Extract model residuals}
 \usage{
-\method{residuals}{QuadrupenFit}(object, newx = NULL, newy, ...)
+\method{residuals}{QuadrupenFit}(object, newx = NULL, newy = NULL, ...)
 }
 \arguments{
 \item{object}{a \link{QuadrupenFit} object}
 
-\item{newx}{matrix of new values for the regressor with which to predict. If omitted, the fitted values are used.}
+\item{newx}{matrix of new covariates for out-of-sample residuals. Must be provided together with \code{newy}. If \code{NULL} (default), training residuals are returned.}
 
-\item{newy}{vector of new values for the response with which to compute the residuals. If omitted, the fitted values are used.}
+\item{newy}{vector of new responses for out-of-sample residuals. Must be provided together with \code{newx}. If \code{NULL} (default), training residuals are returned.}
 
 \item{...}{not used, only here for S3 compatibility}
 }

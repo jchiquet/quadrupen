@@ -3,12 +3,12 @@ template:
   bootstrap: 5
   mathjax: true
   math-rendering: mathjax
-  
+
 reference:
 - title: "Main functions for user"
   desc: >
     Functions for fitting various structured regularization models
-  contents: 
+  contents:
   - bounded_reg
   - elastic_net
   - scad
@@ -50,6 +50,8 @@ reference:
   - criteria
   - cross_validate
   - stability
+  - selection
+  - plot.QuadrupenFit
   - residuals.QuadrupenFit
   - coef.QuadrupenFit
   - predict.QuadrupenFit

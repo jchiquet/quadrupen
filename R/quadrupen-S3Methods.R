@@ -49,23 +49,25 @@ coef.QuadrupenFit <- function(object, selection = NULL, ...) {
   )
 }
 
-#' Extract model residuals 
-#' 
+#' Extract model residuals
+#'
 #' @description Extracts model residuals from a [QuadrupenFit] object
-#' 
+#'
 #' @param object a [QuadrupenFit] object
-#' @param newx matrix of new values for the regressor with which to predict. If omitted, the fitted values are used.
-#' @param newy vector of new values for the response with which to compute the residuals. If omitted, the fitted values are used.
+#' @param newx matrix of new covariates for out-of-sample residuals. Must be provided together with \code{newy}. If \code{NULL} (default), training residuals are returned.
+#' @param newy vector of new responses for out-of-sample residuals. Must be provided together with \code{newx}. If \code{NULL} (default), training residuals are returned.
 #' @param ... not used, only here for S3 compatibility
 #' @return Matrix of residuals, each column corresponding to a value of \code{lambda1}.
 #' @export
-residuals.QuadrupenFit <- function(object, newx=NULL, newy, ...) {
+residuals.QuadrupenFit <- function(object, newx=NULL, newy=NULL, ...) {
   stopifnot(isQuadrupenFit(object))
-  if (is.null(newx) | is.null(newy)) {
+  if (is.null(newx) && is.null(newy)) {
     res <- object$residuals
-  } else {
+  } else if (!is.null(newx) && !is.null(newy)) {
     n <- length(object$major_tuning)
     res <- matrix(rep(newy, n), ncol=n) - predict(object, newx)
+  } else {
+    stop("'newx' and 'newy' must be provided together or both omitted.")
   }
   res
 }
@@ -362,7 +364,7 @@ stability <-
 
 #' @describeIn stability S3 method for stability selection of a [QuadrupenFit]
 #' @export
-stability.QuadrupenFit <- 
+stability.QuadrupenFit <-
   function(object, n_subsamples   = 50,
            subsample_size = floor(object$nobs/2),
            subsamples     = replicate(n_subsamples, sample(1:object$nobs, subsample_size), simplify=FALSE),
@@ -374,3 +376,75 @@ stability.QuadrupenFit <-
   object$stability_path
 }
 
+#' Plot method for quadrupen objects
+#'
+#' @description S3 plot methods for [QuadrupenFit], [CrossValidation] and
+#' [StabilityPath] objects, delegating to their respective R6 `$plot()` method.
+#'
+#' @param x a [QuadrupenFit], [CrossValidation] or [StabilityPath] object.
+#' @param ... additional arguments passed to the underlying R6 `$plot()` method.
+#'   For [QuadrupenFit]: `type` (`"path"`, `"criteria"`, `"crossval"`,
+#'   `"stability"`), `log_scale`, `labels`.
+#'   For [CrossValidation]: `log_scale`, `title`.
+#'   For [StabilityPath]: `xvar`, `title`, `labels`, `sel_mode`, `cutoff`,
+#'   `PFER`, `nvarsel`.
+#'
+#' @return a \pkg{ggplot2} object.
+#'
+#' @importFrom graphics plot
+#' @export
+plot.QuadrupenFit <- function(x, ...) {
+  stopifnot(isQuadrupenFit(x))
+  x$plot(...)
+}
+
+#' @describeIn plot.QuadrupenFit Plot method for a [CrossValidation] object
+#' @export
+plot.CrossValidation <- function(x, ...) {
+  stopifnot(inherits(x, "CrossValidation"))
+  x$plot(...)
+}
+
+#' @describeIn plot.QuadrupenFit Plot method for a [StabilityPath] object
+#' @export
+plot.StabilityPath <- function(x, ...) {
+  stopifnot(inherits(x, "StabilityPath"))
+  x$plot(...)
+}
+
+#' Variable selection from a stability path
+#'
+#' @description S3 generic for variable selection based on a [StabilityPath] object,
+#' as introduced by Meinshausen and Buhlmann (2010).
+#'
+#' @param object a [StabilityPath] object.
+#' @param sel_mode a character string, either `"rank"` or `"PFER"`. Default is
+#'   `"rank"`.
+#' @param cutoff probability threshold for `sel_mode = "PFER"`. Default is `0.75`.
+#' @param PFER per-family error rate to control for `sel_mode = "PFER"`. Default
+#'   is `2`.
+#' @param nvarsel number of variables to select for `sel_mode = "rank"`. Default
+#'   is `floor(nobs / log(nvar))`.
+#' @param ... not used, only here for S3 compatibility.
+#'
+#' @return an integer vector of selected variable indices.
+#'
+#' @seealso [stability()]
+#'
+#' @references N. Meinshausen and P. Buhlmann (2010). Stability Selection, JRSS(B).
+#'
+#' @export
+selection <- function(object, ...) UseMethod("selection", object)
+
+#' @describeIn selection S3 method for variable selection from a [StabilityPath]
+#' @export
+selection.StabilityPath <- function(object,
+                                    sel_mode = c("rank", "PFER"),
+                                    cutoff   = 0.75,
+                                    PFER     = 2,
+                                    nvarsel  = NULL,
+                                    ...) {
+  stopifnot(inherits(object, "StabilityPath"))
+  if (is.null(nvarsel)) nvarsel <- floor(object$nobs / log(object$nvar))
+  object$selection(sel_mode = sel_mode, cutoff = cutoff, PFER = PFER, nvarsel = nvarsel)
+}

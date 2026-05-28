@@ -102,7 +102,7 @@ structured \eqn{\ell_2}{l2}-norm). The solution path is computed
 at a grid of values for the \eqn{\ell_2}{l2}-penalty. See details
 for the criterion optimized.
 }
-\note{
+\details{
 The optimized criterion is the following: \if{latex}{\deqn{%
 \hat{\beta}_{\lambda_2} = \arg \min_{\beta} \frac{1}{2} (y - X
 \beta)^T (y - X \beta) + \frac{\lambda_2}{2} \beta^T S \beta, }}
