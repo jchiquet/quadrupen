@@ -20,7 +20,7 @@
 #' 
 #' @return an object with class [RidgeRegressionFit], inheriting from [QuadrupenFit].
 #'
-#' @note The optimized criterion is the following: \if{latex}{\deqn{%
+#' @details The optimized criterion is the following: \if{latex}{\deqn{%
 #' \hat{\beta}_{\lambda_2} = \arg \min_{\beta} \frac{1}{2} (y - X
 #' \beta)^T (y - X \beta) + \frac{\lambda_2}{2} \beta^T S \beta, }}
 #' \if{html}{\out{ <center> &beta;<sup>hat</sup>

@@ -125,7 +125,7 @@ of the data followed by a
 computed at a grid of values for the \eqn{\ell_1}{l1}-penalty. See
 details for the criterion optimized.
 }
-\note{
+\details{
 The optimized criterion is the following: \if{latex}{\deqn{%
 \hat{\theta}_{\lambda_1,\lambda_2} = \arg \min_{\theta = \beta + \delta} \frac{1}{2 n} (y - X
 (\beta + \delta))^T (y - X (\beta + \delta)) + \lambda_1 \| \beta \|_{1} + \frac{\lambda_2}{2} \delta^T S \delta, }}

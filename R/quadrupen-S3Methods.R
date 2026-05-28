@@ -49,23 +49,25 @@ coef.QuadrupenFit <- function(object, selection = NULL, ...) {
   )
 }
 
-#' Extract model residuals 
-#' 
+#' Extract model residuals
+#'
 #' @description Extracts model residuals from a [QuadrupenFit] object
-#' 
+#'
 #' @param object a [QuadrupenFit] object
-#' @param newx matrix of new values for the regressor with which to predict. If omitted, the fitted values are used.
-#' @param newy vector of new values for the response with which to compute the residuals. If omitted, the fitted values are used.
+#' @param newx matrix of new covariates for out-of-sample residuals. Must be provided together with \code{newy}. If \code{NULL} (default), training residuals are returned.
+#' @param newy vector of new responses for out-of-sample residuals. Must be provided together with \code{newx}. If \code{NULL} (default), training residuals are returned.
 #' @param ... not used, only here for S3 compatibility
 #' @return Matrix of residuals, each column corresponding to a value of \code{lambda1}.
 #' @export
-residuals.QuadrupenFit <- function(object, newx=NULL, newy, ...) {
+residuals.QuadrupenFit <- function(object, newx=NULL, newy=NULL, ...) {
   stopifnot(isQuadrupenFit(object))
-  if (is.null(newx) | is.null(newy)) {
+  if (is.null(newx) && is.null(newy)) {
     res <- object$residuals
-  } else {
+  } else if (!is.null(newx) && !is.null(newy)) {
     n <- length(object$major_tuning)
     res <- matrix(rep(newy, n), ncol=n) - predict(object, newx)
+  } else {
+    stop("'newx' and 'newy' must be provided together or both omitted.")
   }
   res
 }

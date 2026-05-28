@@ -12,7 +12,7 @@
 #' 
 #' @return an object with class [QuadrupenFit].
 #'
-#' @note The optimized criterion is  \if{latex}{\deqn{%
+#' @details The optimized criterion is the following: \if{latex}{\deqn{%
 #' \hat{\beta}_{\lambda_1,\lambda_1} = \arg \min_{\beta} \frac{1}{2}
 #' (y - X \beta)^T (y - X \beta) + \lambda_1 \|D \beta \|_{\infty} +
 #' \frac{\lambda_2}{2} \beta^T S \beta, }} \if{html}{\out{ <center>

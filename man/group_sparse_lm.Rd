@@ -106,7 +106,7 @@ sparse_group_l1linf(
   group,
   lambda1 = NULL,
   lambda2 = 0,
-  alpha = 0,
+  alpha = 0.5,
   weights = rep(1, nrow(x)),
   penscale = sqrt(tabulate(group)),
   intercept = TRUE,
@@ -124,7 +124,7 @@ sparse_coop_lasso(
   group,
   lambda1 = NULL,
   lambda2 = 0,
-  alpha = 0,
+  alpha = 0.5,
   weights = rep(1, nrow(x)),
   penscale = sqrt(tabulate(group)),
   intercept = TRUE,
@@ -248,6 +248,32 @@ cooperative). We also add a (possibly structured) \eqn{\ell_2}{l2}-norm (ridge-l
 The solution path is computed on an automatically tuned  grid of values for
 the sparse group penalty. The mixture coefficient and the amount of ridge-like
 regularization are fixed by the user.  See details for the criterion optimized.
+}
+\details{
+The optimized criterion is the following: \if{latex}{\deqn{%
+\hat{\beta}_{\lambda_1,\lambda_2} = \arg \min_{\beta} \frac{1}{2}
+(y - X \beta)^T (y - X \beta) + \lambda_1 \left[ (1-\alpha)\,
+\Omega_g(\beta) + \alpha \| D \beta \|_1 \right] +
+\frac{\lambda_2}{2} \beta^T S \beta, }}
+\if{html}{\out{ <center>
+&beta;<sup>hat</sup>
+<sub>&lambda;<sub>1</sub>,&lambda;<sub>2</sub></sub> =
+argmin<sub>&beta;</sub> 1/2 RSS(&beta;) + &lambda;<sub>1</sub>
+[(1-&alpha;) &Omega;<sub>g</sub>(&beta;) + &alpha; &#124; D &beta; &#124;<sub>1</sub>]
++ &lambda;<sub>2</sub>/2 &beta;<sup>T</sup> S &beta;,
+</center> }}
+\if{text}{\deqn{beta.hat(lambda1, lambda2) = argmin_beta 1/2
+RSS(beta) + lambda1 [(1-alpha) Omega_g(beta) + alpha |D beta|_1]
++ lambda2/2 beta' S beta,}}
+where \eqn{\Omega_g}{Omega_g} is the group-wise mixed norm:
+\eqn{\ell_1/\ell_2}{l1/l2} (Group-Lasso),
+\eqn{\ell_1/\ell_\infty}{l1/linf}, or cooperative (Clime), controlled
+by the \code{type} argument; \eqn{D}{D} is a diagonal matrix whose
+diagonal terms are given by \code{penscale}; \eqn{\alpha}{alpha}
+tunes the mixture between the group and element-wise penalties;
+and \eqn{S}{S} is the \eqn{\ell_2}{l2} structuring matrix provided
+via \code{struct}, a positive semidefinite matrix (possibly of
+class \code{Matrix}).
 }
 \examples{
 ## Simulating multivariate Gaussian with blockwise correlation
