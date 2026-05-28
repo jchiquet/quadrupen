@@ -130,7 +130,7 @@ an object with class
 inheriting from
 [QuadrupenFit](https://jchiquet.github.io/quadrupen/reference/QuadrupenFit.md).
 
-## Note
+## Details
 
 The optimized criterion is the following:
 

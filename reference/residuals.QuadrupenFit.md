@@ -8,7 +8,7 @@ object
 
 ``` r
 # S3 method for class 'QuadrupenFit'
-residuals(object, newx = NULL, newy, ...)
+residuals(object, newx = NULL, newy = NULL, ...)
 ```
 
 ## Arguments
@@ -21,13 +21,15 @@ residuals(object, newx = NULL, newy, ...)
 
 - newx:
 
-  matrix of new values for the regressor with which to predict. If
-  omitted, the fitted values are used.
+  matrix of new covariates for out-of-sample residuals. Must be provided
+  together with `newy`. If `NULL` (default), training residuals are
+  returned.
 
 - newy:
 
-  vector of new values for the response with which to compute the
-  residuals. If omitted, the fitted values are used.
+  vector of new responses for out-of-sample residuals. Must be provided
+  together with `newx`. If `NULL` (default), training residuals are
+  returned.
 
 - ...:
 

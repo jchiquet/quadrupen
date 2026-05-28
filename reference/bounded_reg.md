@@ -155,9 +155,9 @@ an object with class
 inheriting from
 [QuadrupenFit](https://jchiquet.github.io/quadrupen/reference/QuadrupenFit.md).
 
-## Note
+## Details
 
-The optimized criterion is
+The optimized criterion is the following:
 
 β^(hat)_(λ₁,λ₂) = argmin_(β) 1/2 RSS(&beta) + λ₁ \| D β \|_(∞) + λ/2 ₂
 β^(T) S β,

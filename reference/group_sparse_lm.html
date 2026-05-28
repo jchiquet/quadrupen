@@ -159,7 +159,7 @@ regularization are fixed by the user.  See details for the criterion optimized.<
 <span>  <span class="va">group</span>,</span>
 <span>  lambda1 <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  lambda2 <span class="op">=</span> <span class="fl">0</span>,</span>
-<span>  alpha <span class="op">=</span> <span class="fl">0</span>,</span>
+<span>  alpha <span class="op">=</span> <span class="fl">0.5</span>,</span>
 <span>  weights <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">x</span><span class="op">)</span><span class="op">)</span>,</span>
 <span>  penscale <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/MathFun.html" class="external-link">sqrt</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/tabulate.html" class="external-link">tabulate</a></span><span class="op">(</span><span class="va">group</span><span class="op">)</span><span class="op">)</span>,</span>
 <span>  intercept <span class="op">=</span> <span class="cn">TRUE</span>,</span>
@@ -177,7 +177,7 @@ regularization are fixed by the user.  See details for the criterion optimized.<
 <span>  <span class="va">group</span>,</span>
 <span>  lambda1 <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  lambda2 <span class="op">=</span> <span class="fl">0</span>,</span>
-<span>  alpha <span class="op">=</span> <span class="fl">0</span>,</span>
+<span>  alpha <span class="op">=</span> <span class="fl">0.5</span>,</span>
 <span>  weights <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">x</span><span class="op">)</span><span class="op">)</span>,</span>
 <span>  penscale <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/MathFun.html" class="external-link">sqrt</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/tabulate.html" class="external-link">tabulate</a></span><span class="op">(</span><span class="va">group</span><span class="op">)</span><span class="op">)</span>,</span>
 <span>  intercept <span class="op">=</span> <span class="cn">TRUE</span>,</span>
@@ -331,6 +331,26 @@ when <code>'1'</code>, the bound derived in Grandvalet et al. is computed; when
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
     <p>an object with class <a href="SparseGroupFit.html">SparseGroupFit</a>, inheriting from <a href="QuadrupenFit.html">QuadrupenFit</a>.</p>
+    </div>
+    <div class="section level2">
+    <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
+    <p>The optimized criterion is the following:
+ </p><center>
+β<sup>hat</sup><sub>λ<sub>1</sub>,λ<sub>2</sub></sub> =
+argmin<sub>β</sub> 1/2 RSS(β) + λ<sub>1</sub>
+[(1-α) Ω<sub>g</sub>(β) + α | D β |<sub>1</sub>]
++ λ<sub>2</sub>/2 β<sup>T</sup> S β,
+</center>
+
+where \(\Omega_g\) is the group-wise mixed norm:
+\(\ell_1/\ell_2\) (Group-Lasso),
+\(\ell_1/\ell_\infty\), or cooperative (Clime), controlled
+by the <code>type</code> argument; \(D\) is a diagonal matrix whose
+diagonal terms are given by <code>penscale</code>; \(\alpha\)
+tunes the mixture between the group and element-wise penalties;
+and \(S\) is the \(\ell_2\) structuring matrix provided
+via <code>struct</code>, a positive semidefinite matrix (possibly of
+class <code>Matrix</code>).
     </div>
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>

@@ -46,7 +46,7 @@
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="co"># S3 method for class 'QuadrupenFit'</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/stats/residuals.html" class="external-link">residuals</a></span><span class="op">(</span><span class="va">object</span>, newx <span class="op">=</span> <span class="cn">NULL</span>, <span class="va">newy</span>, <span class="va">...</span><span class="op">)</span></span></code></pre></div>
+<span><span class="fu"><a href="https://rdrr.io/r/stats/residuals.html" class="external-link">residuals</a></span><span class="op">(</span><span class="va">object</span>, newx <span class="op">=</span> <span class="cn">NULL</span>, newy <span class="op">=</span> <span class="cn">NULL</span>, <span class="va">...</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
@@ -58,11 +58,11 @@
 
 
 <dt id="arg-newx">newx<a class="anchor" aria-label="anchor" href="#arg-newx"></a></dt>
-<dd><p>matrix of new values for the regressor with which to predict. If omitted, the fitted values are used.</p></dd>
+<dd><p>matrix of new covariates for out-of-sample residuals. Must be provided together with <code>newy</code>. If <code>NULL</code> (default), training residuals are returned.</p></dd>
 
 
 <dt id="arg-newy">newy<a class="anchor" aria-label="anchor" href="#arg-newy"></a></dt>
-<dd><p>vector of new values for the response with which to compute the residuals. If omitted, the fitted values are used.</p></dd>
+<dd><p>vector of new responses for out-of-sample residuals. Must be provided together with <code>newx</code>. If <code>NULL</code> (default), training residuals are returned.</p></dd>
 
 
 <dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>

@@ -108,7 +108,7 @@ sparse_group_l1linf(
   group,
   lambda1 = NULL,
   lambda2 = 0,
-  alpha = 0,
+  alpha = 0.5,
   weights = rep(1, nrow(x)),
   penscale = sqrt(tabulate(group)),
   intercept = TRUE,
@@ -126,7 +126,7 @@ sparse_coop_lasso(
   group,
   lambda1 = NULL,
   lambda2 = 0,
-  alpha = 0,
+  alpha = 0.5,
   weights = rep(1, nrow(x)),
   penscale = sqrt(tabulate(group)),
   intercept = TRUE,
@@ -281,6 +281,21 @@ an object with class
 [SparseGroupFit](https://jchiquet.github.io/quadrupen/reference/SparseGroupFit.md),
 inheriting from
 [QuadrupenFit](https://jchiquet.github.io/quadrupen/reference/QuadrupenFit.md).
+
+## Details
+
+The optimized criterion is the following:
+
+β^(hat)_(λ₁,λ₂) = argmin_(β) 1/2 RSS(β) + λ₁ \[(1-α) Ω_(g)(β) + α \| D β
+\|₁\] + λ₂/2 β^(T) S β,
+
+where \\\Omega_g\\ is the group-wise mixed norm: \\\ell_1/\ell_2\\
+(Group-Lasso), \\\ell_1/\ell\_\infty\\, or cooperative (Clime),
+controlled by the `type` argument; \\D\\ is a diagonal matrix whose
+diagonal terms are given by `penscale`; \\\alpha\\ tunes the mixture
+between the group and element-wise penalties; and \\S\\ is the
+\\\ell_2\\ structuring matrix provided via `struct`, a positive
+semidefinite matrix (possibly of class `Matrix`).
 
 ## See also
 

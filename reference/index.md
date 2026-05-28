@@ -75,6 +75,12 @@ S3 methods, aliases for the most useful R6 methods.
   : Cross-validation for Quadrupen object
 - [`stability()`](https://jchiquet.github.io/quadrupen/reference/stability.md)
   : Stability selection for Quadrupen object
+- [`selection()`](https://jchiquet.github.io/quadrupen/reference/selection.md)
+  : Variable selection from a stability path
+- [`plot(`*`<QuadrupenFit>`*`)`](https://jchiquet.github.io/quadrupen/reference/plot.QuadrupenFit.md)
+  [`plot(`*`<CrossValidation>`*`)`](https://jchiquet.github.io/quadrupen/reference/plot.QuadrupenFit.md)
+  [`plot(`*`<StabilityPath>`*`)`](https://jchiquet.github.io/quadrupen/reference/plot.QuadrupenFit.md)
+  : Plot method for quadrupen objects
 - [`residuals(`*`<QuadrupenFit>`*`)`](https://jchiquet.github.io/quadrupen/reference/residuals.QuadrupenFit.md)
   : Extract model residuals
 - [`coef(`*`<QuadrupenFit>`*`)`](https://jchiquet.github.io/quadrupen/reference/coef.QuadrupenFit.md)

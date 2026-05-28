@@ -170,14 +170,17 @@ an object with class
 inheriting from
 [QuadrupenFit](https://jchiquet.github.io/quadrupen/reference/QuadrupenFit.md).
 
-## Note
+## Details
 
 The optimized criterion is the following:
 
-β^(hat)_(λ₁) = argmin_(&theta = &beta+δ) 1/2n RSS(&beta + &delta) + λ₁
-\| β \|₁ + λ/2 ₂ δ^(T) S δ,
+θ^(hat)_(λ₁,λ₂) = argmin_(θ = β+δ) 1/2n RSS(β + δ) + λ₁ Ω_(g)(β) + λ₂/2
+δ^(T) S δ,
 
-.
+where \\\Omega_g\\ is the group-wise mixed norm: \\\ell_1/\ell_2\\
+(Group-LAVA) or \\\ell_1/\ell\_\infty\\, controlled by the `type`
+argument. The \\\ell_2\\ structuring matrix \\S\\ is provided via
+`struct`.
 
 ## References
 
