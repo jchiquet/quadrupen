@@ -77,9 +77,10 @@ CrossValidation <- R6::R6Class(
     print = function() { self$show() },
     #' @description Plot 1-dimensional cross-validation
     #' @param log_scale logical, should a log-scale be used for the x-axis
+    #' @param se logical, should confidence band be displayed (TRUE by default)
     #' @param title graph title
     #' @return a ggplot object
-    plotCV_1D = function(log_scale=TRUE, title = "Cross-validation error") {
+    plotCV_1D = function(log_scale=TRUE, title = "Cross-validation error", se = TRUE) {
       ## SIMPLE CROSS-VALIDATION GRAPH
       if (length(self$lambda1) > length(self$lambda2)) {
         d <- ggplot(self$data, aes(x=.data$lambda1,y=.data$mean)) + theme_bw()
@@ -97,7 +98,7 @@ CrossValidation <- R6::R6Class(
       d <- d + xlab(xlab) + ylab("Mean square error") +
         geom_point(alpha=0.3) +
         geom_smooth(aes(ymin=.data$mean-.data$serr, ymax=.data$mean+.data$serr, group=as.factor(.data$lambda2),
-                        colour=as.factor(.data$lambda2)), data=self$data, alpha=0.2, stat="identity")
+                        colour=as.factor(.data$lambda2)), se=se, data=self$data, alpha=0.2, stat="identity")
       if (log_scale) {
         d <- d + scale_x_log10() + annotation_logticks(sides="b")
       }

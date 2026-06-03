@@ -95,7 +95,7 @@ public:
     this->set_.inverse_Gram() ;
     mat K = diagmat(ones(this->data_.n_)) -
       this->data_.X_.cols(this->set_.A_) * this->set_.XATXAinv_ * this->data_.X_.cols(this->set_.A_).t() ;
-    df -= trace(K * Proj_) ;
+    df += trace(K * Proj_) ;
     return df ;
   }
 

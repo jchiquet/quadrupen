@@ -12,3 +12,4 @@ README.qmd
 ^memcheck
 ^\.positai$
 ^\.claude$
+^vignettes/*_files$

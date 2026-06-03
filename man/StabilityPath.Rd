@@ -174,7 +174,7 @@ selection.
   sel_mode = c("rank", "PFER"),
   cutoff = 0.75,
   PFER = 2,
-  nvarsel = floor(self$nobs/log(self$nvar))
+  nvarsel = min(self$nvar, floor(self$nobs/log(self$nvar)))
 )}
     \if{html}{\out{</div>}}
   }
@@ -201,8 +201,6 @@ Buhlmannn's paper. Default is \code{"rank"}.}
 relevant when \code{sel_mode} equals \code{"PFER"}).}
       \item{\code{nvarsel}}{number of variables selected (only relevant when
 \code{sel_mode} equals \code{"rank"}. Default is \code{floor(n/log(p))}.}
-      \item{\code{log_scale}}{logical; indicates if a log-scale should be used
-when \code{xvar="lambda"}. Default is \code{TRUE}.}
       \item{\code{plot}}{logical; indicates if the graph should be
 plotted. Default is \code{TRUE}. If \code{FALSE}, only the
 \pkg{ggplot2} object is sent back.}

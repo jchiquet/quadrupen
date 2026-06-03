@@ -91,8 +91,6 @@ StabilityPath <- R6::R6Class(
     #' (first penalty level) or `"fraction"` (fraction of the
     #' penalty level applied tune by \eqn{\lambda_1}{lambda1}). Default
     #' is `"lambda"`.
-    #' @param log_scale logical; indicates if a log-scale should be used
-    #' when \code{xvar="lambda"}. Default is `TRUE`.
     #' @param plot logical; indicates if the graph should be
     #' plotted. Default is `TRUE`. If `FALSE`, only the
     #' \pkg{ggplot2} object is sent back.
@@ -135,7 +133,7 @@ StabilityPath <- R6::R6Class(
     #' 
     plot = function(
       xvar = "lambda", title = "Stability path", labels = rep("unknown status",self$nvar), 
-      sel_mode = c("rank", "PFER"), cutoff=0.75, PFER=2, nvarsel=floor(self$nobs/log(self$nvar))) {
+      sel_mode = c("rank", "PFER"), cutoff=0.75, PFER=2, nvarsel=min(self$nvar, floor(self$nobs/log(self$nvar)))) {
 
       sel_mode <- match.arg(sel_mode)
       selection <- rep("unselected",length(self$nonzero))

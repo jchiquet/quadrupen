@@ -104,7 +104,11 @@ Should be called internally by an object \code{\link[=QuadrupenFit]{QuadrupenFit
   Plot 1-dimensional cross-validation
   \subsection{Usage}{
     \if{html}{\out{<div class="r">}}
-    \preformatted{CrossValidation$plotCV_1D(log_scale = TRUE, title = "Cross-validation error")}
+    \preformatted{CrossValidation$plotCV_1D(
+  log_scale = TRUE,
+  title = "Cross-validation error",
+  se = TRUE
+)}
     \if{html}{\out{</div>}}
   }
   \subsection{Arguments}{
@@ -112,6 +116,7 @@ Should be called internally by an object \code{\link[=QuadrupenFit]{QuadrupenFit
     \describe{
       \item{\code{log_scale}}{logical, should a log-scale be used for the x-axis}
       \item{\code{title}}{graph title}
+      \item{\code{se}}{logical, should confidence band be displayed (TRUE by default)}
     }
     \if{html}{\out{</div>}}
   }
