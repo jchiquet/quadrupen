@@ -1,6 +1,6 @@
 NEWS/Changelog
 
-# quadrupen dev version	(2026-05-xx)
+# quadrupen dev version	(2026-06-xx)
 
 - major updates
   - complete rewriting of R code using R6 classes
@@ -13,6 +13,7 @@ NEWS/Changelog
   - added mcp and scad (concave penalties, Chernozukov et al, 2017)
   - added refit version of Lasso/Elastic-Net ("relaxed" Lasso/Enet)
   - changing many parameters (badly) named, do not expect backward compatibility
+  - added vignettes
 - minor updates
   - Integration of changes from CRAN versions from 0.2-4 to 0.2-13  
   - set up github workflow for pkgdown page

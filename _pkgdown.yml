@@ -4,6 +4,18 @@ template:
   mathjax: true
   math-rendering: mathjax
 
+articles:
+- title: "Getting started"
+  navbar: ~
+  contents:
+  - sparse-regression
+  - group-sparse-regression
+- title: "Advanced topics"
+  navbar: ~
+  contents:
+  - structured-signal-recovery
+  - lava
+
 reference:
 - title: "Main functions for user"
   desc: >

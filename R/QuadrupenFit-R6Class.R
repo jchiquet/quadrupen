@@ -540,7 +540,7 @@ QuadrupenFit <- R6::R6Class(
               "path"      = self$plot_path(log_scale = log_scale, labels = labels),
               "criteria"  = self$information_criteria$plot(log_scale = log_scale),
               "crossval"  = self$cross_validation$plot(log_scale = log_scale),
-              "stability" = self$stability_path$plot(log_scale = log_scale, labels = labels)
+              "stability" = self$stability_path$plot(labels = labels)
       )
       d
       
