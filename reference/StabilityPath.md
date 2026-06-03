@@ -159,7 +159,7 @@ Produce a plot of the stability path obtained by stability selection.
       sel_mode = c("rank", "PFER"),
       cutoff = 0.75,
       PFER = 2,
-      nvarsel = floor(self$nobs/log(self$nvar))
+      nvarsel = min(self$nvar, floor(self$nobs/log(self$nvar)))
     )
 
 #### Arguments
@@ -202,11 +202,6 @@ Produce a plot of the stability path obtained by stability selection.
 
   number of variables selected (only relevant when `sel_mode` equals
   `"rank"`. Default is `floor(n/log(p))`.
-
-- `log_scale`:
-
-  logical; indicates if a log-scale should be used when `xvar="lambda"`.
-  Default is `TRUE`.
 
 - `plot`:
 

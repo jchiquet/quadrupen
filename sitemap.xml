@@ -1,6 +1,11 @@
 <urlset xmlns = 'http://www.sitemaps.org/schemas/sitemap/0.9'>
 <url><loc>https://jchiquet.github.io/quadrupen/404.html</loc></url>
 <url><loc>https://jchiquet.github.io/quadrupen/LICENSE.html</loc></url>
+<url><loc>https://jchiquet.github.io/quadrupen/articles/group-sparse-regression.html</loc></url>
+<url><loc>https://jchiquet.github.io/quadrupen/articles/index.html</loc></url>
+<url><loc>https://jchiquet.github.io/quadrupen/articles/lava.html</loc></url>
+<url><loc>https://jchiquet.github.io/quadrupen/articles/sparse-regression.html</loc></url>
+<url><loc>https://jchiquet.github.io/quadrupen/articles/structured-signal-recovery.html</loc></url>
 <url><loc>https://jchiquet.github.io/quadrupen/authors.html</loc></url>
 <url><loc>https://jchiquet.github.io/quadrupen/index.html</loc></url>
 <url><loc>https://jchiquet.github.io/quadrupen/news/index.html</loc></url>

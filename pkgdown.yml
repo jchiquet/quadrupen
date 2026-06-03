@@ -1,8 +1,12 @@
 pandoc: 3.8.3
 pkgdown: 2.2.0
 pkgdown_sha: ~
-articles: {}
-last_built: 2026-05-28T14:59Z
+articles:
+  group-sparse-regression: group-sparse-regression.html
+  lava: lava.html
+  sparse-regression: sparse-regression.html
+  structured-signal-recovery: structured-signal-recovery.html
+last_built: 2026-06-03T17:09Z
 urls:
   reference: https://jchiquet.github.io/quadrupen/reference
   article: https://jchiquet.github.io/quadrupen/articles

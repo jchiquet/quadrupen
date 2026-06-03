@@ -117,7 +117,11 @@ Plot 1-dimensional cross-validation
 
 #### Usage
 
-    CrossValidation$plotCV_1D(log_scale = TRUE, title = "Cross-validation error")
+    CrossValidation$plotCV_1D(
+      log_scale = TRUE,
+      title = "Cross-validation error",
+      se = TRUE
+    )
 
 #### Arguments
 
@@ -128,6 +132,10 @@ Plot 1-dimensional cross-validation
 - `title`:
 
   graph title
+
+- `se`:
+
+  logical, should confidence band be displayed (TRUE by default)
 
 #### Returns
 
