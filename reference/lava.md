@@ -160,12 +160,8 @@ inheriting from
 
 ## Details
 
-The optimized criterion is the following:
-
-β^(hat)_(λ₁) = argmin_(θ = β+δ) 1/2n RSS(β + δ) + λ₁ \| β \|₁ + λ/2 ₂
-δ^(T) S δ,
-
-.
+The optimized criterion is the following: β^(hat)_(λ₁) =
+argmin_(θ = β+δ) 1/2n RSS(β + δ) + λ₁ \| β \|₁ + λ/2 ₂ δ^(T) S δ, .
 
 ## References
 

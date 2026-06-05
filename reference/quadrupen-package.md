@@ -32,8 +32,8 @@ about the statistical dependence between the features. This is sometimes
 referred to as the "Structured Elastic-Net".
 
 We also provide in the package the implementation of the Generalized
-Fused-LASSO originally proposed by Holger Höfling now archived from CRAN
-([original repo here](https://github.com/cran/FusedLasso)).
+Fused-LASSO originally proposed by Holger Hoefling now archived from
+CRAN ([original repo here](https://github.com/cran/FusedLasso)).
 
 While likely not as fast as highly specialized packages like *glmnet*,
 the use of a working set algorithm combined with efficient solvers,
@@ -111,9 +111,8 @@ computationally unstable.
 
 ## References
 
-- Yves Grandvalet, Julien Chiquet and Christophe Ambroise, [Sparsity by
-  Worst-case Quadratic Penalties](http://arxiv.org/abs/1210.2077), arXiv
-  preprint, 2012.
+- Yves Grandvalet, Julien Chiquet and Christophe Ambroise, "Sparsity by
+  Worst-case Quadratic Penalties", <doi:10.48550/arXiv.1210.2077>, 2012.
 
 - Fan, Jianqing, and Runze Li. “Variable selection via nonconcave
   penalized likelihood and its oracle properties.” JASA, 2001
@@ -125,9 +124,7 @@ computationally unstable.
   approximator.” JCGS, 2010.
 
 - Martin Slawski, Wolfgang zu Castell, and Gerhard Tutz. Feature
-  selection guided by structural information, AOAS,
-
-1.  
+  selection guided by structural information, AOAS, 2010.
 
 - Zhang, C. H. Nearly unbiased variable selection under minimax concave
   penalty. The Annals of Statistics, 2010.

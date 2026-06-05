@@ -132,12 +132,10 @@ inheriting from
 
 ## Details
 
-The optimized criterion is the following:
-
-β^(hat)_(λ₂) = argmin_(β) 1/2 RSS(&beta) + λ/2 ₂ β^(T) S β,
-
-where the \\\ell_2\\ structuring positive semidefinite matrix \\S\\ is
-provided via the `struct` argument (possibly of class `Matrix`).
+The optimized criterion is the following: β^(hat)_(λ₂) = argmin_(β) 1/2
+RSS(β) + λ/2 ₂ β^(T) S β, where the \\\ell_2\\ structuring positive
+semidefinite matrix \\S\\ is provided via the `struct` argument
+(possibly of class `Matrix`).
 
 ## See also
 

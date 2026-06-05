@@ -284,11 +284,8 @@ inheriting from
 
 ## Details
 
-The optimized criterion is the following:
-
-β^(hat)_(λ₁,λ₂) = argmin_(β) 1/2 RSS(β) + λ₁ \[(1-α) Ω_(g)(β) + α \| D β
-\|₁\] + λ₂/2 β^(T) S β,
-
+The optimized criterion is the following: β^(hat)_(λ₁,λ₂) = argmin_(β)
+1/2 RSS(β) + λ₁ \[(1-α) Ω_(g)(β) + α \| D β \|₁\] + λ₂/2 β^(T) S β,
 where \\\Omega_g\\ is the group-wise mixed norm: \\\ell_1/\ell_2\\
 (Group-Lasso), \\\ell_1/\ell\_\infty\\, or cooperative (Clime),
 controlled by the `type` argument; \\D\\ is a diagonal matrix whose
@@ -332,6 +329,7 @@ plot(sparse_group_lasso(x, y, grp, alpha = 0.75), label=labels)
 
 
 if (FALSE) { # \dontrun{
+
 ## Sparse Group-Lasso + L2 regularization
 plot(group_sparse_lm(x, y, grp, type = "l2", alpha = .75, lambda2=.5),
  label=labels)
@@ -339,17 +337,13 @@ plot(group_sparse_lm(x, y, grp, type = "l2", alpha = .75, lambda2=10),
  label=labels)
 plot(group_sparse_lm(x, y, grp, type = "l2", alpha = .75, lambda2=10,
  struct=solve(Sigma)), label=labels)
-} # }
 
 ## Group-Lasso L1/LINF
 plot(group_l1linf(x, y, grp), label=labels)
 
-
 ## Sparse Group-Lasso L1/LINF
 plot(sparse_group_l1linf(x, y, grp, alpha = 0.75), label=labels)
 
-
-if (FALSE) { # \dontrun{
 ## Sparse L1/LINF Group-Lasso + L2 regularization
 plot(group_sparse_lm(x, y, grp, type = "linf", alpha = .75, lambda2=.5),
   label=labels)
@@ -357,17 +351,13 @@ plot(group_sparse_lm(x, y, grp, type = "linf", alpha = .75, lambda2=10),
   label=labels)
 plot(group_sparse_lm(x, y, grp, type = "linf", alpha = .75, lambda2=10,
   struct=solve(Sigma)), label=labels)
-} # }
 
 ## Cooperative-Lasso
 plot(coop_lasso(x, y, grp), label=labels)
 
-
 ## Sparse Cooperative-Lasso
 plot(sparse_coop_lasso(x, y, grp, alpha = 0.75), label=labels)
 
-
-if (FALSE) { # \dontrun{
 ## Sparse Cooperative-Lasso + L2 regularization
 plot(group_sparse_lm(x, y, grp, type = "coop", alpha = .75, lambda2=.5),
  label=labels)

@@ -28,5 +28,5 @@ Quadratic Penalties, arXiv preprint, 2012.
       author = {Yves Grandvalet and Julien Chiquet and Christophe Ambroise},
       journal = {arXiv preprint},
       year = {2012},
-      url = {http://arxiv.org/abs/1210.2077},
+      url = {https://arxiv.org/abs/1210.2077},
     }

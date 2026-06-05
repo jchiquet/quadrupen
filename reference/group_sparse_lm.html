@@ -342,12 +342,12 @@ when <code>'1'</code>, the bound derived in Grandvalet et al. is computed; when
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
     <p>The optimized criterion is the following:
- </p><center>
+
 β<sup>hat</sup><sub>λ<sub>1</sub>,λ<sub>2</sub></sub> =
 argmin<sub>β</sub> 1/2 RSS(β) + λ<sub>1</sub>
 [(1-α) Ω<sub>g</sub>(β) + α | D β |<sub>1</sub>]
 + λ<sub>2</sub>/2 β<sup>T</sup> S β,
-</center>
+
 
 where \(\Omega_g\) is the group-wise mixed norm:
 \(\ell_1/\ell_2\) (Group-Lasso),
@@ -357,7 +357,7 @@ diagonal terms are given by <code>penscale</code>; \(\alpha\)
 tunes the mixture between the group and element-wise penalties;
 and \(S\) is the \(\ell_2\) structuring matrix provided
 via <code>struct</code>, a positive semidefinite matrix (possibly of
-class <code>Matrix</code>).
+class <code>Matrix</code>).</p>
     </div>
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>
@@ -393,6 +393,7 @@ class <code>Matrix</code>).
 <span class="r-plt img"><img src="group_sparse_lm-2.png" alt="" width="700" height="433"></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="kw">if</span> <span class="op">(</span><span class="cn">FALSE</span><span class="op">)</span> <span class="op">{</span> <span class="co"># \dontrun{</span></span></span>
+<span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co">## Sparse Group-Lasso + L2 regularization</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="fu">group_sparse_lm</span><span class="op">(</span><span class="va">x</span>, <span class="va">y</span>, <span class="va">grp</span>, type <span class="op">=</span> <span class="st">"l2"</span>, alpha <span class="op">=</span> <span class="fl">.75</span>, lambda2<span class="op">=</span><span class="fl">.5</span><span class="op">)</span>,</span></span>
 <span class="r-in"><span> label<span class="op">=</span><span class="va">labels</span><span class="op">)</span></span></span>
@@ -400,17 +401,13 @@ class <code>Matrix</code>).
 <span class="r-in"><span> label<span class="op">=</span><span class="va">labels</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="fu">group_sparse_lm</span><span class="op">(</span><span class="va">x</span>, <span class="va">y</span>, <span class="va">grp</span>, type <span class="op">=</span> <span class="st">"l2"</span>, alpha <span class="op">=</span> <span class="fl">.75</span>, lambda2<span class="op">=</span><span class="fl">10</span>,</span></span>
 <span class="r-in"><span> struct<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/solve.html" class="external-link">solve</a></span><span class="op">(</span><span class="va">Sigma</span><span class="op">)</span><span class="op">)</span>, label<span class="op">=</span><span class="va">labels</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="op">}</span> <span class="co"># }</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co">## Group-Lasso L1/LINF</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="fu">group_l1linf</span><span class="op">(</span><span class="va">x</span>, <span class="va">y</span>, <span class="va">grp</span><span class="op">)</span>, label<span class="op">=</span><span class="va">labels</span><span class="op">)</span></span></span>
-<span class="r-plt img"><img src="group_sparse_lm-3.png" alt="" width="700" height="433"></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co">## Sparse Group-Lasso L1/LINF</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="fu">sparse_group_l1linf</span><span class="op">(</span><span class="va">x</span>, <span class="va">y</span>, <span class="va">grp</span>, alpha <span class="op">=</span> <span class="fl">0.75</span><span class="op">)</span>, label<span class="op">=</span><span class="va">labels</span><span class="op">)</span></span></span>
-<span class="r-plt img"><img src="group_sparse_lm-4.png" alt="" width="700" height="433"></span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="kw">if</span> <span class="op">(</span><span class="cn">FALSE</span><span class="op">)</span> <span class="op">{</span> <span class="co"># \dontrun{</span></span></span>
 <span class="r-in"><span><span class="co">## Sparse L1/LINF Group-Lasso + L2 regularization</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="fu">group_sparse_lm</span><span class="op">(</span><span class="va">x</span>, <span class="va">y</span>, <span class="va">grp</span>, type <span class="op">=</span> <span class="st">"linf"</span>, alpha <span class="op">=</span> <span class="fl">.75</span>, lambda2<span class="op">=</span><span class="fl">.5</span><span class="op">)</span>,</span></span>
 <span class="r-in"><span>  label<span class="op">=</span><span class="va">labels</span><span class="op">)</span></span></span>
@@ -418,17 +415,13 @@ class <code>Matrix</code>).
 <span class="r-in"><span>  label<span class="op">=</span><span class="va">labels</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="fu">group_sparse_lm</span><span class="op">(</span><span class="va">x</span>, <span class="va">y</span>, <span class="va">grp</span>, type <span class="op">=</span> <span class="st">"linf"</span>, alpha <span class="op">=</span> <span class="fl">.75</span>, lambda2<span class="op">=</span><span class="fl">10</span>,</span></span>
 <span class="r-in"><span>  struct<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/solve.html" class="external-link">solve</a></span><span class="op">(</span><span class="va">Sigma</span><span class="op">)</span><span class="op">)</span>, label<span class="op">=</span><span class="va">labels</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="op">}</span> <span class="co"># }</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co">## Cooperative-Lasso</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="fu">coop_lasso</span><span class="op">(</span><span class="va">x</span>, <span class="va">y</span>, <span class="va">grp</span><span class="op">)</span>, label<span class="op">=</span><span class="va">labels</span><span class="op">)</span></span></span>
-<span class="r-plt img"><img src="group_sparse_lm-5.png" alt="" width="700" height="433"></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co">## Sparse Cooperative-Lasso</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="fu">sparse_coop_lasso</span><span class="op">(</span><span class="va">x</span>, <span class="va">y</span>, <span class="va">grp</span>, alpha <span class="op">=</span> <span class="fl">0.75</span><span class="op">)</span>, label<span class="op">=</span><span class="va">labels</span><span class="op">)</span></span></span>
-<span class="r-plt img"><img src="group_sparse_lm-6.png" alt="" width="700" height="433"></span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="kw">if</span> <span class="op">(</span><span class="cn">FALSE</span><span class="op">)</span> <span class="op">{</span> <span class="co"># \dontrun{</span></span></span>
 <span class="r-in"><span><span class="co">## Sparse Cooperative-Lasso + L2 regularization</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="fu">group_sparse_lm</span><span class="op">(</span><span class="va">x</span>, <span class="va">y</span>, <span class="va">grp</span>, type <span class="op">=</span> <span class="st">"coop"</span>, alpha <span class="op">=</span> <span class="fl">.75</span>, lambda2<span class="op">=</span><span class="fl">.5</span><span class="op">)</span>,</span></span>
 <span class="r-in"><span> label<span class="op">=</span><span class="va">labels</span><span class="op">)</span></span></span>

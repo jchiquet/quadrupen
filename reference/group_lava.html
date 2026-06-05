@@ -235,15 +235,15 @@ when <code>'1'</code>, the bound derived in Grandvalet et al. is computed; when
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
     <p>The optimized criterion is the following:
- </p><center> θ<sup>hat</sup><sub>λ<sub>1</sub>,λ<sub>2</sub></sub> =
+  θ<sup>hat</sup><sub>λ<sub>1</sub>,λ<sub>2</sub></sub> =
 argmin<sub>θ = β+δ</sub> 1/2n RSS(β + δ) + λ<sub>1</sub>
 Ω<sub>g</sub>(β) + λ<sub>2</sub>/2 δ<sup>T</sup> S
-δ, </center>
+δ,
 
 where \(\Omega_g\) is the group-wise mixed norm:
 \(\ell_1/\ell_2\) (Group-LAVA) or
 \(\ell_1/\ell_\infty\), controlled by the <code>type</code> argument.
-The \(\ell_2\) structuring matrix \(S\) is provided via <code>struct</code>.
+The \(\ell_2\) structuring matrix \(S\) is provided via <code>struct</code>.</p>
     </div>
     <div class="section level2">
     <h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a></h2>

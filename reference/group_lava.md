@@ -172,12 +172,9 @@ inheriting from
 
 ## Details
 
-The optimized criterion is the following:
-
-θ^(hat)_(λ₁,λ₂) = argmin_(θ = β+δ) 1/2n RSS(β + δ) + λ₁ Ω_(g)(β) + λ₂/2
-δ^(T) S δ,
-
-where \\\Omega_g\\ is the group-wise mixed norm: \\\ell_1/\ell_2\\
+The optimized criterion is the following: θ^(hat)_(λ₁,λ₂) =
+argmin_(θ = β+δ) 1/2n RSS(β + δ) + λ₁ Ω_(g)(β) + λ₂/2 δ^(T) S δ, where
+\\\Omega_g\\ is the group-wise mixed norm: \\\ell_1/\ell_2\\
 (Group-LAVA) or \\\ell_1/\ell\_\infty\\, controlled by the `type`
 argument. The \\\ell_2\\ structuring matrix \\S\\ is provided via
 `struct`.

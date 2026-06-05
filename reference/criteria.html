@@ -117,9 +117,9 @@ field of the original <a href="QuadrupenFit.html">QuadrupenFit</a> object.</p>
     <div class="section level2">
     <h2 id="note">Note<a class="anchor" aria-label="anchor" href="#note"></a></h2>
     <p>When <code>sigma</code> is provided, the criterion takes the form</p>
-<p></p><center> RSS + penalty * df / n * sigma<sup>2</sup></center>
+<p>RSS + penalty * df / n * sigma<sup>2</sup></p>
 <p>When it is unknown, it writes</p>
-<p></p><center> n*log(RSS) + penalty * df </center>
+<p>n*log(RSS) + penalty * df</p>
 <p>Estimation of the degrees of freedom (for the elastic-net, the
 LASSO and also bounded regression) are computed by applying and
 adapting the results of Tibshirani and Taylor (see references

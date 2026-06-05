@@ -29,8 +29,8 @@ adding such a penalty to the LASSO, this is sometimes referred to as the
 “Structured” or “Generalized” Elastic-Net”[^9].
 
 We also provide in the package the implementation of the Generalized
-Fused-LASSO[^10] originally proposed by Holger Höfling now archived from
-CRAN ([original repo here](https://github.com/cran/FusedLasso)).
+Fused-LASSO[^10] originally proposed by Holger Hoefling now archived
+from CRAN ([original repo here](https://github.com/cran/FusedLasso)).
 
 The original version of **Quadrupen** only includes Lasso, Elastic-Net
 and Bounded regression. It was used as an illustration for our paper
@@ -59,8 +59,8 @@ one:
 ## Example: structured penalized regression
 
 This example is extracted from chapter 1 of my
-[habilitation](https://tel.archives-ouvertes.fr/tel-01288976/). You can
-get more insight by reading pages 65-66, 70-71.
+[habilitation](https://theses.hal.science/tel-01288976/). You can get
+more insight by reading pages 65-66, 70-71.
 
 First, load the package
 
@@ -76,7 +76,7 @@ library(quadrupen)
 ### A toy data set advocating for structured regularization
 
 See pages 29–30 in my
-[habilitation](https://tel.archives-ouvertes.fr/tel-01288976/). Code for
+[habilitation](https://theses.hal.science/tel-01288976/). Code for
 additional functions is given at the end of the present document
 (Appendix).
 
@@ -275,8 +275,8 @@ variables, and use group-sparse regularization. We offer three variants
 of group sparse regularization in `quadrupen`: standard group-lasso
 (\\\ell_1/\ell_2\\ mixed norm), type 2 group Lasso
 (\\\ell_1/\ell\_\infty\\ mixed norm) and the
-[cooperative-lasso](https://jchiquet.github.io/quadrupen/doi.org/10.1214/11-AOAS520),
-an original proposition.
+[cooperative-lasso](https://doi.org/10.1214/11-AOAS520), an original
+proposition.
 
 We first define a group index vector to encode the group memberships:
 
@@ -364,7 +364,7 @@ plot(group_sparse_lm(x, y, group, type = "l2", alpha = 0.5, lambda2 = 2, struct 
 >
 > I wrote all the R and C++ code, which is a collection of various
 > pieces accumulated over the years (except for the Fused-Lasso code,
-> which was written by Holger Hofling). I recently put all these pieces
+> which was written by Holger Hoefling). I recently put all these pieces
 > together. I used Claude code to help me refactor and optimise certain
 > parts of the C++ code, as well as to review and generate parts of the
 > documentation.

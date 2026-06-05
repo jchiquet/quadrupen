@@ -135,15 +135,12 @@ inheriting from
 
 ## Details
 
-The optimized criterion is the following:
-
-β^(hat)_(λ₁,λ₂) = argmin_(β) 1/2 RSS(&beta) + λ₁ \| D β \|₁ + λ/2 ₂
-β^(T) S β,
-
-where \\D\\ is a diagonal matrix, whose diagonal terms are provided as a
-vector by the `penscale` argument. The \\\ell_1\\ fusion penalty is
-structured by a possibly weighted graph \\G\\ provided via the `struct`
-argument, as a symmetric (undirected) adjacency matrix.
+The optimized criterion is the following: β^(hat)_(λ₁,λ₂) = argmin_(β)
+1/2 RSS(β) + λ₁ \| D β \|₁ + λ/2 ₂ β^(T) S β, where \\D\\ is a diagonal
+matrix, whose diagonal terms are provided as a vector by the `penscale`
+argument. The \\\ell_1\\ fusion penalty is structured by a possibly
+weighted graph \\G\\ provided via the `struct` argument, as a symmetric
+(undirected) adjacency matrix.
 
 ## Author
 

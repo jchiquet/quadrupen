@@ -261,15 +261,12 @@ inheriting from
 
 ## Details
 
-The optimized criterion is the following:
-
-β^(hat)_(λ₁,λ₂) = argmin_(β) 1/2 RSS(&beta) + λ₁ pen_(η)(D β) + λ/2 ₂
-β^(T) S β,
-
-where \\D\\ is a diagonal matrix, whose diagonal terms are provided as a
-vector by the `penscale` argument. The \\\ell_2\\ structuring matrix
-\\S\\ is provided via the `struct` argument, a positive semidefinite
-matrix (possibly of class `Matrix`).
+The optimized criterion is the following: β^(hat)_(λ₁,λ₂) = argmin_(β)
+1/2 RSS(β) + λ₁ pen_(η)(D β) + λ/2 ₂ β^(T) S β, where \\D\\ is a
+diagonal matrix, whose diagonal terms are provided as a vector by the
+`penscale` argument. The \\\ell_2\\ structuring matrix \\S\\ is provided
+via the `struct` argument, a positive semidefinite matrix (possibly of
+class `Matrix`).
 
 ## See also
 

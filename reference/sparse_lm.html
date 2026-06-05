@@ -314,17 +314,17 @@ when <code>'1'</code>, the bound derived in Grandvalet et al. is computed; when
     </div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
-    <p>The optimized criterion is the following:   </p><center>
+    <p>The optimized criterion is the following:
 β<sup>hat</sup><sub>λ<sub>1</sub>,λ<sub>2</sub></sub> =
-argmin<sub>β</sub> 1/2 RSS(&amp;beta) + λ<sub>1</sub>
+argmin<sub>β</sub> 1/2 RSS(β) + λ<sub>1</sub>
 pen<sub>η</sub>(D β) + λ/2 <sub>2</sub>
-β<sup>T</sup> S β, </center>
+β<sup>T</sup> S β,
  where
 \(D\) is a diagonal matrix, whose diagonal terms are provided
 as a vector by the <code>penscale</code> argument. The \(\ell_2\)
 structuring matrix \(S\) is provided via the <code>struct</code>
 argument, a positive semidefinite matrix (possibly of class
-<code>Matrix</code>).
+<code>Matrix</code>).</p>
     </div>
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>
