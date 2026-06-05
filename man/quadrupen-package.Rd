@@ -90,33 +90,17 @@ unstable.
 }
 \references{
 \itemize{
-\item Yves Grandvalet, Julien Chiquet and Christophe Ambroise,
-\href{http://arxiv.org/abs/1210.2077}{Sparsity by Worst-case Quadratic Penalties},
-arXiv preprint, 2012.
-\item Fan, Jianqing, and Runze Li. “Variable selection via nonconcave penalized
-likelihood and its oracle properties.” JASA, 2001
-\item Nicolas Meinshausen and Peter Buhlmann. Stability Selection,
-JRSS(B), 2010.
+\item Yves Grandvalet, Julien Chiquet and Christophe Ambroise, "Sparsity by Worst-case Quadratic Penalties", \url{doi:10.48550/arXiv.1210.2077}, 2012.
+\item Fan, Jianqing, and Runze Li. “Variable selection via nonconcave penalized likelihood and its oracle properties.” JASA, 2001
+\item Nicolas Meinshausen and Peter Buhlmann. Stability Selection, JRSS(B), 2010.
 \item Hoefling, Holger. “A path algorithm for the fused lasso signal approximator.” JCGS, 2010.
-\item Martin Slawski, Wolfgang zu Castell, and Gerhard
-Tutz. Feature selection guided by structural information, AOAS,
-}
-\enumerate{
-\item 
-}
-\itemize{
-\item Zhang, C. H. Nearly unbiased variable selection under minimax concave penalty.
-The Annals of Statistics, 2010.
-\item Yuan, Ming, and Yi Lin. “Model selection and estimation in regression with grouped variables.”,
-JRSS(B), 2006.
+\item Martin Slawski, Wolfgang zu Castell, and Gerhard Tutz. Feature selection guided by structural information, AOAS, 2010.
+\item Zhang, C. H. Nearly unbiased variable selection under minimax concave penalty. The Annals of Statistics, 2010.
+\item Yuan, Ming, and Yi Lin. “Model selection and estimation in regression with grouped variables.”, JRSS(B), 2006.
 \item Simon, Noah, et al. “A sparse-group lasso.” JCGS, 2013
-\item Peng Zhao, Guillerme Rocha and Bin Yu. The composite
-absolute penalties family for grouped and hierarchical variable
-selection, The Annals of Statistics, 2009.
-\item Hui Zou and Trevor Hastie. Regularization and variable
-selection via the elastic net, JRSS(B), 2006.
-\item Robert Tibshirani. Regression Shrinkage and Selection
-via the Lasso, JRSS(B), 1996.
+\item Peng Zhao, Guillerme Rocha and Bin Yu. The composite absolute penalties family for grouped and hierarchical variable selection, The Annals of Statistics, 2009.
+\item Hui Zou and Trevor Hastie. Regularization and variable selection via the elastic net, JRSS(B), 2006.
+\item Robert Tibshirani. Regression Shrinkage and Selection via the Lasso, JRSS(B), 1996.
 }
 }
 \seealso{

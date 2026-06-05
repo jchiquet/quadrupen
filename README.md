@@ -64,8 +64,8 @@ one:
 ## Example: structured penalized regression
 
 This example is extracted from chapter 1 of my
-[habilitation](https://tel.archives-ouvertes.fr/tel-01288976/). You can
-get more insight by reading pages 65-66, 70-71.
+[habilitation](https://theses.hal.science/tel-01288976/). You can get
+more insight by reading pages 65-66, 70-71.
 
 First, load the package
 
@@ -258,8 +258,9 @@ We can use the correlation structure as a proxy for forming groups of
 variables, and use group-sparse regularization. We offer three variants
 of group sparse regularization in `quadrupen`: standard group-lasso
 ($\ell_1/\ell_2$ mixed norm), type 2 group Lasso ($\ell_1/\ell_\infty$
-mixed norm) and the [cooperative-lasso](doi.org/10.1214/11-AOAS520), an
-original proposition.
+mixed norm) and the
+[cooperative-lasso](https://doi.org/10.1214/11-AOAS520), an original
+proposition.
 
 We first define a group index vector to encode the group memberships:
 
