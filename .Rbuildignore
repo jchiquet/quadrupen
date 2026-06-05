@@ -14,3 +14,4 @@ README.qmd
 ^\.claude$
 ^vignettes/*_files$
 ^cran-comments\.md$
+^CRAN-SUBMISSION$
