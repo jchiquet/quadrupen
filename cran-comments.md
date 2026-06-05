@@ -31,7 +31,11 @@
 
 * tested remotely with win-builder (R version 4.5.3, R unstable, R version 4.6.0)
 
-all status OK
+all status OK except 1 NOTE (False Positive, MCP is the name of a penalty, not a misspelled word)
+
+Possibly misspelled words in DESCRIPTION:
+  MCP (9:165)
+  
 
 ## Local R CMD check results
 

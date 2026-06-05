@@ -35,7 +35,7 @@ model selection purpose (information criteria, cross-validation, stability selec
 
 For all these regularizers, **Quadrupen** offers the possibility to add an $\ell_2$/ridge-like "structured" penalty to embed some external knowledge about the statistical dependence between the features. When adding such a penalty to the LASSO, this is sometimes referred to as the "Structured" or "Generalized" Elastic-Net"[^7].
 
-We also provide in the package the implementation of the Generalized Fused-LASSO[^8] originally proposed by Holger Höfling now archived from CRAN ([original repo here](https://github.com/cran/FusedLasso)).
+We also provide in the package the implementation of the Generalized Fused-LASSO[^8] originally proposed by Holger Hoefling now archived from CRAN ([original repo here](https://github.com/cran/FusedLasso)).
 
 The original version of **Quadrupen** only includes Lasso, Elastic-Net and Bounded regression. It was used as an illustration for our paper *"Sparsity by worst-case penalties"*[^9]. I eventually used it to include my personal implementation of sparse methods for linear regression.
 
@@ -73,7 +73,7 @@ library(quadrupen)
 
 ### A toy data set advocating for structured regularization
 
-See pages 29--30 in my [habilitation](https://tel.archives-ouvertes.fr/tel-01288976/). Code for additional functions is given at the end of the present document (Appendix).
+See pages 29--30 in my [habilitation](https://theses.hal.science/tel-01288976/). Code for additional functions is given at the end of the present document (Appendix).
 
 ```{r chol-functions-internal, echo=FALSE}
 chol.uniform <- function(p,rho) {
@@ -307,7 +307,7 @@ plot(group_sparse_lm(x, y, group, type = "l2", alpha = 0.5, lambda2 = 2, struct 
 ::: {.callout-note}
 ### Disclaimer about the use of AI
 
-I wrote all the R and C++ code, which is a collection of various pieces accumulated over the years (except for the Fused-Lasso code, which was written by Holger Hofling). I recently put all these pieces together. I used Claude code to help me refactor and optimise certain parts of the C++ code, as well as to review and generate parts of the documentation.
+I wrote all the R and C++ code, which is a collection of various pieces accumulated over the years (except for the Fused-Lasso code, which was written by Holger Hoefling). I recently put all these pieces together. I used Claude code to help me refactor and optimise certain parts of the C++ code, as well as to review and generate parts of the documentation.
 :::
 
 

@@ -23,7 +23,7 @@
 #' "Structured Elastic-Net". 
 #' 
 #' We also provide in the package the implementation of the Generalized Fused-LASSO originally 
-#' proposed by Holger Höfling now archived from CRAN ([original repo here](https://github.com/cran/FusedLasso)).
+#' proposed by Holger Hoefling now archived from CRAN ([original repo here](https://github.com/cran/FusedLasso)).
 #' 
 #' While likely not as fast as highly specialized packages like *glmnet*, 
 #' the use of a working set algorithm combined with efficient solvers, sparse matrix support when applicable, and templated C++ code makes it both competitive and versatile.

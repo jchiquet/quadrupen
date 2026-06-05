@@ -31,7 +31,7 @@ the statistical dependence between the features. This is sometimes referred to a
 "Structured Elastic-Net".
 
 We also provide in the package the implementation of the Generalized Fused-LASSO originally
-proposed by Holger Höfling now archived from CRAN (\href{https://github.com/cran/FusedLasso}{original repo here}).
+proposed by Holger Hoefling now archived from CRAN (\href{https://github.com/cran/FusedLasso}{original repo here}).
 
 While likely not as fast as highly specialized packages like \emph{glmnet},
 the use of a working set algorithm combined with efficient solvers, sparse matrix support when applicable, and templated C++ code makes it both competitive and versatile.
