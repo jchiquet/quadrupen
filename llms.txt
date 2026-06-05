@@ -13,20 +13,20 @@ algorithms. Also provides a few methods for model selection purpose
 **Quadrupen** covers the following regularizers
 
 - LASSO[^1] (Least Absolute Shrinkage and Selection Operator)
-- SCAD[^2] (Smoothly Clip Absolute Deviation)
+- SCAD[^2] (Smoothly Clipped Absolute Deviation)
 - MCP[^3] (Minimax Concave Penalty)
 - Group-LASSO[^4] (\\\ell_1/\ell_2\\ or \\\ell_1/\ell\_\infty\\)
 - Cooperative-LASSO[^5]
 - Sparse Group-LASSO[^6] and Sparse Cooperative-LASSO
 - Bounded Regression (\\\ell\_\infty\\-norm).
-- LAVA[^7] and the group-LAVA variants for the all the group-sparse
-  methods
+- LAVA[^7] and the group-LAVA variants for all the group-sparse methods
 - Ridge Regression[^8]
 
 For all these regularizers, **Quadrupen** offers the possibility to add
 an \\\ell_2\\/ridge-like “structured” penalty to embed some external
-knowledge about the statistical dependence between the features. This is
-sometimes referred to as the “Structured Elastic-Net”[^9].
+knowledge about the statistical dependence between the features. When
+adding such a penalty to the LASSO, this is sometimes referred to as the
+“Structured” or “Generalized” Elastic-Net”[^9].
 
 We also provide in the package the implementation of the Generalized
 Fused-LASSO[^10] originally proposed by Holger Höfling now archived from
@@ -50,12 +50,15 @@ both competitive and versatile.
 devtools::install_github("jchiquet/quadrupen")
 ```
 
-Many examples and demos can be found in the `inst` directory. Here is a
-more illustrative one:
+[A couple of vignettes](https://jchiquet.github.io/quadrupen/articles/)
+introduce the basics and more advanced uses of the functions and classes
+implemented in the package. Other examples can be found in the
+documentation and in the `inst` directory. Here is a more illustrative
+one:
 
 ## Example: structured penalized regression
 
-This example is extracted form chapter 1 of my
+This example is extracted from chapter 1 of my
 [habilitation](https://tel.archives-ouvertes.fr/tel-01288976/). You can
 get more insight by reading pages 65-66, 70-71.
 
@@ -74,12 +77,12 @@ library(quadrupen)
 
 See pages 29–30 in my
 [habilitation](https://tel.archives-ouvertes.fr/tel-01288976/). Code for
-additional function is given by the end of the present document
+additional functions is given at the end of the present document
 (Appendix).
 
-We draw data from linear regression where the regression parameters are
-defined group-wise. The corresponding regression correlated according to
-the same pattern.
+We draw data from a linear regression where the regression parameters
+are defined group-wise. The regressors are correlated according to the
+same block pattern.
 
 ``` r
 
@@ -139,11 +142,6 @@ plot(lasso(x,y, intercept=FALSE), labels=labels)
 plot(mcp(x,y, intercept=FALSE), labels=labels)
 ```
 
-``` R
-Warning in sparse_lm(x, y, type = "mcp", lambda1 = lambda1, lambda2 = lambda2,
-: SCAD and MCP are still highly experimental and in development
-```
-
 ![](reference/figures/mcp-nostruct-1.png)
 
 #### SCAD (Smoothly Clipped Absolute Deviation)
@@ -153,14 +151,9 @@ Warning in sparse_lm(x, y, type = "mcp", lambda1 = lambda1, lambda2 = lambda2,
 plot(scad(x,y, intercept=FALSE), labels=labels)
 ```
 
-``` R
-Warning in sparse_lm(x, y, type = "scad", lambda1 = lambda1, lambda2 = lambda2,
-: SCAD and MCP are still highly experimental and in development
-```
-
 ![](reference/figures/scad-nostruct-1.png)
 
-#### SCAD (Smoothly Clipped Absolute Deviation)
+#### Fused-LASSO (contiguity penalty)
 
 ``` r
 
@@ -280,8 +273,8 @@ out_lava$plot_path(component = "dense", labels=labels)
 We can use the correlation structure as a proxy for forming groups of
 variables, and use group-sparse regularization. We offer three variants
 of group sparse regularization in `quadrupen`: standard group-lasso
-(\\\ell_1/\ell_2\\ mixed norm), type 2 group Lasso (
-(\\\ell_1/\ell\_\infty\\ mixed norm)) and the
+(\\\ell_1/\ell_2\\ mixed norm), type 2 group Lasso
+(\\\ell_1/\ell\_\infty\\ mixed norm) and the
 [cooperative-lasso](https://jchiquet.github.io/quadrupen/doi.org/10.1214/11-AOAS520),
 an original proposition.
 
@@ -348,12 +341,12 @@ plot(sparse_coop_lasso(x, y, group, alpha = 0.75, intercept=FALSE), labels=label
 
 ### Regularization mixing smooth and hard prior knowledge
 
-We let the possibility to add structured-\\\ell_2\\ penalty to this
+We allow the possibility to add a structured-\\\ell_2\\ penalty to these
 mixed-group penalties, in order to introduce additional smoothing prior
 in the regularization, just like in the structured version of the
 Elastic-Net and Ridge regression. For this, the function
-`group_sparse_lm` is the more generic group-wise function, which
-generalize all the above model by letting the possibility to add an
+`group_sparse_lm` is the most generic group-wise function, which
+generalizes all the above models by allowing the addition of an
 \\\ell_2\\-structured penalty.
 
 #### Sparse Group-Lasso L2 + Structured ElasticNet (group sparse L1/L2 + structured L2)
@@ -364,6 +357,17 @@ plot(group_sparse_lm(x, y, group, type = "l2", alpha = 0.5, lambda2 = 2, struct 
 ```
 
 ![](reference/figures/sparse-grpenet-l1l2-1.png)
+
+> \[!NOTE\]
+>
+> ### Disclaimer about the use of AI
+>
+> I wrote all the R and C++ code, which is a collection of various
+> pieces accumulated over the years (except for the Fused-Lasso code,
+> which was written by Holger Hofling). I recently put all these pieces
+> together. I used Claude code to help me refactor and optimise certain
+> parts of the C++ code, as well as to review and generate parts of the
+> documentation.
 
 ## Appendix: functions for data generation
 

@@ -3,7 +3,11 @@
 ## Authors
 
 - **Julien Chiquet**. Author, maintainer.
-  [](https://orcid.org/0000-0002-3629-3429)
+  [](https://orcid.org/0000-0002-3629-3429)  
+  main contributor
+
+- **Holger Hoefling**. Author.  
+  Author of the original C++ code for Fused-Lasso
 
 ## Citation
 

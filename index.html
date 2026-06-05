@@ -17,8 +17,8 @@
 <script src="deps/bootstrap-5.3.8/bootstrap.bundle.min.js"></script><link href="deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
 <link href="deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
 <script src="deps/headroom-0.11.0/headroom.min.js"></script><script src="deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="deps/search-1.0.0/fuse.min.js"></script><script src="deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="pkgdown.js"></script><meta property="og:title" content="Sparse and Group Sparse Linear Models">
-<meta name="description" content="This package fits the solution paths of classical sparse regression models with efficient active set algorithms by solving small sub-problems. Include LASSO, SCAD, MCP, (Sparse) Group-LASSO, Cooperative-LASSO, LAVA and Elastic-Net variants. Also provides a few methods for model selection purpose (cross-validation, stability selection).">
-<meta property="og:description" content="This package fits the solution paths of classical sparse regression models with efficient active set algorithms by solving small sub-problems. Include LASSO, SCAD, MCP, (Sparse) Group-LASSO, Cooperative-LASSO, LAVA and Elastic-Net variants. Also provides a few methods for model selection purpose (cross-validation, stability selection).">
+<meta name="description" content="This package fits the solution paths of classical sparse regression models with efficient active set algorithms by solving small sub-problems. Include LASSO, SCAD, MCP, (Sparse) Group-LASSO, Cooperative-LASSO, (Group) LAVA, (Generalized) Fused-Lasso and (Generalized) Elastic-Net. Also provides methods for model selection purpose (information criteria, cross-validation, stability selection).">
+<meta property="og:description" content="This package fits the solution paths of classical sparse regression models with efficient active set algorithms by solving small sub-problems. Include LASSO, SCAD, MCP, (Sparse) Group-LASSO, Cooperative-LASSO, (Group) LAVA, (Generalized) Fused-Lasso and (Generalized) Elastic-Net. Also provides methods for model selection purpose (information criteria, cross-validation, stability selection).">
 </head>
 <body>
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
@@ -73,18 +73,18 @@
 <p><strong>Quadrupen</strong> covers the following regularizers</p>
 <ul>
 <li>LASSO<a class="footnote-ref" tabindex="0" data-bs-toggle="popover" data-bs-content="&lt;p&gt;Tibshirani, Robert. “Regression shrinkage and selection via the lasso.” Journal of the Royal Statistical Society Series B: Statistical Methodology 58.1 (1996): 267-288.&lt;/p&gt;"><sup>1</sup></a> (Least Absolute Shrinkage and Selection Operator)</li>
-<li>SCAD<a class="footnote-ref" tabindex="0" data-bs-toggle="popover" data-bs-content="&lt;p&gt;Fan, Jianqing, and Runze Li. “Variable selection via nonconcave penalized likelihood and its oracle properties.” Journal of the American statistical Association 96.456 (2001): 1348-1360.&lt;/p&gt;"><sup>2</sup></a> (Smoothly Clip Absolute Deviation)</li>
+<li>SCAD<a class="footnote-ref" tabindex="0" data-bs-toggle="popover" data-bs-content="&lt;p&gt;Fan, Jianqing, and Runze Li. “Variable selection via nonconcave penalized likelihood and its oracle properties.” Journal of the American statistical Association 96.456 (2001): 1348-1360.&lt;/p&gt;"><sup>2</sup></a> (Smoothly Clipped Absolute Deviation)</li>
 <li>MCP<a class="footnote-ref" tabindex="0" data-bs-toggle="popover" data-bs-content="&lt;p&gt;Zhang, C. H. Nearly unbiased variable selection under minimax concave penalty. The Annals of Statistics, 38(2), (2010): 894-942.&lt;/p&gt;"><sup>3</sup></a> (Minimax Concave Penalty)</li>
 <li>Group-LASSO<a class="footnote-ref" tabindex="0" data-bs-toggle="popover" data-bs-content="&lt;p&gt;Yuan, Ming, and Yi Lin. “Model selection and estimation in regression with grouped variables.” Journal of the Royal Statistical Society Series B: Statistical Methodology 68.1 (2006): 49-67.&lt;/p&gt;"><sup>4</sup></a> (<span class="math inline">\(\ell_1/\ell_2\)</span> or <span class="math inline">\(\ell_1/\ell_\infty\)</span>)</li>
 <li>Cooperative-LASSO<a class="footnote-ref" tabindex="0" data-bs-toggle="popover" data-bs-content="&lt;p&gt;Chiquet, Julien, Yves Grandvalet, and Camille Charbonnier. “Sparsity with sign-coherent groups of variables via the cooperative-lasso.” (2012): 795-830.&lt;/p&gt;"><sup>5</sup></a>
 </li>
 <li>Sparse Group-LASSO<a class="footnote-ref" tabindex="0" data-bs-toggle="popover" data-bs-content="&lt;p&gt;Simon, Noah, et al. “A sparse-group lasso.” Journal of computational and graphical statistics 22.2 (2013): 231-245.&lt;/p&gt;"><sup>6</sup></a> and Sparse Cooperative-LASSO</li>
 <li>Bounded Regression (<span class="math inline">\(\ell_\infty\)</span>-norm).</li>
-<li>LAVA<a class="footnote-ref" tabindex="0" data-bs-toggle="popover" data-bs-content="&lt;p&gt;Chernozhukov, Victor, Christian Hansen, and Yuan Liao. “A lava attack on the recovery of sums of dense and sparse signals.” The Annals of Statistics (2017): 39-76.&lt;/p&gt;"><sup>7</sup></a> and the group-LAVA variants for the all the group-sparse methods</li>
+<li>LAVA<a class="footnote-ref" tabindex="0" data-bs-toggle="popover" data-bs-content="&lt;p&gt;Chernozhukov, Victor, Christian Hansen, and Yuan Liao. “A lava attack on the recovery of sums of dense and sparse signals.” The Annals of Statistics (2017): 39-76.&lt;/p&gt;"><sup>7</sup></a> and the group-LAVA variants for all the group-sparse methods</li>
 <li>Ridge Regression<a class="footnote-ref" tabindex="0" data-bs-toggle="popover" data-bs-content="&lt;p&gt;Hoerl, Arthur E., and Robert W. Kennard. “Ridge regression: Biased estimation for nonorthogonal problems.” Technometrics 12.1 (1970): 55-67.&lt;/p&gt;"><sup>8</sup></a>
 </li>
 </ul>
-<p>For all these regularizers, <strong>Quadrupen</strong> offers the possibility to add an <span class="math inline">\(\ell_2\)</span>/ridge-like “structured” penalty to embed some external knowledge about the statistical dependence between the features. This is sometimes referred to as the “Structured Elastic-Net”<a class="footnote-ref" tabindex="0" data-bs-toggle="popover" data-bs-content="&lt;p&gt;Slawski, Martin. “The structured elastic net for quantile regression and support vector classification.” Statistics and Computing 22.1 (2012): 153-168.&lt;/p&gt;"><sup>9</sup></a>.</p>
+<p>For all these regularizers, <strong>Quadrupen</strong> offers the possibility to add an <span class="math inline">\(\ell_2\)</span>/ridge-like “structured” penalty to embed some external knowledge about the statistical dependence between the features. When adding such a penalty to the LASSO, this is sometimes referred to as the “Structured” or “Generalized” Elastic-Net”<a class="footnote-ref" tabindex="0" data-bs-toggle="popover" data-bs-content="&lt;p&gt;Slawski, Martin. “The structured elastic net for quantile regression and support vector classification.” Statistics and Computing 22.1 (2012): 153-168.&lt;/p&gt;"><sup>9</sup></a>.</p>
 <p>We also provide in the package the implementation of the Generalized Fused-LASSO<a class="footnote-ref" tabindex="0" data-bs-toggle="popover" data-bs-content="&lt;p&gt;Hoefling, Holger. “A path algorithm for the fused lasso signal approximator.” Journal of Computational and Graphical Statistics 19.4 (2010): 984-1006.&lt;/p&gt;"><sup>10</sup></a> originally proposed by Holger Höfling now archived from CRAN (<a href="https://github.com/cran/FusedLasso" class="external-link">original repo here</a>).</p>
 <p>The original version of <strong>Quadrupen</strong> only includes Lasso, Elastic-Net and Bounded regression. It was used as an illustration for our paper <em>“Sparsity by worst-case penalties”</em><a class="footnote-ref" tabindex="0" data-bs-toggle="popover" data-bs-content="&lt;p&gt;Grandvalet, Yves, Julien Chiquet, and Christophe Ambroise. “Sparsity by worst-case penalties.” arXiv preprint arXiv:1210.2077 (2012).&lt;/p&gt;"><sup>11</sup></a>. I eventually used it to include my personal implementation of sparse methods for linear regression.</p>
 <p>While likely not as fast as highly specialized packages like <em>glmnet</em>, the use of a working set algorithm combined with efficient solvers, sparse matrix support when applicable, and templated C++ code makes it both competitive and versatile.</p>
@@ -94,12 +94,12 @@
 </h2>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu">devtools</span><span class="fu">::</span><span class="fu">install_github</span><span class="op">(</span><span class="st">"jchiquet/quadrupen"</span><span class="op">)</span></span></code></pre></div>
-<p>Many examples and demos can be found in the <code>inst</code> directory. Here is a more illustrative one:</p>
+<p><a href="https://jchiquet.github.io/quadrupen/articles/">A couple of vignettes</a> introduce the basics and more advanced uses of the functions and classes implemented in the package. Other examples can be found in the documentation and in the <code>inst</code> directory. Here is a more illustrative one:</p>
 </div>
 <div class="section level2">
 <h2 id="example-structured-penalized-regression">Example: structured penalized regression<a class="anchor" aria-label="anchor" href="#example-structured-penalized-regression"></a>
 </h2>
-<p>This example is extracted form chapter 1 of my <a href="https://tel.archives-ouvertes.fr/tel-01288976/" class="external-link">habilitation</a>. You can get more insight by reading pages 65-66, 70-71.</p>
+<p>This example is extracted from chapter 1 of my <a href="https://tel.archives-ouvertes.fr/tel-01288976/" class="external-link">habilitation</a>. You can get more insight by reading pages 65-66, 70-71.</p>
 <p>First, load the package</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/jchiquet/quadrupen" class="external-link">quadrupen</a></span><span class="op">)</span></span></code></pre></div>
@@ -107,8 +107,8 @@
 <div class="section level3">
 <h3 id="a-toy-data-set-advocating-for-structured-regularization">A toy data set advocating for structured regularization<a class="anchor" aria-label="anchor" href="#a-toy-data-set-advocating-for-structured-regularization"></a>
 </h3>
-<p>See pages 29–30 in my <a href="https://tel.archives-ouvertes.fr/tel-01288976/" class="external-link">habilitation</a>. Code for additional function is given by the end of the present document (Appendix).</p>
-<p>We draw data from linear regression where the regression parameters are defined group-wise. The corresponding regression correlated according to the same pattern.</p>
+<p>See pages 29–30 in my <a href="https://tel.archives-ouvertes.fr/tel-01288976/" class="external-link">habilitation</a>. Code for additional functions is given at the end of the present document (Appendix).</p>
+<p>We draw data from a linear regression where the regression parameters are defined group-wise. The regressors are correlated according to the same block pattern.</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">n</span> <span class="op">&lt;-</span> <span class="fl">200</span></span>
 <span><span class="va">p</span> <span class="op">&lt;-</span> <span class="fl">192</span></span>
@@ -150,55 +150,51 @@
 </h4>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="fu"><a href="reference/sparse_lm.html">mcp</a></span><span class="op">(</span><span class="va">x</span>,<span class="va">y</span>, intercept<span class="op">=</span><span class="cn">FALSE</span><span class="op">)</span>, labels<span class="op">=</span><span class="va">labels</span><span class="op">)</span></span></code></pre></div>
-<div class="sourceCode" id="cb9"><pre class="sourceCode R"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" tabindex="-1"></a>Warning <span class="cf">in</span> <span class="fu">sparse_lm</span>(x, y, <span class="at">type =</span> <span class="st">"mcp"</span>, <span class="at">lambda1 =</span> lambda1, <span class="at">lambda2 =</span> lambda2,</span>
-<span id="cb9-2"><a href="#cb9-2" tabindex="-1"></a><span class="sc">:</span> SCAD and MCP are still highly experimental and <span class="cf">in</span> development</span></code></pre></div>
 <p><img src="reference/figures/mcp-nostruct-1.png"></p>
 </div>
 <div class="section level4">
 <h4 id="scad-smoothly-clipped-absolute-deviation">SCAD (Smoothly Clipped Absolute Deviation)<a class="anchor" aria-label="anchor" href="#scad-smoothly-clipped-absolute-deviation"></a>
 </h4>
-<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="fu"><a href="reference/sparse_lm.html">scad</a></span><span class="op">(</span><span class="va">x</span>,<span class="va">y</span>, intercept<span class="op">=</span><span class="cn">FALSE</span><span class="op">)</span>, labels<span class="op">=</span><span class="va">labels</span><span class="op">)</span></span></code></pre></div>
-<div class="sourceCode" id="cb11"><pre class="sourceCode R"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" tabindex="-1"></a>Warning <span class="cf">in</span> <span class="fu">sparse_lm</span>(x, y, <span class="at">type =</span> <span class="st">"scad"</span>, <span class="at">lambda1 =</span> lambda1, <span class="at">lambda2 =</span> lambda2,</span>
-<span id="cb11-2"><a href="#cb11-2" tabindex="-1"></a><span class="sc">:</span> SCAD and MCP are still highly experimental and <span class="cf">in</span> development</span></code></pre></div>
 <p><img src="reference/figures/scad-nostruct-1.png"></p>
 </div>
 <div class="section level4">
-<h4 id="scad-smoothly-clipped-absolute-deviation-1">SCAD (Smoothly Clipped Absolute Deviation)<a class="anchor" aria-label="anchor" href="#scad-smoothly-clipped-absolute-deviation-1"></a>
+<h4 id="fused-lasso-contiguity-penalty">Fused-LASSO (contiguity penalty)<a class="anchor" aria-label="anchor" href="#fused-lasso-contiguity-penalty"></a>
 </h4>
-<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="fu"><a href="reference/fused_lasso.html">fused_lasso</a></span><span class="op">(</span><span class="va">x</span>,<span class="va">y</span>, lambda2 <span class="op">=</span> <span class="fl">5</span>, intercept<span class="op">=</span><span class="cn">FALSE</span><span class="op">)</span>, labels<span class="op">=</span><span class="va">labels</span><span class="op">)</span></span></code></pre></div>
 <p><img src="reference/figures/fused-lasso-1.png"></p>
 </div>
 <div class="section level4">
 <h4 id="elastic-net-ell_1ell_2-penalty">Elastic-net (<span class="math inline">\(\ell_1+\ell_2\)</span> penalty)<a class="anchor" aria-label="anchor" href="#elastic-net-ell_1ell_2-penalty"></a>
 </h4>
-<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="fu"><a href="reference/sparse_lm.html">elastic_net</a></span><span class="op">(</span><span class="va">x</span>,<span class="va">y</span>, lambda2<span class="op">=</span><span class="fl">1</span>, intercept<span class="op">=</span><span class="cn">FALSE</span><span class="op">)</span>, labels<span class="op">=</span><span class="va">labels</span><span class="op">)</span></span></code></pre></div>
 <p><img src="reference/figures/enet-nostruct-1.png"></p>
 </div>
 <div class="section level4">
 <h4 id="bounded-regression-ell_infty-penalty">Bounded regression (<span class="math inline">\(\ell_\infty\)</span> penalty)<a class="anchor" aria-label="anchor" href="#bounded-regression-ell_infty-penalty"></a>
 </h4>
-<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="fu"><a href="reference/bounded_reg.html">bounded_reg</a></span><span class="op">(</span><span class="va">x</span>,<span class="va">y</span>, lambda2<span class="op">=</span><span class="fl">0</span>, intercept<span class="op">=</span><span class="cn">FALSE</span><span class="op">)</span>, labels<span class="op">=</span><span class="va">labels</span><span class="op">)</span></span></code></pre></div>
 <p><img src="reference/figures/breg-nostruct-1.png"></p>
 </div>
 <div class="section level4">
 <h4 id="bounded-regression--ridge-ell_inftyell_2-penalty">Bounded regression + Ridge (<span class="math inline">\(\ell_\infty+\ell_2\)</span> penalty)<a class="anchor" aria-label="anchor" href="#bounded-regression--ridge-ell_inftyell_2-penalty"></a>
 </h4>
-<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="fu"><a href="reference/bounded_reg.html">bounded_reg</a></span><span class="op">(</span><span class="va">x</span>,<span class="va">y</span>, lambda2<span class="op">=</span><span class="fl">5</span>, intercept<span class="op">=</span><span class="cn">FALSE</span><span class="op">)</span>, labels<span class="op">=</span><span class="va">labels</span><span class="op">)</span></span></code></pre></div>
 <p><img src="reference/figures/bregridge-nostruct-1.png"></p>
 </div>
 <div class="section level4">
 <h4 id="lava-sparse--dense-signal-decomposition">Lava (sparse + dense signal decomposition)<a class="anchor" aria-label="anchor" href="#lava-sparse--dense-signal-decomposition"></a>
 </h4>
-<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">out_lava</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/lava.html">lava</a></span><span class="op">(</span><span class="va">x</span>,<span class="va">y</span>, lambda2<span class="op">=</span><span class="fl">1</span>, intercept<span class="op">=</span><span class="cn">FALSE</span><span class="op">)</span></span>
 <span><span class="va">out_lava</span><span class="op">$</span><span class="fu">plot_path</span><span class="op">(</span>component <span class="op">=</span> <span class="st">"sparse"</span>, labels<span class="op">=</span><span class="va">labels</span><span class="op">)</span></span></code></pre></div>
 <p><img src="reference/figures/lava-nostruct-1.png"></p>
-<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">out_lava</span><span class="op">$</span><span class="fu">plot_path</span><span class="op">(</span>component <span class="op">=</span> <span class="st">"dense"</span>, labels<span class="op">=</span><span class="va">labels</span><span class="op">)</span></span></code></pre></div>
 <p><img src="reference/figures/lava-nostruct-2.png"></p>
 </div>
@@ -207,39 +203,39 @@
 <h3 id="regularization-with-smooth-prior-knowledge">Regularization with smooth prior knowledge<a class="anchor" aria-label="anchor" href="#regularization-with-smooth-prior-knowledge"></a>
 </h3>
 <p>Now let’s define the graph associated with the groups of the regressor and compute the Graph Laplacian. We add a small value on the diagonal to ensure strict positive definiteness (in the future, this matrix should preferentially be defined with a graph).</p>
-<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">A</span> <span class="op">&lt;-</span> <span class="fu">Matrix</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/Matrix/man/bdiag.html" class="external-link">bdiag</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/lapply.html" class="external-link">lapply</a></span><span class="op">(</span><span class="va">group</span>, <span class="kw">function</span><span class="op">(</span><span class="va">s</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">matrix</a></span><span class="op">(</span><span class="fl">1</span>,<span class="va">s</span>,<span class="va">s</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> ; <span class="fu"><a href="https://rdrr.io/r/base/diag.html" class="external-link">diag</a></span><span class="op">(</span><span class="va">A</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="fl">0</span></span>
 <span><span class="va">L</span> <span class="op">&lt;-</span> <span class="op">-</span><span class="va">A</span>; <span class="fu"><a href="https://rdrr.io/r/base/diag.html" class="external-link">diag</a></span><span class="op">(</span><span class="va">L</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="fu">Matrix</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/Matrix/man/colSums-methods.html" class="external-link">colSums</a></span><span class="op">(</span><span class="va">A</span><span class="op">)</span> <span class="op">+</span> <span class="fl">1e-2</span></span></code></pre></div>
 <p>Now, we run all the methods having a ridge-like regularization by replacing the ridge penalty <span class="math inline">\(\| \cdot \|_2^2\)</span> with <span class="math inline">\(\| \cdot \|_{\mathbf{L}}^2\)</span> to enforce some structure in the regularization: the solution paths look a lot more convincing.</p>
 <div class="section level4">
 <h4 id="structuredgeneralized-ridge-regression-ell_2-penalty">Structured/Generalized Ridge regression (<span class="math inline">\(\ell_2\)</span> penalty)<a class="anchor" aria-label="anchor" href="#structuredgeneralized-ridge-regression-ell_2-penalty"></a>
 </h4>
-<div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="fu"><a href="reference/ridge.html">ridge</a></span><span class="op">(</span><span class="va">x</span>,<span class="va">y</span>, lambda <span class="op">=</span> <span class="fl">10</span><span class="op">^</span><span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq</a></span><span class="op">(</span><span class="fl">4</span>,<span class="op">-</span><span class="fl">1</span>,len<span class="op">=</span><span class="fl">100</span><span class="op">)</span>, struct <span class="op">=</span> <span class="va">L</span>, intercept<span class="op">=</span><span class="cn">FALSE</span><span class="op">)</span>, labels<span class="op">=</span><span class="va">labels</span><span class="op">)</span></span></code></pre></div>
 <p><img src="reference/figures/ridge_struct-1.png"></p>
 </div>
 <div class="section level4">
 <h4 id="structuredgeneralized-elastic-net-ell_1ell_2-penalty">Structured/Generalized Elastic-net (<span class="math inline">\(\ell_1+\ell_2\)</span> penalty)<a class="anchor" aria-label="anchor" href="#structuredgeneralized-elastic-net-ell_1ell_2-penalty"></a>
 </h4>
-<div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="fu"><a href="reference/sparse_lm.html">elastic_net</a></span><span class="op">(</span><span class="va">x</span>,<span class="va">y</span>, struct <span class="op">=</span> <span class="va">L</span>, lambda2<span class="op">=</span><span class="fl">1</span>, intercept<span class="op">=</span><span class="cn">FALSE</span><span class="op">)</span>, labels<span class="op">=</span><span class="va">labels</span><span class="op">)</span></span></code></pre></div>
 <p><img src="reference/figures/enet_struct-1.png"></p>
 </div>
 <div class="section level4">
 <h4 id="bounded-regression--structuredgeneralized-ridge-ell_inftyell_2-penalty">Bounded regression + structured/Generalized Ridge (<span class="math inline">\(\ell_\infty+\ell_2\)</span> penalty)<a class="anchor" aria-label="anchor" href="#bounded-regression--structuredgeneralized-ridge-ell_inftyell_2-penalty"></a>
 </h4>
-<div class="sourceCode" id="cb21"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="fu"><a href="reference/bounded_reg.html">bounded_reg</a></span><span class="op">(</span><span class="va">x</span>,<span class="va">y</span>, struct <span class="op">=</span> <span class="va">L</span>, lambda2<span class="op">=</span><span class="fl">5</span>, intercept<span class="op">=</span><span class="cn">FALSE</span><span class="op">)</span>, labels<span class="op">=</span><span class="va">labels</span><span class="op">)</span></span></code></pre></div>
 <p><img src="reference/figures/bregridge_struct-1.png"></p>
 </div>
 <div class="section level4">
 <h4 id="lava-sparse--structured-dense">Lava (sparse + structured dense)<a class="anchor" aria-label="anchor" href="#lava-sparse--structured-dense"></a>
 </h4>
-<div class="sourceCode" id="cb22"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">out_lava</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/lava.html">lava</a></span><span class="op">(</span><span class="va">x</span>,<span class="va">y</span>, lambda2<span class="op">=</span><span class="fl">1</span>, struct <span class="op">=</span> <span class="va">L</span>, intercept<span class="op">=</span><span class="cn">FALSE</span><span class="op">)</span></span>
 <span><span class="va">out_lava</span><span class="op">$</span><span class="fu">plot_path</span><span class="op">(</span>component <span class="op">=</span> <span class="st">"sparse"</span>, labels<span class="op">=</span><span class="va">labels</span><span class="op">)</span></span></code></pre></div>
 <p><img src="reference/figures/lava_struct-1.png"></p>
-<div class="sourceCode" id="cb23"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb21"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">out_lava</span><span class="op">$</span><span class="fu">plot_path</span><span class="op">(</span>component <span class="op">=</span> <span class="st">"dense"</span>, labels<span class="op">=</span><span class="va">labels</span><span class="op">)</span></span></code></pre></div>
 <p><img src="reference/figures/lava_struct-2.png"></p>
 </div>
@@ -247,49 +243,49 @@
 <div class="section level3">
 <h3 id="regularization-with-hard-prior-knowledge">Regularization with hard prior knowledge<a class="anchor" aria-label="anchor" href="#regularization-with-hard-prior-knowledge"></a>
 </h3>
-<p>We can use the correlation structure as a proxy for forming groups of variables, and use group-sparse regularization. We offer three variants of group sparse regularization in <code>quadrupen</code>: standard group-lasso (<span class="math inline">\(\ell_1/\ell_2\)</span> mixed norm), type 2 group Lasso ( (<span class="math inline">\(\ell_1/\ell_\infty\)</span> mixed norm)) and the <a href="doi.org/10.1214/11-AOAS520">cooperative-lasso</a>, an original proposition.</p>
+<p>We can use the correlation structure as a proxy for forming groups of variables, and use group-sparse regularization. We offer three variants of group sparse regularization in <code>quadrupen</code>: standard group-lasso (<span class="math inline">\(\ell_1/\ell_2\)</span> mixed norm), type 2 group Lasso (<span class="math inline">\(\ell_1/\ell_\infty\)</span> mixed norm) and the <a href="doi.org/10.1214/11-AOAS520">cooperative-lasso</a>, an original proposition.</p>
 <p>We first define a group index vector to encode the group memberships:</p>
-<div class="sourceCode" id="cb24"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb22"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">group</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fl">1</span><span class="op">:</span><span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">group</span><span class="op">)</span>, <span class="va">group</span><span class="op">)</span></span></code></pre></div>
 <div class="section level4">
 <h4 id="group-lasso-group-sparse-l1l2">Group Lasso (group sparse L1/L2)<a class="anchor" aria-label="anchor" href="#group-lasso-group-sparse-l1l2"></a>
 </h4>
-<div class="sourceCode" id="cb25"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb23"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="fu"><a href="reference/group_sparse_lm.html">group_lasso</a></span><span class="op">(</span><span class="va">x</span>, <span class="va">y</span>, <span class="va">group</span>, intercept<span class="op">=</span><span class="cn">FALSE</span><span class="op">)</span>, labels<span class="op">=</span><span class="va">labels</span><span class="op">)</span></span></code></pre></div>
 <p><img src="reference/figures/grplasso-l1l2-1.png"></p>
 </div>
 <div class="section level4">
 <h4 id="sparse-group-lasso-mixing-l1--group-sparse-l1l2">Sparse Group Lasso (mixing L1 + group sparse L1/L2)<a class="anchor" aria-label="anchor" href="#sparse-group-lasso-mixing-l1--group-sparse-l1l2"></a>
 </h4>
-<div class="sourceCode" id="cb26"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb24"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="fu"><a href="reference/group_sparse_lm.html">sparse_group_lasso</a></span><span class="op">(</span><span class="va">x</span>, <span class="va">y</span>, <span class="va">group</span>, alpha <span class="op">=</span> <span class="fl">0.75</span>, intercept<span class="op">=</span><span class="cn">FALSE</span><span class="op">)</span>, labels<span class="op">=</span><span class="va">labels</span><span class="op">)</span></span></code></pre></div>
 <p><img src="reference/figures/sparse-grplasso-l1l2-1.png"></p>
 </div>
 <div class="section level4">
 <h4 id="group-lasso-group-sparse-l1linf">Group-Lasso (group sparse L1/LInf)<a class="anchor" aria-label="anchor" href="#group-lasso-group-sparse-l1linf"></a>
 </h4>
-<div class="sourceCode" id="cb27"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb25"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="fu"><a href="reference/group_sparse_lm.html">group_l1linf</a></span><span class="op">(</span><span class="va">x</span>, <span class="va">y</span>, <span class="va">group</span>, intercept<span class="op">=</span><span class="cn">FALSE</span><span class="op">)</span>, labels<span class="op">=</span><span class="va">labels</span><span class="op">)</span></span></code></pre></div>
 <p><img src="reference/figures/grplasso-l1linf-1.png"></p>
 </div>
 <div class="section level4">
 <h4 id="sparse-group-lasso-mixing-l1--group-sparse-l1linf">Sparse Group Lasso (mixing L1 + group sparse L1/LInf)<a class="anchor" aria-label="anchor" href="#sparse-group-lasso-mixing-l1--group-sparse-l1linf"></a>
 </h4>
-<div class="sourceCode" id="cb28"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb26"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="fu"><a href="reference/group_sparse_lm.html">sparse_group_l1linf</a></span><span class="op">(</span><span class="va">x</span>, <span class="va">y</span>, <span class="va">group</span>, alpha <span class="op">=</span> <span class="fl">0.75</span>, intercept<span class="op">=</span><span class="cn">FALSE</span><span class="op">)</span>, labels<span class="op">=</span><span class="va">labels</span><span class="op">)</span></span></code></pre></div>
 <p><img src="reference/figures/sparse-grplasso-l1linf-1.png"></p>
 </div>
 <div class="section level4">
 <h4 id="cooperative-lasso-sign-coherent-group-lasso">Cooperative-Lasso (sign-coherent group lasso)<a class="anchor" aria-label="anchor" href="#cooperative-lasso-sign-coherent-group-lasso"></a>
 </h4>
-<div class="sourceCode" id="cb29"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb27"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="fu"><a href="reference/group_sparse_lm.html">coop_lasso</a></span><span class="op">(</span><span class="va">x</span>, <span class="va">y</span>, <span class="va">group</span>, intercept<span class="op">=</span><span class="cn">FALSE</span><span class="op">)</span>, labels<span class="op">=</span><span class="va">labels</span><span class="op">)</span></span></code></pre></div>
 <p><img src="reference/figures/sparse-cooplasso-1.png"></p>
 </div>
 <div class="section level4">
 <h4 id="sparse-cooperative-lasso-mixing-l1--cooperative-norm">Sparse Cooperative Lasso (mixing L1 + Cooperative norm)<a class="anchor" aria-label="anchor" href="#sparse-cooperative-lasso-mixing-l1--cooperative-norm"></a>
 </h4>
-<div class="sourceCode" id="cb30"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb28"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="fu"><a href="reference/group_sparse_lm.html">sparse_coop_lasso</a></span><span class="op">(</span><span class="va">x</span>, <span class="va">y</span>, <span class="va">group</span>, alpha <span class="op">=</span> <span class="fl">0.75</span>, intercept<span class="op">=</span><span class="cn">FALSE</span><span class="op">)</span>, labels<span class="op">=</span><span class="va">labels</span><span class="op">)</span></span></code></pre></div>
 <p><img src="reference/figures/sparse-grplasso-coop-1.png"></p>
 </div>
@@ -297,20 +293,25 @@
 <div class="section level3">
 <h3 id="regularization-mixing-smooth-and-hard-prior-knowledge">Regularization mixing smooth and hard prior knowledge<a class="anchor" aria-label="anchor" href="#regularization-mixing-smooth-and-hard-prior-knowledge"></a>
 </h3>
-<p>We let the possibility to add structured-<span class="math inline">\(\ell_2\)</span> penalty to this mixed-group penalties, in order to introduce additional smoothing prior in the regularization, just like in the structured version of the Elastic-Net and Ridge regression. For this, the function <code>group_sparse_lm</code> is the more generic group-wise function, which generalize all the above model by letting the possibility to add an <span class="math inline">\(\ell_2\)</span>-structured penalty.</p>
+<p>We allow the possibility to add a structured-<span class="math inline">\(\ell_2\)</span> penalty to these mixed-group penalties, in order to introduce additional smoothing prior in the regularization, just like in the structured version of the Elastic-Net and Ridge regression. For this, the function <code>group_sparse_lm</code> is the most generic group-wise function, which generalizes all the above models by allowing the addition of an <span class="math inline">\(\ell_2\)</span>-structured penalty.</p>
 <div class="section level4">
 <h4 id="sparse-group-lasso-l2--structured-elasticnet-group-sparse-l1l2--structured-l2">Sparse Group-Lasso L2 + Structured ElasticNet (group sparse L1/L2 + structured L2)<a class="anchor" aria-label="anchor" href="#sparse-group-lasso-l2--structured-elasticnet-group-sparse-l1l2--structured-l2"></a>
 </h4>
-<div class="sourceCode" id="cb31"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb29"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="fu"><a href="reference/group_sparse_lm.html">group_sparse_lm</a></span><span class="op">(</span><span class="va">x</span>, <span class="va">y</span>, <span class="va">group</span>, type <span class="op">=</span> <span class="st">"l2"</span>, alpha <span class="op">=</span> <span class="fl">0.5</span>, lambda2 <span class="op">=</span> <span class="fl">2</span>, struct <span class="op">=</span> <span class="va">L</span>, intercept<span class="op">=</span><span class="cn">FALSE</span><span class="op">)</span>, labels<span class="op">=</span><span class="va">labels</span><span class="op">)</span></span></code></pre></div>
 <p><img src="reference/figures/sparse-grpenet-l1l2-1.png"></p>
+<blockquote>
+<p>[!NOTE]</p>
+<h3 id="disclaimer-about-the-use-of-ai">Disclaimer about the use of AI</h3>
+<p>I wrote all the R and C++ code, which is a collection of various pieces accumulated over the years (except for the Fused-Lasso code, which was written by Holger Hofling). I recently put all these pieces together. I used Claude code to help me refactor and optimise certain parts of the C++ code, as well as to review and generate parts of the documentation.</p>
+</blockquote>
 </div>
 </div>
 </div>
 <div class="section level2">
 <h2 id="appendix-functions-for-data-generation">Appendix: functions for data generation<a class="anchor" aria-label="anchor" href="#appendix-functions-for-data-generation"></a>
 </h2>
-<div class="sourceCode" id="cb32"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb30"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">chol.uniform</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">p</span>,<span class="va">rho</span><span class="op">)</span> <span class="op">{</span></span>
 <span></span>
 <span>  <span class="va">q</span> <span class="op">&lt;-</span> <span class="fl">0</span>     <span class="co">## sum_k^(i-1) c.k^2</span></span>
@@ -394,6 +395,8 @@
 <h2 data-toc-skip>Developers</h2>
 <ul class="list-unstyled">
 <li>Julien Chiquet <br><small class="roles"> Author, maintainer </small> <a href="https://orcid.org/0000-0002-3629-3429" target="orcid.widget" aria-label="ORCID" class="external-link"><span class="fab fa-orcid orcid" aria-hidden="true"></span></a>  </li>
+<li>Holger Hoefling <br><small class="roles"> Author </small>   </li>
+<li><a href="authors.html">More about authors...</a></li>
 </ul>
 </div>
 
@@ -409,7 +412,7 @@
 
 
     <footer><div class="pkgdown-footer-left">
-  <p>Developed by Julien Chiquet.</p>
+  <p>Developed by Julien Chiquet, Holger Hoefling.</p>
 </div>
 
 <div class="pkgdown-footer-right">
