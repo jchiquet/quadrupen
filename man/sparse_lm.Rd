@@ -231,12 +231,12 @@ regularization. See details for the criterion optimized.
 The optimized criterion is the following: \if{latex}{\deqn{%
 \hat{\beta}_{\lambda_1,\lambda_2} = \arg \min_{\beta} \frac{1}{2}
 (y - X \beta)^T (y - X \beta) + \lambda_1 pen_{\eta}(D \beta) +
-\frac{\lambda_2}{2} \beta^T S \beta, }} \if{html}{\out{ <center>
+\frac{\lambda_2}{2} \beta^T S \beta, }} \if{html}{\out{ 
 &beta;<sup>hat</sup>
 <sub>&lambda;<sub>1</sub>,&lambda;<sub>2</sub></sub> =
-argmin<sub>&beta;</sub> 1/2 RSS(&beta) + &lambda;<sub>1</sub>
+argmin<sub>&beta;</sub> 1/2 RSS(&beta;) + &lambda;<sub>1</sub>
 pen<sub>&eta;</sub>(D &beta;) + &lambda;/2 <sub>2</sub>
-&beta;<sup>T</sup> S &beta;, </center> }}
+&beta;<sup>T</sup> S &beta;,  }}
 \if{text}{\deqn{beta.hat(lambda1, lambda2) = argmin_beta 1/2
 RSS(beta) + lambda1 |D beta|1 + lambda2 beta' S beta,}} where
 \eqn{D}{D} is a diagonal matrix, whose diagonal terms are provided
@@ -285,5 +285,3 @@ plot(mcp(x, y, eta = 3, lambda2=1), label=labels)
 \seealso{
 See also \link{SparseFit}
 }
-\keyword{models,}
-\keyword{regression}

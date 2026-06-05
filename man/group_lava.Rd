@@ -140,11 +140,11 @@ optimized.
 The optimized criterion is the following: \if{latex}{\deqn{%
 \hat{\theta}_{\lambda_1,\lambda_2} = \arg \min_{\theta = \beta + \delta} \frac{1}{2 n} (y - X
 (\beta + \delta))^T (y - X (\beta + \delta)) + \lambda_1 \Omega_g(\beta) + \frac{\lambda_2}{2} \delta^T S \delta, }}
-\if{html}{\out{ <center> &theta;<sup>hat</sup>
+\if{html}{\out{  &theta;<sup>hat</sup>
 <sub>&lambda;<sub>1</sub>,&lambda;<sub>2</sub></sub> =
 argmin<sub>&theta; = &beta;+&delta;</sub> 1/2n RSS(&beta; + &delta;) + &lambda;<sub>1</sub>
 &Omega;<sub>g</sub>(&beta;) + &lambda;<sub>2</sub>/2 &delta;<sup>T</sup> S
-&delta;, </center> }}
+&delta;,  }}
 \if{text}{\deqn{theta.hat(lambda1,lambda2) = argmin_{theta = beta + delta} 1/2n
 RSS(beta + delta) + lambda1 Omega_g(beta) + lambda2/2 delta' S delta,}}
 where \eqn{\Omega_g}{Omega_g} is the group-wise mixed norm:
@@ -195,5 +195,3 @@ plot(group_lava(x, y, grp, type = "coop", lambda2=10,struct=solve(Sigma)), label
 Chernozhukov, Victor, Christian Hansen, and Yuan Liao. "A lava attack on the recovery of sums of
 dense and sparse signals." The Annals of Statistics (2017): 39-76. \url{doi:10.1214/16-AOS1434}
 }
-\keyword{models,}
-\keyword{regression}

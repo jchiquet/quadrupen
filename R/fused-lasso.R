@@ -29,12 +29,12 @@
 #' @details The optimized criterion is the following: \if{latex}{\deqn{%
 #' \hat{\beta}_{\lambda_1,\lambda_2} = \arg \min_{\beta} \frac{1}{2}
 #' (y - X \beta)^T (y - X \beta) + \lambda_1 \|w \circ \beta \|_{1} +
-#' \frac{\lambda_2}{2} \sum_{i \sim j} w_{ij} |\beta_i - \beta_j|, }} \if{html}{\out{ <center>
+#' \frac{\lambda_2}{2} \sum_{i \sim j} w_{ij} |\beta_i - \beta_j|, }} \if{html}{\out{ 
 #' &beta;<sup>hat</sup>
 #' <sub>&lambda;<sub>1</sub>,&lambda;<sub>2</sub></sub> =
-#' argmin<sub>&beta;</sub> 1/2 RSS(&beta) + &lambda;<sub>1</sub>
+#' argmin<sub>&beta;</sub> 1/2 RSS(&beta;) + &lambda;<sub>1</sub>
 #' &#124; D &beta; &#124;<sub>1</sub> + &lambda;/2 <sub>2</sub>
-#' &beta;<sup>T</sup> S &beta;, </center> }}
+#' &beta;<sup>T</sup> S &beta;,  }}
 #' \if{text}{\deqn{beta.hat(lambda1, lambda2) = argmin_beta 1/2
 #' RSS(beta) + lambda1 |D beta|1 + lambda2 sum{(i,j) in G} w(ij) |beta_j -beta_i|,}} where
 #' \eqn{D}{D} is a diagonal matrix, whose diagonal terms are provided
@@ -60,8 +60,6 @@
 #' resG <- fused_lasso(x, y, lambda2=5, struct = G)
 #' plot(res)
 #' plot(resG)
-#' 
-#' @keywords models regression multivariate
 #' 
 #' @importFrom methods as
 #' @export 

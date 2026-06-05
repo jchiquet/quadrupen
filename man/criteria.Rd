@@ -55,14 +55,14 @@ When \code{sigma} is provided, the criterion takes the form
 
 \if{latex}{\deqn{\left\|\mathbf{y} - \mathbf{X} \hat{\beta} \right\|^2 +
 \mathrm{penalty} \times \frac{\hat{\mathrm{df}}}{n} \ \sigma^2.}}
-\if{html}{\out{ <center> RSS + penalty * df / n * sigma<sup>2</sup> </center>}}
+\if{html}{\out{  RSS + penalty * df / n * sigma<sup>2</sup> }}
 \if{text}{\deqn{RSS + penalty * df / n * sigma^2}}
 
 When it is unknown, it writes
 
 \if{latex}{\deqn{\log\left(\left\|\mathbf{y} - \mathbf{X} \hat{\beta} \right\|^2\right) +
 \mathrm{penalty} \times \hat{\mathrm{df}}.}}
-\if{html}{\out{ <center> n*log(RSS) + penalty * df </center>}}
+\if{html}{\out{  n*log(RSS) + penalty * df }}
 \if{text}{\deqn{n*log(RSS) + penalty * df}}
 
 Estimation of the degrees of freedom (for the elastic-net, the

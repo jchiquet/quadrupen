@@ -25,13 +25,13 @@
 #' (y - X \beta)^T (y - X \beta) + \lambda_1 \left[ (1-\alpha)\,
 #' \Omega_g(\beta) + \alpha \| D \beta \|_1 \right] +
 #' \frac{\lambda_2}{2} \beta^T S \beta, }}
-#' \if{html}{\out{ <center>
+#' \if{html}{\out{ 
 #' &beta;<sup>hat</sup>
 #' <sub>&lambda;<sub>1</sub>,&lambda;<sub>2</sub></sub> =
 #' argmin<sub>&beta;</sub> 1/2 RSS(&beta;) + &lambda;<sub>1</sub>
 #' [(1-&alpha;) &Omega;<sub>g</sub>(&beta;) + &alpha; &#124; D &beta; &#124;<sub>1</sub>]
 #' + &lambda;<sub>2</sub>/2 &beta;<sup>T</sup> S &beta;,
-#' </center> }}
+#'  }}
 #' \if{text}{\deqn{beta.hat(lambda1, lambda2) = argmin_beta 1/2
 #' RSS(beta) + lambda1 [(1-alpha) Omega_g(beta) + alpha |D beta|_1]
 #' + lambda2/2 beta' S beta,}}
@@ -48,8 +48,6 @@
 #' @return an object with class [SparseGroupFit], inheriting from [QuadrupenFit].
 #'
 #' @seealso See also [QuadrupenFit]
-#'
-#' @keywords models, regression
 #'
 #' @examples
 #' ## Simulating multivariate Gaussian with blockwise correlation
@@ -77,6 +75,7 @@
 #' plot(sparse_group_lasso(x, y, grp, alpha = 0.75), label=labels)
 #'
 #' \dontrun{
+#' 
 #' ## Sparse Group-Lasso + L2 regularization
 #' plot(group_sparse_lm(x, y, grp, type = "l2", alpha = .75, lambda2=.5),
 #'  label=labels)
@@ -84,7 +83,6 @@
 #'  label=labels)
 #' plot(group_sparse_lm(x, y, grp, type = "l2", alpha = .75, lambda2=10,
 #'  struct=solve(Sigma)), label=labels)
-#' }
 #'
 #' ## Group-Lasso L1/LINF
 #' plot(group_l1linf(x, y, grp), label=labels)
@@ -92,7 +90,6 @@
 #' ## Sparse Group-Lasso L1/LINF
 #' plot(sparse_group_l1linf(x, y, grp, alpha = 0.75), label=labels)
 #'
-#' \dontrun{
 #' ## Sparse L1/LINF Group-Lasso + L2 regularization
 #' plot(group_sparse_lm(x, y, grp, type = "linf", alpha = .75, lambda2=.5),
 #'   label=labels)
@@ -100,7 +97,6 @@
 #'   label=labels)
 #' plot(group_sparse_lm(x, y, grp, type = "linf", alpha = .75, lambda2=10,
 #'   struct=solve(Sigma)), label=labels)
-#' }
 #'
 #' ## Cooperative-Lasso
 #' plot(coop_lasso(x, y, grp), label=labels)
@@ -108,7 +104,6 @@
 #' ## Sparse Cooperative-Lasso
 #' plot(sparse_coop_lasso(x, y, grp, alpha = 0.75), label=labels)
 #'
-#' \dontrun{
 #' ## Sparse Cooperative-Lasso + L2 regularization
 #' plot(group_sparse_lm(x, y, grp, type = "coop", alpha = .75, lambda2=.5),
 #'  label=labels)

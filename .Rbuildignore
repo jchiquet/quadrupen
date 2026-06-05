@@ -13,3 +13,4 @@ README.qmd
 ^\.positai$
 ^\.claude$
 ^vignettes/*_files$
+^cran-comments\.md$

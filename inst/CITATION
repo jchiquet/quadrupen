@@ -16,6 +16,6 @@ bibentry(
   author = c("Yves Grandvalet", "Julien Chiquet", "Christophe Ambroise"),
   journal = "arXiv preprint",
   year = "2012",
-  url = "http://arxiv.org/abs/1210.2077",
+  url = "https://arxiv.org/abs/1210.2077",
   textVersion = "Y. Grandvalet, J. Chiquet and C. Ambroise. Sparsity by Worst-Case Quadratic Penalties, arXiv preprint, 2012."
 )

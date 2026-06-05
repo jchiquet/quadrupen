@@ -129,11 +129,11 @@ details for the criterion optimized.
 The optimized criterion is the following: \if{latex}{\deqn{%
 \hat{\theta}_{\lambda_1,\lambda_2} = \arg \min_{\theta = \beta + \delta} \frac{1}{2 n} (y - X
 (\beta + \delta))^T (y - X (\beta + \delta)) + \lambda_1 \| \beta \|_{1} + \frac{\lambda_2}{2} \delta^T S \delta, }}
-\if{html}{\out{ <center> &beta;<sup>hat</sup>
+\if{html}{\out{  &beta;<sup>hat</sup>
 <sub>&lambda;<sub>1</sub></sub> =
 argmin<sub>&theta; = &beta;+&delta;</sub> 1/2n RSS(&beta; + &delta;) + &lambda;<sub>1</sub>
 &#124; &beta; &#124;<sub>1</sub> + &lambda;/2 <sub>2</sub> &delta;<sup>T</sup> S
-&delta;, </center> }}
+&delta;,  }}
 \if{text}{\deqn{theta.hat(lambda1,lambda2) = argmin_{theta = beta + delta} 1/2n
 RSS(beta + delta) + lambda1 |beta|1 + + lambda2 delta' S delta}}.
 }
@@ -163,5 +163,3 @@ out$plot_path(component = "dense", labels=labels)
 Chernozhukov, Victor, Christian Hansen, and Yuan Liao. "A lava attack on the recovery of sums of
 dense and sparse signals." The Annals of Statistics (2017): 39-76. \url{doi:10.1214/16-AOS1434}
 }
-\keyword{models,}
-\keyword{regression}
