@@ -18,6 +18,10 @@ and methods of \link{QuadrupenFit}
   \describe{
     \item{\code{penalty}}{character describing the regularizer/penalty}
 
+    \item{\code{lambda1}}{vector of tuning parameters for the l1 penalty (sparse component)}
+
+    \item{\code{lambda2}}{vector of tuning parameters for the l2 penalty (dense component)}
+
     \item{\code{sparse_coef}}{sparse part of the  decomposition of the coefficients}
 
     \item{\code{dense_coef}}{dense part of the  decomposition of the coefficients}

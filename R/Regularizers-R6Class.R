@@ -1,17 +1,21 @@
 #' Class "SparseFit"
-#' 
+#'
 #' Class of object returned by the fitting function [elastic_net()]. Inherits fields
 #' and methods of [QuadrupenFit]
-#' 
+#'
 #' @seealso [QuadrupenFit], [elastic_net()]
-#' 
+#'
 #' @export
-#' 
+#'
 SparseFit <- R6::R6Class(
   classname = "SparseFit",
   inherit = QuadrupenFit,
   private  = list(type_ = NA),
   active  = list(
+    #' @field lambda1 vector of tuning parameters for the l1 penalty
+    lambda1 = function(value) private$tuning[[1]],
+    #' @field lambda2 vector of tuning parameters for the l2 penalty
+    lambda2 = function(value) private$tuning[[2]],
     #' @field penalty character describing the regularizer/penalty
     penalty = function(value) {
       ridge  <- ifelse(self$is_l2_regularized, "plus L2-regularization", "")
@@ -40,7 +44,7 @@ SparseFit <- R6::R6Class(
       super$initialize(data, intercept, regParam)
       private$type_  <- type
       if (data$sparse_encoding) {
-        private$optimizer <-  switch(private$type_, 
+        private$optimizer <-  switch(private$type_,
             "mcp" = mcp_sparse_cpp, "scad" = scad_sparse_cpp, elastic_net_sparse_cpp)
       } else {
         private$optimizer <- switch(private$type_,
@@ -51,18 +55,24 @@ SparseFit <- R6::R6Class(
 )
 
 #' Class "BoundedRegression"
-#' 
+#'
 #' Class of object returned by the fitting function [bounded_reg()]. Inherits fields
 #' and methods of [QuadrupenFit].
-#' 
+#'
 #' @seealso [QuadrupenFit], [bounded_reg()]
-#' 
+#'
 #' @export
 BoundedRegressionFit <- R6::R6Class(
   classname = "BoundedRegressionFit",
   inherit = QuadrupenFit,
-  #' @field penalty character describing the regularizer/penalty
-  active  = list(penalty = function(value) "bounded_reg"),
+  active  = list(
+    #' @field penalty character describing the regularizer/penalty
+    penalty = function(value) "Bounded (LINF)",
+    #' @field lambdainf vector of tuning parameters for the linf penalty
+    lambdainf = function(value) private$tuning[[1]],
+    #' @field lambda2 vector of tuning parameters for the l2 penalty
+    lambda2 = function(value) private$tuning[[2]]
+  ),
   #' @description Initialize a [`BoundedRegressionFit`] model
   #' @param data a [`DataModel`] object
   #' @param intercept a logical; should an intercept be included in the mode?
@@ -77,18 +87,22 @@ BoundedRegressionFit <- R6::R6Class(
 
 
 #' Class "RidgeRegressionFit"
-#' 
+#'
 #' Class of object returned by the fitting function [ridge()]. Inherits fields
 #' and methods of [QuadrupenFit].
-#' 
+#'
 #' @seealso [QuadrupenFit], [ridge()]
-#' 
+#'
 #' @export
 RidgeRegressionFit <- R6::R6Class(
   classname = "RidgeRegressionFit",
   inherit = QuadrupenFit,
-  #' @field penalty character describing the regularizer/penalty
-  active  = list(penalty = function(value) "ridge"),
+  active  = list(
+    #' @field penalty character describing the regularizer/penalty
+    penalty = function(value) "Ridge",
+    #' @field lambda2 vector of tuning parameters for the l2 penalty
+    lambda2 = function(value) private$tuning[[1]]
+  ),
   public  = list(
     #' @description Initialize a [`RidgeRegressionFit`] model
     #' @param data a [`DataModel`] object
@@ -102,20 +116,25 @@ RidgeRegressionFit <- R6::R6Class(
 )
 
 
-
 #' Class "FusedLassoFit"
-#' 
+#'
 #' Class of object returned by the fitting function [fused_lasso()]. Inherits fields
 #' and methods of [QuadrupenFit].
-#' 
+#'
 #' @seealso [QuadrupenFit], [bounded_reg()]
-#' 
+#'
 #' @export
 FusedLassoFit <- R6::R6Class(
   classname = "FusedLassoFit",
   inherit = QuadrupenFit,
   #' @field penalty character describing the regularizer/penalty
-  active  = list(penalty = function(value) "fused.lasso"),
+  active  = list(
+    penalty = function(value) "Fused-LASSO",
+      #' @field lambda1 vector of tuning parameters for the l1 penalty
+    lambda1 = function(value) private$tuning[[1]],
+    #' @field lambda2 vector of tuning parameters for the fusion penalty
+    lambda2 = function(value) private$tuning[[2]]
+  ),
   #' @description Initialize a [`FusedLassoFit`] model
   #' @param data a [`DataModel`] object
   #' @param intercept a logical; should an intercept be included in the mode?
@@ -129,19 +148,25 @@ FusedLassoFit <- R6::R6Class(
 )
 
 #' Class "SparseGroupFit"
-#' 
+#'
 #' Class of object returned by the fitting function [group_sparse_lm()]. Inherits fields
 #' and methods of [QuadrupenFit]
-#' 
+#'
 #' @seealso [QuadrupenFit], [group_sparse_lm()]
-#' 
+#'
 #' @export
-#' 
+#'
 SparseGroupFit <- R6::R6Class(
   classname = "SparseGroupFit",
   inherit = QuadrupenFit,
   private  = list(group_ = NA, type_ = NA),
   active  = list(
+    #' @field lambda1 vector of tuning parameters for the l1 group penalty
+    lambda1 = function(value) private$tuning[[1]],
+    #' @field lambda2 vector of tuning parameters for the l2 penalty
+    lambda2 = function(value) private$tuning[[2]],
+    #' @field alpha mixing parameter of the sparse group-penalty
+    alpha = function(value) private$tuning[[3]],
     #' @field penalty character describing the regularizer/penalty
     penalty = function(value) {
       sparse <- ifelse(self$is_group_sparse, "Sparse", "")
@@ -203,10 +228,10 @@ SparseGroupFit <- R6::R6Class(
 )
 
 #' Class "LavaFit"
-#' 
+#'
 #' Class of object returned by the fitting function [lava()]. Inherits fields
 #' and methods of [QuadrupenFit]
-#' 
+#'
 #' @param log_scale logical; indicates if a log-scale should be used
 #' when `xvar="lambda"`. Default is `TRUE`.
 #' @param standardize logical; standardize the coefficients before
@@ -216,17 +241,21 @@ SparseGroupFit <- R6::R6Class(
 #' each variable. Only relevant when the number of predictor is
 #' small. Remind that the intercept does not count. Default is
 #' \code{NULL}.
-#' 
+#'
 #' @seealso [QuadrupenFit], [lava()]
-#' 
+#'
 #' @export
-#' 
+#'
 LavaFit <- R6::R6Class(
   classname = "LavaFit",
   inherit = QuadrupenFit,
   active  = list(
     #' @field penalty character describing the regularizer/penalty
-    penalty = function(value) "lava",
+    penalty = function(value) "Lava",
+    #' @field lambda1 vector of tuning parameters for the l1 penalty (sparse component)
+    lambda1 = function(value) private$tuning[[1]],
+    #' @field lambda2 vector of tuning parameters for the l2 penalty (dense component)
+    lambda2 = function(value) private$tuning[[2]],
     #' @field sparse_coef sparse part of the  decomposition of the coefficients
     sparse_coef = function(value) private$sparse_coef_,
     #' @field dense_coef dense part of the  decomposition of the coefficients
@@ -261,22 +290,22 @@ LavaFit <- R6::R6Class(
       private$optimizer <- lava_dense_cpp
     },
     #' @description function performing the optimization
-    #' @param control list controlling the optimization process    
+    #' @param control list controlling the optimization process
     fit = function(control) {
       super$fit(control)
       private$sparse_coef_ <- private$stored_fit$sparse_coef
     },
     #' Plot method for lava regularization path
-    #' 
+    #'
     #' @description Produce a plot of the solution path of a [LavaFit] object.
     #'
     #' @param xvar variable to plot on the X-axis: either `"lambda"`
     #' (\eqn{\ell_1}{l1} penalty level, or
     #' \eqn{\ell_2}{l2} for ridge  and \eqn{\ell_\infty}{l_inf}) or
     #' `"fraction"` (\eqn{\ell_1}{l1}-norm
-    #' of the coefficients) or `df` for estimated degrees of freedom. 
+    #' of the coefficients) or `df` for estimated degrees of freedom.
     #' Default is set to `"lambda"`.
-    #' @param component a character indicating the component to plot: both 
+    #' @param component a character indicating the component to plot: both
     #' (sum of sparse and dense), sparse or dense. Default to both.
     #' @param title the title. Default is set to the model name followed
     #' by what is on the Y-axis.
@@ -292,50 +321,54 @@ LavaFit <- R6::R6Class(
         "sparse" = self$sparse_coef, "dense" = self$dense_coef, private$coef_
         )
 
-      xvar <- match.arg(xvar)      
-      stopifnot("Not available when the leading vector of tuning parameters boild down to a scalar." 
+      xvar <- match.arg(xvar)
+      stopifnot("Not available when the leading vector of tuning parameters boild down to a scalar."
                 = length(self$major_tuning) > 1)
-      
+
       nzeros <- which(rowSums(comp) != 0)
       stopifnot("Nothing to plot: all coefficients are zero." = length(nzeros) > 0)
-      
+
       coef  <- t(as.matrix(comp[nzeros, , drop = FALSE]))
       rownames(coef) <- NULL ## avoid warning message in ggplot2
       attr(coef, "nzeros") <- nzeros
-      
+
       if (standardize) coef <- scale(coef, FALSE, 1/private$data_$normx[nzeros])
-      
+
       xv <- switch(xvar,
                    "fraction" = apply(abs(coef),1,sum)/max(apply(abs(coef),1,sum)),
                    "df"       = private$df_,
                    self$major_tuning
       )
       attr(xv, "type") <- xvar
-      
+
       d <- .plot_regpath(xv, coef, standardize, log_scale, labels)
       d <- d + ggtitle(title) + theme_bw()
-      if (is.null(labels)) d <- d + theme(legend.position = "none") 
+      if (is.null(labels)) d <- d + theme(legend.position = "none")
       d
     }
   )
 )
 
 #' Class "GroupLavaFit"
-#' 
+#'
 #' Class of object returned by the fitting function [group_lava()]. Inherits fields
 #' and methods of [QuadrupenFit] and [LavaFit]
-#' 
+#'
 #' @seealso [QuadrupenFit], [group_lava()]
-#' 
+#'
 #' @export
-#' 
+#'
 GroupLavaFit <- R6::R6Class(
   classname = "GroupLavaFit",
   inherit = LavaFit,
   private  = list(group_ = NA, type_ = NA),
   active  = list(
+    #' @field lambda1 vector of tuning parameters for the l1 group penalty (sparse component)
+    lambda1 = function(value) private$tuning[[1]],
+    #' @field lambda2 vector of tuning parameters for the l2 penalty (dense component)
+    lambda2 = function(value) private$tuning[[2]],
     #' @field penalty character describing the regularizer/penalty
-    penalty = function(value) paste0("group.lasso l1/", private$type_),
+    penalty = function(value) paste0("group Lava l1/", private$type_),
     #' @field group vector of integers indicating group belonging
     group = function(value) private$group_,
     #' @field type string indicating whether the \eqn{\ell_1/\ell_2}{l1/l2} or the

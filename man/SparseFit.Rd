@@ -16,6 +16,10 @@ and methods of \link{QuadrupenFit}
 \section{Active bindings}{
   \if{html}{\out{<div class="r6-active-bindings">}}
   \describe{
+    \item{\code{lambda1}}{vector of tuning parameters for the l1 penalty}
+
+    \item{\code{lambda2}}{vector of tuning parameters for the l2 penalty}
+
     \item{\code{penalty}}{character describing the regularizer/penalty}
 
     \item{\code{type}}{string the type of group-wise regularization applied}

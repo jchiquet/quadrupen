@@ -16,6 +16,12 @@ and methods of \link{QuadrupenFit}
 \section{Active bindings}{
   \if{html}{\out{<div class="r6-active-bindings">}}
   \describe{
+    \item{\code{lambda1}}{vector of tuning parameters for the l1 group penalty}
+
+    \item{\code{lambda2}}{vector of tuning parameters for the l2 penalty}
+
+    \item{\code{alpha}}{mixing parameter of the sparse group-penalty}
+
     \item{\code{penalty}}{character describing the regularizer/penalty}
 
     \item{\code{group}}{vector of integers indicating group belonging}

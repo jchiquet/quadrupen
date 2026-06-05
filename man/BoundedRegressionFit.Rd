@@ -17,6 +17,10 @@ and methods of \link{QuadrupenFit}.
   \if{html}{\out{<div class="r6-active-bindings">}}
   \describe{
     \item{\code{penalty}}{character describing the regularizer/penalty}
+
+    \item{\code{lambdainf}}{vector of tuning parameters for the linf penalty}
+
+    \item{\code{lambda2}}{vector of tuning parameters for the l2 penalty}
   }
   \if{html}{\out{</div>}}
 }
