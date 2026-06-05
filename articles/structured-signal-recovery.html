@@ -220,7 +220,7 @@ spatial signals.</p>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">fit_fused_chain</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/fused_lasso.html">fused_lasso</a></span><span class="op">(</span><span class="va">X</span>, <span class="va">y</span>, lambda2 <span class="op">=</span> <span class="fl">5</span>, intercept <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
 <span><span class="va">fit_fused_chain</span></span>
-<span><span class="co">#&gt; Linear regression with fused.lasso penalizer.</span></span>
+<span><span class="co">#&gt; Linear regression with Fused-LASSO penalizer.</span></span>
 <span><span class="co">#&gt; - number of coefficients: 95 + intercept</span></span>
 <span><span class="co">#&gt; - l1 regularization: 50 points from 44.7 to 0.447</span></span>
 <span><span class="co">#&gt; - l2 regularization: 5</span></span></code></pre></div>
@@ -236,7 +236,7 @@ true block structure of <span class="math inline">\(\beta\)</span>.</p>
 <div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">fit_fused_comm</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/fused_lasso.html">fused_lasso</a></span><span class="op">(</span><span class="va">X</span>, <span class="va">y</span>, lambda2 <span class="op">=</span> <span class="fl">5</span>, struct <span class="op">=</span> <span class="va">A</span>, intercept <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
 <span><span class="va">fit_fused_comm</span></span>
-<span><span class="co">#&gt; Linear regression with fused.lasso penalizer.</span></span>
+<span><span class="co">#&gt; Linear regression with Fused-LASSO penalizer.</span></span>
 <span><span class="co">#&gt; - number of coefficients: 95 + intercept</span></span>
 <span><span class="co">#&gt; - l1 regularization: 50 points from 44.7 to 0.447</span></span>
 <span><span class="co">#&gt; - l2 regularization: 5</span></span></code></pre></div>
@@ -417,7 +417,7 @@ closest recovery to the true signal.</li>
 
 
     <footer><div class="pkgdown-footer-left">
-  <p>Developed by Julien Chiquet, Holger Hoefling.</p>
+  <p>Developed by Julien Chiquet.</p>
 </div>
 
 <div class="pkgdown-footer-right">

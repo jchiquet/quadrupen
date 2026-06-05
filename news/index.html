@@ -46,21 +46,29 @@
     </div>
 
     <div class="section level2">
-<h2 class="pkg-version" data-toc-text="0.3-0" id="quadrupen-03-0-2013-11">quadrupen 0.3-0 (2013-11)<a class="anchor" aria-label="anchor" href="#quadrupen-03-0-2013-11"></a></h2>
+<h2 class="pkg-version" data-toc-text="1.0-0" id="quadrupen-10-0-2026-06-05">quadrupen 1.0-0 (2026-06-05)<a class="anchor" aria-label="anchor" href="#quadrupen-10-0-2026-06-05"></a></h2>
 <ul><li>major updates
-<ul><li>added structured ridge regression (regression penalized by structured l2 norm)</li>
-<li>added corresponding functionality for cross-validation and stability path</li>
+<ul><li>complete rewriting of R code using R6 classes</li>
+<li>complete rewriting of C++ code using template and OO style programming</li>
+<li>included ‘FusedLasso’ from the archived package by Holger Hoefling (fixed CRAN’s complaints)</li>
+<li>added group-lasso/group-elastic and variants (group penalty: l1/l2, l1/linf, cooperative Lasso)</li>
+<li>added sparse group-lasso/group-elastic and variant (group penalty: l1/l2, l1/linf, cooperative Lasso)</li>
+<li>added lava and/post-lava (combination of sparse and dense regularization, Chernozukov et al, 2017)</li>
+<li>extended to group-lava (group penalty: l1/l2, l1/linf, cooperative Lasso)</li>
+<li>added mcp and scad (concave penalties, Chernozukov et al, 2017)</li>
+<li>added refit version of Lasso/Elastic-Net (“relaxed” Lasso/Enet)</li>
+<li>changing many parameters (badly) named, do not expect backward compatibility</li>
+<li>added vignettes</li>
 </ul></li>
-<li>Minor:
-<ul><li>removed the not very useful ‘reverse’ argument for plotting<br></li>
-<li>added demo for lasso, ridge and use of the criteria function</li>
+<li>minor updates
+<ul><li>Integration of changes from CRAN versions from 0.2-4 to 0.2-13</li>
+<li>set up github workflow for pkgdown page</li>
+<li>various fixes, more testing</li>
 </ul></li>
 </ul></div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="0.2-4" id="quadrupen-02-4-2014-01-16">quadrupen 0.2-4 (2014-01-16)<a class="anchor" aria-label="anchor" href="#quadrupen-02-4-2014-01-16"></a></h2><p class="text-muted">CRAN release: 2014-01-16</p>
-<div class="sourceCode" id="cb1"><pre class="sourceCode R"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a>Minor<span class="sc">:</span></span>
-<span id="cb1-2"><a href="#cb1-2" tabindex="-1"></a><span class="sc">+</span>   memory leak <span class="fu">corrected</span> (sp_mat declaration)</span>
-<span id="cb1-3"><a href="#cb1-3" tabindex="-1"></a><span class="sc">+</span>   linking to Rcpp<span class="sc">/</span>RcppArmadillo <span class="fu">headers</span> (requires R <span class="fl">3.0</span><span class="dv">-2</span>)</span></code></pre></div>
+<p>Minor: - memory leak corrected (sp_mat declaration) - linking to Rcpp/RcppArmadillo headers (requires R 3.0-2)</p>
 </div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="0.2-4" id="quadrupen-02-4-2013-11-01">quadrupen 0.2-4 (2013-11-01)<a class="anchor" aria-label="anchor" href="#quadrupen-02-4-2013-11-01"></a></h2><p class="text-muted">CRAN release: 2014-01-16</p>
@@ -98,7 +106,7 @@
 
 
     <footer><div class="pkgdown-footer-left">
-  <p>Developed by Julien Chiquet, Holger Hoefling.</p>
+  <p>Developed by Julien Chiquet.</p>
 </div>
 
 <div class="pkgdown-footer-right">

@@ -21,6 +21,14 @@ Inherits fields and methods of
 
   character describing the regularizer/penalty
 
+- `lambdainf`:
+
+  vector of tuning parameters for the linf penalty
+
+- `lambda2`:
+
+  vector of tuning parameters for the l2 penalty
+
 ## Methods
 
 ### Public methods

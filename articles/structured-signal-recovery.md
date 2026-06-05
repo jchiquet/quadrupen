@@ -169,7 +169,7 @@ ordered or spatial signals.
 
 fit_fused_chain <- fused_lasso(X, y, lambda2 = 5, intercept = FALSE)
 fit_fused_chain
-#> Linear regression with fused.lasso penalizer.
+#> Linear regression with Fused-LASSO penalizer.
 #> - number of coefficients: 95 + intercept
 #> - l1 regularization: 50 points from 44.7 to 0.447
 #> - l2 regularization: 5
@@ -192,7 +192,7 @@ directly targets the true block structure of \\\beta\\.
 
 fit_fused_comm <- fused_lasso(X, y, lambda2 = 5, struct = A, intercept = FALSE)
 fit_fused_comm
-#> Linear regression with fused.lasso penalizer.
+#> Linear regression with Fused-LASSO penalizer.
 #> - number of coefficients: 95 + intercept
 #> - l1 regularization: 50 points from 44.7 to 0.447
 #> - l2 regularization: 5

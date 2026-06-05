@@ -101,7 +101,7 @@ component.
 
 fit_lava <- lava(X, y, lambda2 = 1)
 fit_lava
-#> Linear regression with lava penalizer.
+#> Linear regression with Lava penalizer.
 #> - number of coefficients: 50 + intercept
 #> - lambda regularization: 100 points from 16.1 to 0.161
 #> - gamma regularization: 1
@@ -356,7 +356,7 @@ var_labels  <- group_names[group]
 
 fit_gl <- group_lava(X, y2, group = group, lambda2 = 1)
 fit_gl
-#> Linear regression with group.lasso l1/l2 penalizer.
+#> Linear regression with group Lava l1/l2 penalizer.
 #> - number of coefficients: 50 + intercept
 #> - lambda regularization: 100 points from 14.9 to 0.149
 #> - gamma regularization: 1

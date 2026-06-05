@@ -17,6 +17,14 @@ Inherits fields and methods of
 
 ## Active bindings
 
+- `lambda1`:
+
+  vector of tuning parameters for the l1 penalty
+
+- `lambda2`:
+
+  vector of tuning parameters for the l2 penalty
+
 - `penalty`:
 
   character describing the regularizer/penalty

@@ -166,7 +166,7 @@ ridge-like penalty on the dense component.</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">fit_lava</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/lava.html">lava</a></span><span class="op">(</span><span class="va">X</span>, <span class="va">y</span>, lambda2 <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span>
 <span><span class="va">fit_lava</span></span>
-<span><span class="co">#&gt; Linear regression with lava penalizer.</span></span>
+<span><span class="co">#&gt; Linear regression with Lava penalizer.</span></span>
 <span><span class="co">#&gt; - number of coefficients: 50 + intercept</span></span>
 <span><span class="co">#&gt; - lambda regularization: 100 points from 16.1 to 0.161</span></span>
 <span><span class="co">#&gt; - gamma regularization: 1</span></span></code></pre></div>
@@ -401,7 +401,7 @@ silent. The <code>type</code> argument selects the group norm (<span class="math
 <div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">fit_gl</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/group_lava.html">group_lava</a></span><span class="op">(</span><span class="va">X</span>, <span class="va">y2</span>, group <span class="op">=</span> <span class="va">group</span>, lambda2 <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span>
 <span><span class="va">fit_gl</span></span>
-<span><span class="co">#&gt; Linear regression with group.lasso l1/l2 penalizer.</span></span>
+<span><span class="co">#&gt; Linear regression with group Lava l1/l2 penalizer.</span></span>
 <span><span class="co">#&gt; - number of coefficients: 50 + intercept</span></span>
 <span><span class="co">#&gt; - lambda regularization: 100 points from 14.9 to 0.149</span></span>
 <span><span class="co">#&gt; - gamma regularization: 1</span></span></code></pre></div>
@@ -452,7 +452,7 @@ Statistics</em>, 45(1), 39–76. <a href="https://doi.org/10.1214/16-AOS1434" cl
 
 
     <footer><div class="pkgdown-footer-left">
-  <p>Developed by Julien Chiquet, Holger Hoefling.</p>
+  <p>Developed by Julien Chiquet.</p>
 </div>
 
 <div class="pkgdown-footer-right">

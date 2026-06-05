@@ -20,6 +20,15 @@ and [LavaFit](https://jchiquet.github.io/quadrupen/reference/LavaFit.md)
 
 ## Active bindings
 
+- `lambda1`:
+
+  vector of tuning parameters for the l1 group penalty (sparse
+  component)
+
+- `lambda2`:
+
+  vector of tuning parameters for the l2 penalty (dense component)
+
 - `penalty`:
 
   character describing the regularizer/penalty

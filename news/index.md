@@ -1,25 +1,37 @@
 # Changelog
 
-## quadrupen 0.3-0 (2013-11)
+## quadrupen 1.0-0 (2026-06-05)
 
 - major updates
-  - added structured ridge regression (regression penalized by
-    structured l2 norm)
-  - added corresponding functionality for cross-validation and stability
-    path
-- Minor:
-  - removed the not very useful ‘reverse’ argument for plotting  
-  - added demo for lasso, ridge and use of the criteria function
+  - complete rewriting of R code using R6 classes
+  - complete rewriting of C++ code using template and OO style
+    programming
+  - included ‘FusedLasso’ from the archived package by Holger Hoefling
+    (fixed CRAN’s complaints)
+  - added group-lasso/group-elastic and variants (group penalty: l1/l2,
+    l1/linf, cooperative Lasso)
+  - added sparse group-lasso/group-elastic and variant (group penalty:
+    l1/l2, l1/linf, cooperative Lasso)
+  - added lava and/post-lava (combination of sparse and dense
+    regularization, Chernozukov et al, 2017)
+  - extended to group-lava (group penalty: l1/l2, l1/linf, cooperative
+    Lasso)
+  - added mcp and scad (concave penalties, Chernozukov et al, 2017)
+  - added refit version of Lasso/Elastic-Net (“relaxed” Lasso/Enet)
+  - changing many parameters (badly) named, do not expect backward
+    compatibility
+  - added vignettes
+- minor updates
+  - Integration of changes from CRAN versions from 0.2-4 to 0.2-13
+  - set up github workflow for pkgdown page
+  - various fixes, more testing
 
 ## quadrupen 0.2-4 (2014-01-16)
 
 CRAN release: 2014-01-16
 
-``` R
-Minor:
-+   memory leak corrected (sp_mat declaration)
-+   linking to Rcpp/RcppArmadillo headers (requires R 3.0-2)
-```
+Minor: - memory leak corrected (sp_mat declaration) - linking to
+Rcpp/RcppArmadillo headers (requires R 3.0-2)
 
 ## quadrupen 0.2-4 (2013-11-01)
 

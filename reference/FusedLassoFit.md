@@ -21,6 +21,14 @@ Inherits fields and methods of
 
   character describing the regularizer/penalty
 
+- `lambda1`:
+
+  vector of tuning parameters for the l1 penalty
+
+- `lambda2`:
+
+  vector of tuning parameters for the fusion penalty
+
 ## Methods
 
 ### Public methods

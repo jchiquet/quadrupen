@@ -21,6 +21,14 @@ Inherits fields and methods of
 
   character describing the regularizer/penalty
 
+- `lambda1`:
+
+  vector of tuning parameters for the l1 penalty (sparse component)
+
+- `lambda2`:
+
+  vector of tuning parameters for the l2 penalty (dense component)
+
 - `sparse_coef`:
 
   sparse part of the decomposition of the coefficients

@@ -17,6 +17,18 @@ Inherits fields and methods of
 
 ## Active bindings
 
+- `lambda1`:
+
+  vector of tuning parameters for the l1 group penalty
+
+- `lambda2`:
+
+  vector of tuning parameters for the l2 penalty
+
+- `alpha`:
+
+  mixing parameter of the sparse group-penalty
+
 - `penalty`:
 
   character describing the regularizer/penalty
