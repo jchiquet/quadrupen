@@ -19,15 +19,6 @@ NEWS/Changelog
   - set up github workflow for pkgdown page
   - various fixes, more testing
 
-# quadrupen 0.3-0	(2013-11)
-
-- major updates
-  -	added structured ridge regression (regression penalized by structured l2 norm)
-  -   added corresponding functionality for cross-validation and stability path
-- Minor:
-  - removed the not very useful 'reverse' argument for plotting
-  - added demo for lasso, ridge and use of the criteria function
-
 # quadrupen 0.2-4	(2014-01-16)
 
   Minor:
