@@ -2,14 +2,14 @@ Package: quadrupen
 Type: Package
 Title: Sparse and Group Sparse Linear Models
 Version: 1.0-0
-Date: 2026-05-xx
-Authors@R: person("Julien", "Chiquet", , "julien.chiquet@inrae.fr", role = c("aut", "cre"),
-           comment = c(ORCID = "0000-0002-3629-3429"))
-Description: This package fits the solution paths of classical sparse regression
-  models with efficient active set algorithms by solving small sub-problems.
-  Include LASSO, SCAD, MCP, (Sparse) Group-LASSO, Cooperative-LASSO, LAVA and
-  Elastic-Net variants. Also provides a few methods for model selection purpose
-  (cross-validation, stability selection).
+Date: 2026-06-05
+Authors@R: c(
+        person("Julien", "Chiquet", email = "julien.chiquet@inrae.fr", role = c("aut", "cre"),
+           comment = c("main contributor", ORCID = "0000-0002-3629-3429")),
+        person("Holger", "Hoefling", email = "hhoeflin@gmail.com", role = c("aut"),
+           comment = "Author of the original C++ code for Fused-Lasso")
+        )
+Description: This package fits the solution paths of classical sparse regression models with efficient active set algorithms by solving small sub-problems. Include LASSO, SCAD, MCP, (Sparse) Group-LASSO, Cooperative-LASSO, (Group) LAVA, (Generalized) Fused-Lasso and (Generalized) Elastic-Net. Also provides methods for model selection purpose (information criteria, cross-validation, stability selection).
 URL: https://github.com/jchiquet/quadrupen, https://jchiquet.github.io/quadrupen/
 BugReports: https://github.com/jchiquet/quadrupen/issues
 License: GPL (>= 3)
