@@ -2,6 +2,8 @@
 
 ## quadrupen 1.0-0 (2026-06-05)
 
+CRAN release: 2026-06-05
+
 - major updates
   - complete rewriting of R code using R6 classes
   - complete rewriting of C++ code using template and OO style

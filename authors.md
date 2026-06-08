@@ -8,7 +8,7 @@
 ## Citation
 
 Source:
-[`inst/CITATION`](https://github.com/jchiquet/quadrupen/blob/master/inst/CITATION)
+[`inst/CITATION`](https://github.com/jchiquet/quadrupen/blob/v1.0-0/inst/CITATION)
 
 Julien Chiquet. Quadrupen: Sparse and Group Sparse Linear Models, R
 Package, 2026.
