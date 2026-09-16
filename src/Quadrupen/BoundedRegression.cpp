@@ -65,6 +65,29 @@ double BoundedRegression::get_df() {
   return(df);
 }
 
+double BoundedRegression::optimality_gap(const vec& grad, const double lambda) const {
+  // KKT conditions of min 1/2 b'Hb - c'b + lambda max_i w_i |b_i|, with g = Hb - c:
+  //  - b = 0 : sum_i |g_i| / w_i <= lambda
+  //  - b != 0, B = {i : w_i |b_i| = max} : g_i = 0 outside B, sign(g_i) = -sign(b_i) on B
+  //    and sum_{i in B} |g_i| / w_i = lambda
+  const vec& w = lambda_factor_ ;
+  const vec wb = abs(beta_) % w ;
+  const double bound = wb.max() ;
+  const vec gw = abs(grad) / w ;
+  if (bound == 0.0) return std::max(0.0, accu(gw) - lambda) ;
+
+  double gap = 0.0, dual_B = 0.0 ;
+  for (uword i = 0; i < beta_.n_elem; ++i) {
+    if (wb(i) >= bound * (1.0 - 1e-8)) {
+      dual_B += gw(i) ;
+      if (grad(i) * beta_(i) > 0.0) gap = std::max(gap, gw(i)) ;
+    } else {
+      gap = std::max(gap, gw(i)) ;
+    }
+  }
+  return std::max(gap, std::abs(dual_B - lambda)) ;
+}
+
 List BoundedRegression::solution_path(const List& control) {
 
   // Parameters controlling the optimization
@@ -104,6 +127,8 @@ List BoundedRegression::solution_path(const List& control) {
         ioptim.push_back(
           solver_.fista(beta_, lambda_, data_.XTy_, data_.XTX_, prox, 1e-5, 10000)
         );
+        grad_ = - data_.XTy_ + data_.XTX_ * beta_ ;
+        current_gap = optimality_gap(grad_, lambda_) / std::max(1.0, lambda_) ;
         break;
       } else { // QUADRA solver
         try {
@@ -123,16 +148,16 @@ List BoundedRegression::solution_path(const List& control) {
         }
       }
 
-      // OPTIMALITY TESTING
+      // OPTIMALITY TESTING (relative to lambda, as the gradient scales with the data)
       grad_ = - data_.XTy_ + data_.XTX_ * beta_ ;
-      current_gap = sum(penalty_.optimality(grad_, lambda_, lambda_factor_)) ;
+      current_gap = optimality_gap(grad_, lambda_) / std::max(1.0, lambda_) ;
     } while ((current_gap > accuracy) && (current_it <= maxiter));
 
     // Checking convergence status
-    gap.push_back(fmax(0.0, sum(penalty_.optimality(grad_, lambda_, lambda_factor_)))) ;
+    gap.push_back(current_gap) ;
     iactive.push_back(current_it) ;
     status.push_back(0) ;
-    if (current_it >= maxiter) { status.back() = 1 ; }
+    if (current_gap > accuracy) { status.back() = 1 ; }
     if ((unbounded_.n_elem > maxfeat) & 
         (algorithm == SolverType::QUADRA)) { status.back() = 2 ; }
 

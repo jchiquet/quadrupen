@@ -180,14 +180,53 @@ Working set + solveur interne en descente par coordonnées accélérée par Ande
 Massias et al., 2018 ; skglm : Bertrand et al., 2022). Coût par itération en O(nnz), sans
 factorisation. QUADRA resterait l'option haute précision pour de petits ensembles actifs.
 
-## Anomalies relevées au passage (à vérifier)
+## Anomalies relevées au passage
 
 - `src/Quadrupen/OptimizerGroup.h` (`working_set`, activation d'un groupe) : `grad(grp_in)`
-  indexe le gradient **par variable** avec un numéro de **groupe** ; le signe
-  d'initialisation est donc faux.
-- `src/Quadrupen/BoundedRegression.cpp` (`solution_path`) : `sum(penalty_.optimality(...))`
-  vaut ‖g‖₁,w − p·λ et non ‖g‖₁,w − λ ; le gap est très sous-estimé et la boucle s'arrête
-  probablement dès la première itération.
+  indexait le gradient **par variable** avec un numéro de **groupe**. **Corrigé** à l'étape 2 ;
+  depuis l'étape 4, les nouveaux groupes partent de 0.
+- `src/Quadrupen/BoundedRegression.cpp` (`solution_path`) : le critère d'arrêt
+  `sum(penalty_.optimality(...))` vaut ‖g‖₁,w − p·λ au lieu d'une mesure d'optimalité. Il est
+  très négatif, donc la boucle QUADRA s'arrêtait toujours après un seul appel de
+  `quadratic_breg` et le gap rapporté valait 0. **Corrigé** (voir « Correctif de la régression
+  bornée » ci-dessous).
+- `src/Quadrupen/PenaltyGroup.cpp` : prox l1/l∞ non nulle quand le groupe est dans la boule l1.
+  **Corrigé** à l'étape 4.
+
+### Correctif de la régression bornée
+
+Nouveau `BoundedRegression::optimality_gap`, qui mesure les conditions KKT exactes de
+min ½bᵀHb − cᵀb + λ max_i w_i|b_i| (g = Hb − c) :
+
+- b = 0 : Σ |g_i|/w_i ≤ λ ;
+- b ≠ 0, avec B = {i : w_i|b_i| = max} : g_i = 0 hors de B, g_i de signe opposé à b_i sur B,
+  Σ_{i∈B} |g_i|/w_i = λ.
+
+Le gap (relatif à λ) pilote maintenant la boucle QUADRA, qui réitère `quadratic_breg` jusqu'au
+seuil, et il est aussi calculé après FISTA (qui rapportait une valeur sans signification).
+
+Mesures contre `quadprog` (problèmes aléatoires, `normalize = FALSE`, 30 λ) :
+
+| Cas | QUADRA avant : objectif − optimum | QUADRA après | FISTA |
+|---|---|---|---|
+| n=50, p=20, λ₂=0 | jusqu'à +0,45 (gap rapporté 0) | ≤ 2e-10 | ≤ 4e-12 |
+| n=50, p=20, λ₂=5 | +0,33 | ≤ 1e-10 | ≤ 1e-12 |
+| n=100, p=60, λ₂=1 | +6,4 | ≤ 2e-10 | ≤ 1e-12 |
+| n=40, p=80, λ₂=2 | +0,38 | ≤ 0 | ≤ 0 |
+
+Le gap rapporté coïncide désormais avec l'écart KKT calculé indépendamment en R. Le nombre
+d'itérations externes augmente de 1,4 à 2 fois.
+
+**Données de test régénérées** : `tests/testthat/dataTest-boundedReg.rds` avait été produit par
+l'ancien QUADRA (qui le reproduisait à 1e-8). Sur ces données, le nouveau QUADRA et FISTA
+concordent et atteignent un objectif inférieur ou égal à la référence sur tous les λ (jusqu'à
+0,33 de moins sans structure, 0,59 avec S) ; les tests FISTA ne passaient que grâce à leur
+tolérance de 1e-2. Les trois ajustements de référence ont été recalculés avec les mêmes appels
+que les tests ; `x`, `y`, `S` et le reste du fichier sont inchangés.
+
+**Limite connue** : `quadratic_breg` donne la même valeur absolue à toutes les variables du
+bord, ce qui ne correspond au problème pondéré que pour des poids `penscale` égaux (le cas par
+défaut).
 
 ## Résultats de l'étape 1 (P1 + P2)
 
