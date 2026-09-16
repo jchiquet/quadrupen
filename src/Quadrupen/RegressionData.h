@@ -111,8 +111,9 @@ void RegressionData<matrix>::scale_struct(const double gamma) {
 template <typename matrix>
 void RegressionData<matrix>::precompute_XTX() {
   mat WX = X_ ;
-  WX.each_col() %= weights_ ;
-  XTX_ = X_.t() * WX - n_w_ * X_bar_ * X_bar_.t() + S_ ;
+  WX.each_col() %= sqrt(weights_) ;
+  XTX_ = WX.t() * WX ; // A'A form: evaluated with syrk
+  XTX_ += S_ - n_w_ * X_bar_ * X_bar_.t() ;
 };
 
 template <typename matrix>

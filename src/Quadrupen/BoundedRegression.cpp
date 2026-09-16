@@ -49,14 +49,17 @@ double BoundedRegression::get_df() {
 
   double df = data_.centered_ + unbounded_.size();
 
-  if (gamma_ > 0) {
+  if (gamma_ > 0 && !unbounded_.is_empty()) {
     mat C = inv_sympd(data_.XTX_(unbounded_,unbounded_));
     uword ku = unbounded_.size();
-    mat SUU(ku, ku);
-    for (uword i = 0; i < ku; i++)
-      for (uword j = i; j < ku; j++)
-        SUU(j, i) = SUU(i, j) = data_.S_.at(unbounded_(i), unbounded_(j));
-    df -= trace(SUU * C);
+    // position of each unbounded variable, then a single pass over the non-zeros of S
+    std::vector<long> pos(data_.p_, -1);
+    for (uword i = 0; i < ku; i++) pos[unbounded_(i)] = i;
+    mat SUU(ku, ku, fill::zeros);
+    for (auto it = data_.S_.begin(); it != data_.S_.end(); ++it) {
+      if (pos[it.row()] >= 0 && pos[it.col()] >= 0) SUU(pos[it.row()], pos[it.col()]) = *it;
+    }
+    df -= accu(SUU % C); // trace(SUU * C) for symmetric matrices
   }
 
   return(df);
@@ -86,6 +89,7 @@ List BoundedRegression::solution_path(const List& control) {
   } ;
 
   // LAMBDA LOOP
+  coef_.set_size(data_.p_, lambdas_.size()) ;
   wall_clock timer ; timer.tic(); // clock
   for(auto lambda_ : lambdas_) {
     if (verbose) {Rprintf("\n lambda_linf = %f",lambda_) ;}
@@ -136,7 +140,7 @@ List BoundedRegression::solution_path(const List& control) {
     if (status.back() >= 2) {
       break;
     } else {
-      coef_ = join_rows(coef_, beta_/data_.norm_X_) ;
+      coef_.col(df_.size()) = beta_/data_.norm_X_ ;
       intercept_.push_back(data_.y_bar_ - dot(beta_, data_.X_bar_));
       double max_abs = max(abs(beta_));
       bounded_.push_back(find(abs(beta_) >= max_abs * (1.0 - 1e-10))) ;
@@ -147,6 +151,7 @@ List BoundedRegression::solution_path(const List& control) {
   } // END OF THE LOOP OVER LAMBDA
 
   lambdas_.resize(df_.size()) ;
+  coef_ = coef_.head_cols(df_.size()) ;
   
   return(
     List::create(

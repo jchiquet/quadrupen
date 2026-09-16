@@ -382,6 +382,56 @@ coïncident à 4e-12 près sur tous les λ, pour les quatre pénalités.
 restant dans chaque cas est l'arrêt du chemin sur « max # of feature reached » (570 variables
 actives pour `maxfeat` = 600), identique en fista : tous les λ convergent.
 
+## Résultats de l'étape 5 (P3, P5, P6)
+
+**P3 — Downdate de Givens** (`ActiveSet.h`) : rotations appliquées sur place sur les lignes
+(k, k+1), sans temporaires Armadillo. Micro-benchmark (suppression d'une colonne au quart) :
+0,13 → 0,04 ms pour k = 200, 7,2 → 5,4 ms pour k = 1 000, 32 → 26 ms pour k = 2 000 (les deux
+`shed_*` restent). Résultat identique à 1e-13.
+
+**P5 — Boucles proximales** (`working_set` des deux optimiseurs) : poids, tailles de groupes et
+X'y restreints à l'ensemble actif calculés une fois par appel du solveur au lieu d'une fois par
+itération interne. Gain faible (group-lasso fista 0,39 → 0,34 s) : le passage de `std::function`
+à un paramètre template n'a pas été fait, le coût dominant étant ailleurs (voir ci-dessous).
+
+**P6 — Points secondaires faits** :
+
+- `criteria()` (R) évaluait l'active binding `deviance` 5 fois, chacune refaisant
+  `X %*% coef`, `sweep` et `apply` : il est évalué une fois ; `residuals` est vectorisé. Lasso
+  n=500, p=10 000, temps total R : 0,73 → 0,58 s.
+- Ridge et Lava avec une structure S diagonale à diagonale positive (le cas par défaut) :
+  C⁻¹ = diag(1/√s) appliqué comme mise à l'échelle des colonnes, sans Cholesky ni inverse
+  p × p ; côté R, `CholStruct()` n'est appelé que si S n'est pas de ce type. n=200 :
+
+  | p | ridge avant → après | lava avant → après |
+  |---|---|---|
+  | 4 000 | 0,61 → 0,21 s | 1,68 → 0,33 s |
+  | 8 000 | 1,98 → 0,40 s | 11,6 → **0,63 s** |
+
+  Coefficients identiques à 4e-15, degrés de liberté à 9e-14.
+- `BoundedRegression` : coefficients pré-alloués (plus de `join_rows` dans la boucle) ; `get_df`
+  en `accu(SUU % C)` avec une seule passe sur les non-zéros de S ; matrice de Gram en forme A'A
+  (`syrk`). `bounded_reg` n=300, p=1 000 : 1,18 → 1,07 s.
+- `RidgeRegression` : coefficients pré-alloués, produit sans `diagmat`.
+- `wrapper_FusedLasso.cpp` : normalisation des colonnes par itérateur sur les non-zéros.
+- `src/Makevars` et `src/Makevars.win` : les objets dépendent des en-têtes ;
+  `-DARMA_NO_DEBUG` ajouté sous Windows.
+- Validation croisée : les données de chaque pli sont construites dans la tâche du pli
+  (`DataModel$splitFold`) au lieu de construire les K plis à l'avance ; même temps, K copies de
+  X en moins en mémoire simultanément. Erreurs de CV identiques à 2e-15.
+
+**Validation** : 128/128 tests ; résultats identiques à l'étape 4 (lasso, group-lasso, ridge et
+lava à ≤ 4e-15, `bounded_reg` à 3,7e-7, critères d'information à 9e-13).
+
+**P6 non fait** : conversion de X dense en creux et normalisation non centrée ni pondérée dans
+FusedLasso (changement de comportement, à décider) ; warm start entre valeurs de λ₂ et passage
+d'indices au C++ pour la validation croisée.
+
+**Où part le temps maintenant.** Lasso n=500, p=10 000 : environ 0,4 s en C++ quel que soit le
+solveur, dont 90 % sur les λ où des variables entrent. Le coût est le calcul des nouvelles
+colonnes X'WX_j sur les p lignes (O(np) par variable), imposé par le stockage de `XTXA_` : c'est
+l'objet de P4.
+
 ## Feuille de route
 
 | Étape | Contenu | Risque | Statut |
@@ -390,5 +440,6 @@ actives pour `maxfeat` = 600), identique en fista : tous les λ convergent.
 | 2 | A1 (activation en bloc) + statut de convergence ; critère d'arrêt et garde-fou Anderson (A3) | moyen | fait (537c847, 3a28cd8) |
 | 3 | A2 (descente par blocs exacte + Newton pour les groupes) ; bug de prox l1/l∞ | moyen | fait |
 | 4 | A3 restant (restart FISTA, estimation de L par Lanczos) | faible | fait (934346e) |
-| 5 | P3–P6 | faible | à faire |
+| 5 | P3, P5, P6 | faible | fait |
+| 5 bis | P4 (gradient par le résidu, mémoire O(pk)) | moyen | à faire |
 | 6 | A4 (CD + working set) | élevé | à évaluer |
