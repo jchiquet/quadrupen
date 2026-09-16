@@ -14,7 +14,56 @@ using arma::eye;
 
 #include "RegressionData.h"
 #include <algorithm>
+#include <cmath>
+#include <cstring>
 #include <vector>
+
+// The k x k matrices of the active set (Gram matrix, Cholesky factor) grow and shrink by a few
+// rows and columns at a time. To avoid a reallocation and a full copy at each change, they keep
+// spare capacity: Armadillo reuses the allocated memory as long as the number of elements does
+// not exceed n_alloc, and the columns are moved in place to the new layout.
+namespace square_inplace {
+
+inline void check_same_memory(const mat& M, const double* mem) {
+  if (M.memptr() != mem) Rcpp::stop("internal error: unexpected reallocation of an active set matrix") ;
+}
+
+// Grow M from k x k to (k+m) x (k+m), keeping its top-left block; new entries are not initialized
+inline void grow(mat& M, uword m) {
+  const uword k = M.n_rows, kn = k + m ;
+  if (kn * kn > M.n_alloc) {
+    // not enough capacity: reallocate with ~56% spare elements (side x 1.25)
+    const uword cap = std::max(kn, (uword) std::ceil(1.25 * kn)) ;
+    mat bigger(cap, cap, arma::fill::none) ;
+    bigger.set_size(kn, kn) ; // keeps the cap x cap allocation
+    for (uword j = 0; j < k; ++j) std::copy_n(M.colptr(j), k, bigger.colptr(j)) ;
+    M = std::move(bigger) ;
+    return ;
+  }
+  // move the columns from leading dimension k to kn, last column first (destinations are after sources)
+  double* mem = M.memptr() ;
+  for (uword j = k; j-- > 1; ) std::memmove(mem + j * kn, mem + j * k, k * sizeof(double)) ;
+  M.set_size(kn, kn) ;
+  check_same_memory(M, mem) ;
+}
+
+// Remove row and column i of the square matrix M
+inline void remove(mat& M, uword i) {
+  const uword k = M.n_rows, kn = k - 1 ;
+  if (kn * kn <= arma::arma_config::mat_prealloc) { M.shed_col(i) ; M.shed_row(i) ; return ; }
+  // compact the kept entries in column-major order (destinations are never after sources)
+  double* mem = M.memptr() ;
+  uword dst = 0 ;
+  for (uword j = 0; j < k; ++j) {
+    if (j == i) continue ;
+    const double* col = mem + j * k ;
+    for (uword r = 0; r < k; ++r) if (r != i) mem[dst++] = col[r] ;
+  }
+  M.set_size(kn, kn) ;
+  check_same_memory(M, mem) ;
+}
+
+} // namespace square_inplace
 
 template <typename matrix>
 class ActiveSet {
@@ -139,18 +188,16 @@ void ActiveSet<matrix>::add_var(uword var_in, const RegressionData<matrix>& data
   reserve_XTXA(k, k + 1) ;
   XTXA_buf_.col(k) = new_col ;
 
-  // Single allocation for XATXA_: fill four blocks directly
-  // [ XATXA_old | cross        ]
-  // [ cross.t() | new_cols.rows(vars) ]
-  mat new_XATXA_(k + 1, k + 1, arma::fill::none) ;
+  // Grow XATXA_ in place and fill the new row and column
+  // [ XATXA_old | cross       ]
+  // [ cross.t() | new_col(j)  ]
+  square_inplace::grow(XATXA_, 1) ;
   if (k > 0) {
-    vec cross = new_col.elem(A_.head(k)) ; // cross-products with previously active variables
-    new_XATXA_.submat(0, 0, k-1, k-1) = XATXA_ ;
-    new_XATXA_.col(k).head(k)  = cross ;
-    new_XATXA_.row(k).head(k)  = cross.t() ;
+    const vec cross = new_col.elem(A_.head(k)) ; // cross-products with previously active variables
+    XATXA_.col(k).head(k) = cross ;
+    XATXA_.row(k).head(k) = cross.t() ;
   }
-  new_XATXA_(k, k) = new_col(var_in) ;
-  XATXA_ = std::move(new_XATXA_) ;
+  XATXA_(k, k) = new_col(var_in) ;
 
   if (use_chol_) update_Cholesky() ;
 }
@@ -174,16 +221,14 @@ void ActiveSet<matrix>::add_vars(uvec vars, const RegressionData<matrix>& data) 
   reserve_XTXA(p_old, p_total) ;
   XTXA_buf_.cols(p_old, p_total - 1) = new_cols ;
 
-  // Single allocation for XATXA_
-  mat new_XATXA_(p_total, p_total, arma::fill::none) ;
+  // Grow XATXA_ in place and fill the new blocks
+  square_inplace::grow(XATXA_, n_new) ;
   if (p_old > 0) {
-    mat cross = new_cols.rows(A_.head(p_old)) ; // p_old x n_new cross-products
-    new_XATXA_.submat(0,     0,     p_old-1,   p_old-1)   = XATXA_ ;
-    new_XATXA_.submat(0,     p_old, p_old-1,   p_total-1) = cross ;
-    new_XATXA_.submat(p_old, 0,     p_total-1, p_old-1)   = cross.t() ;
+    const mat cross = new_cols.rows(A_.head(p_old)) ; // p_old x n_new cross-products
+    XATXA_.submat(0,     p_old, p_old-1,   p_total-1) = cross ;
+    XATXA_.submat(p_old, 0,     p_total-1, p_old-1)   = cross.t() ;
   }
-  new_XATXA_.submat(p_old, p_old, p_total-1, p_total-1) = new_cols.rows(vars) ;
-  XATXA_ = std::move(new_XATXA_) ;
+  XATXA_.submat(p_old, p_old, p_total-1, p_total-1) = new_cols.rows(vars) ;
 
   if (use_chol_) update_Cholesky_block(n_new) ;
 }
@@ -193,8 +238,7 @@ void ActiveSet<matrix>::del_var(uword ivar_out, vec& beta) {
   compact_XTXA(uvec{ivar_out}, size()) ;
   is_in_[A_[ivar_out]] = 0  ;
   A_.shed_row(ivar_out)     ;
-  XATXA_.shed_col(ivar_out) ;
-  XATXA_.shed_row(ivar_out) ;
+  square_inplace::remove(XATXA_, ivar_out) ;
   beta.shed_row(ivar_out)   ;
 
   if (use_chol_) downdate_Cholesky(ivar_out) ;
@@ -209,8 +253,7 @@ void ActiveSet<matrix>::del_vars(uvec ivars, vec& beta) {
     uword ivar_out = ivars[i] ;
     is_in_[A_[ivar_out]] = 0  ;
     A_.shed_row(ivar_out)     ;
-    XATXA_.shed_col(ivar_out) ;
-    XATXA_.shed_row(ivar_out) ;
+    square_inplace::remove(XATXA_, ivar_out) ;
     beta.shed_row(ivar_out)   ;
     if (use_chol_) downdate_Cholesky(ivar_out) ;
   }
@@ -238,10 +281,11 @@ void ActiveSet<matrix>::update_Cholesky() {
     vec rp = XATXA_.col(p-1).head(p-1) ;
     solve_R(rp, 'T') ;
 
-    // Extend R_ from (p-1)x(p-1) to pxp (resize fills new entries with zeros)
+    // Extend R_ from (p-1)x(p-1) to pxp in place
     // [ R_old | rp             ]
     // [ 0     | R_bottom_right ]
-    R_.resize(p, p) ;
+    square_inplace::grow(R_, 1) ;
+    R_.row(p-1).head(p-1).zeros() ;
     R_.col(p-1).head(p-1) = rp ;
     R_(p-1, p-1) = std::sqrt(XATXA_(p-1, p-1) - dot(rp, rp)) ;
   }
@@ -263,10 +307,11 @@ void ActiveSet<matrix>::update_Cholesky_block(uword n_new) {
     mat R_bottom_right = chol(XATXA_.submat(p_old, p_old, p_total-1, p_total-1) -
                               R_new_cols.t() * R_new_cols) ;
 
-    // Extend R_ from p_old×p_old to p_total×p_total
+    // Extend R_ from p_old×p_old to p_total×p_total in place
     // [ R_old | R_new_cols     ]
     // [ 0     | R_bottom_right ]
-    R_.resize(p_total, p_total) ;
+    square_inplace::grow(R_, n_new) ;
+    R_.submat(p_old, 0, p_total-1, p_old-1).zeros() ;
     R_.submat(0,     p_old, p_old-1,   p_total-1) = R_new_cols ;
     R_.submat(p_old, p_old, p_total-1, p_total-1) = R_bottom_right ;
   }
@@ -275,23 +320,43 @@ void ActiveSet<matrix>::update_Cholesky_block(uword n_new) {
 template <typename matrix>
 void ActiveSet<matrix>::downdate_Cholesky(uword j) {
   // Remove column j, then restore the upper triangular form with Givens rotations
-  // applied in place on rows (k, k+1)
-  R_.shed_col(j);
-  const uword p = R_.n_cols;
+  // applied in place on rows (k, k+1), and drop the last row. All steps work in the
+  // memory of R_ with its current leading dimension n.
+  const uword n = R_.n_rows, p = n - 1 ;
+  if (p * p <= arma::arma_config::mat_prealloc) {
+    R_.shed_col(j) ;
+    for (uword k = j; k < p; ++k) {
+      const double a = R_(k, k), b = R_(k+1, k) ;
+      if (b == 0.0) continue ;
+      const double r = std::hypot(a, b), c = a / r, s = b / r ;
+      R_(k, k) = r ; R_(k+1, k) = 0.0 ;
+      for (uword l = k + 1; l < p; ++l) {
+        const double x = R_(k, l), y = R_(k+1, l) ;
+        R_(k, l) = c * x + s * y ; R_(k+1, l) = c * y - s * x ;
+      }
+    }
+    R_.shed_row(p) ;
+    return ;
+  }
+
+  double* mem = R_.memptr() ;
+  std::memmove(mem + j * n, mem + (j + 1) * n, (p - j) * n * sizeof(double)) ; // drop column j
   for (uword k = j; k < p; ++k) {
-    double* ck = R_.colptr(k);
-    const double a = ck[k], b = ck[k+1];
-    if (b == 0.0) continue;
-    const double r = std::hypot(a, b), c = a / r, s = b / r;
-    ck[k] = r; ck[k+1] = 0.0;
+    double* ck = mem + k * n ;
+    const double a = ck[k], b = ck[k+1] ;
+    if (b == 0.0) continue ;
+    const double r = std::hypot(a, b), c = a / r, s = b / r ;
+    ck[k] = r ; ck[k+1] = 0.0 ;
     for (uword l = k + 1; l < p; ++l) {
-      double* cl = R_.colptr(l);
-      const double x = cl[k], y = cl[k+1];
-      cl[k]   = c * x + s * y;
-      cl[k+1] = c * y - s * x;
+      double* cl = mem + l * n ;
+      const double x = cl[k], y = cl[k+1] ;
+      cl[k]   = c * x + s * y ;
+      cl[k+1] = c * y - s * x ;
     }
   }
-  R_.shed_row(p);
+  for (uword l = 1; l < p; ++l) std::memmove(mem + l * p, mem + l * n, p * sizeof(double)) ; // drop the last row
+  R_.set_size(p, p) ;
+  square_inplace::check_same_memory(R_, mem) ;
 }
 
 template <typename matrix>

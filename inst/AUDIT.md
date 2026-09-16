@@ -526,6 +526,39 @@ Solutions identiques entre les deux modes (écart ≤ 5e-14) dans tous les cas.
 - À faire en même temps ou avant : tampons à capacité pour `XATXA_` et `R_` (comme pour
   `XTXA_` à l'étape 1), qui profitent aux deux modes dès que k dépasse quelques milliers.
 
+## Résultats de l'étape 6 (tampons k × k)
+
+**Modification** (`ActiveSet.h`, espace de noms `square_inplace`). `XATXA_` et le facteur de
+Cholesky `R_` restent des `mat` k × k ordinaires pour le reste du code, mais ne sont plus
+réalloués à chaque ajout ou retrait :
+
+- `grow(M, m)` réserve une capacité (côté × 1,25, soit ~56 % d'éléments en plus) quand elle
+  manque, et sinon déplace les colonnes sur place vers la nouvelle disposition ; Armadillo
+  réutilise la mémoire allouée tant que le nombre d'éléments ne dépasse pas `n_alloc` ;
+- `remove(M, i)` compacte sur place en retirant la ligne et la colonne i ;
+- le downdate de Givens travaille directement dans la mémoire de `R_` (retrait de la colonne,
+  rotations, retrait de la dernière ligne) ;
+- repli sur `shed_*` pour les très petites matrices (≤ 16 éléments, stockées localement par
+  Armadillo), et vérification défensive que la mémoire n'a pas été déplacée.
+
+**Validation** : test de stress hors dépôt (séquences aléatoires de 300 à 600 ajouts et retraits,
+simples ou en bloc, franchissant le seuil de mémoire locale) : `XATXA_` = (X'X)_AA, R'R =
+`XATXA_` et X'X_A v exacts à 4e-15 ; 128/128 tests ; coefficients identiques au bit près à
+l'étape précédente sur tous les cas mesurés.
+
+**Temps** (même protocole) :
+
+| Cas | k max | avant | après |
+|---|---|---|---|
+| Lasso creux n=5 000, p=50 000, 1 % | 3 720 | 90,0 s | **42,6 s** |
+| Elastic-net λ₂=1, n=1 000, p=20 000 | 3 992 | 72,5 s | **49,1 s** |
+| Elastic-net λ₂=1, n=500, p=10 000 | 1 940 | 9,7 s | 8,3 s |
+| Group-lasso n=300, p=3 000 | 700 | 0,58 s | 0,52 s |
+| Lasso n=500, p=10 000 | 249 | 0,70 s | 0,71 s |
+
+Le gain apparaît dès que k dépasse quelques centaines et croît avec k. En contrepartie, la mémoire
+réservée pour ces deux matrices peut atteindre ~1,56 fois leur taille.
+
 ## Feuille de route
 
 | Étape | Contenu | Risque | Statut |
@@ -536,5 +569,5 @@ Solutions identiques entre les deux modes (écart ≤ 5e-14) dans tous les cas.
 | 4 | A3 restant (restart FISTA, estimation de L par Lanczos) | faible | fait (934346e) |
 | 5 | P3, P5, P6 | faible | fait |
 | 5 bis | P4 (gradient par le résidu, mémoire O(pk)) | moyen | étudié (prototype) : hybride recommandé, reporté à une version ultérieure |
-| 5 ter | Tampons à capacité pour `XATXA_` et `R_` | faible | à faire |
+| 5 ter | Tampons à capacité pour `XATXA_` et `R_` | faible | fait |
 | 6 | A4 (CD + working set) | élevé | à évaluer |
