@@ -206,7 +206,7 @@ uword GroupOptimizer<matrix,norm>::working_set(
       inner_iter_.push_back(
         quadratic(beta, lambda, weights(set.G_), data.XTy_(set.A_), set, 1e-4)
       );
-      grad = - data.XTy_ + set.XTXA_ * beta ;
+      grad = - data.XTy_ + set.XTXA_times(beta) ;
     } else {
       if (set_changed) cached_L = estimate_lipschitz(set.XATXA_) ;
       auto prox = [this, &set, &weights](const vec& x, const double l) {
@@ -222,7 +222,7 @@ uword GroupOptimizer<matrix,norm>::working_set(
           pgd(beta, lambda, data.XTy_(set.A_), set.XATXA_, prox, current_tol, 3000, 3, cached_L)
         );
       }
-      grad += set.XTXA_ * (beta - beta_old);
+      grad += set.XTXA_times(beta - beta_old);
     }
 
     // VARIABLE DELETION IF APPLICABLE

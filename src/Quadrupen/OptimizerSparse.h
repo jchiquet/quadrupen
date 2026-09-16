@@ -94,11 +94,8 @@ uword SparseOptimizer<matrix, norm>::quadratic(
     // (XA'XA) beta = XA'y - local_w * sign(beta)
     vec beta_new; // candidate for next step
     if (set.use_chol_) {
-      vec rhs = XTy(set.A_) - local_w % theta;
-      // Step 1 - Forward Substitution
-      vec tmp = arma::solve(trimatl(set.R_.t()), rhs);
-      // Step 2 - Backward Substitution
-      beta_new = arma::solve(trimatu(set.R_), tmp);
+      // Forward then backward substitution with the Cholesky factor
+      beta_new = set.solve_Gram(XTy(set.A_) - local_w % theta);
     } else {
       beta_new = beta ; // warm start for CG
       this->conjugate_gradient(beta_new, set.XATXA_,
@@ -178,7 +175,7 @@ uword SparseOptimizer<matrix,norm>::working_set(
       inner_iter_.push_back(
         quadratic(beta, lambda, weights, data.XTy_, set, 1e-9, 1000)
       );
-      grad = - data.XTy_ + set.XTXA_ * beta ;
+      grad = - data.XTy_ + set.XTXA_times(beta) ;
     }
     else { // Proximal-based solvers
       if (set_changed) cached_L = estimate_lipschitz(set.XATXA_) ;
@@ -195,7 +192,7 @@ uword SparseOptimizer<matrix,norm>::working_set(
           pgd(beta, lambda, data.XTy_.elem(set.A_), set.XATXA_, prox, 1e-7, 3000, 5, cached_L)
         );
       }
-      grad += set.XTXA_ * (beta - beta_old); // Incremental update of the gradient
+      grad += set.XTXA_times(beta - beta_old); // Incremental update of the gradient
 
       uvec local_A = regspace<uvec>(0, set.size() - 1); // local indices
       vec kkt_res  = penalty_.optimality(

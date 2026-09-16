@@ -13,6 +13,8 @@ using arma::zeros;
 using arma::eye;
 
 #include "RegressionData.h"
+#include <algorithm>
+#include <vector>
 
 template <typename matrix>
 class ActiveSet {
@@ -22,10 +24,10 @@ public:
   // VARIABLES FOR HANDLING THE ACTIVE SET
   uvec A_           ; // set of currently activated variables
   uvec is_in_       ; // indicator of active variables (0/1)
-  mat XATXA_, XTXA_ ; // matrices of currently activated variables
+  mat XATXA_        ; // Gram matrix of currently activated variables
   mat XATXAinv_     ;
   bool use_chol_    ; // Maintain a Cholesky factorization along the active set algorithm
-  mat R_            ; // Cholesky decomposition of XATXA
+  mat R_            ; // Cholesky decomposition of XATXA (upper triangular, XATXA = R'R)
 
   ActiveSet() {} ;
   ActiveSet(const RegressionData<matrix> &data, const bool use_chol=true) ;
@@ -39,6 +41,9 @@ public:
   void reset() ; // empty the active set
   const uword size() const { return A_.n_elem ; }
 
+  // ── Products with X'X_A (p x k), stored without copy ──────────────────────────────
+  vec XTXA_times(const vec& v) const ;
+
   // ── Update/Downdate the Cholesky factorisation ────────────────────────────────────
   void update_Cholesky() ; // Insert the last activated variable
   void update_Cholesky_block(uword n_new) ; // Insert the last n_new activated variables
@@ -48,6 +53,17 @@ public:
   void inverse_Gram() ; // When whole inverse is needed (df computation when gamma > 0)
   vec solve_Gram(const vec& b) const ; // Without the full inverse — O(k²) vs O(k³)
 
+private:
+
+  // The first size() columns of XTXA_buf_ hold X'X_A. Extra columns are spare
+  // capacity, so that adding/removing a variable does not reallocate a p x k matrix.
+  mat XTXA_buf_ ;
+  void reserve_XTXA(uword k_old, uword k_new) ;
+  void compact_XTXA(const uvec& positions, uword k_old) ;
+
+  // In-place triangular solve with R_: R' X = B (trans = 'T') or R X = B (trans = 'N')
+  // Returns false when R_ is singular or the solution is not finite
+  bool solve_R(mat& B, char trans) const ;
 };
 
 // ── Constructors ────────────────────────────────────────────────────────────────────
@@ -55,12 +71,14 @@ template <typename matrix>
 ActiveSet<matrix>::ActiveSet(const RegressionData<matrix>& data, const bool use_chol) :
   use_chol_(use_chol) {
   is_in_.zeros(data.p_) ;
+  XTXA_buf_.set_size(data.p_, 0) ;
 }
 
 template <typename matrix>
 ActiveSet<matrix>::ActiveSet(const RegressionData<matrix>& data, const uvec& A0, const bool use_chol) :
   use_chol_(use_chol) {
   is_in_.zeros(data.p_) ;
+  XTXA_buf_.set_size(data.p_, 0) ;
   add_vars(A0, data)    ;
 }
 
@@ -69,10 +87,44 @@ void ActiveSet<matrix>::reset() {
   A_.reset()      ;
   is_in_.zeros()  ;
   XATXA_.reset()  ;
-  XTXA_.reset()   ;
+  XTXA_buf_.set_size(XTXA_buf_.n_rows, 0) ;
   R_.reset()      ;
 }
 
+// ── X'X_A storage ───────────────────────────────────────────────────────────────────
+template <typename matrix>
+vec ActiveSet<matrix>::XTXA_times(const vec& v) const {
+  if (size() == 0) return zeros<vec>(XTXA_buf_.n_rows) ;
+  // read-only alias on the first size() columns of the buffer (no copy)
+  const mat XTXA(const_cast<double*>(XTXA_buf_.memptr()), XTXA_buf_.n_rows, size(), false, true) ;
+  return XTXA * v ;
+}
+
+template <typename matrix>
+void ActiveSet<matrix>::reserve_XTXA(uword k_old, uword k_new) {
+  if (k_new <= XTXA_buf_.n_cols) return ;
+  uword p = XTXA_buf_.n_rows ;
+  // geometric growth, bounded by p (the active set cannot exceed p variables)
+  uword capacity = std::max(k_new, std::min(p, std::max<uword>(16, 2 * XTXA_buf_.n_cols))) ;
+  mat new_buf(p, capacity, arma::fill::none) ;
+  if (k_old > 0) std::copy_n(XTXA_buf_.memptr(), p * k_old, new_buf.memptr()) ;
+  XTXA_buf_ = std::move(new_buf) ;
+}
+
+template <typename matrix>
+void ActiveSet<matrix>::compact_XTXA(const uvec& positions, uword k_old) {
+  // Remove the columns at 'positions' among the first k_old ones, preserving order
+  std::vector<bool> removed(k_old, false) ;
+  for (uword i : positions) removed[i] = true ;
+  uword p = XTXA_buf_.n_rows, dst = 0 ;
+  for (uword j = 0; j < k_old; ++j) {
+    if (removed[j]) continue ;
+    if (dst != j) std::copy_n(XTXA_buf_.colptr(j), p, XTXA_buf_.colptr(dst)) ;
+    ++dst ;
+  }
+}
+
+// ── Active set handling ─────────────────────────────────────────────────────────────
 template <typename matrix>
 void ActiveSet<matrix>::add_var(uword var_in, const RegressionData<matrix>& data) {
   uword k = size() ;
@@ -84,11 +136,8 @@ void ActiveSet<matrix>::add_var(uword var_in, const RegressionData<matrix>& data
   vec new_col = data.X_.t() * wcol -
     data.n_w_ * data.X_bar_ * arma::as_scalar(data.X_bar_[var_in]) + data.S_.col(var_in) ;
 
-  // Single allocation for XTXA_: copy old columns then set new one
-  mat new_XTXA_(data.p_, k + 1, arma::fill::none) ;
-  if (k > 0) new_XTXA_.cols(0, k - 1) = XTXA_ ;
-  new_XTXA_.col(k) = new_col ;
-  XTXA_ = std::move(new_XTXA_) ;
+  reserve_XTXA(k, k + 1) ;
+  XTXA_buf_.col(k) = new_col ;
 
   // Single allocation for XATXA_: fill four blocks directly
   // [ XATXA_old | cross        ]
@@ -122,11 +171,8 @@ void ActiveSet<matrix>::add_vars(uvec vars, const RegressionData<matrix>& data) 
     data.n_w_ * data.X_bar_ * data.X_bar_.rows(vars).t() +
     data.S_.cols(vars) ;
 
-  // Single allocation for XTXA_
-  mat new_XTXA_(data.p_, p_total, arma::fill::none) ;
-  if (p_old > 0) new_XTXA_.cols(0, p_old - 1) = XTXA_ ;
-  new_XTXA_.cols(p_old, p_total - 1) = new_cols ;
-  XTXA_ = std::move(new_XTXA_) ;
+  reserve_XTXA(p_old, p_total) ;
+  XTXA_buf_.cols(p_old, p_total - 1) = new_cols ;
 
   // Single allocation for XATXA_
   mat new_XATXA_(p_total, p_total, arma::fill::none) ;
@@ -144,9 +190,9 @@ void ActiveSet<matrix>::add_vars(uvec vars, const RegressionData<matrix>& data) 
 
 template <typename matrix>
 void ActiveSet<matrix>::del_var(uword ivar_out, vec& beta) {
+  compact_XTXA(uvec{ivar_out}, size()) ;
   is_in_[A_[ivar_out]] = 0  ;
   A_.shed_row(ivar_out)     ;
-  XTXA_.shed_col(ivar_out)  ;
   XATXA_.shed_col(ivar_out) ;
   XATXA_.shed_row(ivar_out) ;
   beta.shed_row(ivar_out)   ;
@@ -156,10 +202,29 @@ void ActiveSet<matrix>::del_var(uword ivar_out, vec& beta) {
 
 template <typename matrix>
 void ActiveSet<matrix>::del_vars(uvec ivars, vec& beta) {
+  if (ivars.is_empty()) return ;
+  compact_XTXA(ivars, size()) ; // single pass over X'X_A for all removed variables
   ivars = sort(ivars, "descend");
   for (uword i=0 ; i <ivars.n_elem ; i++) {
-    del_var(ivars[i], beta) ;
+    uword ivar_out = ivars[i] ;
+    is_in_[A_[ivar_out]] = 0  ;
+    A_.shed_row(ivar_out)     ;
+    XATXA_.shed_col(ivar_out) ;
+    XATXA_.shed_row(ivar_out) ;
+    beta.shed_row(ivar_out)   ;
+    if (use_chol_) downdate_Cholesky(ivar_out) ;
   }
+}
+
+// ── Cholesky factorisation ──────────────────────────────────────────────────────────
+template <typename matrix>
+bool ActiveSet<matrix>::solve_R(mat& B, char trans) const {
+  // LAPACK dtrtrs directly on R_ memory: no transpose, no copy, no rcond estimation
+  if (R_.n_rows == 0 || B.n_elem == 0) return true ;
+  char uplo = 'U', diag = 'N' ;
+  arma::blas_int n = R_.n_rows, nrhs = B.n_cols, info = 0 ;
+  arma::lapack::trtrs<double>(&uplo, &trans, &diag, &n, &nrhs, R_.memptr(), &n, B.memptr(), &n, &info) ;
+  return (info == 0) && B.is_finite() ;
 }
 
 template <typename matrix>
@@ -169,20 +234,16 @@ void ActiveSet<matrix>::update_Cholesky() {
   if (p == 1) {
     R_ = sqrt(XATXA_) ;
   } else {
-    // Solve R_old^T * rp[0..p-2] = XATXA_[0..p-2, p-1]
-    colvec rp(p, arma::fill::zeros) ;
-    rp.head(p-1) = solve(trimatu(R_).t(),
-                         XATXA_.col(p-1).head(p-1),
-                         arma::solve_opts::fast) ;
-    rp(p-1) = std::sqrt(XATXA_(p-1, p-1) - dot(rp.head(p-1), rp.head(p-1))) ;
+    // Solve R_old^T * rp = XATXA_[0..p-2, p-1]
+    vec rp = XATXA_.col(p-1).head(p-1) ;
+    solve_R(rp, 'T') ;
 
-    // Extend R_ from (p-1)x(p-1) to pxp
-    // [ R_old | R_new_cols     ]
+    // Extend R_ from (p-1)x(p-1) to pxp (resize fills new entries with zeros)
+    // [ R_old | rp             ]
     // [ 0     | R_bottom_right ]
-    mat new_R_(p, p, arma::fill::zeros) ; // lower-triangular part stays zero
-    new_R_.submat(0, 0, p-2, p-2) = R_ ;
-    new_R_.col(p-1) = rp ;
-    R_ = std::move(new_R_) ;
+    R_.resize(p, p) ;
+    R_.col(p-1).head(p-1) = rp ;
+    R_(p-1, p-1) = std::sqrt(XATXA_(p-1, p-1) - dot(rp, rp)) ;
   }
 }
 
@@ -195,9 +256,8 @@ void ActiveSet<matrix>::update_Cholesky_block(uword n_new) {
     R_ = chol(XATXA_) ;
   } else {
     // Solve R_old^T * R_new_cols = XATXA_[0..p_old-1, p_old..p_total-1]
-    mat R_new_cols = solve(trimatu(R_).t(),
-                           XATXA_.submat(0, p_old, p_old-1, p_total-1),
-                           arma::solve_opts::fast) ;
+    mat R_new_cols = XATXA_.submat(0, p_old, p_old-1, p_total-1) ;
+    solve_R(R_new_cols, 'T') ;
 
     // Schur complement for the new diagonal block
     mat R_bottom_right = chol(XATXA_.submat(p_old, p_old, p_total-1, p_total-1) -
@@ -206,13 +266,12 @@ void ActiveSet<matrix>::update_Cholesky_block(uword n_new) {
     // Extend R_ from p_old×p_old to p_total×p_total
     // [ R_old | R_new_cols     ]
     // [ 0     | R_bottom_right ]
-    mat new_R_(p_total, p_total, arma::fill::zeros) ; // lower-triangular part stays zero
-    new_R_.submat(0,     0,     p_old-1,   p_old-1)   = R_ ;
-    new_R_.submat(0,     p_old, p_old-1,   p_total-1) = R_new_cols ;
-    new_R_.submat(p_old, p_old, p_total-1, p_total-1) = R_bottom_right ;
-    R_ = std::move(new_R_) ;
+    R_.resize(p_total, p_total) ;
+    R_.submat(0,     p_old, p_old-1,   p_total-1) = R_new_cols ;
+    R_.submat(p_old, p_old, p_total-1, p_total-1) = R_bottom_right ;
   }
 }
+
 template <typename matrix>
 void ActiveSet<matrix>::downdate_Cholesky(uword j) {
 
@@ -244,19 +303,19 @@ void ActiveSet<matrix>::downdate_Cholesky(uword j) {
 template <typename matrix>
 void ActiveSet<matrix>::inverse_Gram() {
   if (use_chol_) {
-    XATXAinv_ = solve(trimatu(R_), solve(trimatl(R_.t()), eye<mat>(R_.n_cols, R_.n_cols)));
-  } else {
-    XATXAinv_ = inv_sympd(XATXA_, arma::inv_opts::allow_approx);
+    XATXAinv_ = eye<mat>(R_.n_cols, R_.n_cols) ;
+    if (solve_R(XATXAinv_, 'T') && solve_R(XATXAinv_, 'N')) return ;
   }
+  // no factorization, or degenerate one: approximate inverse
+  XATXAinv_ = inv_sympd(XATXA_, arma::inv_opts::allow_approx);
 }
 
 template <typename matrix>
 vec ActiveSet<matrix>::solve_Gram(const vec& b) const {
   if (use_chol_) {
-    return solve(trimatu(R_),
-                 solve(trimatl(R_.t()), b, arma::solve_opts::fast),
-                 arma::solve_opts::fast) ;
-  } else {
-    return solve(XATXA_, b, arma::solve_opts::fast) ;
+    vec x = b ;
+    if (solve_R(x, 'T') && solve_R(x, 'N')) return x ;
   }
+  // no factorization, or degenerate one: fall back to a direct (possibly approximate) solve
+  return solve(XATXA_, b, arma::solve_opts::fast) ;
 }
