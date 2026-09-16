@@ -340,13 +340,55 @@ le coût fixe par itération externe domine désormais (voir P5).
 **Non fait** : tolérance interne adaptée au gap externe (résolution inexacte). Gain attendu
 faible maintenant que le coût des itérations internes n'est plus dominant.
 
+## Résultats de l'étape 4 (A2)
+
+**Nouveau solveur QUADRA pour les modèles à groupes** (`GroupOptimizer::quadratic` et
+`block_solve` dans `OptimizerGroup.h`) : descente par blocs exacte sur les groupes actifs.
+
+- **Test de nullité exact** pour chaque groupe : β_g = 0 si la norme duale du résidu partiel
+  (soft-thresholdé si α > 0) est ≤ λw. Il vaut pour les trois normes (`penalty_.optimality`).
+- **Group-lasso (α = 0)** : solution exacte du bloc. Avec l'EVD H_g = V diag(d) Vᵀ déjà en
+  cache, t = ‖β_g‖ résout Σ c_i² / (d_i t + μ)² = 1 avec c = Vᵀr ; la fonction est convexe et
+  décroissante, donc Newton parti de la gauche converge de façon monotone.
+- **Pas de Newton global** après chaque passe, sur les groupes non nuls, avec le hessien exact
+  H + Σ_g μ_g/t_g (I − u_g u_gᵀ) et une recherche linéaire d'Armijo. Sans lui, la descente par
+  blocs plafonnait à 1 000 passes sur les données du test (n = 50, p = 95, 5 groupes corrélés).
+- **Sparse-group, coop, l1/l∞** : FISTA avec redémarrage sur le bloc, avec la prox exacte de la
+  pénalité et L = max de l'EVD du groupe.
+- Les groupes nuls sont retirés à la fin, une fois la descente convergée ; les nouveaux groupes
+  partent de 0 ; l'EVD est maintenue dès que la méthode est quadra (`factmat` dans
+  `group_sparse_lm` et `group_lava`). Le poids du terme L1 est désormais celui de la pénalité
+  (non pondéré, comme dans `elt_norm` et `proximal`).
+
+**Bug corrigé dans la prox l1/l∞** (`PenaltyGroup.cpp`) : quand ‖x_g‖₁ ≤ λw, la prox de
+λw‖·‖∞ vaut 0, mais le code laissait x_g inchangé. FISTA et PGD en l1/l∞ convergeaient vers une
+mauvaise solution.
+
+**Validation** : 128/128 tests, dont le test de temps « quadra plus rapide que fista »
+(0,04 s contre 0,10 s). Objectifs pénalisés calculés indépendamment en R : quadra, fista et pgd
+coïncident à 4e-12 près sur tous les λ, pour les quatre pénalités.
+
+**Temps** (n=300, p=3 000, groupes de 10, λ₂ = 0 ; secondes) :
+
+| Pénalité | quadra avant | quadra après | fista après | grpreg |
+|---|---|---|---|---|
+| Group-lasso, ρ=0,3 | 1,73 (22 λ non convergés) | **0,37** | 0,40 | 0,18 |
+| Group-lasso, ρ=0 | 1,66 (21 non convergés) | 0,48 | 0,40 | 0,14 |
+| Sparse-group α=0,5 | 24,5 (99 non convergés, objectif ×25) | **0,43** | 0,31 | — |
+| Coop | 1,40 (19 non convergés) | 0,74 | 0,43 | — |
+| l1/l∞ | inutilisable | 0,72 | 57,0 → **0,58** (bug de prox) | — |
+
+« Non convergés » compte les λ au statut autre que `converged`. Après correction, le seul λ
+restant dans chaque cas est l'arrêt du chemin sur « max # of feature reached » (570 variables
+actives pour `maxfeat` = 600), identique en fista : tous les λ convergent.
+
 ## Feuille de route
 
 | Étape | Contenu | Risque | Statut |
 |---|---|---|---|
 | 1 | P1 + P2 (ensemble actif pré-alloué, solves triangulaires) | faible, couvert par les tests | fait (33f7102) |
 | 2 | A1 (activation en bloc) + statut de convergence ; critère d'arrêt et garde-fou Anderson (A3) | moyen | fait (537c847, 3a28cd8) |
-| 3 | A2 (bloc exact pour le group-lasso) | moyen | à faire |
-| 4 | A3 restant (restart FISTA, estimation de L par Lanczos) | faible | fait |
+| 3 | A2 (descente par blocs exacte + Newton pour les groupes) ; bug de prox l1/l∞ | moyen | fait |
+| 4 | A3 restant (restart FISTA, estimation de L par Lanczos) | faible | fait (934346e) |
 | 5 | P3–P6 | faible | à faire |
 | 6 | A4 (CD + working set) | élevé | à évaluer |
