@@ -178,17 +178,19 @@ uword SparseOptimizer<matrix,norm>::working_set(
     }
     else { // Proximal-based solvers
       if (set_changed) { cached_L = estimate_lipschitz(set.XATXA_) ; set_changed = false ; }
-      auto prox = [this, &set, &weights](const vec& x, double l) {
-        return(penalty_.proximal(x, l, weights.elem(set.A_)));
+      const vec wA = weights.elem(set.A_) ; // computed once, not at each inner iteration
+      const vec XTyA = data.XTy_.elem(set.A_) ;
+      auto prox = [this, &wA](const vec& x, double l) {
+        return(penalty_.proximal(x, l, wA));
       };
       vec beta_old = beta ;
       if (algorithm_ == SolverType::FISTA) {
         inner_iter_.push_back(
-          fista(beta, lambda, data.XTy_.elem(set.A_), set.XATXA_, prox, 1e-7, 3000, cached_L)
+          fista(beta, lambda, XTyA, set.XATXA_, prox, 1e-7, 3000, cached_L)
         );
       } else if (algorithm_ == SolverType::PGD) {
         inner_iter_.push_back(
-          pgd(beta, lambda, data.XTy_.elem(set.A_), set.XATXA_, prox, 1e-7, 3000, 5, cached_L)
+          pgd(beta, lambda, XTyA, set.XATXA_, prox, 1e-7, 3000, 5, cached_L)
         );
       }
       grad += set.XTXA_times(beta - beta_old); // Incremental update of the gradient

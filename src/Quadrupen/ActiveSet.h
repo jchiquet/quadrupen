@@ -274,27 +274,21 @@ void ActiveSet<matrix>::update_Cholesky_block(uword n_new) {
 
 template <typename matrix>
 void ActiveSet<matrix>::downdate_Cholesky(uword j) {
-
-  vec x = zeros<vec>(2);
-  mat G = zeros<mat>(2,2);
-
+  // Remove column j, then restore the upper triangular form with Givens rotations
+  // applied in place on rows (k, k+1)
   R_.shed_col(j);
-  int p = R_.n_cols;
-  double r;
-  for (int k=j; k<p; k++) {
-    x = R_.submat(k,k,k+1,k);
-
-    if (x[1] != 0) {
-      r = std::hypot(x(0), x(1));
-      G = {{x(0), x(1)}, {-x(1), x(0)}};
-      G = G / r;
-      x(0) = r; x(1) = 0;
-    } else {
-      G = eye(2,2);
-    }
-    R_.submat(k,k,k+1,k) = x;
-    if (k < p-1) {
-      R_.submat(k,k+1,k+1,p-1) = G * R_.submat(k,k+1,k+1,p-1);
+  const uword p = R_.n_cols;
+  for (uword k = j; k < p; ++k) {
+    double* ck = R_.colptr(k);
+    const double a = ck[k], b = ck[k+1];
+    if (b == 0.0) continue;
+    const double r = std::hypot(a, b), c = a / r, s = b / r;
+    ck[k] = r; ck[k+1] = 0.0;
+    for (uword l = k + 1; l < p; ++l) {
+      double* cl = R_.colptr(l);
+      const double x = cl[k], y = cl[k+1];
+      cl[k]   = c * x + s * y;
+      cl[k+1] = c * y - s * x;
     }
   }
   R_.shed_row(p);

@@ -302,17 +302,20 @@ uword GroupOptimizer<matrix,norm>::working_set(
       grad = - data.XTy_ + set.XTXA_times(beta) ;
     } else {
       if (set_changed) { cached_L = estimate_lipschitz(set.XATXA_) ; set_changed = false ; }
-      auto prox = [this, &set, &weights](const vec& x, const double l) {
-        return(penalty_.proximal(x, l, set.grp_sizes_(set.G_), weights(set.G_)));
+      const uvec pkA = set.grp_sizes_(set.G_) ; // computed once, not at each inner iteration
+      const vec  wkA = weights(set.G_) ;
+      const vec XTyA = data.XTy_(set.A_) ;
+      auto prox = [this, &pkA, &wkA](const vec& x, const double l) {
+        return(penalty_.proximal(x, l, pkA, wkA));
       } ;
       vec beta_old = beta ;
       if (algorithm_ == SolverType::FISTA) {
         inner_iter_.push_back(
-          fista(beta, lambda, data.XTy_(set.A_), set.XATXA_, prox, current_tol, 3000, cached_L)
+          fista(beta, lambda, XTyA, set.XATXA_, prox, current_tol, 3000, cached_L)
         );
       } else if (algorithm_ == SolverType::PGD) {
         inner_iter_.push_back(
-          pgd(beta, lambda, data.XTy_(set.A_), set.XATXA_, prox, current_tol, 3000, 3, cached_L)
+          pgd(beta, lambda, XTyA, set.XATXA_, prox, current_tol, 3000, 3, cached_L)
         );
       }
       grad += set.XTXA_times(beta - beta_old);
