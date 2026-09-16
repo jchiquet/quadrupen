@@ -471,6 +471,61 @@ solveur, dont 90 % sur les λ où des variables entrent. Le coût est le calcul 
 colonnes X'WX_j sur les p lignes (O(np) par variable), imposé par le stockage de `XTXA_` : c'est
 l'objet de P4.
 
+## Étude d'opportunité de P4 (gradient par le résidu)
+
+**Principe.** Aujourd'hui, l'ensemble actif stocke X'X_A (p × k) : ajouter une variable coûte le
+calcul de toute la colonne X'Wx_j (O(np), ou O(nnz) en creux), et le gradient coûte O(pk).
+Alternative : ne rien stocker ; à l'ajout, seuls les termes croisés X_A'Wx_j sont calculés
+(O(nk)) ; le gradient vaut X'W(X_A β) − n_w X̄ (X̄_Aᵀβ) + S_{·,A}β, en O(np + nk) ou O(nnz).
+
+**Modèle de coût** par itération externe, avec k variables actives dont m ajoutées :
+stockage m·np + pk, résidu m·nk + n(p + k). Le résidu gagne si
+(m − 1)·np + k·(p − (m + 1)·n) > 0 : toujours quand p ≫ n et que des variables entrent ; le
+stockage reste meilleur sur les itérations sans ajout quand k < n.
+
+**Prototype** (hors dépôt, les deux modes dans le même binaire, 1 thread, cœurs épinglés).
+Solutions identiques entre les deux modes (écart ≤ 5e-14) dans tous les cas.
+
+| Cas | k max | `XTXA_` | stockage | résidu | gain |
+|---|---|---|---|---|---|
+| Lasso n=500, p=10 000, quadra | 249 | 19 Mo | 0,60 s | 0,43 s | ×1,4 |
+| Lasso n=500, p=10 000, fista | 249 | 19 Mo | 0,70 s | 0,51 s | ×1,4 |
+| MCP n=500, p=10 000 | 107 | 8 Mo | 0,57 s | 0,49 s | ×1,2 |
+| Lasso n=200, p=50 000 | 187 | 71 Mo | 1,68 s | 1,06 s | ×1,6 |
+| Group-lasso n=300, p=3 000 | 700 | 16 Mo | 0,51 s | 0,42 s | ×1,2 |
+| Elastic-net λ₂=1, n=500, p=10 000 | 1 940 | 148 Mo | 8,78 s | 7,62 s | ×1,15 |
+| Lasso n=2 000, p=5 000 | 41 | 2 Mo | 0,55 s | 0,76 s | **×0,7** |
+| Lasso creux n=5 000, p=50 000, 1 % | 3 720 | 1,4 Go | 94 s | 75 s | ×1,25 |
+| Elastic-net creux, même X, λ₂=1 | 12 429 | **4,7 Go** | 1 190 s | 1 073 s | ×1,1 |
+
+**Constats.**
+
+1. Le gain en temps est réel mais modeste (×1,1 à ×1,6), et il y a une perte quand l'ensemble
+   actif reste petit devant n (×0,7), conformément au modèle.
+2. Le vrai bénéfice est la mémoire : le stockage p × k devient prohibitif en grande dimension
+   creuse (4,7 Go ici ; ~37 Go pour p = 10⁶ et k = 5 000), alors que le résidu ne demande que
+   O(n).
+3. À grand k, le goulot suivant est l'algèbre k × k, commune aux deux modes : `XATXA_` et `R_`
+   (1,15 Go chacun pour k = 12 429) sont réalloués à chaque ajout, et les mises à jour de Cholesky
+   coûtent O(k²). D'après les micro-benchmarks, les seules réallocations représentent de l'ordre
+   de 0,3 s par lot ajouté à ce k, soit une part importante des ~1 100 s.
+4. Le prototype n'est pas optimal en creux (colonnes densifiées pour X_A β, extraction de X_A à
+   chaque ajout) : le gain y serait un peu plus grand.
+
+**Recommandation.**
+
+- Implémenter P4 sous forme **hybride** plutôt qu'en remplacement : démarrer en mode stockage et
+  basculer définitivement vers le résidu (bascule gratuite : on libère le tampon) quand le
+  modèle de coût, évalué avec k courant et le nombre moyen d'ajouts récents, le favorise, ou
+  quand le tampon dépasse un budget mémoire. Le retour vers le stockage coûterait k·np : on ne
+  le fait pas.
+- Coût d'implémentation : moyen (deux chemins dans `ActiveSet`, passage des données à
+  `XTXA_times`, variante creuse efficace, tests des deux modes).
+- Priorité : utile surtout pour les grands problèmes creux ; pour un usage courant (p ≤ 10⁴), le
+  gain attendu reste inférieur à ×1,5.
+- À faire en même temps ou avant : tampons à capacité pour `XATXA_` et `R_` (comme pour
+  `XTXA_` à l'étape 1), qui profitent aux deux modes dès que k dépasse quelques milliers.
+
 ## Feuille de route
 
 | Étape | Contenu | Risque | Statut |
@@ -480,5 +535,6 @@ l'objet de P4.
 | 3 | A2 (descente par blocs exacte + Newton pour les groupes) ; bug de prox l1/l∞ | moyen | fait |
 | 4 | A3 restant (restart FISTA, estimation de L par Lanczos) | faible | fait (934346e) |
 | 5 | P3, P5, P6 | faible | fait |
-| 5 bis | P4 (gradient par le résidu, mémoire O(pk)) | moyen | à faire |
+| 5 bis | P4 (gradient par le résidu, mémoire O(pk)) | moyen | étudié (prototype) : hybride recommandé, reporté à une version ultérieure |
+| 5 ter | Tampons à capacité pour `XATXA_` et `R_` | faible | à faire |
 | 6 | A4 (CD + working set) | élevé | à évaluer |
