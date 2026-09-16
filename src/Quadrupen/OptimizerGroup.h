@@ -173,9 +173,8 @@ uword GroupOptimizer<matrix,norm>::working_set(
   if (verbosity_) Rprintf("\n nb active groups = %i\n", set.size_grp()) ;
 
   vec optimality = penalty_.optimality(grad, lambda, set.grp_sizes_, weights) ;
-  uword grp_in = optimality.index_max() ; // highest violation of KKT conditions
   uword status = 0 ; iter_ = 0 ; bool success = true ;
-  gap_ = std::max(0.0, optimality(grp_in)) ;
+  gap_ = std::max(0.0, optimality.max()) ;
   J_ = arma::datum::inf ; D_ = arma::datum::inf ;
 
   double cached_L = -1.0 ; // Lipschitz constant cache; -1 means stale/not yet computed
@@ -186,19 +185,20 @@ uword GroupOptimizer<matrix,norm>::working_set(
     iter_++;
     double current_tol = 1e-7;
 
-    // VARIABLE ACTIVATION IF APPLICABLE
-    if (set.is_grp_in_[grp_in] == 0 && optimality(grp_in) > 0) { // Is var_in already in the active set?
+    // GROUP ACTIVATION IF APPLICABLE: the largest KKT violators among inactive groups,
+    // stopping once more than maxfeat variables are active (which stops the path)
+    uvec grps_in = select_violators(optimality, set.is_grp_in_, accuracy_, max_add_) ;
+    set_changed = false ;
+    for (uword grp_in : grps_in) {
+      if (set.size() > maxfeat_) break ;
       set.add_group(grp_in, data) ;
-      beta.insert_rows(beta.n_elem, set.grp_sizes_(grp_in)); // update the vector of active parameters
       if (algorithm_ ==  SolverType::QUADRA) {
-        beta.tail(set.grp_sizes_(grp_in)).fill(- 1e-3 * arma::sign(grad(grp_in)));
+        beta = arma::join_cols(beta, - 1e-3 * arma::sign(grad.elem(set.group_[grp_in]))) ;
       } else {
-        beta.tail(set.grp_sizes_(grp_in)).fill(0.0);
+        beta = arma::join_cols(beta, arma::zeros<vec>(set.grp_sizes_(grp_in))) ;
       }
       if (verbosity_) {Rprintf("\tnewly added group %i\n",grp_in);}
       set_changed = true ;
-    } else {
-      set_changed = false ;
     }
 
     // OPTIMIZATION OVER THE CURRENTLY ACTIVATED VARIABLES
@@ -238,8 +238,7 @@ uword GroupOptimizer<matrix,norm>::working_set(
 
     // OPTIMALITY TESTING
     optimality = penalty_.optimality(grad, lambda, set.grp_sizes_, weights) ;
-    grp_in = optimality.index_max() ;
-    gap_ = std::max(0.0, optimality(grp_in)) ;
+    gap_ = std::max(0.0, optimality.max()) ;
 
     if (monitoring_ > 0) {
       optimality_violation(beta, grad, lambda, gamma, data.XTy_(set.A_), set.XATXA_, data.norm_y_, set.A_, monitoring_) ;
@@ -251,7 +250,7 @@ uword GroupOptimizer<matrix,norm>::working_set(
   if (verbosity_) Rprintf("\tcurrent gap = %f\n",gap_) ;
 
   // Checking convergence status
-  if (iter_ >= maxiter_)     { status = 1 ; }
+  if (gap_ > accuracy_)      { status = 1 ; }
   if (set.size() > maxfeat_) { status = 2 ; }
   if (!success)              { status = 3 ; }
 

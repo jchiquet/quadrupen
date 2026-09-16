@@ -227,13 +227,81 @@ Le gain croît avec la taille de l'ensemble actif, comme attendu. L'écart resta
 (lasso p=10 000 : 1,01 s contre 0,42 s) et grpreg relève maintenant surtout des algorithmes
 (A1, A2, A4).
 
+## Résultats de l'étape 2 (A1, et une partie de A3)
+
+**Activation en bloc** (`Optimizer::select_violators`, `working_set` dans `OptimizerSparse.h` et
+`OptimizerGroup.h`) :
+
+- à chaque itération externe, on active jusqu'à `maxadd` variables (ou groupes) inactives parmi
+  les plus fortes violations des KKT, au lieu de la seule plus forte violation globale ;
+- nouveau paramètre de contrôle `maxadd` : 10 par défaut pour les modèles parcimonieux et Lava,
+  5 pour les modèles à groupes (valeurs choisies sur les mesures ci-dessous) ;
+- l'activation est plafonnée pour ne pas dépasser `maxfeat + 1` variables actives ;
+- le statut « max # of iterate reached » ne dépend plus du compteur d'itérations mais du gap
+  final (un λ convergé exactement à la dernière itération n'est plus signalé en échec) ;
+- correction au passage de l'initialisation QUADRA des groupes, qui lisait `grad(grp_in)` avec un
+  numéro de groupe au lieu du gradient des variables du groupe.
+
+Les *strong rules* n'ont pas été implémentées : dans une méthode d'ensemble actif, elles ne
+restreignent pas les variables à activer (toutes les violatrices sont dans l'ensemble fort) et
+servent seulement à éviter le test KKT sur toutes les variables, qui est en O(p) et n'est pas le
+goulot. Les *Gap Safe rules* restent une piste.
+
+**Solveurs proximaux** (`Optimizer.cpp`). L'activation en bloc a révélé une fragilité existante :
+sur des données mal conditionnées (prostate non normalisée, normes de colonnes de 4,6 à 633),
+PGD et FISTA s'arrêtaient après une seule itération interne, car le critère ‖x⁺ − x‖ < 1e-7 est
+proportionnel au pas 1/L. La référence elle-même ne convergeait pas sur ce cas et ne passait le
+test (`test-enet-reference.R`, tolérance 1e-2) que par chance. Deux corrections :
+
+- critère d'arrêt sur la norme de l'application gradient, L·‖x⁺ − x‖, invariante au pas ;
+- garde-fou pour Anderson (PGD) : si le résidu augmente après un pas extrapolé, ce pas est rejeté,
+  on revient au pas proximal simple et l'historique est vidé.
+
+Sur 50 tirages de `lambda2` (le test tire `lambda2` au hasard sans graine), PGD avec activation en
+bloc échouait 38 à 50 fois avant ces corrections et 0 fois après ; sur la graine 1, pgd et fista
+atteignent l'objectif de référence à 3e-14 près (1e-5 dans la version d'origine).
+
+**Validation** : 128/128 tests. Là où les deux versions convergent, coefficients identiques à la
+référence à 1e-14 (lasso, elastic-net), 1e-6 (MCP, tolérance de la LLA), 1e-8 (FISTA). Pour le
+group-lasso fista/pgd, deux groupes supplémentaires à coefficients ≤ 1,8e-4 au dernier λ, avec un
+objectif légèrement *plus bas* que la référence (736,782724 contre 736,782733).
+
+**Choix de `maxadd`** (secondes, même protocole) :
+
+| Cas | 1 | 5 | 10 | 20 | 100 |
+|---|---|---|---|---|---|
+| Elastic-net λ₂=1, n=500, p=10 000, quadra | 34,1 | 12,8 | 9,4 | 7,9 | 34,3 |
+| Elastic-net λ₂=1, n=200, p=2 000, quadra | 1,06 | 0,65 | 0,58 | 0,61 | 0,97 |
+| Lasso n=500, p=10 000, quadra | 1,11 | 0,79 | — | 0,80 | 0,93 |
+| Group-lasso pgd | 0,91 | 0,56 | — | 1,24 | 1,35 |
+
+Au-delà d'une vingtaine de variables, le solveur de Newton passe son temps à retirer les variables
+ajoutées en trop.
+
+**Temps avec les valeurs par défaut** (secondes, `b1dfd64` → branche) :
+
+| Cas | quadra | fista | pgd |
+|---|---|---|---|
+| Elastic-net λ₂=1, n=500, p=10 000 | 112,4 → **7,2** (non convergés : 28 → 1) | — | — |
+| Lasso n=500, p=10 000 | 2,05 → **0,77** | 1,65 → 0,94 | 1,18 → 0,78 |
+| Lasso n=200, p=2 000 | 0,08 → 0,08 | 0,14 → 0,10 | 0,13 → 0,11 |
+| Lasso n=2 000, p=5 000 (k ≤ 41) | 0,87 → 0,97 | 0,98 → 1,09 | 0,85 → 0,95 |
+| Group-lasso n=300, p=3 000 | 2,18 → 2,60 (toujours 25 non convergés, cf. A2) | 2,77 → 2,27 | 1,45 → 0,97 |
+| Lava p=2 000 | 0,43 → 0,42 | — | — |
+
+Le lasso p=10 000 est désormais à 2× de glmnet (0,39 s) au lieu de 5×. Seul point négatif : un
+ralentissement d'environ 10 % sur le lasso n=2 000 avec un très petit ensemble actif (k ≤ 41).
+
+Sur l'elastic-net, le chemin s'arrête à 84 λ au lieu de 89 : la version convergée atteint
+réellement `maxfeat` plus tôt, alors que la référence, non convergée, y arrivait en retard.
+
 ## Feuille de route
 
 | Étape | Contenu | Risque | Statut |
 |---|---|---|---|
-| 1 | P1 + P2 (ensemble actif pré-alloué, solves triangulaires) | faible, couvert par les tests | fait (non commité) |
-| 2 | A1 (activation en bloc, strong rules) + révision de `maxiter` | moyen | à faire |
+| 1 | P1 + P2 (ensemble actif pré-alloué, solves triangulaires) | faible, couvert par les tests | fait (33f7102) |
+| 2 | A1 (activation en bloc) + statut de convergence ; critère d'arrêt et garde-fou Anderson (A3) | moyen | fait (non commité) |
 | 3 | A2 (bloc exact pour le group-lasso) | moyen | à faire |
-| 4 | A3 (restart FISTA, warm start Lipschitz, garde-fou Anderson) | faible | à faire |
+| 4 | A3 restant (restart FISTA, warm start Lipschitz, estimation sûre de L) | faible | à faire |
 | 5 | P3–P6 | faible | à faire |
 | 6 | A4 (CD + working set) | élevé | à évaluer |

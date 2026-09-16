@@ -18,7 +18,23 @@ monitoring_(control["monitor"]) {
   if (as<std::string>(control["method"]) == "FISTA") algorithm_ = SolverType::FISTA;
   if (as<std::string>(control["method"]) == "QUADRA") algorithm_ = SolverType::QUADRA;
   if (as<std::string>(control["method"]) == "PGD") algorithm_ = SolverType::PGD;
-  
+  if (control.containsElementNamed("maxadd")) max_add_ = std::max<uword>(1, as<uword>(control["maxadd"]));
+}
+
+uvec Optimizer::select_violators(
+  const vec& optimality,
+  const uvec& is_in,
+  const double& tol,
+  const uword& max_add) const {
+
+  uvec candidates = find(optimality > tol && is_in == 0) ;
+  if (candidates.n_elem > max_add) {
+    uvec order = sort_index(optimality(candidates), "descend") ;
+    candidates = candidates(order.head(max_add)) ;
+  } else if (candidates.n_elem > 1) {
+    candidates = candidates(sort_index(optimality(candidates), "descend")) ;
+  }
+  return candidates ;
 }
 
 double Optimizer::estimate_lipschitz(
