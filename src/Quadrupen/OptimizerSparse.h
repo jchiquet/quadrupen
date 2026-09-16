@@ -167,8 +167,6 @@ uword SparseOptimizer<matrix,norm>::working_set(
       }
       if (verbosity_) {vars_in.t().print("\tnewly added variables");}
       set_changed = true ;
-    } else {
-      set_changed = false ;
     }
 
     // OPTIMIZATION OVER THE CURRENTLY ACTIVATED VARIABLES
@@ -179,7 +177,7 @@ uword SparseOptimizer<matrix,norm>::working_set(
       grad = - data.XTy_ + set.XTXA_times(beta) ;
     }
     else { // Proximal-based solvers
-      if (set_changed) cached_L = estimate_lipschitz(set.XATXA_) ;
+      if (set_changed) { cached_L = estimate_lipschitz(set.XATXA_) ; set_changed = false ; }
       auto prox = [this, &set, &weights](const vec& x, double l) {
         return(penalty_.proximal(x, l, weights.elem(set.A_)));
       };

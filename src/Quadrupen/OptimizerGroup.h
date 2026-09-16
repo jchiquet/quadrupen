@@ -188,7 +188,6 @@ uword GroupOptimizer<matrix,norm>::working_set(
     // GROUP ACTIVATION IF APPLICABLE: the largest KKT violators among inactive groups,
     // stopping once more than maxfeat variables are active (which stops the path)
     uvec grps_in = select_violators(optimality, set.is_grp_in_, accuracy_, max_add_) ;
-    set_changed = false ;
     for (uword grp_in : grps_in) {
       if (set.size() > maxfeat_) break ;
       set.add_group(grp_in, data) ;
@@ -208,7 +207,7 @@ uword GroupOptimizer<matrix,norm>::working_set(
       );
       grad = - data.XTy_ + set.XTXA_times(beta) ;
     } else {
-      if (set_changed) cached_L = estimate_lipschitz(set.XATXA_) ;
+      if (set_changed) { cached_L = estimate_lipschitz(set.XATXA_) ; set_changed = false ; }
       auto prox = [this, &set, &weights](const vec& x, const double l) {
         return(penalty_.proximal(x, l, set.grp_sizes_(set.G_), weights(set.G_)));
       } ;

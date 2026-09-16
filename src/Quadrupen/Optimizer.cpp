@@ -46,40 +46,40 @@ double Optimizer::estimate_lipschitz(
   if (pk == 0) return 1.0;
   if (pk == 1) return as_scalar(XTX(0,0));
 
-  // Warm-start from previous eigenvector when size matches; random init otherwise
-  vec q;
-  if (q_lipschitz_.n_elem == pk) {
-    q = q_lipschitz_;
-  } else {
-    q = randu<vec>(pk);
-    q /= norm(q, 2);
+  // Lanczos iterations (no reorthogonalization) for the largest eigenvalue of XTX.
+  // Unlike the power iteration, it converges fast even when the top eigenvalues are close.
+  // Deterministic start: no draw from R's random number generator.
+  uword m = std::min(max_it, pk);
+  vec v = ones<vec>(pk) + 0.1 * arma::sin(regspace<vec>(1, pk));
+  v /= norm(v, 2);
+  vec v_old(pk, fill::zeros), alpha(m, fill::zeros), beta(m, fill::zeros);
+  double b = 0.0, theta = 0.0, residual = datum::inf;
+
+  for (uword j = 0; j < m; ++j) {
+    vec w = XTX * v;
+    alpha(j) = dot(w, v);
+    w -= alpha(j) * v + b * v_old;
+    b = norm(w, 2);
+    beta(j) = b;
+
+    bool breakdown = (b <= 1e-12 * std::abs(alpha(j)));
+    if (breakdown || j == m - 1 || (j + 1) % 5 == 0) {
+      // Largest Ritz value and its residual bound |beta_j * s_j|
+      mat T(j + 1, j + 1, fill::zeros);
+      T.diag() = alpha.head(j + 1);
+      if (j > 0) { T.diag(1) = beta.head(j); T.diag(-1) = beta.head(j); }
+      vec ritz; mat S;
+      eig_sym(ritz, S, T);
+      theta = ritz(j);
+      residual = std::abs(b * S(j, j));
+      if (breakdown || residual <= tol * theta) break;
+    }
+    v_old = v;
+    v = w / b;
   }
 
-  double lambda = 0.0;
-  double lambda_old = 0.0;
-
-  for (uword i = 0; i < max_it; ++i) {
-    vec z = XTX * q;
-
-    // Largest eigenvalue (simplified Rayleigh quotient since ||q||=1)
-    lambda = dot(q, z);
-    if (i > 0 && std::abs(lambda - lambda_old) < tol * lambda) {
-      break;
-    }
-    lambda_old = lambda;
-
-    double n = norm(z, 2);
-    if (n > 1e-15) {
-      q = z / n;
-    } else {
-      break;
-    }
-  }
-
-  q_lipschitz_ = q; // save for next call
-
-  // Safety margin for 1/L
-  return lambda * 1.01;
+  // theta underestimates the largest eigenvalue; theta + residual bounds it in practice
+  return std::max({theta + residual, 1.01 * theta, XTX.diag().max()});
 }
 
 uword Optimizer::pgd(
@@ -189,18 +189,25 @@ uword Optimizer::fista(
     // Proximal step
     betak = proximal_operator(betal - (XTX * betal - XTy) * invL, lambda * invL);
     
-    // FISTA update
-    tk = 0.5 * (1.0 + std::sqrt(1.0 + 4.0 * t0 * t0));
-    double weight = (t0 - 1.0) / tk;
-    
-    // Accelerating step
-    betal = betak + weight * (betak - beta);
-    
     // Assess convergence (scaled by L to be invariant to the step size)
     delta = L * norm(beta - betak, 2);
     
+    if (dot(betal - betak, betak - beta) > 0) {
+      // Adaptive restart (O'Donoghue & Candes, 2015): the momentum points against the
+      // gradient mapping, so reset it
+      t0 = 1.0;
+      betal = betak;
+    } else {
+      // FISTA update
+      tk = 0.5 * (1.0 + std::sqrt(1.0 + 4.0 * t0 * t0));
+      double weight = (t0 - 1.0) / tk;
+      
+      // Accelerating step
+      betal = betak + weight * (betak - beta);
+      t0 = tk;
+    }
+    
     beta = betak;
-    t0 = tk;
     iter++;
     
     if (iter % 100 == 0) R_CheckUserInterrupt();

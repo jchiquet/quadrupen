@@ -295,13 +295,58 @@ ralentissement d'environ 10 % sur le lasso n=2 000 avec un très petit ensemble 
 Sur l'elastic-net, le chemin s'arrête à 84 λ au lieu de 89 : la version convergée atteint
 réellement `maxfeat` plus tôt, alors que la référence, non convergée, y arrivait en retard.
 
+## Résultats de l'étape 3 (A3)
+
+Les deux premiers points de A3 (critère d'arrêt invariant au pas, garde-fou Anderson) ont été
+faits à l'étape 2. Cette étape termine le sujet des solveurs proximaux (`Optimizer.cpp`,
+`working_set`).
+
+- **Redémarrage adaptatif de FISTA** (O'Donoghue & Candès, 2015) : le moment est remis à zéro
+  quand il pointe contre l'application gradient, soit (y_k − x_{k+1})ᵀ(x_{k+1} − x_k) > 0.
+- **Estimation de L par Lanczos** au lieu de la puissance itérée. Mesures sur des matrices de Gram
+  d'ensembles actifs croissants (n=500, k jusqu'à 2 000) :
+  - données corrélées (ρ=0,3) : la puissance itérée converge en ~5 itérations ; Lanczos est exact
+    à 1e-16 en 10 pas ;
+  - données non corrélées (ρ=0), valeurs propres du haut serrées : la puissance itérée ne converge
+    pas en 50 itérations et **sous-estime λmax jusqu'à 2,9 %** (8 % avec les anciens réglages,
+    15 itérations), au-delà de la marge de 1 %, d'où un pas trop grand ; la borne de Gershgorin est
+    2,9 fois trop grande. Avec 30 pas de Lanczos, la borne θ + résidu est toujours ≥ λmax et au
+    plus 0,5 % au-dessus.
+
+  Implémentation : au plus 30 pas, arrêt dès que le résidu de Ritz est ≤ 1e-3 θ, L = max(θ +
+  résidu, 1,01 θ, max diag). Départ déterministe : l'ancienne initialisation par `randu`
+  consommait le générateur aléatoire de R et modifiait la suite aléatoire de l'utilisateur.
+- **Réestimation de L après un retrait** : `set_changed` était remis à `false` au début d'une
+  itération sans ajout, si bien qu'un retrait de variable à l'itération précédente ne déclenchait
+  pas de réestimation (L périmé mais majorant, donc pas dangereux, seulement trop prudent).
+
+**Validation** : 128/128 tests ; 0 échec sur les 50 tirages prostate en pgd et fista ; supports
+identiques à l'étape 2 et coefficients à ≤ 1,4e-7 près (fista), ≤ 5e-9 (pgd).
+
+**Temps** (secondes, étape 2 → étape 3 ; itérations internes entre parenthèses) :
+
+| Cas | fista | pgd |
+|---|---|---|
+| Group-lasso n=300, p=3 000, ρ=0,3 | 2,20 → **0,62** (40 569 → 7 303) | 1,01 → 1,00 |
+| Group-lasso, ρ=0 | 0,65 → 0,44 (7 371 → 2 857) | 0,49 → 0,52 |
+| Lasso n=500, p=10 000, ρ=0,3 | 1,02 → 0,85 (45 025 → 9 193) | 0,87 → 0,87 |
+| Lasso n=500, p=10 000, ρ=0 | 1,04 → 0,87 (21 104 → 6 054) | 0,97 → 0,98 |
+| Lasso n=200, p=2 000 | 0,10 → 0,06 (29 835 → 6 753) | 0,11 → 0,10 |
+| `bounded_reg` n=300, p=1 000, λ₂=1 | 11,06 → **2,76** (64 238 → 13 556) | — |
+
+Sur le lasso p=10 000, FISTA fait 5 fois moins d'itérations internes mais ne gagne que 17 % :
+le coût fixe par itération externe domine désormais (voir P5).
+
+**Non fait** : tolérance interne adaptée au gap externe (résolution inexacte). Gain attendu
+faible maintenant que le coût des itérations internes n'est plus dominant.
+
 ## Feuille de route
 
 | Étape | Contenu | Risque | Statut |
 |---|---|---|---|
 | 1 | P1 + P2 (ensemble actif pré-alloué, solves triangulaires) | faible, couvert par les tests | fait (33f7102) |
-| 2 | A1 (activation en bloc) + statut de convergence ; critère d'arrêt et garde-fou Anderson (A3) | moyen | fait (non commité) |
+| 2 | A1 (activation en bloc) + statut de convergence ; critère d'arrêt et garde-fou Anderson (A3) | moyen | fait (537c847, 3a28cd8) |
 | 3 | A2 (bloc exact pour le group-lasso) | moyen | à faire |
-| 4 | A3 restant (restart FISTA, warm start Lipschitz, estimation sûre de L) | faible | à faire |
+| 4 | A3 restant (restart FISTA, estimation de L par Lanczos) | faible | fait |
 | 5 | P3–P6 | faible | à faire |
 | 6 | A4 (CD + working set) | élevé | à évaluer |

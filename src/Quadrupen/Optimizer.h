@@ -30,7 +30,6 @@ public:
   uword max_add_ = 1 ; // max # of variables (or groups) activated at once in the working set
   vector<uword> inner_iter_   ;
   vector<double> J_vec_, D_vec_ ;
-  vec q_lipschitz_ ; // warm-start eigenvector for power iteration in estimate_lipschitz
   
   uword conjugate_gradient(
       vec& x0,
@@ -49,8 +48,8 @@ public:
 
   double estimate_lipschitz(
       const mat& XTX,
-      uword max_it = 15,
-      double tol = 1e-4
+      uword max_it = 30,
+      double tol = 1e-3
   ) ;
   
   uword fista(
