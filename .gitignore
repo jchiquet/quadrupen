@@ -63,3 +63,6 @@ docs
 tools/
 .positai
 inst/doc
+
+/.quarto/
+**/*.quarto_ipynb

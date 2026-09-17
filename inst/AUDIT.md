@@ -211,6 +211,15 @@ creuses.)
   régression bornée » ci-dessous).
 - `src/Quadrupen/PenaltyGroup.cpp` : prox l1/l∞ non nulle quand le groupe est dans la boule l1.
   **Corrigé** à l'étape 4.
+- **Régression introduite à l'étape 2 et détectée par la CI** : avec l'activation en bloc,
+  `update_Cholesky_block` factorisait le complément de Schur avec `chol()`, qui lève une erreur
+  quand le bloc n'est pas défini positif. C'est le cas dès que l'ensemble actif dépasse le rang
+  de X (exemple de `lava`, n = 50 < p = 95 : échec sur 18 graines sur 30). **Corrigé** : en cas
+  d'échec, les variables du bloc sont insérées une à une, comme pour un ajout simple
+  (`extend_Cholesky`), et le repli de `solve_Gram` passe à une solution par moindres carrés
+  quand la matrice est singulière, ce qui corrige aussi un échec préexistant de la version CRAN
+  (1 graine sur 30, `solve(): solution not found`). Coefficients identiques au bit près quand la
+  matrice est définie positive.
 
 ### Correctif de la régression bornée
 
@@ -625,6 +634,50 @@ sans aucune bascule vers un `solve` dense ni pivot de Cholesky non positif ; aux
 trois passages simultanés sont identiques au bit près. La cause du passage aberrant n'a pas été
 identifiée.
 
+## Bilan par rapport à la version 1.0-0 du CRAN
+
+Version CRAN 1.0-0 (tarball téléchargé, code identique à `b1dfd64`) contre la branche
+`perf-active-set`. Appels utilisateur avec les réglages par défaut (sauf mention), même protocole
+(1 thread, cœurs épinglés, les deux versions l'une après l'autre sur le même cœur). Temps total R en
+secondes ; « nc » = nombre de λ non convergés (hors arrêt normal sur `maxfeat`).
+
+| Cas | CRAN 1.0-0 | 1.1-0 | gain |
+|---|---|---|---|
+| Lasso 200×2 000 | 0,07 | 0,05 | ×1,4 |
+| Lasso 500×10 000 | 1,91 | 0,62 | ×3,1 |
+| Lasso 2 000×5 000 | 0,78 | 0,53 | ×1,5 |
+| Lasso 500×10 000, fista | 2,17 | 0,64 | ×3,4 |
+| Lasso 500×10 000, pgd | 1,81 | 0,66 | ×2,7 |
+| MCP 500×10 000 | 1,32 | 0,55 | ×2,4 |
+| SCAD 500×10 000 | 2,09 | 0,48 | ×4,4 |
+| Lasso creux 2 500×25 000 (1 %) | 569,7 (14 nc) | 15,8 | ×36 |
+| Elastic-net λ₂=1, 500×10 000 | 103,0 (27 nc) | 5,6 | ×18 |
+| Elastic-net λ₂=1, 1 000×20 000 | 428,4 (48 nc) | 48,5 | ×8,8 |
+| Group-lasso 300×3 000, quadra | 2,03 (25 nc) | 0,42 | ×4,8 |
+| Group-lasso 300×3 000, fista | 2,51 | 0,47 | ×5,3 |
+| Sparse-group α=0,5, fista | 1,53 | 0,32 | ×4,8 |
+| Sparse-group α=0,5, quadra | 5,27 (99 nc) | 0,35 | ×15 |
+| Coop, fista | 1,45 | 0,31 | ×4,7 |
+| l1/l∞, fista | 2,20 (solution fausse) | 0,48 | ×4,6 |
+| `bounded_reg` 300×1 000, λ₂=1 | 1,16 (solution sous-optimale) | 2,11 | ×0,55 |
+| Ridge 200×8 000 | 2,13 | 0,26 | ×8,2 |
+| Lava 200×8 000 (30 λ) | 12,50 | 0,41 | ×30 |
+| Validation croisée lasso 500×10 000, K = 5 | 5,37 | 2,89 | ×1,9 |
+
+**Lecture.**
+
+- Tous les cas mesurés sont plus rapides, de ×1,4 à ×36, à une exception près : `bounded_reg`,
+  où la version CRAN s'arrêtait trop tôt et renvoyait des solutions sous-optimales (voir
+  « Correctif de la régression bornée ») ; le surcoût est le prix d'une solution exacte.
+- Les gains les plus forts concernent les grands ensembles actifs (elastic-net, lasso creux) et
+  les modèles à groupes, où la version CRAN laissait aussi de nombreux λ non convergés : tous
+  convergent désormais.
+- Quand le nombre de λ diffère (elastic-net 89 → 84 et 100 → 87, sparse-group quadra 100 → 93),
+  c'est l'arrêt du chemin sur `maxfeat`, atteint plus tôt par une version qui converge.
+- Résultats identiques à la version CRAN là où celle-ci convergeait (écarts ≤ 1e-13 pour QUADRA,
+  dans la tolérance des solveurs proximaux sinon) ; différents, et meilleurs, pour les trois
+  anomalies corrigées (`bounded_reg`, prox l1/l∞, QUADRA des groupes).
+
 ## Feuille de route
 
 Étapes dans l'ordre chronologique, telles que détaillées dans les sections de résultats.
@@ -639,6 +692,8 @@ identifiée.
 | — | Anomalie : gap exact de la régression bornée, données de test régénérées | fait (`cb1ad7d`) |
 | — | Étude d'opportunité de P4 (gradient par le résidu) | faite (`f22da81`) : hybride recommandé |
 | 6 | Tampons à capacité pour `XATXA_` et `R_` | fait (`df2d765`) |
-| — | Évaluation de A4 (descente par coordonnées) | faite : pas de CD sur la Gram |
+| — | Évaluation de A4 (descente par coordonnées) | faite : pas de CD sur la Gram (`0975504`) |
+| — | Régression Cholesky en bloc détectée par la CI (exemple `lava`) | corrigée |
+| — | Bilan par rapport à la version CRAN 1.0-0 ; préparation de la version 1.1-0 | fait |
 | — | P4 + CD sur le résidu, pour les grands ensembles actifs sur données creuses | reporté à une version ultérieure |
 | — | FusedLasso (X dense convertie en creux, normalisation) ; warm start λ₂ en validation croisée | à décider |
