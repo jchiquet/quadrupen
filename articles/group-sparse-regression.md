@@ -5,7 +5,7 @@
 ``` r
 
 library(quadrupen)
-#> 'quadrupen' package version 1.0-0
+#> 'quadrupen' package version 1.1-0
 data("Birthwt", package = "grpreg")
 y     <- Birthwt$bwt[-130]    ## outlier
 X     <- Birthwt$X[-130, ]
