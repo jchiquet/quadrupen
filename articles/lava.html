@@ -142,8 +142,8 @@ every predictor). Neither component alone characterizes the signal.</p>
 <span>  index     <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fl">1</span><span class="op">:</span><span class="va">p</span>, <span class="fl">3</span><span class="op">)</span>,</span>
 <span>  value     <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">beta</span>, <span class="va">delta</span>, <span class="va">theta</span><span class="op">)</span>,</span>
 <span>  component <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html" class="external-link">factor</a></span><span class="op">(</span></span>
-<span>    <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Sparse (β)"</span>, <span class="st">"Dense (δ)"</span>, <span class="st">"Total (θ = β + δ)"</span><span class="op">)</span>, each <span class="op">=</span> <span class="va">p</span><span class="op">)</span>,</span>
-<span>    levels <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Sparse (β)"</span>, <span class="st">"Dense (δ)"</span>, <span class="st">"Total (θ = β + δ)"</span><span class="op">)</span></span>
+<span>    <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Sparse (beta)"</span>, <span class="st">"Dense (delta)"</span>, <span class="st">"Total (theta = beta + delta)"</span><span class="op">)</span>, each <span class="op">=</span> <span class="va">p</span><span class="op">)</span>,</span>
+<span>    levels <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Sparse (beta)"</span>, <span class="st">"Dense (delta)"</span>, <span class="st">"Total (theta = beta + delta)"</span><span class="op">)</span></span>
 <span>  <span class="op">)</span></span>
 <span><span class="op">)</span></span>
 <span></span>
@@ -286,21 +286,21 @@ inactive positions are the dense signal alone.</p>
 <span>  method   <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html" class="external-link">factor</a></span><span class="op">(</span><span class="st">"LAVA (BIC)"</span>, levels <span class="op">=</span> <span class="va">method_levels</span><span class="op">)</span>,</span>
 <span>  index    <span class="op">=</span> <span class="fl">1</span><span class="op">:</span><span class="va">p</span>,</span>
 <span>  value    <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/numeric.html" class="external-link">as.numeric</a></span><span class="op">(</span><span class="va">theta_hat</span><span class="op">)</span>,</span>
-<span>  fill_grp <span class="op">=</span> <span class="st">"LAVA dense (δ̂)"</span></span>
+<span>  fill_grp <span class="op">=</span> <span class="st">"LAVA dense (delta-hat)"</span></span>
 <span><span class="op">)</span></span>
 <span><span class="va">df_lava_sparse</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
 <span>  method   <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html" class="external-link">factor</a></span><span class="op">(</span><span class="st">"LAVA (BIC)"</span>, levels <span class="op">=</span> <span class="va">method_levels</span><span class="op">)</span>,</span>
 <span>  index    <span class="op">=</span> <span class="fl">1</span><span class="op">:</span><span class="va">p</span>,</span>
 <span>  value    <span class="op">=</span> <span class="va">beta_hat</span>,</span>
-<span>  fill_grp <span class="op">=</span> <span class="st">"LAVA sparse (β̂)"</span></span>
+<span>  fill_grp <span class="op">=</span> <span class="st">"LAVA sparse (beta-hat)"</span></span>
 <span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">fill_palette</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span></span>
-<span>  <span class="st">"True signal"</span>       <span class="op">=</span> <span class="st">"grey20"</span>,</span>
-<span>  <span class="st">"Lasso"</span>             <span class="op">=</span> <span class="st">"#56B4E9"</span>,</span>
-<span>  <span class="st">"Elastic-net"</span>       <span class="op">=</span> <span class="st">"#E69F00"</span>,</span>
-<span>  <span class="st">"LAVA dense (δ̂)"</span>   <span class="op">=</span> <span class="st">"#CC79A7"</span>,</span>
-<span>  <span class="st">"LAVA sparse (β̂)"</span>  <span class="op">=</span> <span class="st">"#009E73"</span></span>
+<span>  <span class="st">"True signal"</span>            <span class="op">=</span> <span class="st">"grey20"</span>,</span>
+<span>  <span class="st">"Lasso"</span>                  <span class="op">=</span> <span class="st">"#56B4E9"</span>,</span>
+<span>  <span class="st">"Elastic-net"</span>            <span class="op">=</span> <span class="st">"#E69F00"</span>,</span>
+<span>  <span class="st">"LAVA dense (delta-hat)"</span> <span class="op">=</span> <span class="st">"#CC79A7"</span>,</span>
+<span>  <span class="st">"LAVA sparse (beta-hat)"</span> <span class="op">=</span> <span class="st">"#009E73"</span></span>
 <span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span>mapping <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">index</span>, y <span class="op">=</span> <span class="va">value</span>, fill <span class="op">=</span> <span class="va">fill_grp</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
@@ -310,7 +310,7 @@ inactive positions are the dense signal alone.</p>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/facet_wrap.html" class="external-link">facet_wrap</a></span><span class="op">(</span><span class="op">~</span> <span class="va">method</span>, ncol <span class="op">=</span> <span class="fl">2</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_manual.html" class="external-link">scale_fill_manual</a></span><span class="op">(</span></span>
 <span>    values <span class="op">=</span> <span class="va">fill_palette</span>,</span>
-<span>    breaks <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"LAVA sparse (β̂)"</span>, <span class="st">"LAVA dense (δ̂)"</span><span class="op">)</span>,</span>
+<span>    breaks <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"LAVA sparse (beta-hat)"</span>, <span class="st">"LAVA dense (delta-hat)"</span><span class="op">)</span>,</span>
 <span>    name   <span class="op">=</span> <span class="st">"LAVA decomposition"</span></span>
 <span>  <span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">labs</a></span><span class="op">(</span>x <span class="op">=</span> <span class="st">"Predictor index"</span>, y <span class="op">=</span> <span class="st">"Estimated coefficient"</span>,</span>
