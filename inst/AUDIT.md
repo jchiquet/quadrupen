@@ -1,23 +1,37 @@
 # Audit de performance et d'algorithmes — quadrupen
 
-- **Date** : 2026-09-16
-- **Révision auditée** : `b1dfd64` (master, version 1.0-0)
+- **Date** : 2026-09-16, mis à jour le 2026-09-17
+- **Révision auditée** : `b1dfd64` (master, version 1.0-0 publiée sur le CRAN)
+- **Travaux** : branche `perf-active-set`
 - **Périmètre** : code C++ (`src/Quadrupen`, `src/FusedLasso`, wrappers) et orchestration R
   (validation croisée, sélection de stabilité), sous l'angle (i) performance de calcul pure,
   (ii) choix algorithmiques.
 
 ## Synthèse
 
-Le code est propre et plusieurs optimisations sont déjà en place (cache de la constante de
-Lipschitz, spécialisation `sp_mat` de la standardisation, `nth_element` dans FusedLasso).
-Deux constats dominent :
+**Diagnostic initial** (`b1dfd64`). Deux constats dominaient :
 
-1. **Le goulot principal n'est pas l'algèbre linéaire mais la gestion mémoire de l'ensemble
-   actif** : `XTXA_` (p × k) est réalloué et recopié à chaque ajout ou retrait de variable, et
-   les solves triangulaires matérialisent des copies k × k. Sur les chemins où l'ensemble actif
-   devient grand, ces copies coûtent 10 à 40 fois le calcul utile.
-2. **Le solveur QUADRA du group-lasso est approché** (point fixe tronqué, soft-threshold a
-   posteriori) : il est à la fois lent et imprécis, et de nombreux λ ne convergent pas.
+1. **Le goulot principal n'était pas l'algèbre linéaire mais la gestion mémoire de l'ensemble
+   actif** : `XTXA_` (p × k) réalloué et recopié à chaque ajout ou retrait de variable, solves
+   triangulaires matérialisant des copies k × k. Sur les chemins à grand ensemble actif, ces
+   copies coûtaient 10 à 40 fois le calcul utile.
+2. **Le solveur QUADRA du group-lasso était approché** (point fixe tronqué, soft-threshold a
+   posteriori) : lent, imprécis, avec de nombreux λ non convergés.
+
+S'y ajoutaient une limite d'une variable activée par itération externe, des solveurs proximaux
+fragiles sur données mal conditionnées, et trois anomalies (dont une régression bornée QUADRA qui
+renvoyait des solutions sous-optimales).
+
+**État actuel.** Les deux constats sont traités (étapes 1, 4 et 6), ainsi que l'activation en
+bloc (étape 2), les solveurs proximaux (étapes 2 et 3), les points secondaires (étape 5) et les
+trois anomalies. Tous les λ convergent désormais sur les cas mesurés, et les solutions sont
+identiques à l'ancienne version là où celle-ci convergeait. Le bilan par rapport à la version
+1.0-0 du CRAN est donné en fin de document.
+
+**Reste à faire** : gradient par le résidu et descente par coordonnées sur le résidu, pour les
+grands ensembles actifs sur données creuses (P4 + A4, reportés à une version ultérieure) ;
+FusedLasso (conversion de X dense en creux, normalisation) ; warm start entre valeurs de λ₂ en
+validation croisée.
 
 ## Mesures
 
@@ -60,6 +74,9 @@ Solve de Cholesky (avant + arrière), k = 200 / 1 000 / 2 000, en ms : `solve(tr
 0,12 / 0,78.
 
 ## 1. Performance pure
+
+Les sections 1 et 2 décrivent le diagnostic de `b1dfd64`. Ce qui a été fait est détaillé dans les
+sections « Résultats de l'étape … » et résumé dans la feuille de route.
 
 ### P1 — Réallocation de l'ensemble actif (gain attendu : ×5 à ×20 sur les grands ensembles actifs)
 
@@ -179,6 +196,8 @@ avec mise à jour du résidu en O(n·|g|).
 Working set + solveur interne en descente par coordonnées accélérée par Anderson (celer :
 Massias et al., 2018 ; skglm : Bertrand et al., 2022). Coût par itération en O(nnz), sans
 factorisation. QUADRA resterait l'option haute précision pour de petits ensembles actifs.
+(Évaluée en fin de document : le gain n'existe que pour une descente sur le résidu, sur données
+creuses.)
 
 ## Anomalies relevées au passage
 
@@ -188,8 +207,8 @@ factorisation. QUADRA resterait l'option haute précision pour de petits ensembl
 - `src/Quadrupen/BoundedRegression.cpp` (`solution_path`) : le critère d'arrêt
   `sum(penalty_.optimality(...))` vaut ‖g‖₁,w − p·λ au lieu d'une mesure d'optimalité. Il est
   très négatif, donc la boucle QUADRA s'arrêtait toujours après un seul appel de
-  `quadratic_breg` et le gap rapporté valait 0. **Corrigé** (voir « Correctif de la régression
-  bornée » ci-dessous).
+  `quadratic_breg` et le gap rapporté valait 0. **Corrigé** (`cb1ad7d`, voir « Correctif de la
+  régression bornée » ci-dessous).
 - `src/Quadrupen/PenaltyGroup.cpp` : prox l1/l∞ non nulle quand le groupe est dans la boule l1.
   **Corrigé** à l'étape 4.
 
@@ -242,7 +261,7 @@ défaut).
 - Si le facteur est dégénéré (pivot nul ou solution non finie), repli sur `solve(XATXA_, b)` ou
   `inv_sympd(..., allow_approx)`, comme le faisait le `solve` d'Armadillo sans `fast`.
 - `XATXA_` et `R_` (k × k) restent réalloués à chaque ajout : leur coût est désormais du même
-  ordre que le calcul utile.
+  ordre que le calcul utile (traité à l'étape 6).
 
 **Validation** : 128/128 tests ; coefficients, intercepts et degrés de liberté identiques à
 l'ancienne version à 1e-13 près sur lasso, MCP, elastic-net structuré avec refit, group-lasso
@@ -524,7 +543,8 @@ Solutions identiques entre les deux modes (écart ≤ 5e-14) dans tous les cas.
 - Priorité : utile surtout pour les grands problèmes creux ; pour un usage courant (p ≤ 10⁴), le
   gain attendu reste inférieur à ×1,5.
 - À faire en même temps ou avant : tampons à capacité pour `XATXA_` et `R_` (comme pour
-  `XTXA_` à l'étape 1), qui profitent aux deux modes dès que k dépasse quelques milliers.
+  `XTXA_` à l'étape 1), qui profitent aux deux modes dès que k dépasse quelques milliers (fait à
+  l'étape 6).
 
 ## Résultats de l'étape 6 (tampons k × k)
 
@@ -559,15 +579,66 @@ l'étape précédente sur tous les cas mesurés.
 Le gain apparaît dès que k dépasse quelques centaines et croît avec k. En contrepartie, la mémoire
 réservée pour ces deux matrices peut atteindre ~1,56 fois leur taille.
 
+## Évaluation de A4 (descente par coordonnées)
+
+**Écart avec les implémentations par coordonnées de référence** (même problème : X standardisée
+à l'avance, même grille de λ, λ_glmnet = λ_quadrupen / n ; écart KKT relatif maximal) :
+
+| Cas | quadrupen (QUADRA) | glmnet par défaut | glmnet, seuil 1e-12 |
+|---|---|---|---|
+| Lasso 200×2 000 | 0,06 s (1e-13) | 0,02 s (1e-2) | 0,02 s (1e-4) |
+| Lasso 500×10 000 | 0,68 s (6e-14) | 0,38 s (2e-2) | 0,34 s (2e-4) |
+| Lasso 2 000×5 000 | **0,45 s** | 0,62 s | 0,66 s |
+| Lasso creux 5 000×50 000, petit k | **0,16 s** | 0,64 s | 0,66 s |
+| Lasso 1 000×10 000, k = 935 | 4,44 s (1e-13) | 0,78 s (5e-2) | 6,79 s (3e-4) |
+| Lasso creux 5 000×50 000, k = 4 774 | 117 s (3e-13) | 0,75 s (9e-2) | 6,1 s (9e-4) |
+| MCP 500×10 000 | 0,52 s | ncvreg 0,44 s | — |
+| Group-lasso 300×3 000 | 0,41 s | grpreg 0,14 s | — |
+
+La précision n'est pas comparable : glmnet s'arrête par défaut à un écart KKT de 1e-2 à 1e-1,
+quadrupen à 1e-13. À précision proche, quadrupen est aussi rapide ou plus rapide, sauf pour les
+grands ensembles actifs sur données creuses.
+
+**Descente par coordonnées sur la matrice de Gram, dans `Optimizer`** (prototype hors dépôt, à côté
+de `fista()` et `pgd()` : L1, mise à jour du gradient par colonne de la Gram, sans Cholesky).
+Lasso sur X creuse (1 %), k proche de n ; toutes les méthodes trouvent la même solution :
+
+| Cas | QUADRA | FISTA | PGD | CD sur la Gram |
+|---|---|---|---|---|
+| 1 000×10 000, k = 970 | **2,8 s** | 20,9 s | 47,2 s | 87,6 s |
+| 2 500×25 000, k = 2 392 | **27,8 s** | — | — | 617 s |
+
+Quand k approche n, le problème restreint est mal conditionné : la descente par coordonnées fait
+des centaines de milliers de passes, chacune en O(k²). QUADRA, avec sa factorisation, est la
+bonne méthode dans ce régime ; une CD sur la Gram n'apporte rien.
+
+**Conclusion.** Le seul gain substantiel est dans le régime « grand ensemble actif sur données
+creuses » (jusqu'à ~20 fois à précision comparable). Il vient du coût par coordonnée en
+O(nnz(x_j)) d'une descente par coordonnées sur le résidu, sans matrice de Gram, et non de la
+descente par coordonnées en elle-même. C'est la même refonte que P4 (gradient par le résidu) :
+les deux sont regroupées et reportées à une version ultérieure, ciblée sur les X creuses.
+
+**Note sur une mesure non reproduite.** Un passage du lasso creux 5 000×50 000 a duré 3 056 s
+sans converger (k max = 4 131), en concurrence avec deux autres processus gourmands en mémoire.
+Relancé seul avec des compteurs de diagnostic, le même cas converge en 117 s (k max = 4 774),
+sans aucune bascule vers un `solve` dense ni pivot de Cholesky non positif ; aux échelles réduites,
+trois passages simultanés sont identiques au bit près. La cause du passage aberrant n'a pas été
+identifiée.
+
 ## Feuille de route
 
-| Étape | Contenu | Risque | Statut |
-|---|---|---|---|
-| 1 | P1 + P2 (ensemble actif pré-alloué, solves triangulaires) | faible, couvert par les tests | fait (33f7102) |
-| 2 | A1 (activation en bloc) + statut de convergence ; critère d'arrêt et garde-fou Anderson (A3) | moyen | fait (537c847, 3a28cd8) |
-| 3 | A2 (descente par blocs exacte + Newton pour les groupes) ; bug de prox l1/l∞ | moyen | fait |
-| 4 | A3 restant (restart FISTA, estimation de L par Lanczos) | faible | fait (934346e) |
-| 5 | P3, P5, P6 | faible | fait |
-| 5 bis | P4 (gradient par le résidu, mémoire O(pk)) | moyen | étudié (prototype) : hybride recommandé, reporté à une version ultérieure |
-| 5 ter | Tampons à capacité pour `XATXA_` et `R_` | faible | fait |
-| 6 | A4 (CD + working set) | élevé | à évaluer |
+Étapes dans l'ordre chronologique, telles que détaillées dans les sections de résultats.
+
+| Étape | Contenu | Statut |
+|---|---|---|
+| 1 | P1 + P2 : stockage de `XTXA_` sans réallocation, solves triangulaires LAPACK | fait (`33f7102`) |
+| 2 | A1 : activation en bloc (`maxadd`), statut de convergence ; critère d'arrêt invariant au pas et garde-fou Anderson (A3) | fait (`537c847`, `3a28cd8`) |
+| 3 | A3 : redémarrage de FISTA, estimation de L par Lanczos | fait (`934346e`) |
+| 4 | A2 : descente par blocs exacte + Newton pour les groupes ; bug de prox l1/l∞ | fait (`8130599`, `1b34ac6`) |
+| 5 | P3, P5, P6 : downdate en place, boucles proximales, S diagonale pour ridge et lava, points secondaires | fait (`9a82f30`, `ba5b1d5`, `7968dad`) |
+| — | Anomalie : gap exact de la régression bornée, données de test régénérées | fait (`cb1ad7d`) |
+| — | Étude d'opportunité de P4 (gradient par le résidu) | faite (`f22da81`) : hybride recommandé |
+| 6 | Tampons à capacité pour `XATXA_` et `R_` | fait (`df2d765`) |
+| — | Évaluation de A4 (descente par coordonnées) | faite : pas de CD sur la Gram |
+| — | P4 + CD sur le résidu, pour les grands ensembles actifs sur données creuses | reporté à une version ultérieure |
+| — | FusedLasso (X dense convertie en creux, normalisation) ; warm start λ₂ en validation croisée | à décider |
