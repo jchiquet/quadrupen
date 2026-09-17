@@ -13,7 +13,7 @@
 
 * tested locally on Ubuntu Linux 24.04 LTS, R 4.6.1, GCC 13.3
 
-* tested remotely with github-action (TO BE UPDATED after the CI run on the release commit)
+* tested remotely with github-action, all status OK
 
 - Linux ubuntu 24.04, R-release
 - Linux ubuntu 24.04, R-oldrel
@@ -21,7 +21,13 @@
 - Windows Server 2025, R-release, 64 bit
 - macOS 15, R-release
 
-* tested remotely with win-builder (TO BE UPDATED)
+* tested remotely with win-builder (R-release, R-devel, R-oldrelease), all status OK
+
+* additionally tested remotely with R-hub v2 (memory-checking platforms, given the amount of
+  C++/Rcpp/RcppArmadillo code), all status OK
+
+- clang-ASAN
+- clang-UBSAN
 
 ## Local R CMD check results
 
