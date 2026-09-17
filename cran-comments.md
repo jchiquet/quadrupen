@@ -23,11 +23,20 @@
 
 * tested remotely with win-builder (R-release, R-devel, R-oldrelease), all status OK
 
-* additionally tested remotely with R-hub v2 (memory-checking platforms, given the amount of
-  C++/Rcpp/RcppArmadillo code), all status OK
+* additionally tested remotely with R-hub v2 (memory-checking platforms and alternate
+  BLAS/LAPACK, given the amount of C++/Rcpp/RcppArmadillo code)
 
-- clang-ASAN
-- clang-UBSAN
+- clang-ASAN: OK
+- clang-UBSAN: OK
+- gcc-ASAN: OK
+- ATLAS (alternate BLAS/LAPACK implementation): OK
+- valgrind: the example suite completed cleanly (0 errors, 0 bytes leaked, definitely/
+  indirectly/possibly); the testthat suite is too slow under valgrind's instrumentation to
+  finish within GitHub Actions' 6h job limit and was cancelled mid-run, with no error reported
+  up to that point
+- rchk: all findings are located inside Rcpp/RcppArmadillo header code (PROTECT/UNPROTECT
+  static analysis of e.g. Armor.h, Shield.h, S4.h), none in the package's own sources; a
+  known false-positive-prone pattern of this tool on Rcpp-based packages
 
 ## Local R CMD check results
 
