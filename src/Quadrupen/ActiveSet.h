@@ -110,6 +110,9 @@ private:
   void reserve_XTXA(uword k_old, uword k_new) ;
   void compact_XTXA(const uvec& positions, uword k_old) ;
 
+  // Extend R_ from (p-1) x (p-1) to p x p with the p-th column of XATXA_
+  void extend_Cholesky(uword p) ;
+
   // In-place triangular solve with R_: R' X = B (trans = 'T') or R X = B (trans = 'N')
   // Returns false when R_ is singular or the solution is not finite
   bool solve_R(mat& B, char trans) const ;
@@ -271,24 +274,29 @@ bool ActiveSet<matrix>::solve_R(mat& B, char trans) const {
 }
 
 template <typename matrix>
-void ActiveSet<matrix>::update_Cholesky() {
-  uword p = XATXA_.n_cols ;
-
+void ActiveSet<matrix>::extend_Cholesky(uword p) {
   if (p == 1) {
-    R_ = sqrt(XATXA_) ;
-  } else {
-    // Solve R_old^T * rp = XATXA_[0..p-2, p-1]
-    vec rp = XATXA_.col(p-1).head(p-1) ;
-    solve_R(rp, 'T') ;
-
-    // Extend R_ from (p-1)x(p-1) to pxp in place
-    // [ R_old | rp             ]
-    // [ 0     | R_bottom_right ]
-    square_inplace::grow(R_, 1) ;
-    R_.row(p-1).head(p-1).zeros() ;
-    R_.col(p-1).head(p-1) = rp ;
-    R_(p-1, p-1) = std::sqrt(XATXA_(p-1, p-1) - dot(rp, rp)) ;
+    R_ = sqrt(XATXA_.submat(0, 0, 0, 0)) ;
+    return ;
   }
+  // Solve R_old^T * rp = XATXA_[0..p-2, p-1]
+  vec rp = XATXA_.col(p-1).head(p-1) ;
+  solve_R(rp, 'T') ;
+
+  // Extend R_ from (p-1)x(p-1) to pxp in place
+  // [ R_old | rp             ]
+  // [ 0     | R_bottom_right ]
+  // When XATXA_ is (numerically) singular the new pivot is not finite: solve_Gram then
+  // falls back to a direct solve.
+  square_inplace::grow(R_, 1) ;
+  R_.row(p-1).head(p-1).zeros() ;
+  R_.col(p-1).head(p-1) = rp ;
+  R_(p-1, p-1) = std::sqrt(XATXA_(p-1, p-1) - dot(rp, rp)) ;
+}
+
+template <typename matrix>
+void ActiveSet<matrix>::update_Cholesky() {
+  extend_Cholesky(XATXA_.n_cols) ;
 }
 
 template <typename matrix>
@@ -297,24 +305,29 @@ void ActiveSet<matrix>::update_Cholesky_block(uword n_new) {
   uword p_old   = p_total - n_new ;
 
   if (p_old == 0) {
-    R_ = chol(XATXA_) ;
+    if (arma::chol(R_, XATXA_)) return ;
   } else {
     // Solve R_old^T * R_new_cols = XATXA_[0..p_old-1, p_old..p_total-1]
     mat R_new_cols = XATXA_.submat(0, p_old, p_old-1, p_total-1) ;
     solve_R(R_new_cols, 'T') ;
 
     // Schur complement for the new diagonal block
-    mat R_bottom_right = chol(XATXA_.submat(p_old, p_old, p_total-1, p_total-1) -
-                              R_new_cols.t() * R_new_cols) ;
-
-    // Extend R_ from p_old×p_old to p_total×p_total in place
-    // [ R_old | R_new_cols     ]
-    // [ 0     | R_bottom_right ]
-    square_inplace::grow(R_, n_new) ;
-    R_.submat(p_old, 0, p_total-1, p_old-1).zeros() ;
-    R_.submat(0,     p_old, p_old-1,   p_total-1) = R_new_cols ;
-    R_.submat(p_old, p_old, p_total-1, p_total-1) = R_bottom_right ;
+    mat R_bottom_right ;
+    if (arma::chol(R_bottom_right, XATXA_.submat(p_old, p_old, p_total-1, p_total-1) -
+                                   R_new_cols.t() * R_new_cols)) {
+      // Extend R_ from p_old×p_old to p_total×p_total in place
+      // [ R_old | R_new_cols     ]
+      // [ 0     | R_bottom_right ]
+      square_inplace::grow(R_, n_new) ;
+      R_.submat(p_old, 0, p_total-1, p_old-1).zeros() ;
+      R_.submat(0,     p_old, p_old-1,   p_total-1) = R_new_cols ;
+      R_.submat(p_old, p_old, p_total-1, p_total-1) = R_bottom_right ;
+      return ;
+    }
   }
+  // The new block is not positive definite (e.g. more active variables than the rank of X):
+  // insert the variables one at a time, as for single additions
+  for (uword p = p_old + 1; p <= p_total; ++p) extend_Cholesky(p) ;
 }
 
 template <typename matrix>
@@ -375,6 +388,9 @@ vec ActiveSet<matrix>::solve_Gram(const vec& b) const {
     vec x = b ;
     if (solve_R(x, 'T') && solve_R(x, 'N')) return x ;
   }
-  // no factorization, or degenerate one: fall back to a direct (possibly approximate) solve
-  return solve(XATXA_, b, arma::solve_opts::fast) ;
+  // no factorization, or degenerate one: fall back to a direct solve, and to a least squares
+  // solution when XATXA_ is singular
+  vec x ;
+  if (arma::solve(x, XATXA_, b, arma::solve_opts::fast)) return x ;
+  return arma::solve(XATXA_, b, arma::solve_opts::force_approx) ;
 }
