@@ -126,6 +126,11 @@ bounded.reg(
     algorithm to solve the problem for a given value of lambda1 .
     Default is 50.
 
+  - `maxadd` the maximal number of variables (or groups, for
+    group-sparse models) activated at once in the active set algorithm,
+    chosen among the largest violations of the optimality conditions.
+    Default is 10 (5 for group-sparse models).
+
   - `method` a string for the underlying solver used. Either `"quadra"`,
     `"fista"` or `"pgd"`. Default is `"quadra"`.
 

@@ -195,9 +195,9 @@ cat("Non-zero Group Lasso coefficients for lambda =", round(lambda_gl[20], 3), "
 #> Non-zero Group Lasso coefficients for lambda = 1.148
 print(coef_gl_lambda[coef_gl_lambda != 0])
 #>   Intercept        lwt1        lwt2        lwt3       white       black 
-#>  3.00152526  0.15075650 -0.05059705  0.10668998  0.08606329 -0.05956671 
+#>  3.00151874  0.15191558 -0.05098639  0.10750573  0.08604606 -0.05957548 
 #>       smoke        ptl1       ptl2m          ht          ui 
-#> -0.09912127 -0.07510812  0.01632751 -0.11998203 -0.31761663
+#> -0.09908814 -0.07511584  0.01634151 -0.12007207 -0.31755038
 ```
 
 ## Cross-validation

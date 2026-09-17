@@ -56,6 +56,8 @@ Class for storing data and various fixed quantity
 
 - [`DataModel$splitTrainTest()`](#method-DataModel-splitTrainTest)
 
+- [`DataModel$splitFold()`](#method-DataModel-splitFold)
+
 - [`DataModel$splitSubSamples()`](#method-DataModel-splitSubSamples)
 
 - [`DataModel$clone()`](#method-DataModel-clone)
@@ -134,6 +136,26 @@ a function splitting the data into train and test folds
 - `folds`:
 
   a list of vectors describing the folds (optional)
+
+#### Returns
+
+a list with train and test data and id.
+
+------------------------------------------------------------------------
+
+### `DataModel$splitFold()`
+
+a function splitting the data into one train and one test set
+
+#### Usage
+
+    DataModel$splitFold(omit)
+
+#### Arguments
+
+- `omit`:
+
+  vector of the indices of the test observations
 
 #### Returns
 

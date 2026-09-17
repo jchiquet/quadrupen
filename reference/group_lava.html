@@ -27,7 +27,7 @@ optimized."></head><body>
 
     <a class="navbar-brand me-2" href="../index.html">quadrupen</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0-0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.1-0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -56,7 +56,7 @@ optimized."></head><body>
   <main id="main" class="col-md-9"><div class="page-header">
 
       <h1>Fit a linear model with group-lava regularization</h1>
-      <small class="dont-index">Source: <a href="https://github.com/jchiquet/quadrupen/blob/v1.0-0/R/group-lava.R" class="external-link"><code>R/group-lava.R</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/jchiquet/quadrupen/blob/master/R/group-lava.R" class="external-link"><code>R/group-lava.R</code></a></small>
       <div class="d-none name"><code>group_lava.Rd</code></div>
     </div>
 
@@ -211,6 +211,9 @@ cross-validation or stability selection.</p></li>
 algorithm. Default is <code>FALSE</code>.</p></li>
 <li><p><code>maxiter</code> the maximal number of iteration used in the active set algorithm
 to solve the problem for a given value of lambda1 . Default is 50.</p></li>
+<li><p><code>maxadd</code> the maximal number of variables (or groups, for group-sparse models)
+activated at once in the active set algorithm, chosen among the largest violations
+of the optimality conditions. Default is 10 (5 for group-sparse models).</p></li>
 <li><p><code>method</code> a string for the underlying solver used. Either
 <code>"quadra"</code>, <code>"fista"</code> or <code>"pgd"</code>. Default is <code>"quadra"</code>.</p></li>
 <li><p><code>factmat</code> Boolean indicating if matrix factorization should be used to
@@ -301,7 +304,7 @@ dense and sparse signals." The Annals of Statistics (2017): 39-76. <a href="doi:
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.1.</p>
 </div>
 
     </footer></div>

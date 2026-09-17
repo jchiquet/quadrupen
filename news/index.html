@@ -13,7 +13,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">quadrupen</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0-0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.1-0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -42,9 +42,35 @@
   <main id="main" class="col-md-9"><div class="page-header">
 
       <h1>Changelog</h1>
-      <small>Source: <a href="https://github.com/jchiquet/quadrupen/blob/v1.0-0/NEWS.md" class="external-link"><code>NEWS.md</code></a></small>
+      <small>Source: <a href="https://github.com/jchiquet/quadrupen/blob/master/NEWS.md" class="external-link"><code>NEWS.md</code></a></small>
     </div>
 
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="1.1-0" id="quadrupen-11-0-2026-09-17">quadrupen 1.1-0 (2026-09-17)<a class="anchor" aria-label="anchor" href="#quadrupen-11-0-2026-09-17"></a></h2>
+<ul><li>performance
+<ul><li>active set: no reallocation of the Gram matrices when variables enter or leave the model, LAPACK triangular solves, in-place Cholesky downdates</li>
+<li>several variables (or groups) activated at once in the working set algorithm (new control option <code>maxadd</code>, default 10 for sparse models and 5 for group models)</li>
+<li>proximal solvers: adaptive restart of FISTA, safer Lipschitz constant (Lanczos), step-invariant stopping rule and safeguarded Anderson acceleration for PGD</li>
+<li>exact block coordinate descent with Newton steps for the <code>quadra</code> method of group models</li>
+<li>ridge and lava: no p x p algebra for a diagonal structuring matrix (the default)</li>
+<li>faster information criteria; cross-validation folds built on demand (less memory)</li>
+<li>typical speed-ups over 1.0-0 with default settings: x2 to x4 for lasso, MCP and SCAD, x5 to x15 for group models, x9 to x36 for elastic-net and sparse designs with large active sets, x8 for ridge and x30 for lava with p = 8000; all lambdas now converge on these cases</li>
+</ul></li>
+<li>bug fixes (results may change)
+<ul><li>robustness when the active set exceeds the rank of the design (no more failure of the Cholesky factorization or of the direct solve)</li>
+<li>
+<code><a href="../reference/bounded_reg.html">bounded_reg()</a></code> with <code>method = "quadra"</code> (the default) stopped too early and could return suboptimal solutions; the optimality gap is now computed from the exact KKT conditions</li>
+<li>l1/linf group penalty: wrong proximal operator when the group lies in the l1 ball (<code>fista</code> and <code>pgd</code> converged to wrong solutions)</li>
+<li>
+<code>quadra</code> method for group models: exact solution of each block; sparse-group, coop and l1/linf variants now converge</li>
+<li>proximal solvers could stop after one iteration on badly scaled data</li>
+<li>convergence status now reflects the final optimality gap</li>
+<li>the Lipschitz constant estimation no longer draws from R’s random number generator</li>
+</ul></li>
+<li>minor updates
+<ul><li>objects are rebuilt when a C++ header changes; <code>ARMA_NO_DEBUG</code> also on Windows</li>
+</ul></li>
+</ul></div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="1.0-0" id="quadrupen-10-0-2026-06-05">quadrupen 1.0-0 (2026-06-05)<a class="anchor" aria-label="anchor" href="#quadrupen-10-0-2026-06-05"></a></h2><p class="text-muted">CRAN release: 2026-06-05</p>
 <ul><li>major updates
@@ -110,7 +136,7 @@
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.1.</p>
 </div>
 
     </footer></div>

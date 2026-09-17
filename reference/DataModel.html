@@ -13,7 +13,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">quadrupen</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0-0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.1-0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -42,7 +42,7 @@
   <main id="main" class="col-md-9"><div class="page-header">
 
       <h1>Data Class</h1>
-      <small class="dont-index">Source: <a href="https://github.com/jchiquet/quadrupen/blob/v1.0-0/R/DataModel-R6Class.R" class="external-link"><code>R/DataModel-R6Class.R</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/jchiquet/quadrupen/blob/master/R/DataModel-R6Class.R" class="external-link"><code>R/DataModel-R6Class.R</code></a></small>
       <div class="d-none name"><code>DataModel.Rd</code></div>
     </div>
 
@@ -107,6 +107,7 @@
 <p></p><ul><li><p><a href="#method-DataModel-initialize"><code>DataModel$new()</code></a></p></li>
 <li><p><a href="#method-DataModel-CholStruct"><code>DataModel$CholStruct()</code></a></p></li>
 <li><p><a href="#method-DataModel-splitTrainTest"><code>DataModel$splitTrainTest()</code></a></p></li>
+<li><p><a href="#method-DataModel-splitFold"><code>DataModel$splitFold()</code></a></p></li>
 <li><p><a href="#method-DataModel-splitSubSamples"><code>DataModel$splitSubSamples()</code></a></p></li>
 <li><p><a href="#method-DataModel-clone"><code>DataModel$clone()</code></a></p></li>
 </ul></div><p></p><hr><a id="method-DataModel-initialize"></a><div class="section">
@@ -180,10 +181,29 @@
 
 </div>
 
+<p></p><hr><a id="method-DataModel-splitFold"></a><div class="section">
+<h3 id="datamodel-splitfold-"><code>DataModel$splitFold()</code><a class="anchor" aria-label="anchor" href="#datamodel-splitfold-"></a></h3>
+<p>a function splitting the data into one train and one test set</p><div class="section">
+<h4 id="usage-3">Usage<a class="anchor" aria-label="anchor" href="#usage-3"></a></h4>
+<p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">DataModel</span><span class="op">$</span><span class="fu">splitFold</span><span class="op">(</span><span class="va">omit</span><span class="op">)</span></span></code></pre></div><p></p></div>
+</div><p></p><div class="section">
+<h4 id="arguments-2">Arguments<a class="anchor" aria-label="anchor" href="#arguments-2"></a></h4>
+<p></p><div class="arguments"><dl><dt><code>omit</code></dt>
+<dd><p>vector of the indices of the test observations</p></dd>
+
+
+</dl><p></p></div>
+</div><p></p><div class="section">
+<h4 id="returns-1">Returns<a class="anchor" aria-label="anchor" href="#returns-1"></a></h4>
+<p>a list with train and test data and id.</p>
+</div>
+
+</div>
+
 <p></p><hr><a id="method-DataModel-splitSubSamples"></a><div class="section">
 <h3 id="datamodel-splitsubsamples-"><code>DataModel$splitSubSamples()</code><a class="anchor" aria-label="anchor" href="#datamodel-splitsubsamples-"></a></h3>
 <p>a function splitting data into subsamples</p><div class="section">
-<h4 id="usage-3">Usage<a class="anchor" aria-label="anchor" href="#usage-3"></a></h4>
+<h4 id="usage-4">Usage<a class="anchor" aria-label="anchor" href="#usage-4"></a></h4>
 <p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">DataModel</span><span class="op">$</span><span class="fu">splitSubSamples</span><span class="op">(</span></span>
 <span>  n_subsamples <span class="op">=</span> <span class="fl">50</span>,</span>
 <span>  subsample_size <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">floor</a></span><span class="op">(</span><span class="va">self</span><span class="op">$</span><span class="va">n</span><span class="op">/</span><span class="fl">2</span><span class="op">)</span>,</span>
@@ -192,7 +212,7 @@
 <span>  weakness <span class="op">=</span> <span class="fl">1</span></span>
 <span><span class="op">)</span></span></code></pre></div><p></p></div>
 </div><p></p><div class="section">
-<h4 id="arguments-2">Arguments<a class="anchor" aria-label="anchor" href="#arguments-2"></a></h4>
+<h4 id="arguments-3">Arguments<a class="anchor" aria-label="anchor" href="#arguments-3"></a></h4>
 <p></p><div class="arguments"><dl><dt><code>n_subsamples</code></dt>
 <dd><p>the number of subsamples</p></dd>
 
@@ -208,7 +228,7 @@
 
 </dl><p></p></div>
 </div><p></p><div class="section">
-<h4 id="returns-1">Returns<a class="anchor" aria-label="anchor" href="#returns-1"></a></h4>
+<h4 id="returns-2">Returns<a class="anchor" aria-label="anchor" href="#returns-2"></a></h4>
 <p>a list of DataModel, resampling of the original</p>
 </div>
 
@@ -217,10 +237,10 @@
 <p></p><hr><a id="method-DataModel-clone"></a><div class="section">
 <h3 id="datamodel-clone-"><code>DataModel$clone()</code><a class="anchor" aria-label="anchor" href="#datamodel-clone-"></a></h3>
 <p>The objects of this class are cloneable with this method.</p><div class="section">
-<h4 id="usage-4">Usage<a class="anchor" aria-label="anchor" href="#usage-4"></a></h4>
+<h4 id="usage-5">Usage<a class="anchor" aria-label="anchor" href="#usage-5"></a></h4>
 <p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">DataModel</span><span class="op">$</span><span class="fu">clone</span><span class="op">(</span>deep <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></code></pre></div><p></p></div>
 </div><p></p><div class="section">
-<h4 id="arguments-3">Arguments<a class="anchor" aria-label="anchor" href="#arguments-3"></a></h4>
+<h4 id="arguments-4">Arguments<a class="anchor" aria-label="anchor" href="#arguments-4"></a></h4>
 <p></p><div class="arguments"><dl><dt><code>deep</code></dt>
 <dd><p>Whether to make a deep clone.</p></dd>
 
@@ -242,7 +262,7 @@
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.1.</p>
 </div>
 
     </footer></div>
